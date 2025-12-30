@@ -23,16 +23,16 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="relative z-50 w-full bg-[hsl(280,75%,55%)]">
+    <header className="relative z-50 w-full bg-[hsl(198,29%,76%)]">
       {/* Primary Navigation Row */}
-      <div className="border-b border-white/10">
+      <div className="border-b border-foreground/10">
         <nav className="container mx-auto flex h-20 items-center px-4 lg:px-8">
           {/* Logo */}
           <a href="/" className="flex items-center">
             <img 
               src={logo} 
               alt="Mr.Clean Services GmbH" 
-              className="h-10 w-auto brightness-0 invert lg:h-12"
+              className="h-10 w-auto lg:h-12"
             />
           </a>
 
@@ -44,13 +44,13 @@ export function Header() {
                 href={item.href}
                 className={`relative text-lg font-medium transition-colors ${
                   item.active 
-                    ? "text-white" 
-                    : "text-white/80 hover:text-white"
+                    ? "text-foreground" 
+                    : "text-foreground/70 hover:text-foreground"
                 }`}
               >
                 {item.name}
                 {item.active && (
-                  <span className="absolute -bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-white" />
+                  <span className="absolute -bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-foreground" />
                 )}
               </a>
             ))}
@@ -59,10 +59,10 @@ export function Header() {
           {/* Right Side Actions - Desktop */}
           <div className="hidden md:flex md:items-center md:gap-3 md:ml-auto">
             {/* Icon Buttons */}
-            <button className="flex h-10 w-10 items-center justify-center rounded-full border border-white/30 text-white transition-colors hover:bg-white/10">
+            <button className="flex h-10 w-10 items-center justify-center rounded-full border border-foreground/30 text-foreground transition-colors hover:bg-foreground/10">
               <Percent className="h-4 w-4" />
             </button>
-            <button className="flex h-10 w-10 items-center justify-center rounded-full border border-white/30 text-white transition-colors hover:bg-white/10">
+            <button className="flex h-10 w-10 items-center justify-center rounded-full border border-foreground/30 text-foreground transition-colors hover:bg-foreground/10">
               <MapPin className="h-4 w-4" />
             </button>
 
@@ -74,7 +74,7 @@ export function Header() {
             {/* Sign In Dropdown */}
             <Button 
               variant="ghost" 
-              className="rounded-full border border-white/30 text-white hover:bg-white/10 hover:text-white"
+              className="rounded-full border border-foreground/30 text-foreground hover:bg-foreground/10 hover:text-foreground"
             >
               Anmelden
               <ChevronDown className="h-4 w-4" />
@@ -84,7 +84,7 @@ export function Header() {
           {/* Mobile Menu Button */}
           <button
             type="button"
-            className="md:hidden inline-flex items-center justify-center rounded-lg p-2 text-white hover:bg-white/10"
+            className="md:hidden inline-flex items-center justify-center rounded-lg p-2 text-foreground hover:bg-foreground/10 ml-auto"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             <span className="sr-only">Menü öffnen</span>
@@ -100,7 +100,7 @@ export function Header() {
             <a
               key={item.name}
               href={item.href}
-              className="flex items-center gap-1 text-base font-semibold text-white/80 transition-colors hover:text-white"
+              className="flex items-center gap-1 text-base font-semibold text-foreground/70 transition-colors hover:text-foreground"
             >
               {item.name}
               {item.hasDropdown && <ChevronDown className="h-4 w-4" />}
@@ -111,16 +111,16 @@ export function Header() {
 
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-white/10 bg-[hsl(280,75%,55%)]">
+        <div className="md:hidden border-t border-foreground/10 bg-[hsl(198,29%,76%)]">
           <div className="container mx-auto px-4 py-4 space-y-1">
             {/* Primary Nav Items */}
-            <div className="pb-4 border-b border-white/10">
+            <div className="pb-4 border-b border-foreground/10">
               {primaryNav.map((item) => (
                 <a
                   key={item.name}
                   href={item.href}
                   className={`block py-2.5 text-sm font-medium ${
-                    item.active ? "text-white" : "text-white/80"
+                    item.active ? "text-foreground" : "text-foreground/70"
                   }`}
                   onClick={() => setMobileMenuOpen(false)}
                 >
@@ -135,7 +135,7 @@ export function Header() {
                 <a
                   key={item.name}
                   href={item.href}
-                  className="flex items-center justify-between py-2.5 text-sm font-medium text-white/80"
+                  className="flex items-center justify-between py-2.5 text-sm font-medium text-foreground/70"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {item.name}
@@ -145,13 +145,13 @@ export function Header() {
             </div>
 
             {/* Mobile CTAs */}
-            <div className="flex flex-col gap-3 pt-4 border-t border-white/10">
+            <div className="flex flex-col gap-3 pt-4 border-t border-foreground/10">
               <Button variant="hero-white" className="w-full rounded-full">
                 Anfrage
               </Button>
               <Button 
                 variant="ghost" 
-                className="w-full rounded-full border border-white/30 text-white hover:bg-white/10 hover:text-white"
+                className="w-full rounded-full border border-foreground/30 text-foreground hover:bg-foreground/10 hover:text-foreground"
               >
                 Anmelden
                 <ChevronDown className="h-4 w-4" />
