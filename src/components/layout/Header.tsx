@@ -26,7 +26,7 @@ export function Header() {
     <header className="relative z-50 w-full bg-[hsl(280,75%,55%)]">
       {/* Primary Navigation Row */}
       <div className="border-b border-white/10">
-        <nav className="container mx-auto flex h-16 items-center justify-between px-4 lg:px-8">
+        <nav className="container mx-auto flex h-20 items-center justify-between px-4 lg:px-8">
           {/* Logo */}
           <a href="/" className="flex items-center">
             <img 
@@ -95,7 +95,7 @@ export function Header() {
 
       {/* Secondary Navigation Row - Desktop */}
       <div className="hidden md:block">
-        <nav className="container mx-auto flex h-12 items-center gap-8 px-4 lg:px-8">
+        <nav className="container mx-auto flex h-14 items-center gap-10 px-4 lg:px-8">
           {secondaryNav.map((item) => (
             <a
               key={item.name}
