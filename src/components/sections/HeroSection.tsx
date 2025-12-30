@@ -16,7 +16,7 @@ export function HeroSection() {
           <img
             src={heroImage}
             alt="Group hiking on mountain trail"
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover pointer-events-none"
           />
         </div>
 
