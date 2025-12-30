@@ -1,5 +1,4 @@
-import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { AnimatedButton } from "@/components/ui/animated-button";
 
 export function CTASection() {
   return (
@@ -15,13 +14,12 @@ export function CTASection() {
 
           {/* CTA Buttons */}
           <div className="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Button size="xl" className="px-10">
-              Get Started
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="xl" className="px-10">
-              Contact Us
-            </Button>
+            <AnimatedButton className="h-14 px-10 text-base bg-primary text-primary-foreground hover:bg-foreground hover:text-background">
+              Jetzt starten
+            </AnimatedButton>
+            <AnimatedButton className="h-14 px-10 text-base">
+              Kontakt aufnehmen
+            </AnimatedButton>
           </div>
         </div>
       </div>

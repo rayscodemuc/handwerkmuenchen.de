@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { AnimatedButton } from "@/components/ui/animated-button";
 import { Check } from "lucide-react";
 
 const features = [
@@ -52,9 +52,9 @@ export function SplitSection() {
 
             {/* CTA */}
             <div className="mt-12">
-              <Button size="lg" className="px-8">
-                Learn More
-              </Button>
+              <AnimatedButton>
+                Mehr erfahren
+              </AnimatedButton>
             </div>
           </div>
         </div>

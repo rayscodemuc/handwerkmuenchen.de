@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { AnimatedButton } from "@/components/ui/animated-button";
 import heroImage from "@/assets/hero-facility.jpg";
 
 export function HeroSection() {
@@ -42,13 +42,9 @@ export function HeroSection() {
 
             {/* CTA Button */}
             <div className="mt-10">
-              <Button 
-                variant="hero-white" 
-                size="lg"
-                className="rounded-full px-8"
-              >
+              <AnimatedButton className="bg-white text-foreground hover:bg-foreground hover:text-white">
                 Angebot anfragen
-              </Button>
+              </AnimatedButton>
             </div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { AnimatedButton } from "@/components/ui/animated-button";
 import heroFacility from "@/assets/hero-facility.jpg";
 
 const services = [
@@ -76,9 +76,9 @@ export function ServicesSection() {
                   {service.description}
                 </p>
                 <div className="mt-6">
-                  <Button variant="default" className="rounded-full px-6">
+                  <AnimatedButton className="h-10 px-5 text-sm">
                     {service.buttonText}
-                  </Button>
+                  </AnimatedButton>
                 </div>
               </div>
 
@@ -101,9 +101,9 @@ export function ServicesSection() {
 
         {/* Bottom CTA */}
         <div className="mt-16 flex justify-center">
-          <Button variant="default" size="lg" className="rounded-full px-10">
+          <AnimatedButton className="h-14 px-10 text-base">
             Angebot anfragen
-          </Button>
+          </AnimatedButton>
         </div>
       </div>
     </section>
