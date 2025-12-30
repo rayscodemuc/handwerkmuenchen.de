@@ -1,90 +1,71 @@
-import { CreditCard, Shield, BarChart3, Users } from "lucide-react";
+import { CreditCard, Shield, BarChart3, Users, ArrowRight } from "lucide-react";
 
 const services = [
   {
     icon: CreditCard,
     title: "Service Category One",
-    description: "Brief description of this service category and what it offers to customers.",
-    features: ["Feature point one", "Feature point two", "Feature point three"],
+    description: "Brief description of this service category and what it offers to customers. Clear, focused messaging.",
   },
   {
     icon: Shield,
     title: "Service Category Two",
-    description: "Brief description of this service category and what it offers to customers.",
-    features: ["Feature point one", "Feature point two", "Feature point three"],
+    description: "Brief description of this service category and what it offers to customers. Clear, focused messaging.",
   },
   {
     icon: BarChart3,
     title: "Service Category Three",
-    description: "Brief description of this service category and what it offers to customers.",
-    features: ["Feature point one", "Feature point two", "Feature point three"],
+    description: "Brief description of this service category and what it offers to customers. Clear, focused messaging.",
   },
   {
     icon: Users,
     title: "Service Category Four",
-    description: "Brief description of this service category and what it offers to customers.",
-    features: ["Feature point one", "Feature point two", "Feature point three"],
+    description: "Brief description of this service category and what it offers to customers. Clear, focused messaging.",
   },
 ];
 
 export function ServicesSection() {
   return (
-    <section id="services" className="bg-surface py-20 lg:py-28">
+    <section id="services" className="bg-background py-28 lg:py-36">
       <div className="container mx-auto px-4 lg:px-8">
         {/* Section Header */}
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            Services Overview
+        <div className="mx-auto max-w-xl text-center">
+          <h2 className="text-4xl font-bold tracking-tight text-foreground lg:text-5xl">
+            Our Services
           </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
-            Brief section description explaining the range of services available.
+          <p className="mt-6 text-lg text-muted-foreground">
+            Explore our range of services designed to meet your needs.
           </p>
         </div>
 
         {/* Service Cards */}
-        <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {services.map((service, index) => (
-            <div
+        <div className="mt-20 grid gap-8 sm:grid-cols-2 lg:gap-10">
+          {services.map((service) => (
+            <a
               key={service.title}
-              className="group rounded-xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:border-primary/20 hover:shadow-lg"
-              style={{ animationDelay: `${index * 100}ms` }}
+              href="#"
+              className="group relative rounded-2xl border border-border bg-card p-10 transition-all duration-300 hover:border-primary/30 hover:shadow-lg lg:p-12"
             >
               {/* Icon */}
-              <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                <service.icon className="h-6 w-6 text-primary" />
+              <div className="mb-8 inline-flex h-14 w-14 items-center justify-center rounded-xl bg-surface">
+                <service.icon className="h-6 w-6 text-primary" strokeWidth={1.5} />
               </div>
 
               {/* Title */}
-              <h3 className="text-lg font-semibold text-foreground">
+              <h3 className="text-xl font-semibold text-foreground lg:text-2xl">
                 {service.title}
               </h3>
 
               {/* Description */}
-              <p className="mt-2 text-sm text-muted-foreground">
+              <p className="mt-4 text-muted-foreground leading-relaxed">
                 {service.description}
               </p>
 
-              {/* Features */}
-              <ul className="mt-4 space-y-2">
-                {service.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-2 text-sm text-muted-foreground">
-                    <span className="mt-1.5 h-1 w-1 flex-shrink-0 rounded-full bg-primary" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-
               {/* Link */}
-              <a
-                href="#"
-                className="mt-6 inline-flex items-center text-sm font-medium text-primary transition-colors hover:text-primary/80"
-              >
-                Learn more
-                <svg className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </a>
-            </div>
+              <div className="mt-8 inline-flex items-center text-primary font-medium transition-all group-hover:gap-3">
+                <span>Learn more</span>
+                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </div>
+            </a>
           ))}
         </div>
       </div>
