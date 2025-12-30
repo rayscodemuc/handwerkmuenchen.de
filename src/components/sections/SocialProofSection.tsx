@@ -1,10 +1,9 @@
 const logos = [
-  { name: "Partner One", width: 120 },
-  { name: "Partner Two", width: 100 },
-  { name: "Partner Three", width: 130 },
-  { name: "Partner Four", width: 110 },
-  { name: "Partner Five", width: 120 },
-  { name: "Partner Six", width: 100 },
+  { name: "Partner One" },
+  { name: "Partner Two" },
+  { name: "Partner Three" },
+  { name: "Partner Four" },
+  { name: "Partner Five" },
 ];
 
 const testimonials = [
@@ -27,62 +26,54 @@ const testimonials = [
 
 export function SocialProofSection() {
   return (
-    <section className="bg-surface py-20 lg:py-28">
+    <section className="bg-background py-28 lg:py-36">
       <div className="container mx-auto px-4 lg:px-8">
         {/* Partner Logos */}
         <div className="text-center">
-          <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
+          <p className="text-sm font-medium uppercase tracking-widest text-muted-foreground">
             Trusted by organizations
           </p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-x-12 gap-y-8">
+          <div className="mt-12 flex flex-wrap items-center justify-center gap-x-16 gap-y-8">
             {logos.map((logo) => (
               <div
                 key={logo.name}
-                className="flex h-8 items-center justify-center"
-                style={{ width: logo.width }}
+                className="flex h-8 w-28 items-center justify-center"
               >
-                <div className="h-6 w-full rounded bg-muted-foreground/20" />
+                <div className="h-5 w-full rounded bg-muted" />
               </div>
             ))}
           </div>
         </div>
 
         {/* Divider */}
-        <div className="my-16 border-t border-border" />
+        <div className="my-24 border-t border-border" />
 
         {/* Testimonials */}
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+        <div className="mx-auto max-w-xl text-center">
+          <h2 className="text-4xl font-bold tracking-tight text-foreground lg:text-5xl">
             What People Say
           </h2>
-          <p className="mt-4 text-lg text-muted-foreground">
+          <p className="mt-6 text-lg text-muted-foreground">
             Feedback from those who have experienced the service.
           </p>
         </div>
 
-        <div className="mt-12 grid gap-6 md:grid-cols-3">
+        <div className="mt-16 grid gap-8 lg:grid-cols-3 lg:gap-10">
           {testimonials.map((testimonial, index) => (
             <div
               key={index}
-              className="rounded-xl border border-border bg-card p-6 shadow-sm"
+              className="rounded-2xl border border-border bg-card p-10"
             >
-              {/* Quote Icon */}
-              <svg
-                className="mb-4 h-8 w-8 text-primary/30"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
-              </svg>
-
               {/* Quote */}
-              <p className="text-foreground">"{testimonial.quote}"</p>
+              <p className="text-lg text-foreground leading-relaxed">
+                "{testimonial.quote}"
+              </p>
 
               {/* Author */}
-              <div className="mt-6 flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-muted" />
+              <div className="mt-8 flex items-center gap-4">
+                <div className="h-12 w-12 rounded-full bg-muted" />
                 <div>
-                  <p className="text-sm font-medium text-foreground">
+                  <p className="font-medium text-foreground">
                     {testimonial.author}
                   </p>
                   <p className="text-sm text-muted-foreground">
