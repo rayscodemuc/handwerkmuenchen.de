@@ -25,12 +25,15 @@ export function HeroSection() {
           {/* Left Content */}
           <div className="relative z-10 w-full py-16 lg:w-1/2 lg:py-24">
             {/* Main Headline */}
-            <h1 className="font-bold leading-[0.9] tracking-tight text-foreground">
-              <span className="block text-[3.5rem] sm:text-[4.5rem] lg:text-[5.5rem] xl:text-[6.5rem]">
-                For every
+            <h1 className="font-black leading-tight tracking-tight text-foreground">
+              <span className="block text-5xl sm:text-6xl lg:text-7xl xl:text-8xl">
+                Professionelle
               </span>
-              <span className="block text-[3.5rem] sm:text-[4.5rem] lg:text-[5.5rem] xl:text-[6.5rem]">
-                journey
+              <span className="block text-5xl sm:text-6xl lg:text-7xl xl:text-8xl text-primary">
+                Reinigung
+              </span>
+              <span className="block text-5xl sm:text-6xl lg:text-7xl xl:text-8xl">
+                in München
               </span>
             </h1>
 
