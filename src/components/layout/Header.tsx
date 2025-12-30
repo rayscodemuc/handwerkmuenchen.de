@@ -59,22 +59,23 @@ export function Header() {
           {/* Right Side Actions - Desktop */}
           <div className="hidden md:flex md:items-center md:gap-3 md:ml-auto">
             {/* Icon Buttons */}
-            <button className="flex h-10 w-10 items-center justify-center rounded-full border border-foreground/30 text-foreground transition-colors hover:bg-foreground/10">
-              <Percent className="h-4 w-4" />
+            <button className="flex h-12 w-12 items-center justify-center rounded-full border border-foreground/30 text-foreground transition-colors hover:bg-foreground/10">
+              <Percent className="h-5 w-5" />
             </button>
-            <button className="flex h-10 w-10 items-center justify-center rounded-full border border-foreground/30 text-foreground transition-colors hover:bg-foreground/10">
-              <MapPin className="h-4 w-4" />
+            <button className="flex h-12 w-12 items-center justify-center rounded-full border border-foreground/30 text-foreground transition-colors hover:bg-foreground/10">
+              <MapPin className="h-5 w-5" />
             </button>
 
             {/* CTA Button */}
-            <Button variant="hero-white" size="default" className="rounded-full">
+            <Button variant="hero-white" size="lg" className="rounded-full px-6">
               Anfrage
             </Button>
 
             {/* Sign In Dropdown */}
             <Button 
               variant="ghost" 
-              className="rounded-full border border-foreground/30 text-foreground hover:bg-foreground/10 hover:text-foreground"
+              size="lg"
+              className="rounded-full border border-foreground/30 text-foreground hover:bg-foreground/10 hover:text-foreground px-6"
             >
               Anmelden
               <ChevronDown className="h-4 w-4" />
