@@ -42,7 +42,7 @@ export function Header() {
               <a
                 key={item.name}
                 href={item.href}
-                className={`relative text-sm font-medium transition-colors ${
+                className={`relative text-base font-medium transition-colors ${
                   item.active 
                     ? "text-white" 
                     : "text-white/80 hover:text-white"
@@ -100,10 +100,10 @@ export function Header() {
             <a
               key={item.name}
               href={item.href}
-              className="flex items-center gap-1 text-sm font-medium text-white/80 transition-colors hover:text-white"
+              className="flex items-center gap-1 text-base font-medium text-white/80 transition-colors hover:text-white"
             >
               {item.name}
-              {item.hasDropdown && <ChevronDown className="h-3 w-3" />}
+              {item.hasDropdown && <ChevronDown className="h-4 w-4" />}
             </a>
           ))}
         </nav>
