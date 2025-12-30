@@ -7,6 +7,7 @@ import { ProcessSection } from "@/components/sections/ProcessSection";
 import { SplitSection } from "@/components/sections/SplitSection";
 import { SocialProofSection } from "@/components/sections/SocialProofSection";
 import { CTASection } from "@/components/sections/CTASection";
+import { LogoCloudSection } from "@/components/sections/LogoCloudSection";
 
 const Index = () => {
   return (
@@ -18,6 +19,7 @@ const Index = () => {
         <TrustSection />
         <ProcessSection />
         <SplitSection />
+        <LogoCloudSection />
         <SocialProofSection />
         <CTASection />
       </main>
