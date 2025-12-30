@@ -100,7 +100,7 @@ export function Header() {
             <a
               key={item.name}
               href={item.href}
-              className="flex items-center gap-1 text-base font-medium text-white/80 transition-colors hover:text-white"
+              className="flex items-center gap-1 text-base font-semibold text-white/80 transition-colors hover:text-white"
             >
               {item.name}
               {item.hasDropdown && <ChevronDown className="h-4 w-4" />}
