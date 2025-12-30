@@ -26,7 +26,7 @@ export function Header() {
     <header className="relative z-50 w-full bg-[hsl(280,75%,55%)]">
       {/* Primary Navigation Row */}
       <div className="border-b border-white/10">
-        <nav className="container mx-auto flex h-20 items-center justify-between px-4 lg:px-8">
+        <nav className="container mx-auto flex h-20 items-center px-4 lg:px-8">
           {/* Logo */}
           <a href="/" className="flex items-center">
             <img 
@@ -37,7 +37,7 @@ export function Header() {
           </a>
 
           {/* Primary Nav - Desktop */}
-          <div className="hidden md:flex md:items-center md:gap-8">
+          <div className="hidden md:flex md:items-center md:gap-8 md:ml-12">
             {primaryNav.map((item) => (
               <a
                 key={item.name}
@@ -57,7 +57,7 @@ export function Header() {
           </div>
 
           {/* Right Side Actions - Desktop */}
-          <div className="hidden md:flex md:items-center md:gap-3">
+          <div className="hidden md:flex md:items-center md:gap-3 md:ml-auto">
             {/* Icon Buttons */}
             <button className="flex h-10 w-10 items-center justify-center rounded-full border border-white/30 text-white transition-colors hover:bg-white/10">
               <Percent className="h-4 w-4" />
