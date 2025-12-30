@@ -27,17 +27,17 @@ export function HeroSection() {
             {/* Main Headline */}
             <h1 className="font-bold leading-[0.9] tracking-tight text-foreground">
               <span className="block text-[3.5rem] sm:text-[4.5rem] lg:text-[5.5rem] xl:text-[6.5rem]">
-                For every
+                Sauberkeit
               </span>
               <span className="block text-[3.5rem] sm:text-[4.5rem] lg:text-[5.5rem] xl:text-[6.5rem]">
-                journey
+                schafft Werte
               </span>
             </h1>
 
             {/* Subheadline */}
             <p className="mt-8 max-w-[420px] text-base leading-relaxed text-foreground/70 lg:text-lg">
-              Beem is more than banking—it's about people. We're here for your 
-              journey, from your daily money moves to life's big leaps.
+              Mr.Clean Services ist Ihr zuverlässiger Partner für professionelles 
+              Facility Management – von der Reinigung bis zur Gebäudeverwaltung.
             </p>
 
             {/* CTA Button */}
@@ -47,7 +47,7 @@ export function HeroSection() {
                 size="lg"
                 className="rounded-full px-8"
               >
-                Become a member
+                Angebot anfragen
               </Button>
             </div>
           </div>
