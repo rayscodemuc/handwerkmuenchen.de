@@ -1,79 +1,161 @@
 import { useState } from "react";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { Menu, X, ChevronDown, Percent, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import logo from "@/assets/logo.png";
 
-const navigation = [
-  { name: "Services", href: "#services" },
-  { name: "About", href: "#about" },
-  { name: "Process", href: "#process" },
-  { name: "Contact", href: "#contact" },
+const primaryNav = [
+  { name: "Privat", href: "#", active: true },
+  { name: "Gewerbe", href: "#" },
+  { name: "Über uns", href: "#about" },
+  { name: "Kontakt", href: "#contact" },
+];
+
+const secondaryNav = [
+  { name: "Reinigung", href: "#services", hasDropdown: true },
+  { name: "Gebäude", href: "#", hasDropdown: true },
+  { name: "Garten", href: "#", hasDropdown: true },
+  { name: "Spezial", href: "#" },
+  { name: "Preise", href: "#", hasDropdown: true },
+  { name: "Angebote", href: "#" },
 ];
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-      <nav className="container mx-auto flex h-16 items-center justify-between px-4 lg:px-8">
-        {/* Logo */}
-        <a href="/" className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-            <span className="text-lg font-bold text-primary-foreground">C</span>
-          </div>
-          <span className="text-lg font-semibold text-foreground">Company</span>
-        </a>
+    <header className="relative z-50 w-full bg-[hsl(280,75%,55%)]">
+      {/* Primary Navigation Row */}
+      <div className="border-b border-white/10">
+        <nav className="container mx-auto flex h-16 items-center justify-between px-4 lg:px-8">
+          {/* Logo */}
+          <a href="/" className="flex items-center">
+            <img 
+              src={logo} 
+              alt="Mr.Clean Services GmbH" 
+              className="h-10 w-auto brightness-0 invert lg:h-12"
+            />
+          </a>
 
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex md:items-center md:gap-8">
-          {navigation.map((item) => (
-            <a
-              key={item.name}
-              href={item.href}
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
-              {item.name}
-            </a>
-          ))}
-        </div>
-
-        {/* Desktop CTA */}
-        <div className="hidden md:flex md:items-center md:gap-3">
-          <Button variant="ghost" size="sm">
-            Sign In
-          </Button>
-          <Button size="sm">Get Started</Button>
-        </div>
-
-        {/* Mobile Menu Button */}
-        <button
-          type="button"
-          className="md:hidden inline-flex items-center justify-center rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        >
-          <span className="sr-only">Toggle menu</span>
-          {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
-      </nav>
-
-      {/* Mobile Navigation */}
-      {mobileMenuOpen && (
-        <div className="md:hidden border-t border-border bg-background">
-          <div className="container mx-auto px-4 py-4 space-y-3">
-            {navigation.map((item) => (
+          {/* Primary Nav - Desktop */}
+          <div className="hidden md:flex md:items-center md:gap-8">
+            {primaryNav.map((item) => (
               <a
                 key={item.name}
                 href={item.href}
-                className="block py-2 text-sm font-medium text-muted-foreground hover:text-foreground"
-                onClick={() => setMobileMenuOpen(false)}
+                className={`relative text-sm font-medium transition-colors ${
+                  item.active 
+                    ? "text-white" 
+                    : "text-white/80 hover:text-white"
+                }`}
               >
                 {item.name}
+                {item.active && (
+                  <span className="absolute -bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-white" />
+                )}
               </a>
             ))}
-            <div className="flex flex-col gap-2 pt-4 border-t border-border">
-              <Button variant="outline" className="w-full">
-                Sign In
+          </div>
+
+          {/* Right Side Actions - Desktop */}
+          <div className="hidden md:flex md:items-center md:gap-3">
+            {/* Icon Buttons */}
+            <button className="flex h-10 w-10 items-center justify-center rounded-full border border-white/30 text-white transition-colors hover:bg-white/10">
+              <Percent className="h-4 w-4" />
+            </button>
+            <button className="flex h-10 w-10 items-center justify-center rounded-full border border-white/30 text-white transition-colors hover:bg-white/10">
+              <MapPin className="h-4 w-4" />
+            </button>
+
+            {/* CTA Button */}
+            <Button variant="hero-white" size="default" className="rounded-full">
+              Anfrage
+            </Button>
+
+            {/* Sign In Dropdown */}
+            <Button 
+              variant="ghost" 
+              className="rounded-full border border-white/30 text-white hover:bg-white/10 hover:text-white"
+            >
+              Anmelden
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            type="button"
+            className="md:hidden inline-flex items-center justify-center rounded-lg p-2 text-white hover:bg-white/10"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            <span className="sr-only">Menü öffnen</span>
+            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        </nav>
+      </div>
+
+      {/* Secondary Navigation Row - Desktop */}
+      <div className="hidden md:block">
+        <nav className="container mx-auto flex h-12 items-center gap-8 px-4 lg:px-8">
+          {secondaryNav.map((item) => (
+            <a
+              key={item.name}
+              href={item.href}
+              className="flex items-center gap-1 text-sm font-medium text-white/80 transition-colors hover:text-white"
+            >
+              {item.name}
+              {item.hasDropdown && <ChevronDown className="h-3 w-3" />}
+            </a>
+          ))}
+        </nav>
+      </div>
+
+      {/* Mobile Navigation */}
+      {mobileMenuOpen && (
+        <div className="md:hidden border-t border-white/10 bg-[hsl(280,75%,55%)]">
+          <div className="container mx-auto px-4 py-4 space-y-1">
+            {/* Primary Nav Items */}
+            <div className="pb-4 border-b border-white/10">
+              {primaryNav.map((item) => (
+                <a
+                  key={item.name}
+                  href={item.href}
+                  className={`block py-2.5 text-sm font-medium ${
+                    item.active ? "text-white" : "text-white/80"
+                  }`}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {item.name}
+                </a>
+              ))}
+            </div>
+
+            {/* Secondary Nav Items */}
+            <div className="pt-2 pb-4">
+              {secondaryNav.map((item) => (
+                <a
+                  key={item.name}
+                  href={item.href}
+                  className="flex items-center justify-between py-2.5 text-sm font-medium text-white/80"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {item.name}
+                  {item.hasDropdown && <ChevronDown className="h-4 w-4" />}
+                </a>
+              ))}
+            </div>
+
+            {/* Mobile CTAs */}
+            <div className="flex flex-col gap-3 pt-4 border-t border-white/10">
+              <Button variant="hero-white" className="w-full rounded-full">
+                Anfrage
               </Button>
-              <Button className="w-full">Get Started</Button>
+              <Button 
+                variant="ghost" 
+                className="w-full rounded-full border border-white/30 text-white hover:bg-white/10 hover:text-white"
+              >
+                Anmelden
+                <ChevronDown className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         </div>
