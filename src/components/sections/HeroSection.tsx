@@ -10,7 +10,7 @@ export function HeroSection() {
         <div 
           className="absolute inset-0"
           style={{
-            clipPath: "polygon(45% 0, 100% 0, 100% 100%, 25% 100%)",
+            clipPath: "polygon(55% 0, 100% 0, 100% 100%, 35% 100%)",
           }}
         >
           <img
