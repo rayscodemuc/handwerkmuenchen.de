@@ -1,64 +1,72 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import heroImage from "@/assets/hero-hiking.jpg";
 
 export function HeroSection() {
   return (
-    <section className="relative overflow-hidden bg-background">
-      {/* Subtle background pattern */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(var(--primary)/0.03),transparent_50%)]" />
-      
-      <div className="container relative mx-auto px-4 py-20 lg:px-8 lg:py-32">
-        <div className="mx-auto max-w-3xl text-center">
-          {/* Badge */}
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-            <span className="text-sm font-medium text-muted-foreground">
-              Placeholder tagline here
-            </span>
+    <section className="relative min-h-[600px] overflow-hidden bg-[hsl(280,75%,55%)] lg:min-h-[700px]">
+      {/* Main Grid Layout */}
+      <div className="relative flex min-h-[600px] lg:min-h-[700px]">
+        {/* Left Content Side */}
+        <div className="relative z-10 flex w-full flex-col justify-center px-6 py-16 lg:w-1/2 lg:px-16 lg:py-24">
+          <div className="max-w-xl">
+            {/* Main Headline */}
+            <h1 className="font-bold leading-[0.95] tracking-tight text-white">
+              <span className="block text-5xl sm:text-6xl lg:text-7xl xl:text-8xl">
+                For every
+              </span>
+              <span className="block text-5xl sm:text-6xl lg:text-7xl xl:text-8xl">
+                journey
+              </span>
+            </h1>
+
+            {/* Subheadline */}
+            <p className="mt-8 max-w-md text-base leading-relaxed text-white/80 lg:text-lg">
+              Placeholder text about the service—it's about people. We're here 
+              for your journey, from your daily moves to life's big leaps.
+            </p>
+
+            {/* CTA Button */}
+            <div className="mt-10">
+              <Button 
+                variant="hero-white" 
+                size="xl"
+                className="rounded-full"
+              >
+                Become a member
+              </Button>
+            </div>
           </div>
+        </div>
 
-          {/* Headline */}
-          <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-            Main headline goes here with emphasis
-          </h1>
-
-          {/* Subheadline */}
-          <p className="mt-6 text-lg leading-relaxed text-muted-foreground lg:text-xl">
-            Supporting text that provides additional context about the service or product. 
-            Keep it brief and focused on the value proposition.
-          </p>
-
-          {/* CTA Buttons */}
-          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Button variant="hero" size="xl">
-              Primary Action
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-            <Button variant="hero-outline" size="xl">
-              Secondary Action
-            </Button>
+        {/* Right Image Side with Diagonal Clip */}
+        <div className="absolute inset-y-0 right-0 hidden w-[55%] lg:block">
+          <div 
+            className="h-full w-full"
+            style={{
+              clipPath: "polygon(20% 0, 100% 0, 100% 100%, 0% 100%)",
+            }}
+          >
+            <img
+              src={heroImage}
+              alt="Group hiking on mountain trail"
+              className="h-full w-full object-cover"
+            />
           </div>
+        </div>
 
-          {/* Trust indicators */}
-          <div className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <svg className="h-4 w-4 text-primary" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              <span>Trust indicator one</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <svg className="h-4 w-4 text-primary" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              <span>Trust indicator two</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <svg className="h-4 w-4 text-primary" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              <span>Trust indicator three</span>
-            </div>
+        {/* Mobile Image (below content) */}
+        <div className="absolute bottom-0 left-0 right-0 h-48 lg:hidden">
+          <div 
+            className="h-full w-full"
+            style={{
+              clipPath: "polygon(0 30%, 100% 0, 100% 100%, 0% 100%)",
+            }}
+          >
+            <img
+              src={heroImage}
+              alt="Group hiking on mountain trail"
+              className="h-full w-full object-cover object-top"
+            />
           </div>
         </div>
       </div>
