@@ -42,7 +42,7 @@ export function Header() {
               <a
                 key={item.name}
                 href={item.href}
-                className={`relative text-base font-medium transition-colors ${
+                className={`relative text-lg font-medium transition-colors ${
                   item.active 
                     ? "text-white" 
                     : "text-white/80 hover:text-white"
