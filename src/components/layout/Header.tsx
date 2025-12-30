@@ -25,7 +25,7 @@ export function Header() {
   return (
     <header className="relative z-50 w-full bg-[hsl(198,29%,76%)]">
       {/* Primary Navigation Row */}
-      <div className="border-b border-foreground/10">
+      <div className="border-b border-foreground/10 py-2">
         <nav className="container mx-auto flex h-20 items-center px-4 lg:px-8">
           {/* Logo */}
           <a href="/" className="flex items-center">
@@ -37,7 +37,7 @@ export function Header() {
           </a>
 
           {/* Primary Nav - Desktop */}
-          <div className="hidden md:flex md:items-center md:gap-8 md:ml-12">
+          <div className="hidden md:flex md:items-center md:gap-8 md:ml-20">
             {primaryNav.map((item) => (
               <a
                 key={item.name}
@@ -95,7 +95,7 @@ export function Header() {
 
       {/* Secondary Navigation Row - Desktop */}
       <div className="hidden md:block">
-        <nav className="container mx-auto flex h-14 items-center gap-10 px-4 lg:px-8">
+        <nav className="container mx-auto flex h-16 items-center gap-12 px-4 lg:px-8">
           {secondaryNav.map((item) => (
             <a
               key={item.name}
