@@ -5,7 +5,7 @@ export function HeroSection() {
   return (
     <section className="relative overflow-hidden bg-[hsl(280,75%,55%)]">
       {/* Main Container */}
-      <div className="relative min-h-[500px] lg:min-h-[600px]">
+      <div className="relative min-h-[540px] lg:min-h-[650px] pt-8 lg:pt-12">
         {/* Background Image with Diagonal Clip - Full Width */}
         <div 
           className="absolute inset-0"
