@@ -3,8 +3,8 @@ import { AnimatedButton } from "@/components/ui/animated-button";
 import heroFacility from "@/assets/hero-facility.jpg";
 
 const tabs = [
-  { id: "technik", label: "Technik" },
-  { id: "haftung", label: "Haftung & FM" },
+  { id: "technik", label: "Handwerk" },
+  { id: "haftung", label: "Facility Management" },
   { id: "reinigung", label: "Reinigung" },
   { id: "aussen", label: "Außenanlagen" },
 ];
@@ -138,16 +138,10 @@ export function ServicesSection() {
             >
               {/* Content */}
               <div className="flex flex-1 flex-col p-8 lg:p-10">
-                <h3 className="text-2xl font-black text-foreground lg:text-3xl">
-                  {service.title}
-                </h3>
-                <p className="mt-4 text-muted-foreground leading-relaxed">
-                  {service.description}
-                </p>
+                <h3 className="text-2xl font-black text-foreground lg:text-3xl">{service.title}</h3>
+                <p className="mt-4 text-muted-foreground leading-relaxed">{service.description}</p>
                 <div className="mt-8">
-                  <AnimatedButton className="h-12 px-6">
-                    {service.buttonText}
-                  </AnimatedButton>
+                  <AnimatedButton className="h-12 px-6">{service.buttonText}</AnimatedButton>
                 </div>
               </div>
 
@@ -156,7 +150,7 @@ export function ServicesSection() {
                 {/* Decorative curved shapes */}
                 <div className="absolute -left-8 -top-8 h-32 w-32 rounded-full bg-primary/20" />
                 <div className="absolute -right-4 bottom-0 h-24 w-24 rounded-full bg-primary/10" />
-                
+
                 {/* Image */}
                 <img
                   src={service.image}
@@ -170,9 +164,7 @@ export function ServicesSection() {
 
         {/* Bottom CTA */}
         <div className="mt-16 flex justify-center">
-          <AnimatedButton className="h-14 px-10 text-base">
-            Angebot anfragen
-          </AnimatedButton>
+          <AnimatedButton className="h-14 px-10 text-base">Angebot anfragen</AnimatedButton>
         </div>
       </div>
     </section>
