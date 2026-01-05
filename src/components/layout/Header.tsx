@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Menu, X, ChevronDown, Percent, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import logo from "@/assets/logo.png";
 
 const primaryNav = [
@@ -51,6 +51,7 @@ const secondaryNav = [
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const location = useLocation();
 
   return (
     <header className="relative z-50 w-full bg-primary">
@@ -68,15 +69,25 @@ export function Header() {
 
           {/* Primary Nav - Desktop */}
           <div className="hidden md:flex md:items-center md:gap-8 md:ml-20">
-            {primaryNav.map((item) => (
-              <Link
-                key={item.name}
-                to={item.href}
-                className="text-lg font-medium text-foreground/70 transition-colors hover:text-foreground"
-              >
-                {item.name}
-              </Link>
-            ))}
+            {primaryNav.map((item) => {
+              const isActive = location.pathname === item.href;
+              return (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className={`relative text-lg font-medium transition-colors ${
+                    isActive 
+                      ? "text-foreground" 
+                      : "text-foreground/70 hover:text-foreground"
+                  }`}
+                >
+                  {item.name}
+                  {isActive && (
+                    <span className="absolute -bottom-1 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-foreground" />
+                  )}
+                </Link>
+              );
+            })}
           </div>
 
           {/* Right Side Actions - Desktop */}
@@ -158,16 +169,22 @@ export function Header() {
           <div className="container mx-auto px-4 py-4 space-y-1">
             {/* Primary Nav Items */}
             <div className="pb-4 border-b border-foreground/10">
-              {primaryNav.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className="block py-2.5 text-sm font-medium text-foreground/70"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {item.name}
-                </Link>
-              ))}
+              {primaryNav.map((item) => {
+                const isActive = location.pathname === item.href;
+                return (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    className={`block py-2.5 text-sm font-medium ${
+                      isActive ? "text-foreground" : "text-foreground/70"
+                    }`}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {isActive && <span className="mr-2">•</span>}
+                    {item.name}
+                  </Link>
+                );
+              })}
             </div>
 
             {/* Secondary Nav Items with Submenus */}
