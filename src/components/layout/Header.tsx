@@ -53,7 +53,7 @@ export function Header() {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
   return (
-    <header className="relative z-50 w-full bg-[hsl(198,29%,76%)]">
+    <header className="relative z-50 w-full bg-primary">
       {/* Primary Navigation Row */}
       <div className="border-b border-foreground/10 py-2">
         <nav className="container mx-auto flex h-20 items-center px-4 lg:px-8">
@@ -154,7 +154,7 @@ export function Header() {
 
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-foreground/10 bg-[hsl(198,29%,76%)]">
+        <div className="md:hidden border-t border-foreground/10 bg-primary">
           <div className="container mx-auto px-4 py-4 space-y-1">
             {/* Primary Nav Items */}
             <div className="pb-4 border-b border-foreground/10">
