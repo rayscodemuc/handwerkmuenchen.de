@@ -90,75 +90,55 @@ const Service247 = () => {
                 an 365 Tagen im Jahr, auch an Wochenenden und Feiertagen.
               </p>
               <div className="mt-10 relative inline-block">
-                {/* Hand-drawn arrow left */}
+                {/* Curved arrow from left */}
                 <svg 
-                  className="absolute -left-16 top-1/2 -translate-y-1/2 w-12 h-12 text-red-500"
-                  viewBox="0 0 50 50" 
+                  className="absolute -left-20 top-1/2 -translate-y-1/2 w-16 h-16 text-red-500 opacity-80"
+                  viewBox="0 0 60 60" 
                   fill="none"
-                  style={{ filter: 'url(#roughen)' }}
                 >
-                  <defs>
-                    <filter id="roughen">
-                      <feTurbulence type="turbulence" baseFrequency="0.05" numOctaves="2" result="noise" />
-                      <feDisplacementMap in="SourceGraphic" in2="noise" scale="1" />
-                    </filter>
-                  </defs>
                   <path 
-                    d="M40 25 L15 25 M15 25 L22 18 M15 25 L22 32" 
+                    d="M8 30 Q25 30 40 25" 
                     stroke="currentColor" 
-                    strokeWidth="4" 
+                    strokeWidth="2.5" 
+                    strokeLinecap="round"
+                    fill="none"
+                  />
+                  <path 
+                    d="M36 20 L42 25 L36 30" 
+                    stroke="currentColor" 
+                    strokeWidth="2.5" 
                     strokeLinecap="round" 
                     strokeLinejoin="round"
+                    fill="none"
                   />
                 </svg>
 
-                {/* Hand-drawn arrow right */}
+                {/* Curved arrow from right */}
                 <svg 
-                  className="absolute -right-16 top-1/2 -translate-y-1/2 w-12 h-12 text-red-500"
-                  viewBox="0 0 50 50" 
+                  className="absolute -right-20 top-1/2 -translate-y-1/2 w-16 h-16 text-red-500 opacity-80"
+                  viewBox="0 0 60 60" 
                   fill="none"
-                  style={{ filter: 'url(#roughen2)' }}
                 >
-                  <defs>
-                    <filter id="roughen2">
-                      <feTurbulence type="turbulence" baseFrequency="0.04" numOctaves="2" result="noise" />
-                      <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.5" />
-                    </filter>
-                  </defs>
                   <path 
-                    d="M10 25 L35 25 M35 25 L28 18 M35 25 L28 32" 
+                    d="M52 30 Q35 30 20 25" 
                     stroke="currentColor" 
-                    strokeWidth="4" 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round"
+                    strokeWidth="2.5" 
+                    strokeLinecap="round"
+                    fill="none"
                   />
-                </svg>
-
-                {/* Hand-drawn arrow top */}
-                <svg 
-                  className="absolute left-1/2 -top-12 -translate-x-1/2 w-10 h-10 text-red-500"
-                  viewBox="0 0 50 50" 
-                  fill="none"
-                  style={{ filter: 'url(#roughen3)' }}
-                >
-                  <defs>
-                    <filter id="roughen3">
-                      <feTurbulence type="turbulence" baseFrequency="0.06" numOctaves="2" result="noise" />
-                      <feDisplacementMap in="SourceGraphic" in2="noise" scale="1" />
-                    </filter>
-                  </defs>
                   <path 
-                    d="M25 40 L25 15 M25 15 L18 22 M25 15 L32 22" 
+                    d="M24 20 L18 25 L24 30" 
                     stroke="currentColor" 
-                    strokeWidth="4" 
+                    strokeWidth="2.5" 
                     strokeLinecap="round" 
                     strokeLinejoin="round"
+                    fill="none"
                   />
                 </svg>
 
                 <AnimatedButton 
                   onClick={() => setIsEmergencyDialogOpen(true)}
-                  className="bg-red-600 text-white hover:bg-red-700 hover:animate-pulse"
+                  className="bg-red-600 text-white hover:bg-red-700 hover:animate-pulse relative z-10"
                 >
                   Notfall melden
                 </AnimatedButton>
