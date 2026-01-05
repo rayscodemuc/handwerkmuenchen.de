@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import UeberUns from "./pages/UeberUns";
+import Kontakt from "./pages/Kontakt";
 
 // Category Pages
 import TechnikCategory from "./pages/categories/TechnikCategory";
@@ -35,6 +37,8 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/ueber-uns" element={<UeberUns />} />
+          <Route path="/kontakt" element={<Kontakt />} />
           
           {/* Category Overview Pages */}
           <Route path="/technik" element={<TechnikCategory />} />

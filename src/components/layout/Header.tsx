@@ -5,9 +5,9 @@ import { Link } from "react-router-dom";
 import logo from "@/assets/logo.png";
 
 const primaryNav = [
-  { name: "Startseite", href: "/", active: true },
-  { name: "Über uns", href: "#about" },
-  { name: "Kontakt", href: "#contact" },
+  { name: "Startseite", href: "/" },
+  { name: "Über uns", href: "/ueber-uns" },
+  { name: "Kontakt", href: "/kontakt" },
 ];
 
 const secondaryNav = [
@@ -72,16 +72,9 @@ export function Header() {
               <Link
                 key={item.name}
                 to={item.href}
-                className={`relative text-lg font-medium transition-colors ${
-                  item.active 
-                    ? "text-foreground" 
-                    : "text-foreground/70 hover:text-foreground"
-                }`}
+                className="text-lg font-medium text-foreground/70 transition-colors hover:text-foreground"
               >
                 {item.name}
-                {item.active && (
-                  <span className="absolute -bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-foreground" />
-                )}
               </Link>
             ))}
           </div>
@@ -169,9 +162,7 @@ export function Header() {
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`block py-2.5 text-sm font-medium ${
-                    item.active ? "text-foreground" : "text-foreground/70"
-                  }`}
+                  className="block py-2.5 text-sm font-medium text-foreground/70"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {item.name}
