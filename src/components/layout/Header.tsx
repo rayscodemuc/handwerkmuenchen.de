@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Menu, X, ChevronDown, Percent, MapPin } from "lucide-react";
+import { Menu, X, ChevronDown, Clock, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
 import logo from "@/assets/logo.png";
@@ -110,9 +110,13 @@ export function Header() {
           {/* Right Side Actions - Desktop */}
           <div className="hidden md:flex md:items-center md:gap-3 md:ml-auto">
             {/* Icon Buttons */}
-            <button className={`flex h-12 w-12 items-center justify-center rounded-full border ${borderColor} ${textColor} transition-colors ${hoverBg}`}>
-              <Percent className="h-5 w-5" />
-            </button>
+            <Link 
+              to="/24-7-service"
+              className={`flex h-12 items-center justify-center gap-1.5 rounded-full border px-4 ${borderColor} ${textColor} transition-colors ${hoverBg}`}
+            >
+              <Clock className="h-4 w-4" />
+              <span className="text-sm font-semibold">24/7</span>
+            </Link>
             <button className={`flex h-12 w-12 items-center justify-center rounded-full border ${borderColor} ${textColor} transition-colors ${hoverBg}`}>
               <MapPin className="h-5 w-5" />
             </button>
