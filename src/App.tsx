@@ -9,6 +9,8 @@ import UeberUns from "./pages/UeberUns";
 import Kontakt from "./pages/Kontakt";
 import PartnerWerden from "./pages/PartnerWerden";
 import Anfrage from "./pages/Anfrage";
+import Datenschutz from "./pages/Datenschutz";
+import Impressum from "./pages/Impressum";
 
 // Category Pages
 import HandwerkCategory from "./pages/categories/HandwerkCategory";
@@ -54,6 +56,8 @@ const App = () => (
           <Route path="/kontakt" element={<Kontakt />} />
           <Route path="/partner-werden" element={<PartnerWerden />} />
           <Route path="/anfrage" element={<Anfrage />} />
+          <Route path="/datenschutz" element={<Datenschutz />} />
+          <Route path="/impressum" element={<Impressum />} />
           
           {/* Category Overview Pages */}
           <Route path="/handwerk" element={<HandwerkCategory />} />
