@@ -1,8 +1,15 @@
+import { useState } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CTASection } from "@/components/sections/CTASection";
 import { AnimatedButton } from "@/components/ui/animated-button";
 import { Link } from "react-router-dom";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { 
   Clock, 
   Phone, 
@@ -13,7 +20,9 @@ import {
   Shield, 
   Truck,
   HeartHandshake,
-  CheckCircle2
+  CheckCircle2,
+  Mail,
+  MapPin
 } from "lucide-react";
 
 const services = [
@@ -59,6 +68,8 @@ const benefits = [
 ];
 
 const Service247 = () => {
+  const [isEmergencyDialogOpen, setIsEmergencyDialogOpen] = useState(false);
+
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
@@ -79,12 +90,62 @@ const Service247 = () => {
                 an 365 Tagen im Jahr, auch an Wochenenden und Feiertagen.
               </p>
               <div className="mt-10">
-                <Link to="/anfrage">
-                  <AnimatedButton className="bg-white text-foreground hover:bg-foreground hover:text-white">
-                    Notfall melden
-                  </AnimatedButton>
-                </Link>
+                <AnimatedButton 
+                  onClick={() => setIsEmergencyDialogOpen(true)}
+                  className="bg-white text-foreground hover:bg-foreground hover:text-white"
+                >
+                  Notfall melden
+                </AnimatedButton>
               </div>
+
+              {/* Emergency Contact Dialog */}
+              <Dialog open={isEmergencyDialogOpen} onOpenChange={setIsEmergencyDialogOpen}>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2 text-2xl">
+                      <Phone className="h-6 w-6 text-primary" />
+                      Notfall-Kontakt
+                    </DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-6 py-4">
+                    <p className="text-foreground/70">
+                      Rufen Sie uns jetzt an – wir sind rund um die Uhr für Sie erreichbar!
+                    </p>
+                    
+                    <a 
+                      href="tel:+4912345678900"
+                      className="flex items-center gap-4 rounded-xl bg-primary p-4 text-primary-foreground transition-colors hover:bg-primary/90"
+                    >
+                      <Phone className="h-8 w-8" />
+                      <div>
+                        <p className="text-sm font-medium opacity-80">24/7 Notfall-Hotline</p>
+                        <p className="text-xl font-bold">+49 123 456 789 00</p>
+                      </div>
+                    </a>
+
+                    <div className="space-y-3">
+                      <a 
+                        href="mailto:notfall@example.de"
+                        className="flex items-center gap-3 rounded-lg border border-border p-3 transition-colors hover:bg-muted"
+                      >
+                        <Mail className="h-5 w-5 text-primary" />
+                        <span className="font-medium">notfall@example.de</span>
+                      </a>
+                      
+                      <div className="flex items-start gap-3 rounded-lg border border-border p-3">
+                        <MapPin className="h-5 w-5 flex-shrink-0 text-primary" />
+                        <span className="text-foreground/70">Musterstraße 123, 12345 Musterstadt</span>
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg bg-muted p-4">
+                      <p className="text-sm text-foreground/60">
+                        <strong className="text-foreground">Reaktionszeit:</strong> In der Regel sind unsere Techniker innerhalb von 60 Minuten vor Ort.
+                      </p>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         </section>
