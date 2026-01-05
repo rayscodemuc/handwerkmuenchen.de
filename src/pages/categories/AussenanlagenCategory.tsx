@@ -29,6 +29,7 @@ export default function AussenanlagenCategory() {
       title="Außenanlagen"
       subtitle="Unsere Leistungen"
       description="Ganzheitliche Pflege Ihrer Außenanlagen für sichere und ansprechende Grundstücke."
+      metaDescription="Gepflegte Außenanlagen das ganze Jahr: Grünpflege, Baumpflege und Grauflächenreinigung. Zuverlässiger Service für einen starken ersten Eindruck."
       services={services}
     />
   );
