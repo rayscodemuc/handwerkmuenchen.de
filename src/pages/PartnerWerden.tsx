@@ -376,20 +376,23 @@ export default function PartnerWerden() {
                 </div>
 
                 <div className="mt-8">
-                  <AnimatedButton
+                  <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="h-14 w-full px-10 text-base bg-primary text-primary-foreground hover:bg-foreground hover:text-background"
+                    className="group relative flex h-16 w-full items-center justify-center gap-3 overflow-hidden rounded-full bg-primary text-primary-foreground text-lg font-semibold transition-all duration-300 hover:bg-foreground hover:text-background hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed"
                   >
                     {isSubmitting ? (
-                      "Wird gesendet..."
+                      <span className="flex items-center gap-3">
+                        <span className="h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                        Wird gesendet...
+                      </span>
                     ) : (
                       <>
-                        <Send className="mr-2 h-5 w-5" />
-                        Bewerbung absenden
+                        <Send className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                        <span>Bewerbung absenden</span>
                       </>
                     )}
-                  </AnimatedButton>
+                  </button>
                 </div>
 
                 <p className="mt-6 text-sm text-muted-foreground text-center">
