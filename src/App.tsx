@@ -6,6 +6,12 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
+// Category Pages
+import TechnikCategory from "./pages/categories/TechnikCategory";
+import HaftungFMCategory from "./pages/categories/HaftungFMCategory";
+import ReinigungCategory from "./pages/categories/ReinigungCategory";
+import AussenanlagenCategory from "./pages/categories/AussenanlagenCategory";
+
 // Service Pages
 import Elektrotechnik from "./pages/services/Elektrotechnik";
 import SanitaerHeizung from "./pages/services/SanitaerHeizung";
@@ -29,6 +35,12 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          
+          {/* Category Overview Pages */}
+          <Route path="/technik" element={<TechnikCategory />} />
+          <Route path="/haftung-fm" element={<HaftungFMCategory />} />
+          <Route path="/reinigung" element={<ReinigungCategory />} />
+          <Route path="/aussenanlagen" element={<AussenanlagenCategory />} />
           
           {/* Technik */}
           <Route path="/technik/elektrotechnik" element={<Elektrotechnik />} />
