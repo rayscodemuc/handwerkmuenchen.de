@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { AnimatedButton } from "@/components/ui/animated-button";
 import { Link } from "react-router-dom";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import useEmblaCarousel from "embla-carousel-react";
 import heroFacility from "@/assets/hero-facility.jpg";
 
 const tabs = [
@@ -128,8 +130,48 @@ const tabContent = {
 
 export function ServicesSection() {
   const [activeTab, setActiveTab] = useState("handwerk");
+  const [emblaRef, emblaApi] = useEmblaCarousel({ 
+    loop: false, 
+    align: "start",
+    slidesToScroll: 1,
+  });
+  const [canScrollPrev, setCanScrollPrev] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(false);
 
   const currentContent = tabContent[activeTab as keyof typeof tabContent];
+
+  const scrollPrev = useCallback(() => {
+    if (emblaApi) emblaApi.scrollPrev();
+  }, [emblaApi]);
+
+  const scrollNext = useCallback(() => {
+    if (emblaApi) emblaApi.scrollNext();
+  }, [emblaApi]);
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setCanScrollPrev(emblaApi.canScrollPrev());
+    setCanScrollNext(emblaApi.canScrollNext());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    onSelect();
+    emblaApi.on("select", onSelect);
+    emblaApi.on("reInit", onSelect);
+    return () => {
+      emblaApi.off("select", onSelect);
+      emblaApi.off("reInit", onSelect);
+    };
+  }, [emblaApi, onSelect]);
+
+  // Reset carousel when tab changes
+  useEffect(() => {
+    if (emblaApi) {
+      emblaApi.scrollTo(0);
+      emblaApi.reInit();
+    }
+  }, [activeTab, emblaApi]);
 
   return (
     <section id="services" className="bg-background py-28 lg:py-36">
@@ -146,7 +188,7 @@ export function ServicesSection() {
 
         {/* Tab Selector - Pill Style */}
         <div className="mt-12 flex justify-center">
-          <div className="inline-flex rounded-full bg-muted p-1.5">
+          <div className="inline-flex flex-wrap justify-center gap-2 rounded-full bg-muted p-1.5">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
@@ -163,39 +205,59 @@ export function ServicesSection() {
           </div>
         </div>
 
-        {/* Service Cards */}
-        <div className="mt-16 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {currentContent.map((service, index) => (
-            <div
-              key={`${activeTab}-${index}`}
-              className="group flex flex-col overflow-hidden rounded-3xl border border-border bg-card transition-all duration-300 hover:shadow-xl"
-            >
-              {/* Content */}
-              <div className="flex flex-1 flex-col p-8 lg:p-10">
-                <h3 className="text-2xl font-black text-foreground lg:text-3xl">{service.title}</h3>
-                <p className="mt-4 text-muted-foreground leading-relaxed">{service.description}</p>
-                <div className="mt-8">
-                  <Link to={service.href}>
-                    <AnimatedButton className="h-12 px-6">{service.buttonText}</AnimatedButton>
-                  </Link>
+        {/* Carousel Navigation */}
+        <div className="mt-10 flex items-center justify-end gap-2">
+          <button
+            onClick={scrollPrev}
+            disabled={!canScrollPrev}
+            className="flex h-12 w-12 items-center justify-center rounded-full border border-border bg-background text-foreground transition-all hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <button
+            onClick={scrollNext}
+            disabled={!canScrollNext}
+            className="flex h-12 w-12 items-center justify-center rounded-full border border-border bg-background text-foreground transition-all hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        </div>
+
+        {/* Service Cards Carousel */}
+        <div className="mt-6 overflow-hidden" ref={emblaRef}>
+          <div className="flex gap-6">
+            {currentContent.map((service, index) => (
+              <div
+                key={`${activeTab}-${index}`}
+                className="group flex min-w-0 flex-[0_0_100%] flex-col overflow-hidden rounded-3xl border border-border bg-card transition-all duration-300 hover:shadow-xl md:flex-[0_0_calc(50%-12px)] lg:flex-[0_0_calc(33.333%-16px)]"
+              >
+                {/* Content */}
+                <div className="flex flex-1 flex-col p-8 lg:p-10">
+                  <h3 className="text-2xl font-black text-foreground lg:text-3xl">{service.title}</h3>
+                  <p className="mt-4 text-muted-foreground leading-relaxed">{service.description}</p>
+                  <div className="mt-8">
+                    <Link to={service.href}>
+                      <AnimatedButton className="h-12 px-6">{service.buttonText}</AnimatedButton>
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Image with decorative background */}
+                <div className="relative h-56 overflow-hidden">
+                  {/* Decorative curved shapes */}
+                  <div className="absolute -left-8 -top-8 h-32 w-32 rounded-full bg-primary/20" />
+                  <div className="absolute -right-4 bottom-0 h-24 w-24 rounded-full bg-primary/10" />
+
+                  {/* Image */}
+                  <img
+                    src={service.image}
+                    alt={service.title}
+                    className="relative h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
                 </div>
               </div>
-
-              {/* Image with decorative background */}
-              <div className="relative h-56 overflow-hidden">
-                {/* Decorative curved shapes */}
-                <div className="absolute -left-8 -top-8 h-32 w-32 rounded-full bg-primary/20" />
-                <div className="absolute -right-4 bottom-0 h-24 w-24 rounded-full bg-primary/10" />
-
-                {/* Image */}
-                <img
-                  src={service.image}
-                  alt={service.title}
-                  className="relative h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
         {/* Bottom CTA */}
