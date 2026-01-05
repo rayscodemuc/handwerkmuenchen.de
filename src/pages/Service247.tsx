@@ -85,9 +85,9 @@ const Service247 = () => {
                   </AnimatedButton>
                 </Link>
                 <a href="tel:+4912345678900">
-                  <AnimatedButton className="border-2 border-foreground bg-transparent text-foreground hover:bg-foreground hover:text-white">
-                    <Phone className="mr-2 h-4 w-4" />
-                    Sofort anrufen
+                  <AnimatedButton className="inline-flex items-center gap-2 border-2 border-foreground bg-transparent text-foreground hover:bg-foreground hover:text-white whitespace-nowrap">
+                    <Phone className="h-4 w-4 flex-shrink-0" />
+                    <span>Sofort anrufen</span>
                   </AnimatedButton>
                 </a>
               </div>
