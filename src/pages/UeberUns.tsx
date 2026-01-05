@@ -39,7 +39,7 @@ export default function UeberUns() {
       <Header />
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="bg-primary py-20 lg:py-28">
+        <section className="relative flex min-h-[540px] items-center bg-primary lg:min-h-[650px]">
           <div className="container mx-auto px-4 lg:px-8">
             <p className="text-sm font-medium uppercase tracking-wider text-primary-foreground/70">
               Über uns
