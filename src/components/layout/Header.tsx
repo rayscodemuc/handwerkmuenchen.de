@@ -36,9 +36,14 @@ const secondaryNav = [
       { name: "Unterhaltsreinigung", href: "/reinigung/unterhaltsreinigung" },
       { name: "Büroreinigung", href: "/reinigung/bueroreinigung" },
       { name: "Fensterreinigung", href: "/reinigung/fensterreinigung" },
-      { name: "Sonderreinigung", href: "/reinigung/sonderreinigung" },
-      { name: "Tiefgaragenreinigung", href: "/reinigung/tiefgaragenreinigung" },
-      { name: "Grundreinigung", href: "/reinigung/grundreinigung" },
+      { 
+        name: "Sonderreinigung", 
+        href: "/reinigung/sonderreinigung",
+        subItems: [
+          { name: "Tiefgaragenreinigung", href: "/reinigung/tiefgaragenreinigung" },
+          { name: "Grundreinigung", href: "/reinigung/grundreinigung" },
+        ]
+      },
     ],
   },
   {
@@ -162,13 +167,23 @@ export function Header() {
                 <div className="absolute left-0 top-full pt-2">
                   <div className="min-w-[220px] rounded-xl bg-background p-2 shadow-lg border border-border">
                     {item.subItems.map((subItem) => (
-                      <Link
-                        key={subItem.name}
-                        to={subItem.href}
-                        className="block rounded-lg px-4 py-3 text-sm font-medium text-foreground/70 transition-colors hover:bg-muted hover:text-foreground"
-                      >
-                        {subItem.name}
-                      </Link>
+                      <div key={subItem.name}>
+                        <Link
+                          to={subItem.href}
+                          className="block rounded-lg px-4 py-3 text-sm font-medium text-foreground/70 transition-colors hover:bg-muted hover:text-foreground"
+                        >
+                          {subItem.name}
+                        </Link>
+                        {subItem.subItems && subItem.subItems.map((nestedItem) => (
+                          <Link
+                            key={nestedItem.name}
+                            to={nestedItem.href}
+                            className="block rounded-lg px-8 py-2 text-sm text-foreground/50 transition-colors hover:bg-muted hover:text-foreground"
+                          >
+                            {nestedItem.name}
+                          </Link>
+                        ))}
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -224,14 +239,25 @@ export function Header() {
                   {openDropdown === item.name && (
                     <div className="ml-4 space-y-1">
                       {item.subItems.map((subItem) => (
-                        <Link
-                          key={subItem.name}
-                          to={subItem.href}
-                          className={`block py-2 text-sm ${textColorMuted}`}
-                          onClick={() => setMobileMenuOpen(false)}
-                        >
-                          {subItem.name}
-                        </Link>
+                        <div key={subItem.name}>
+                          <Link
+                            to={subItem.href}
+                            className={`block py-2 text-sm ${textColorMuted}`}
+                            onClick={() => setMobileMenuOpen(false)}
+                          >
+                            {subItem.name}
+                          </Link>
+                          {subItem.subItems && subItem.subItems.map((nestedItem) => (
+                            <Link
+                              key={nestedItem.name}
+                              to={nestedItem.href}
+                              className={`block py-1.5 pl-4 text-sm ${textColorMuted} opacity-70`}
+                              onClick={() => setMobileMenuOpen(false)}
+                            >
+                              {nestedItem.name}
+                            </Link>
+                          ))}
+                        </div>
                       ))}
                     </div>
                   )}
