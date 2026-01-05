@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Menu, X, ChevronDown, Percent, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 import logo from "@/assets/logo.png";
 
 const primaryNav = [
@@ -10,14 +11,46 @@ const primaryNav = [
 ];
 
 const secondaryNav = [
-  { name: "Technik", href: "#services" },
-  { name: "Haftung & FM", href: "#services" },
-  { name: "Reinigung", href: "#services" },
-  { name: "Außenanlagen", href: "#services" },
+  {
+    name: "Technik",
+    href: "#services",
+    subItems: [
+      { name: "Elektrotechnik", href: "/technik/elektrotechnik" },
+      { name: "Sanitär & Heizung", href: "/technik/sanitaer-heizung" },
+    ],
+  },
+  {
+    name: "Haftung & FM",
+    href: "#services",
+    subItems: [
+      { name: "Winterdienst", href: "/haftung-fm/winterdienst" },
+      { name: "Hausmeisterservice", href: "/haftung-fm/hausmeisterservice" },
+      { name: "Objektmanagement", href: "/haftung-fm/objektmanagement" },
+    ],
+  },
+  {
+    name: "Reinigung",
+    href: "#services",
+    subItems: [
+      { name: "Unterhaltsreinigung", href: "/reinigung/unterhaltsreinigung" },
+      { name: "Glas- & Fassadenpflege", href: "/reinigung/glas-fassade" },
+      { name: "Sonderreinigung", href: "/reinigung/sonderreinigung" },
+    ],
+  },
+  {
+    name: "Außenanlagen",
+    href: "#services",
+    subItems: [
+      { name: "Grünpflege", href: "/aussenanlagen/gruenpflege" },
+      { name: "Grauflächenreinigung", href: "/aussenanlagen/grauflaechenreinigung" },
+      { name: "Baumpflege", href: "/aussenanlagen/baumpflege" },
+    ],
+  },
 ];
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
   return (
     <header className="relative z-50 w-full bg-[hsl(198,29%,76%)]">
@@ -25,20 +58,20 @@ export function Header() {
       <div className="border-b border-foreground/10 py-2">
         <nav className="container mx-auto flex h-20 items-center px-4 lg:px-8">
           {/* Logo */}
-          <a href="/" className="flex items-center">
+          <Link to="/" className="flex items-center">
             <img 
               src={logo} 
               alt="Mr.Clean Services GmbH" 
               className="h-10 w-auto lg:h-12"
             />
-          </a>
+          </Link>
 
           {/* Primary Nav - Desktop */}
           <div className="hidden md:flex md:items-center md:gap-8 md:ml-20">
             {primaryNav.map((item) => (
-              <a
+              <Link
                 key={item.name}
-                href={item.href}
+                to={item.href}
                 className={`relative text-lg font-medium transition-colors ${
                   item.active 
                     ? "text-foreground" 
@@ -49,7 +82,7 @@ export function Header() {
                 {item.active && (
                   <span className="absolute -bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-foreground" />
                 )}
-              </a>
+              </Link>
             ))}
           </div>
 
@@ -94,13 +127,34 @@ export function Header() {
       <div className="hidden md:block">
         <nav className="container mx-auto flex h-16 items-center gap-12 px-4 lg:px-8">
           {secondaryNav.map((item) => (
-            <a
+            <div
               key={item.name}
-              href={item.href}
-              className="text-base font-semibold text-foreground/70 transition-colors hover:text-foreground"
+              className="relative"
+              onMouseEnter={() => setOpenDropdown(item.name)}
+              onMouseLeave={() => setOpenDropdown(null)}
             >
-              {item.name}
-            </a>
+              <button className="flex items-center gap-1 text-base font-semibold text-foreground/70 transition-colors hover:text-foreground">
+                {item.name}
+                <ChevronDown className={`h-4 w-4 transition-transform ${openDropdown === item.name ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* Dropdown Menu */}
+              {openDropdown === item.name && (
+                <div className="absolute left-0 top-full pt-2">
+                  <div className="min-w-[220px] rounded-xl bg-background p-2 shadow-lg border border-border">
+                    {item.subItems.map((subItem) => (
+                      <Link
+                        key={subItem.name}
+                        to={subItem.href}
+                        className="block rounded-lg px-4 py-3 text-sm font-medium text-foreground/70 transition-colors hover:bg-muted hover:text-foreground"
+                      >
+                        {subItem.name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           ))}
         </nav>
       </div>
@@ -112,30 +166,45 @@ export function Header() {
             {/* Primary Nav Items */}
             <div className="pb-4 border-b border-foreground/10">
               {primaryNav.map((item) => (
-                <a
+                <Link
                   key={item.name}
-                  href={item.href}
+                  to={item.href}
                   className={`block py-2.5 text-sm font-medium ${
                     item.active ? "text-foreground" : "text-foreground/70"
                   }`}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {item.name}
-                </a>
+                </Link>
               ))}
             </div>
 
-            {/* Secondary Nav Items */}
+            {/* Secondary Nav Items with Submenus */}
             <div className="pt-2 pb-4">
               {secondaryNav.map((item) => (
-                <a
-                  key={item.name}
-                  href={item.href}
-                  className="block py-2.5 text-sm font-medium text-foreground/70"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {item.name}
-                </a>
+                <div key={item.name} className="py-2">
+                  <button
+                    className="flex w-full items-center justify-between py-2.5 text-sm font-semibold text-foreground"
+                    onClick={() => setOpenDropdown(openDropdown === item.name ? null : item.name)}
+                  >
+                    {item.name}
+                    <ChevronDown className={`h-4 w-4 transition-transform ${openDropdown === item.name ? 'rotate-180' : ''}`} />
+                  </button>
+                  {openDropdown === item.name && (
+                    <div className="ml-4 space-y-1">
+                      {item.subItems.map((subItem) => (
+                        <Link
+                          key={subItem.name}
+                          to={subItem.href}
+                          className="block py-2 text-sm text-foreground/70"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          {subItem.name}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
 
