@@ -5,11 +5,11 @@ export function CTASection() {
     <section id="contact" className="bg-surface py-28 lg:py-36">
       <div className="container mx-auto px-4 lg:px-8">
         <div className="mx-auto max-w-3xl text-center">
-          <h2 className="text-4xl font-bold tracking-tight text-foreground lg:text-5xl">
-            Ready to get started?
+          <h2 className="text-4xl font-black tracking-tight text-foreground lg:text-5xl">
+            Bereit durchzustarten?
           </h2>
           <p className="mt-6 text-lg text-muted-foreground">
-            Take the next step. Our team is here to help you every step of the way.
+            Lassen Sie uns gemeinsam die optimale Lösung für Ihr Objekt finden.
           </p>
 
           {/* CTA Buttons */}
