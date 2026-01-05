@@ -79,6 +79,27 @@ const tabContent = {
       href: "/reinigung/fensterreinigung",
       image: heroFacility,
     },
+    {
+      title: "Sonderreinigung",
+      description: "Tiefenpflege nach Bedarf.",
+      buttonText: "Mehr erfahren",
+      href: "/reinigung/sonderreinigung",
+      image: heroFacility,
+    },
+    {
+      title: "Tiefgaragenreinigung",
+      description: "Gründliche Reinigung für Tiefgaragen.",
+      buttonText: "Mehr erfahren",
+      href: "/reinigung/tiefgaragenreinigung",
+      image: heroFacility,
+    },
+    {
+      title: "Grundreinigung",
+      description: "Intensive Reinigung für hartnäckige Verschmutzungen.",
+      buttonText: "Mehr erfahren",
+      href: "/reinigung/grundreinigung",
+      image: heroFacility,
+    },
   ],
   aussen: [
     {
