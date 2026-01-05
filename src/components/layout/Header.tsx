@@ -112,7 +112,7 @@ export function Header() {
             {/* Icon Buttons */}
             <Link 
               to="/24-7-service"
-              className={`flex h-12 items-center justify-center gap-1.5 rounded-full border px-4 ${borderColor} ${textColor} transition-colors ${hoverBg}`}
+              className="flex h-12 items-center justify-center gap-1.5 rounded-full bg-red-600 px-4 text-white transition-colors hover:bg-red-700"
             >
               <Clock className="h-4 w-4" />
               <span className="text-sm font-semibold">24/7</span>
