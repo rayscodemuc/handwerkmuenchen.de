@@ -125,13 +125,15 @@ export function Header() {
             </Link>
 
             {/* Anfrage Button */}
-            <Button 
-              variant="ghost" 
-              size="lg"
-              className={`rounded-full border ${borderColor} ${textColor} ${hoverBg} hover:${textColor} px-6`}
-            >
-              Anfrage
-            </Button>
+            <Link to="/anfrage">
+              <Button 
+                variant="ghost" 
+                size="lg"
+                className={`rounded-full border ${borderColor} ${textColor} ${hoverBg} hover:${textColor} px-6`}
+              >
+                Anfrage
+              </Button>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -273,12 +275,14 @@ export function Header() {
                   Partner werden
                 </Button>
               </Link>
-              <Button 
-                variant="ghost" 
-                className={`w-full rounded-full border ${borderColor} ${textColor} ${hoverBg} hover:${textColor}`}
-              >
-                Anfrage
-              </Button>
+              <Link to="/anfrage" onClick={() => setMobileMenuOpen(false)}>
+                <Button 
+                  variant="ghost" 
+                  className={`w-full rounded-full border ${borderColor} ${textColor} ${hoverBg} hover:${textColor}`}
+                >
+                  Anfrage
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
