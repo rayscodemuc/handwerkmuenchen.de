@@ -3,7 +3,6 @@ import { Menu, X, ChevronDown, Percent, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
 import logo from "@/assets/logo.png";
-import logoWhite from "@/assets/logo-white.png";
 
 const primaryNav = [
   { name: "Startseite", href: "/" },
@@ -69,7 +68,7 @@ export function Header() {
           {/* Logo */}
           <Link to="/" className="flex items-center">
             <img 
-              src={isKontaktPage ? logoWhite : logo} 
+              src={logo} 
               alt="Mr.Clean Services GmbH" 
               className="h-10 w-auto lg:h-12"
             />
