@@ -12,20 +12,21 @@ const primaryNav = [
 
 const secondaryNav = [
   {
-    name: "Technik",
-    href: "/technik",
+    name: "Handwerk",
+    href: "/handwerk",
     subItems: [
-      { name: "Elektrotechnik", href: "/technik/elektrotechnik" },
-      { name: "Sanitär & Heizung", href: "/technik/sanitaer-heizung" },
+      { name: "Elektrotechnik", href: "/handwerk/elektrotechnik" },
+      { name: "Sanitär & Heizung", href: "/handwerk/sanitaer-heizung" },
+      { name: "Service & Wartung", href: "/handwerk/service-wartung" },
     ],
   },
   {
-    name: "Haftung & FM",
-    href: "/haftung-fm",
+    name: "Facility Management",
+    href: "/facility-management",
     subItems: [
-      { name: "Winterdienst", href: "/haftung-fm/winterdienst" },
-      { name: "Hausmeisterservice", href: "/haftung-fm/hausmeisterservice" },
-      { name: "Objektmanagement", href: "/haftung-fm/objektmanagement" },
+      { name: "Hausmeisterservice", href: "/facility-management/hausmeisterservice" },
+      { name: "Winterdienst", href: "/facility-management/winterdienst" },
+      { name: "Objektmanagement", href: "/facility-management/objektmanagement" },
     ],
   },
   {
@@ -33,17 +34,7 @@ const secondaryNav = [
     href: "/reinigung",
     subItems: [
       { name: "Unterhaltsreinigung", href: "/reinigung/unterhaltsreinigung" },
-      { name: "Glas- & Fassadenpflege", href: "/reinigung/glas-fassade" },
-      { name: "Sonderreinigung", href: "/reinigung/sonderreinigung" },
-    ],
-  },
-  {
-    name: "Außenanlagen",
-    href: "/aussenanlagen",
-    subItems: [
-      { name: "Grünpflege", href: "/aussenanlagen/gruenpflege" },
-      { name: "Grauflächenreinigung", href: "/aussenanlagen/grauflaechenreinigung" },
-      { name: "Baumpflege", href: "/aussenanlagen/baumpflege" },
+      { name: "Glas- & Fensterreinigung", href: "/reinigung/glas-fenster" },
     ],
   },
 ];
