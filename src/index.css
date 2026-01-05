@@ -64,6 +64,26 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
+  /* Theme: Über uns - Warm Beige/Sand */
+  .theme-about {
+    --primary: 32 30% 72%;
+    --primary-foreground: 30 20% 12%;
+    --accent: 32 30% 72%;
+    --accent-foreground: 30 20% 12%;
+    --ring: 32 30% 72%;
+    --surface: 35 25% 96%;
+  }
+
+  /* Theme: Kontakt - Cool Green */
+  .theme-contact {
+    --primary: 160 30% 65%;
+    --primary-foreground: 160 25% 12%;
+    --accent: 160 30% 65%;
+    --accent-foreground: 160 25% 12%;
+    --ring: 160 30% 65%;
+    --surface: 160 20% 96%;
+  }
+
   .dark {
     --background: 220 20% 6%;
     --foreground: 210 15% 95%;

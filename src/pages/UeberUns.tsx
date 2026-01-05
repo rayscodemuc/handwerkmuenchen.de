@@ -35,7 +35,7 @@ const stats = [
 
 export default function UeberUns() {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="theme-about flex min-h-screen flex-col">
       <Header />
       <main className="flex-1">
         {/* Hero Section */}
