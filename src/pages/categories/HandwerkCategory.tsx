@@ -1,29 +1,180 @@
-import { CategoryPageLayout } from "./CategoryPageLayout";
+import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
+import { CTASection } from "@/components/sections/CTASection";
+import { SEOHead } from "@/components/SEOHead";
+import { AnimatedButton } from "@/components/ui/animated-button";
+import { Link } from "react-router-dom";
+import { Wrench, Zap, Droplets, Settings, CheckCircle, Clock, Shield, Users } from "lucide-react";
+
+const services = [
+  {
+    icon: Zap,
+    title: "Elektrotechnik",
+    description: "Installation, Wartung und Reparatur elektrischer Anlagen nach höchsten Sicherheitsstandards.",
+    link: "/handwerk/elektrotechnik",
+  },
+  {
+    icon: Droplets,
+    title: "Sanitär & Heizung",
+    description: "Komplettservice für Ihre Sanitär- und Heizungsanlagen – von der Wartung bis zur Reparatur.",
+    link: "/handwerk/sanitaer-heizung",
+  },
+  {
+    icon: Settings,
+    title: "Service & Wartung",
+    description: "Regelmäßige Wartung und schneller Service für alle technischen Anlagen.",
+    link: "/handwerk/service-wartung",
+  },
+];
+
+const reasons = [
+  {
+    icon: CheckCircle,
+    title: "Geprüfte Fachqualität",
+    description: "Unsere Handwerker sind qualifiziert und arbeiten nach höchsten Standards.",
+  },
+  {
+    icon: Clock,
+    title: "Schnelle Reaktionszeit",
+    description: "Notfälle werden priorisiert – wir sind schnell vor Ort.",
+  },
+  {
+    icon: Shield,
+    title: "Zuverlässige Koordination",
+    description: "Ein Ansprechpartner für alle handwerklichen Belange.",
+  },
+  {
+    icon: Users,
+    title: "Starkes Partnernetzwerk",
+    description: "Eigenes Team ergänzt durch geprüfte regionale Partner.",
+  },
+];
 
 export default function HandwerkCategory() {
   return (
-    <CategoryPageLayout
-      title="Handwerk"
-      subtitle="Technische Dienstleistungen"
-      description="Professionelle Handwerksleistungen für Ihre Immobilien. Von Elektroinstallationen bis zur Heizungswartung – wir halten Ihre Gebäudetechnik funktionsfähig."
-      metaDescription="Alles für Elektro, Sanitär & Heizung. Wir koordinieren Reparaturen und Wartungen durch unser Team und geprüfte Partner. Schnell, zuverlässig & fachgerecht."
-      services={[
-        {
-          title: "Elektrotechnik",
-          description: "Elektrische Installationen, Wartung und Reparaturen für gewerbliche und private Immobilien.",
-          href: "/handwerk/elektrotechnik",
-        },
-        {
-          title: "Sanitär & Heizung",
-          description: "Fachgerechte Installation und Wartung von Sanitär- und Heizungsanlagen.",
-          href: "/handwerk/sanitaer-heizung",
-        },
-        {
-          title: "Service & Wartung",
-          description: "Regelmäßige Wartung und Instandhaltung technischer Anlagen für maximale Betriebssicherheit.",
-          href: "/handwerk/service-wartung",
-        },
-      ]}
-    />
+    <div className="flex min-h-screen flex-col">
+      <SEOHead
+        title="Handwerk & Service: Elektro, Sanitär, Heizung"
+        description="Alles für Elektro, Sanitär & Heizung. Wir koordinieren Reparaturen und Wartungen durch unser Team und geprüfte Partner. Schnell, zuverlässig & fachgerecht."
+      />
+      <Header />
+      <main className="flex-1">
+        {/* Hero Section */}
+        <section className="relative overflow-hidden bg-[hsl(198,29%,76%)]">
+          <div className="relative min-h-[540px] lg:min-h-[650px] pt-8 lg:pt-12">
+            <div 
+              className="absolute inset-0"
+              style={{
+                clipPath: "polygon(55% 0, 100% 0, 100% 100%, 35% 100%)",
+              }}
+            >
+              <div className="h-full w-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center">
+                <Wrench className="h-48 w-48 text-primary/30" />
+              </div>
+            </div>
+
+            <div className="container relative mx-auto flex min-h-[500px] items-center px-4 lg:min-h-[600px] lg:px-8">
+              <div className="relative z-10 w-full py-16 lg:w-1/2 lg:py-24">
+                <p className="text-sm font-semibold uppercase tracking-wider text-primary">
+                  Technische Dienstleistungen
+                </p>
+                <h1 className="mt-4 font-bold leading-[0.9] tracking-tight text-foreground">
+                  <span className="block text-[3rem] sm:text-[4rem] lg:text-[5rem] xl:text-[5.5rem]">
+                    Handwerk
+                  </span>
+                  <span className="block text-[3rem] sm:text-[4rem] lg:text-[5rem] xl:text-[5.5rem]">
+                    & Service
+                  </span>
+                </h1>
+
+                <p className="mt-8 max-w-[420px] text-base leading-relaxed text-foreground/70 lg:text-lg">
+                  Professionelle Handwerksleistungen für Ihre Immobilien. Von Elektroinstallationen 
+                  bis zur Heizungswartung – wir halten Ihre Gebäudetechnik funktionsfähig.
+                </p>
+
+                <div className="mt-10">
+                  <Link to="/anfrage">
+                    <AnimatedButton className="bg-white text-foreground hover:bg-foreground hover:text-white">
+                      Angebot anfragen
+                    </AnimatedButton>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Services Section */}
+        <section className="bg-background py-24 lg:py-32">
+          <div className="container mx-auto px-4 lg:px-8">
+            <div className="text-center">
+              <p className="text-sm font-semibold uppercase tracking-wider text-primary">
+                Unsere Leistungen
+              </p>
+              <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground lg:text-4xl">
+                Handwerkliche Kompetenz
+              </h2>
+              <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+                Elektro, Sanitär und Heizung – alles aus einer Hand.
+              </p>
+            </div>
+
+            <div className="mt-16 grid gap-8 md:grid-cols-3">
+              {services.map((service) => (
+                <Link
+                  key={service.title}
+                  to={service.link}
+                  className="group rounded-2xl border border-border bg-card p-8 transition-all hover:border-primary hover:shadow-lg"
+                >
+                  <service.icon className="h-12 w-12 text-primary" />
+                  <h3 className="mt-6 text-xl font-semibold text-foreground group-hover:text-primary">
+                    {service.title}
+                  </h3>
+                  <p className="mt-3 text-muted-foreground">
+                    {service.description}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Why Us Section */}
+        <section className="bg-muted/50 py-24 lg:py-32">
+          <div className="container mx-auto px-4 lg:px-8">
+            <div className="text-center">
+              <p className="text-sm font-semibold uppercase tracking-wider text-primary">
+                Ihre Vorteile
+              </p>
+              <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground lg:text-4xl">
+                Warum Mr.Clean Handwerk?
+              </h2>
+            </div>
+
+            <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+              {reasons.map((reason) => (
+                <div
+                  key={reason.title}
+                  className="rounded-2xl border border-border bg-card p-6 text-center transition-all hover:border-primary hover:shadow-lg"
+                >
+                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+                    <reason.icon className="h-7 w-7 text-primary" />
+                  </div>
+                  <h3 className="mt-4 text-lg font-semibold text-foreground">
+                    {reason.title}
+                  </h3>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    {reason.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <CTASection />
+      </main>
+      <Footer />
+    </div>
   );
 }
