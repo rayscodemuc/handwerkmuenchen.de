@@ -125,6 +125,13 @@ const tabContent = {
       href: "/aussenanlagen/grauflaechenreinigung",
       image: heroFacility,
     },
+    {
+      title: "Winterdienst",
+      description: "Schneeräumung und Streudienst für Außenanlagen.",
+      buttonText: "Mehr erfahren",
+      href: "/aussenanlagen/winterdienst",
+      image: heroFacility,
+    },
   ],
 };
 
