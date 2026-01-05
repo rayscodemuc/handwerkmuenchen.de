@@ -64,24 +64,24 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
-  /* Theme: Über uns - Warm Beige/Sand */
+  /* Theme: Über uns - Light Grey/Off-White #e0e1dd */
   .theme-about {
-    --primary: 32 30% 72%;
-    --primary-foreground: 30 20% 12%;
-    --accent: 32 30% 72%;
-    --accent-foreground: 30 20% 12%;
-    --ring: 32 30% 72%;
-    --surface: 35 25% 96%;
+    --primary: 75 6% 87%;
+    --primary-foreground: 220 20% 10%;
+    --accent: 75 6% 87%;
+    --accent-foreground: 220 20% 10%;
+    --ring: 75 6% 87%;
+    --surface: 75 6% 94%;
   }
 
-  /* Theme: Kontakt - Cool Green */
+  /* Theme: Kontakt - Dark Navy #1b263b */
   .theme-contact {
-    --primary: 160 30% 65%;
-    --primary-foreground: 160 25% 12%;
-    --accent: 160 30% 65%;
-    --accent-foreground: 160 25% 12%;
-    --ring: 160 30% 65%;
-    --surface: 160 20% 96%;
+    --primary: 219 37% 17%;
+    --primary-foreground: 210 15% 95%;
+    --accent: 219 37% 17%;
+    --accent-foreground: 210 15% 95%;
+    --ring: 219 37% 17%;
+    --surface: 219 30% 94%;
   }
 
   .dark {
