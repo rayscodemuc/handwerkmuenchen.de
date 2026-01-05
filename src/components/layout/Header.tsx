@@ -34,7 +34,11 @@ const secondaryNav = [
     href: "/reinigung",
     subItems: [
       { name: "Unterhaltsreinigung", href: "/reinigung/unterhaltsreinigung" },
-      { name: "Glas- & Fensterreinigung", href: "/reinigung/glas-fenster" },
+      { name: "Büroreinigung", href: "/reinigung/bueroreinigung" },
+      { name: "Fensterreinigung", href: "/reinigung/fensterreinigung" },
+      { name: "Sonderreinigung", href: "/reinigung/sonderreinigung" },
+      { name: "Tiefgaragenreinigung", href: "/reinigung/tiefgaragenreinigung" },
+      { name: "Grundreinigung", href: "/reinigung/grundreinigung" },
     ],
   },
   {
