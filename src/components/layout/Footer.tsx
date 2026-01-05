@@ -23,11 +23,11 @@ const footerLinks = {
 };
 
 // Downloads - füge hier deine Dokumente hinzu
+// Lege die PDFs im Ordner public/documents/ ab
 const downloads = [
-  // Beispiel:
-  // { name: "Preisliste 2025", href: "/documents/preisliste-2025.pdf" },
-  // { name: "AGB", href: "/documents/agb.pdf" },
-  // { name: "Zertifikate", href: "/documents/zertifikate.pdf" },
+  { name: "Preisliste 2025", href: "/documents/preisliste-2025.pdf" },
+  { name: "AGB", href: "/documents/agb.pdf" },
+  { name: "Zertifikate", href: "/documents/zertifikate.pdf" },
 ];
 
 export function Footer() {
