@@ -74,14 +74,14 @@
     --surface: 75 6% 94%;
   }
 
-  /* Theme: Kontakt - Dark Navy #1b263b */
+  /* Theme: Kontakt - Blue Grey #415a77 */
   .theme-contact {
-    --primary: 219 37% 17%;
+    --primary: 212 29% 36%;
     --primary-foreground: 210 15% 95%;
-    --accent: 219 37% 17%;
+    --accent: 212 29% 36%;
     --accent-foreground: 210 15% 95%;
-    --ring: 219 37% 17%;
-    --surface: 219 30% 94%;
+    --ring: 212 29% 36%;
+    --surface: 212 20% 94%;
   }
 
   .dark {
