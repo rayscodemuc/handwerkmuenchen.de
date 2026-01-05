@@ -1,4 +1,4 @@
-import { Phone, Mail, MapPin } from "lucide-react";
+import { Phone, Mail, MapPin, Download } from "lucide-react";
 import { Link } from "react-router-dom";
 import logo from "@/assets/logo.png";
 
@@ -22,11 +22,19 @@ const footerLinks = {
   ],
 };
 
+// Downloads - füge hier deine Dokumente hinzu
+const downloads = [
+  // Beispiel:
+  // { name: "Preisliste 2025", href: "/documents/preisliste-2025.pdf" },
+  // { name: "AGB", href: "/documents/agb.pdf" },
+  // { name: "Zertifikate", href: "/documents/zertifikate.pdf" },
+];
+
 export function Footer() {
   return (
     <footer className="border-t border-border bg-background">
       <div className="container mx-auto px-4 py-16 lg:px-8 lg:py-20">
-        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-5 lg:gap-8">
+        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-6 lg:gap-8">
           {/* Logo & Contact Info */}
           <div className="lg:col-span-2">
             <Link to="/" className="inline-block">
@@ -105,6 +113,33 @@ export function Footer() {
                   </Link>
                 </li>
               ))}
+            </ul>
+          </div>
+
+          {/* Downloads */}
+          <div>
+            <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground">
+              Downloads
+            </h3>
+            <ul className="mt-6 space-y-4">
+              {downloads.length > 0 ? (
+                downloads.map((download) => (
+                  <li key={download.name}>
+                    <a
+                      href={download.href}
+                      download
+                      className="inline-flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      <Download className="h-4 w-4" />
+                      {download.name}
+                    </a>
+                  </li>
+                ))
+              ) : (
+                <li className="text-muted-foreground/50 text-sm italic">
+                  Demnächst verfügbar
+                </li>
+              )}
             </ul>
           </div>
         </div>
