@@ -9,23 +9,34 @@ import UeberUns from "./pages/UeberUns";
 import Kontakt from "./pages/Kontakt";
 
 // Category Pages
-import TechnikCategory from "./pages/categories/TechnikCategory";
-import HaftungFMCategory from "./pages/categories/HaftungFMCategory";
+import HandwerkCategory from "./pages/categories/HandwerkCategory";
+import FacilityManagementCategory from "./pages/categories/FacilityManagementCategory";
 import ReinigungCategory from "./pages/categories/ReinigungCategory";
 import AussenanlagenCategory from "./pages/categories/AussenanlagenCategory";
 
-// Service Pages
+// Handwerk Service Pages
 import Elektrotechnik from "./pages/services/Elektrotechnik";
 import SanitaerHeizung from "./pages/services/SanitaerHeizung";
-import Winterdienst from "./pages/services/Winterdienst";
+import ServiceWartung from "./pages/services/ServiceWartung";
+
+// Facility Management Service Pages
 import Hausmeisterservice from "./pages/services/Hausmeisterservice";
+import Winterdienst from "./pages/services/Winterdienst";
 import Objektmanagement from "./pages/services/Objektmanagement";
+
+// Reinigung Service Pages
 import Unterhaltsreinigung from "./pages/services/Unterhaltsreinigung";
-import GlasFassade from "./pages/services/GlasFassade";
+import Bueroreinigung from "./pages/services/Bueroreinigung";
+import Fensterreinigung from "./pages/services/Fensterreinigung";
 import Sonderreinigung from "./pages/services/Sonderreinigung";
+import Tiefgaragenreinigung from "./pages/services/Tiefgaragenreinigung";
+import Grundreinigung from "./pages/services/Grundreinigung";
+
+// Außenanlagen Service Pages
 import Gruenpflege from "./pages/services/Gruenpflege";
-import Grauflaechenreinigung from "./pages/services/Grauflaechenreinigung";
 import Baumpflege from "./pages/services/Baumpflege";
+import Grauflaechenreinigung from "./pages/services/Grauflaechenreinigung";
+import WinterdienstAussen from "./pages/services/WinterdienstAussen";
 
 const queryClient = new QueryClient();
 
@@ -41,29 +52,34 @@ const App = () => (
           <Route path="/kontakt" element={<Kontakt />} />
           
           {/* Category Overview Pages */}
-          <Route path="/technik" element={<TechnikCategory />} />
-          <Route path="/haftung-fm" element={<HaftungFMCategory />} />
+          <Route path="/handwerk" element={<HandwerkCategory />} />
+          <Route path="/facility-management" element={<FacilityManagementCategory />} />
           <Route path="/reinigung" element={<ReinigungCategory />} />
           <Route path="/aussenanlagen" element={<AussenanlagenCategory />} />
           
-          {/* Technik */}
-          <Route path="/technik/elektrotechnik" element={<Elektrotechnik />} />
-          <Route path="/technik/sanitaer-heizung" element={<SanitaerHeizung />} />
+          {/* Handwerk */}
+          <Route path="/handwerk/elektrotechnik" element={<Elektrotechnik />} />
+          <Route path="/handwerk/sanitaer-heizung" element={<SanitaerHeizung />} />
+          <Route path="/handwerk/service-wartung" element={<ServiceWartung />} />
           
-          {/* Haftung & FM */}
-          <Route path="/haftung-fm/winterdienst" element={<Winterdienst />} />
-          <Route path="/haftung-fm/hausmeisterservice" element={<Hausmeisterservice />} />
-          <Route path="/haftung-fm/objektmanagement" element={<Objektmanagement />} />
+          {/* Facility Management */}
+          <Route path="/facility-management/hausmeisterservice" element={<Hausmeisterservice />} />
+          <Route path="/facility-management/winterdienst" element={<Winterdienst />} />
+          <Route path="/facility-management/objektmanagement" element={<Objektmanagement />} />
           
           {/* Reinigung */}
           <Route path="/reinigung/unterhaltsreinigung" element={<Unterhaltsreinigung />} />
-          <Route path="/reinigung/glas-fassade" element={<GlasFassade />} />
+          <Route path="/reinigung/bueroreinigung" element={<Bueroreinigung />} />
+          <Route path="/reinigung/fensterreinigung" element={<Fensterreinigung />} />
           <Route path="/reinigung/sonderreinigung" element={<Sonderreinigung />} />
+          <Route path="/reinigung/tiefgaragenreinigung" element={<Tiefgaragenreinigung />} />
+          <Route path="/reinigung/grundreinigung" element={<Grundreinigung />} />
           
           {/* Außenanlagen */}
           <Route path="/aussenanlagen/gruenpflege" element={<Gruenpflege />} />
-          <Route path="/aussenanlagen/grauflaechenreinigung" element={<Grauflaechenreinigung />} />
           <Route path="/aussenanlagen/baumpflege" element={<Baumpflege />} />
+          <Route path="/aussenanlagen/grauflaechenreinigung" element={<Grauflaechenreinigung />} />
+          <Route path="/aussenanlagen/winterdienst" element={<WinterdienstAussen />} />
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
