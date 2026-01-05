@@ -3,8 +3,8 @@ import { AnimatedButton } from "@/components/ui/animated-button";
 import heroFacility from "@/assets/hero-facility.jpg";
 
 const tabs = [
-  { id: "technik", label: "Technik" },
-  { id: "haftung", label: "Facility Management" },
+  { id: "technik", label: "Handwerk" },
+  { id: "haftung", label: "Haftung & FM" },
   { id: "reinigung", label: "Reinigung" },
   { id: "aussen", label: "Außenanlagen" },
 ];
