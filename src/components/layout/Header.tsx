@@ -118,9 +118,11 @@ export function Header() {
             </button>
 
             {/* CTA Button */}
-            <Button variant="hero-white" size="lg" className="rounded-full px-6">
-              Partner werden
-            </Button>
+            <Link to="/partner-werden">
+              <Button variant="hero-white" size="lg" className="rounded-full px-6">
+                Partner werden
+              </Button>
+            </Link>
 
             {/* Anfrage Button */}
             <Button 
@@ -265,11 +267,12 @@ export function Header() {
               ))}
             </div>
 
-            {/* Mobile CTAs */}
             <div className={`flex flex-col gap-3 pt-4 border-t ${isKontaktPage ? 'border-white/10' : 'border-foreground/10'}`}>
-              <Button variant="hero-white" className="w-full rounded-full">
-                Partner werden
-              </Button>
+              <Link to="/partner-werden" onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="hero-white" className="w-full rounded-full">
+                  Partner werden
+                </Button>
+              </Link>
               <Button 
                 variant="ghost" 
                 className={`w-full rounded-full border ${borderColor} ${textColor} ${hoverBg} hover:${textColor}`}

@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import UeberUns from "./pages/UeberUns";
 import Kontakt from "./pages/Kontakt";
+import PartnerWerden from "./pages/PartnerWerden";
 
 // Category Pages
 import HandwerkCategory from "./pages/categories/HandwerkCategory";
@@ -50,6 +51,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/ueber-uns" element={<UeberUns />} />
           <Route path="/kontakt" element={<Kontakt />} />
+          <Route path="/partner-werden" element={<PartnerWerden />} />
           
           {/* Category Overview Pages */}
           <Route path="/handwerk" element={<HandwerkCategory />} />
