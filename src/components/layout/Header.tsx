@@ -11,12 +11,10 @@ const primaryNav = [
 ];
 
 const secondaryNav = [
-  { name: "Reinigung", href: "#services", hasDropdown: true },
-  { name: "Gebäude", href: "#", hasDropdown: true },
-  { name: "Garten", href: "#", hasDropdown: true },
-  { name: "Spezial", href: "#" },
-  { name: "Preise", href: "#", hasDropdown: true },
-  { name: "Angebote", href: "#" },
+  { name: "Technik", href: "#services" },
+  { name: "Haftung & FM", href: "#services" },
+  { name: "Reinigung", href: "#services" },
+  { name: "Außenanlagen", href: "#services" },
 ];
 
 export function Header() {
@@ -101,10 +99,9 @@ export function Header() {
             <a
               key={item.name}
               href={item.href}
-              className="flex items-center gap-1 text-base font-semibold text-foreground/70 transition-colors hover:text-foreground"
+              className="text-base font-semibold text-foreground/70 transition-colors hover:text-foreground"
             >
               {item.name}
-              {item.hasDropdown && <ChevronDown className="h-4 w-4" />}
             </a>
           ))}
         </nav>
@@ -136,11 +133,10 @@ export function Header() {
                 <a
                   key={item.name}
                   href={item.href}
-                  className="flex items-center justify-between py-2.5 text-sm font-medium text-foreground/70"
+                  className="block py-2.5 text-sm font-medium text-foreground/70"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {item.name}
-                  {item.hasDropdown && <ChevronDown className="h-4 w-4" />}
                 </a>
               ))}
             </div>
