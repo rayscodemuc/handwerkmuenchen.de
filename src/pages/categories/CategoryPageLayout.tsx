@@ -2,6 +2,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CTASection } from "@/components/sections/CTASection";
 import { AnimatedButton } from "@/components/ui/animated-button";
+import { SEOHead } from "@/components/SEOHead";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 
@@ -15,6 +16,7 @@ interface CategoryPageLayoutProps {
   title: string;
   subtitle: string;
   description: string;
+  metaDescription?: string;
   services: ServiceItem[];
 }
 
@@ -22,10 +24,15 @@ export function CategoryPageLayout({
   title,
   subtitle,
   description,
+  metaDescription,
   services,
 }: CategoryPageLayoutProps) {
   return (
     <div className="flex min-h-screen flex-col">
+      <SEOHead
+        title={title}
+        description={metaDescription || description}
+      />
       <Header />
       <main className="flex-1">
         {/* Hero Section */}

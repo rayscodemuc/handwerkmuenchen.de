@@ -39,6 +39,7 @@ export default function ReinigungCategory() {
       title="Reinigung"
       subtitle="Unsere Leistungen"
       description="Professionelle Reinigungsdienstleistungen für hygienische und repräsentative Räumlichkeiten."
+      metaDescription="Glänzende Ergebnisse für Ihr Objekt: Unterhaltsreinigung, Glas- und Fensterreinigung sowie Sonderreinigungen (TG & Grundreinigung) vom Profi."
       services={services}
     />
   );

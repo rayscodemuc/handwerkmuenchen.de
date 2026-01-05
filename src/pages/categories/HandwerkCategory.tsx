@@ -6,6 +6,7 @@ export default function HandwerkCategory() {
       title="Handwerk"
       subtitle="Technische Dienstleistungen"
       description="Professionelle Handwerksleistungen für Ihre Immobilien. Von Elektroinstallationen bis zur Heizungswartung – wir halten Ihre Gebäudetechnik funktionsfähig."
+      metaDescription="Alles für Elektro, Sanitär & Heizung. Wir koordinieren Reparaturen und Wartungen durch unser Team und geprüfte Partner. Schnell, zuverlässig & fachgerecht."
       services={[
         {
           title: "Elektrotechnik",

@@ -6,6 +6,7 @@ export default function FacilityManagementCategory() {
       title="Facility Management"
       subtitle="Gebäudemanagement"
       description="Ganzheitliches Facility Management für Ihre Liegenschaften. Wir übernehmen Verantwortung für den reibungslosen Betrieb Ihrer Immobilien."
+      metaDescription="Professionelles Objektmanagement, Hausmeisterservice und Winterdienst. Wir sorgen für Werterhalt und Sicherheit Ihrer Immobilie mit System."
       services={[
         {
           title: "Hausmeisterservice",
