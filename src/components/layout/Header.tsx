@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Menu, X, ChevronDown, Clock, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
+import { LocationMapDialog } from "@/components/LocationMapDialog";
 import logo from "@/assets/logo.png";
 
 const primaryNav = [
@@ -61,6 +62,7 @@ const secondaryNav = [
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [locationDialogOpen, setLocationDialogOpen] = useState(false);
   const location = useLocation();
   
   // Check if current page is Kontakt (dark background needs white text)
@@ -117,7 +119,10 @@ export function Header() {
               <Clock className="h-4 w-4" />
               <span className="text-sm font-semibold">24/7</span>
             </Link>
-            <button className={`flex h-12 w-12 items-center justify-center rounded-full border ${borderColor} ${textColor} transition-colors ${hoverBg}`}>
+            <button 
+              onClick={() => setLocationDialogOpen(true)}
+              className={`flex h-12 w-12 items-center justify-center rounded-full border ${borderColor} ${textColor} transition-colors ${hoverBg}`}
+            >
               <MapPin className="h-5 w-5" />
             </button>
 
@@ -291,6 +296,9 @@ export function Header() {
           </div>
         </div>
       )}
+
+      {/* Location Map Dialog */}
+      <LocationMapDialog open={locationDialogOpen} onOpenChange={setLocationDialogOpen} />
     </header>
   );
 }
