@@ -52,11 +52,18 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const location = useLocation();
+  
+  // Check if current page is Kontakt (dark background needs white text)
+  const isKontaktPage = location.pathname === "/kontakt";
+  const textColor = isKontaktPage ? "text-white" : "text-foreground";
+  const textColorMuted = isKontaktPage ? "text-white/70" : "text-foreground/70";
+  const borderColor = isKontaktPage ? "border-white/30" : "border-foreground/30";
+  const hoverBg = isKontaktPage ? "hover:bg-white/10" : "hover:bg-foreground/10";
 
   return (
     <header className="relative z-50 w-full bg-primary">
       {/* Primary Navigation Row */}
-      <div className="border-b border-foreground/10 py-2">
+      <div className={`border-b ${isKontaktPage ? 'border-white/10' : 'border-foreground/10'} py-2`}>
         <nav className="container mx-auto flex h-20 items-center px-4 lg:px-8">
           {/* Logo */}
           <Link to="/" className="flex items-center">
@@ -77,13 +84,13 @@ export function Header() {
                   to={item.href}
                   className={`relative text-lg font-medium transition-colors ${
                     isActive 
-                      ? "text-foreground" 
-                      : "text-foreground/70 hover:text-foreground"
+                      ? textColor 
+                      : `${textColorMuted} hover:${textColor}`
                   }`}
                 >
                   {item.name}
                   {isActive && (
-                    <span className="absolute -bottom-1 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-foreground" />
+                    <span className={`absolute -bottom-1 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full ${isKontaktPage ? 'bg-white' : 'bg-foreground'}`} />
                   )}
                 </Link>
               );
@@ -93,10 +100,10 @@ export function Header() {
           {/* Right Side Actions - Desktop */}
           <div className="hidden md:flex md:items-center md:gap-3 md:ml-auto">
             {/* Icon Buttons */}
-            <button className="flex h-12 w-12 items-center justify-center rounded-full border border-foreground/30 text-foreground transition-colors hover:bg-foreground/10">
+            <button className={`flex h-12 w-12 items-center justify-center rounded-full border ${borderColor} ${textColor} transition-colors ${hoverBg}`}>
               <Percent className="h-5 w-5" />
             </button>
-            <button className="flex h-12 w-12 items-center justify-center rounded-full border border-foreground/30 text-foreground transition-colors hover:bg-foreground/10">
+            <button className={`flex h-12 w-12 items-center justify-center rounded-full border ${borderColor} ${textColor} transition-colors ${hoverBg}`}>
               <MapPin className="h-5 w-5" />
             </button>
 
@@ -109,7 +116,7 @@ export function Header() {
             <Button 
               variant="ghost" 
               size="lg"
-              className="rounded-full border border-foreground/30 text-foreground hover:bg-foreground/10 hover:text-foreground px-6"
+              className={`rounded-full border ${borderColor} ${textColor} ${hoverBg} hover:${textColor} px-6`}
             >
               Anfrage
             </Button>
@@ -118,7 +125,7 @@ export function Header() {
           {/* Mobile Menu Button */}
           <button
             type="button"
-            className="md:hidden inline-flex items-center justify-center rounded-lg p-2 text-foreground hover:bg-foreground/10 ml-auto"
+            className={`md:hidden inline-flex items-center justify-center rounded-lg p-2 ${textColor} ${hoverBg} ml-auto`}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             <span className="sr-only">Menü öffnen</span>
@@ -137,7 +144,7 @@ export function Header() {
               onMouseEnter={() => setOpenDropdown(item.name)}
               onMouseLeave={() => setOpenDropdown(null)}
             >
-              <button className="flex items-center gap-1 text-base font-semibold text-foreground/70 transition-colors hover:text-foreground">
+              <button className={`flex items-center gap-1 text-base font-semibold ${textColorMuted} transition-colors hover:${textColor}`}>
                 {item.name}
                 <ChevronDown className={`h-4 w-4 transition-transform ${openDropdown === item.name ? 'rotate-180' : ''}`} />
               </button>
@@ -165,10 +172,10 @@ export function Header() {
 
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-foreground/10 bg-primary">
+        <div className={`md:hidden border-t ${isKontaktPage ? 'border-white/10' : 'border-foreground/10'} bg-primary`}>
           <div className="container mx-auto px-4 py-4 space-y-1">
             {/* Primary Nav Items */}
-            <div className="pb-4 border-b border-foreground/10">
+            <div className={`pb-4 border-b ${isKontaktPage ? 'border-white/10' : 'border-foreground/10'}`}>
               {primaryNav.map((item) => {
                 const isActive = location.pathname === item.href;
                 return (
@@ -176,7 +183,7 @@ export function Header() {
                     key={item.name}
                     to={item.href}
                     className={`block py-2.5 text-sm font-medium ${
-                      isActive ? "text-foreground" : "text-foreground/70"
+                      isActive ? textColor : textColorMuted
                     }`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
@@ -192,7 +199,7 @@ export function Header() {
               {secondaryNav.map((item) => (
                 <div key={item.name} className="py-2">
                   <button
-                    className="flex w-full items-center justify-between py-2.5 text-sm font-semibold text-foreground"
+                    className={`flex w-full items-center justify-between py-2.5 text-sm font-semibold ${textColor}`}
                     onClick={() => setOpenDropdown(openDropdown === item.name ? null : item.name)}
                   >
                     {item.name}
@@ -204,7 +211,7 @@ export function Header() {
                         <Link
                           key={subItem.name}
                           to={subItem.href}
-                          className="block py-2 text-sm text-foreground/70"
+                          className={`block py-2 text-sm ${textColorMuted}`}
                           onClick={() => setMobileMenuOpen(false)}
                         >
                           {subItem.name}
@@ -217,13 +224,13 @@ export function Header() {
             </div>
 
             {/* Mobile CTAs */}
-            <div className="flex flex-col gap-3 pt-4 border-t border-foreground/10">
+            <div className={`flex flex-col gap-3 pt-4 border-t ${isKontaktPage ? 'border-white/10' : 'border-foreground/10'}`}>
               <Button variant="hero-white" className="w-full rounded-full">
                 Partner werden
               </Button>
               <Button 
                 variant="ghost" 
-                className="w-full rounded-full border border-foreground/30 text-foreground hover:bg-foreground/10 hover:text-foreground"
+                className={`w-full rounded-full border ${borderColor} ${textColor} ${hoverBg} hover:${textColor}`}
               >
                 Anfrage
               </Button>
