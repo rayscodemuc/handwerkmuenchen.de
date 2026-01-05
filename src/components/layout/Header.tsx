@@ -13,7 +13,7 @@ const primaryNav = [
 const secondaryNav = [
   {
     name: "Technik",
-    href: "#services",
+    href: "/technik",
     subItems: [
       { name: "Elektrotechnik", href: "/technik/elektrotechnik" },
       { name: "Sanitär & Heizung", href: "/technik/sanitaer-heizung" },
@@ -21,7 +21,7 @@ const secondaryNav = [
   },
   {
     name: "Haftung & FM",
-    href: "#services",
+    href: "/haftung-fm",
     subItems: [
       { name: "Winterdienst", href: "/haftung-fm/winterdienst" },
       { name: "Hausmeisterservice", href: "/haftung-fm/hausmeisterservice" },
@@ -30,7 +30,7 @@ const secondaryNav = [
   },
   {
     name: "Reinigung",
-    href: "#services",
+    href: "/reinigung",
     subItems: [
       { name: "Unterhaltsreinigung", href: "/reinigung/unterhaltsreinigung" },
       { name: "Glas- & Fassadenpflege", href: "/reinigung/glas-fassade" },
@@ -39,7 +39,7 @@ const secondaryNav = [
   },
   {
     name: "Außenanlagen",
-    href: "#services",
+    href: "/aussenanlagen",
     subItems: [
       { name: "Grünpflege", href: "/aussenanlagen/gruenpflege" },
       { name: "Grauflächenreinigung", href: "/aussenanlagen/grauflaechenreinigung" },
@@ -144,10 +144,13 @@ export function Header() {
               onMouseEnter={() => setOpenDropdown(item.name)}
               onMouseLeave={() => setOpenDropdown(null)}
             >
-              <button className={`flex items-center gap-1 text-base font-semibold ${textColorMuted} transition-colors hover:${textColor}`}>
+              <Link
+                to={item.href}
+                className={`flex items-center gap-1 text-base font-semibold ${textColorMuted} transition-colors hover:${textColor}`}
+              >
                 {item.name}
                 <ChevronDown className={`h-4 w-4 transition-transform ${openDropdown === item.name ? 'rotate-180' : ''}`} />
-              </button>
+              </Link>
 
               {/* Dropdown Menu */}
               {openDropdown === item.name && (
@@ -198,13 +201,21 @@ export function Header() {
             <div className="pt-2 pb-4">
               {secondaryNav.map((item) => (
                 <div key={item.name} className="py-2">
-                  <button
-                    className={`flex w-full items-center justify-between py-2.5 text-sm font-semibold ${textColor}`}
-                    onClick={() => setOpenDropdown(openDropdown === item.name ? null : item.name)}
-                  >
-                    {item.name}
-                    <ChevronDown className={`h-4 w-4 transition-transform ${openDropdown === item.name ? 'rotate-180' : ''}`} />
-                  </button>
+                  <div className="flex w-full items-center justify-between">
+                    <Link
+                      to={item.href}
+                      className={`py-2.5 text-sm font-semibold ${textColor}`}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      {item.name}
+                    </Link>
+                    <button
+                      className={`p-2 ${textColorMuted}`}
+                      onClick={() => setOpenDropdown(openDropdown === item.name ? null : item.name)}
+                    >
+                      <ChevronDown className={`h-4 w-4 transition-transform ${openDropdown === item.name ? 'rotate-180' : ''}`} />
+                    </button>
+                  </div>
                   {openDropdown === item.name && (
                     <div className="ml-4 space-y-1">
                       {item.subItems.map((subItem) => (
