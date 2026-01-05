@@ -10,6 +10,7 @@ import UeberUns from "./pages/UeberUns";
 import Kontakt from "./pages/Kontakt";
 import PartnerWerden from "./pages/PartnerWerden";
 import Anfrage from "./pages/Anfrage";
+import Service247 from "./pages/Service247";
 import Datenschutz from "./pages/Datenschutz";
 import Impressum from "./pages/Impressum";
 
@@ -58,6 +59,7 @@ const App = () => (
           <Route path="/kontakt" element={<Kontakt />} />
           <Route path="/partner-werden" element={<PartnerWerden />} />
           <Route path="/anfrage" element={<Anfrage />} />
+          <Route path="/24-7-service" element={<Service247 />} />
           <Route path="/datenschutz" element={<Datenschutz />} />
           <Route path="/impressum" element={<Impressum />} />
           
