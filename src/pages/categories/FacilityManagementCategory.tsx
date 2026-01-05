@@ -30,23 +30,23 @@ const services = [
 const reasons = [
   {
     icon: Building2,
-    title: "Werterhalt garantiert",
-    description: "Systematische Pflege und Instandhaltung Ihrer Immobilie.",
-  },
-  {
-    icon: Clock,
-    title: "24/7 Erreichbarkeit",
-    description: "Rund um die Uhr für Notfälle und dringende Anliegen.",
+    title: "Werterhalt & Sicherheit",
+    description: "Systematische Pflege für langfristigen Immobilienwert.",
   },
   {
     icon: Shield,
-    title: "Sicherheit & Compliance",
-    description: "Einhaltung aller gesetzlichen Vorschriften und Verkehrssicherungspflichten.",
+    title: "Volle Haftungsübernahme",
+    description: "Wir übernehmen die Verkehrssicherungspflicht für Sie.",
+  },
+  {
+    icon: Clock,
+    title: "24/7 Notdienst",
+    description: "Rund um die Uhr erreichbar bei dringenden Anliegen.",
   },
   {
     icon: Users,
-    title: "Persönliche Betreuung",
-    description: "Fester Ansprechpartner für Ihre Liegenschaft.",
+    title: "Fester Ansprechpartner",
+    description: "Persönliche Betreuung durch Ihren Objektmanager.",
   },
 ];
 
@@ -88,8 +88,8 @@ export default function FacilityManagementCategory() {
                 </h1>
 
                 <p className="mt-8 max-w-[420px] text-base leading-relaxed text-foreground/70 lg:text-lg">
-                  Ganzheitliches Facility Management für Ihre Liegenschaften. Wir übernehmen 
-                  Verantwortung für den reibungslosen Betrieb Ihrer Immobilien.
+                  Werterhalt und Sicherheit für Ihre Immobilie. Wir koordinieren 
+                  Hausmeisterservice, Winterdienst und Objektbetreuung aus einer Hand.
                 </p>
 
                 <div className="mt-10">

@@ -4,7 +4,7 @@ import { CTASection } from "@/components/sections/CTASection";
 import { SEOHead } from "@/components/SEOHead";
 import { AnimatedButton } from "@/components/ui/animated-button";
 import { Link } from "react-router-dom";
-import { Trees, Leaf, TreeDeciduous, Snowflake, CheckCircle, Clock, Shield, Users } from "lucide-react";
+import { Trees, Leaf, TreeDeciduous, Snowflake, Clock, Shield, Users } from "lucide-react";
 
 const services = [
   {
@@ -35,24 +35,24 @@ const services = [
 
 const reasons = [
   {
-    icon: CheckCircle,
-    title: "Erster Eindruck zählt",
-    description: "Gepflegte Außenanlagen repräsentieren Ihr Unternehmen.",
+    icon: Trees,
+    title: "Gepflegter Eindruck",
+    description: "Repräsentative Außenanlagen für Ihr Unternehmen.",
   },
   {
     icon: Clock,
-    title: "Ganzjährige Betreuung",
+    title: "Ganzjähriger Service",
     description: "Von der Grünpflege im Sommer bis zum Winterdienst.",
   },
   {
     icon: Shield,
-    title: "Verkehrssicherung",
-    description: "Erfüllung aller Pflichten zur Verkehrssicherheit.",
+    title: "Verkehrssicherheit",
+    description: "Erfüllung aller gesetzlichen Pflichten.",
   },
   {
     icon: Users,
-    title: "Erfahrene Teams",
-    description: "Fachkundiges Personal mit moderner Ausrüstung.",
+    title: "Fachkundige Teams",
+    description: "Erfahrenes Personal mit moderner Ausrüstung.",
   },
 ];
 
