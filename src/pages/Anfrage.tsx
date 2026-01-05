@@ -127,7 +127,7 @@ export default function Anfrage() {
               Kontakt
             </p>
             <h1 className="mt-3 text-4xl font-black tracking-tight text-primary-foreground lg:text-6xl">
-              Anfrage stellen
+              Sprechen wir über Ihr Projekt
             </h1>
             <p className="mt-6 max-w-2xl text-lg text-primary-foreground/80">
               Beschreiben Sie uns Ihr Anliegen und wir erstellen Ihnen ein unverbindliches Angebot – 
