@@ -4,7 +4,7 @@ import heroFacility from "@/assets/hero-facility.jpg";
 
 const tabs = [
   { id: "technik", label: "Handwerk" },
-  { id: "haftung", label: "Haftung & FM" },
+  { id: "haftung", label: "Facility Management" },
   { id: "reinigung", label: "Reinigung" },
   { id: "aussen", label: "Außenanlagen" },
 ];
