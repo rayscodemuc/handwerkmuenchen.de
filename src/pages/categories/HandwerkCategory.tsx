@@ -4,7 +4,7 @@ import { CTASection } from "@/components/sections/CTASection";
 import { SEOHead } from "@/components/SEOHead";
 import { AnimatedButton } from "@/components/ui/animated-button";
 import { Link } from "react-router-dom";
-import { Wrench, Zap, Droplets, Settings, CheckCircle, Clock, Shield, Users } from "lucide-react";
+import { Wrench, Zap, Droplets, Settings, CheckCircle, Clock, Users } from "lucide-react";
 
 const services = [
   {
@@ -29,24 +29,24 @@ const services = [
 
 const reasons = [
   {
-    icon: CheckCircle,
-    title: "Geprüfte Fachqualität",
-    description: "Unsere Handwerker sind qualifiziert und arbeiten nach höchsten Standards.",
+    icon: Wrench,
+    title: "Fachgerechte Koordination",
+    description: "Ein Ansprechpartner koordiniert alle Gewerke für Sie.",
   },
   {
     icon: Clock,
-    title: "Schnelle Reaktionszeit",
-    description: "Notfälle werden priorisiert – wir sind schnell vor Ort.",
+    title: "Schnelle Reparatur",
+    description: "Kurze Reaktionszeiten bei Störungen und Notfällen.",
   },
   {
-    icon: Shield,
-    title: "Zuverlässige Koordination",
-    description: "Ein Ansprechpartner für alle handwerklichen Belange.",
+    icon: CheckCircle,
+    title: "Geprüfte Qualität",
+    description: "Qualifizierte Handwerker mit nachweisbarer Fachkompetenz.",
   },
   {
     icon: Users,
-    title: "Starkes Partnernetzwerk",
-    description: "Eigenes Team ergänzt durch geprüfte regionale Partner.",
+    title: "Regionale Partner",
+    description: "Eigenes Team ergänzt durch zertifizierte Partner vor Ort.",
   },
 ];
 

@@ -48,23 +48,23 @@ const services = [
 const reasons = [
   {
     icon: Sparkles,
-    title: "Glänzende Ergebnisse",
-    description: "Professionelle Reinigung mit sichtbarem Unterschied.",
-  },
-  {
-    icon: Clock,
-    title: "Flexible Zeiten",
-    description: "Reinigung nach Ihrem Zeitplan – auch nachts und am Wochenende.",
+    title: "Hygiene & Sauberkeit",
+    description: "Höchste Hygienestandards für ein gesundes Arbeitsumfeld.",
   },
   {
     icon: Shield,
-    title: "Geprüfte Qualität",
-    description: "Regelmäßige Qualitätskontrollen für konstante Standards.",
+    title: "Qualitätsgarantie",
+    description: "Regelmäßige Kontrollen sichern gleichbleibende Ergebnisse.",
+  },
+  {
+    icon: Clock,
+    title: "Flexible Einsatzzeiten",
+    description: "Reinigung nach Ihrem Zeitplan – auch nachts und am Wochenende.",
   },
   {
     icon: Users,
     title: "Geschultes Personal",
-    description: "Erfahrene Reinigungskräfte mit Fachkenntnissen.",
+    description: "Erfahrene Reinigungskräfte mit professioneller Ausbildung.",
   },
 ];
 
@@ -97,17 +97,20 @@ export default function ReinigungCategory() {
                   Gebäudeservice
                 </p>
                 <h1 className="mt-4 font-bold leading-[0.9] tracking-tight text-foreground">
-                  <span className="block text-[3rem] sm:text-[4rem] lg:text-[5rem] xl:text-[5.5rem]">
+                  <span className="block text-[2.5rem] sm:text-[3.5rem] lg:text-[4.5rem] xl:text-[5rem]">
                     Professionelle
                   </span>
-                  <span className="block text-[3rem] sm:text-[4rem] lg:text-[5rem] xl:text-[5.5rem]">
-                    Reinigung
+                  <span className="block text-[2.5rem] sm:text-[3.5rem] lg:text-[4.5rem] xl:text-[5rem]">
+                    Reinigung für
+                  </span>
+                  <span className="block text-[2.5rem] sm:text-[3.5rem] lg:text-[4.5rem] xl:text-[5rem]">
+                    Ihr Objekt
                   </span>
                 </h1>
 
                 <p className="mt-8 max-w-[420px] text-base leading-relaxed text-foreground/70 lg:text-lg">
-                  Professionelle Reinigungsdienstleistungen für hygienische und 
-                  repräsentative Räumlichkeiten. Sauberkeit, die man sieht und fühlt.
+                  Von der täglichen Unterhaltsreinigung bis zur Spezialreinigung – 
+                  wir sorgen für Hygiene und Sauberkeit in Ihren Räumlichkeiten.
                 </p>
 
                 <div className="mt-10">
