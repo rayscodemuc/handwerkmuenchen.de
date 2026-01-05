@@ -17,7 +17,7 @@ export function CTASection() {
             <AnimatedButton className="h-14 px-10 text-base bg-foreground text-background hover:bg-background hover:text-foreground">
               Jetzt starten
             </AnimatedButton>
-            <AnimatedButton className="h-14 px-10 text-base border-2 border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary">
+            <AnimatedButton className="h-14 px-10 text-base text-primary-foreground hover:bg-primary-foreground hover:text-primary">
               Kontakt aufnehmen
             </AnimatedButton>
           </div>
