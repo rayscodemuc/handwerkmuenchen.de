@@ -37,6 +37,16 @@ const secondaryNav = [
       { name: "Glas- & Fensterreinigung", href: "/reinigung/glas-fenster" },
     ],
   },
+  {
+    name: "Außenanlagen",
+    href: "/aussenanlagen",
+    subItems: [
+      { name: "Grünpflege", href: "/aussenanlagen/gruenpflege" },
+      { name: "Baumpflege", href: "/aussenanlagen/baumpflege" },
+      { name: "Grauflächenreinigung", href: "/aussenanlagen/grauflaechenreinigung" },
+      { name: "Winterdienst", href: "/aussenanlagen/winterdienst" },
+    ],
+  },
 ];
 
 export function Header() {
