@@ -7,14 +7,29 @@ const services = [
     href: "/reinigung/unterhaltsreinigung",
   },
   {
-    title: "Glas- & Fassadenpflege",
-    description: "Image durch strahlende Optik. Professionelle Reinigung von Glasflächen und Fassaden.",
-    href: "/reinigung/glas-fassade",
+    title: "Büroreinigung",
+    description: "Saubere Arbeitsplätze für produktive Mitarbeiter – täglich, wöchentlich oder nach Bedarf.",
+    href: "/reinigung/bueroreinigung",
+  },
+  {
+    title: "Fensterreinigung",
+    description: "Streifenfreier Durchblick für Ihr Gebäude. Professionelle Glasreinigung innen und außen.",
+    href: "/reinigung/fensterreinigung",
   },
   {
     title: "Sonderreinigung",
-    description: "Tiefenpflege nach Bedarf – von der Baureinigung bis zur Teppichpflege.",
+    description: "Tiefenpflege nach Bedarf – von der Grundreinigung bis zur Tiefgaragenreinigung.",
     href: "/reinigung/sonderreinigung",
+  },
+  {
+    title: "Tiefgaragenreinigung",
+    description: "Gründliche Reinigung für Tiefgaragen und Parkhäuser mit maschineller Bodenreinigung.",
+    href: "/reinigung/tiefgaragenreinigung",
+  },
+  {
+    title: "Grundreinigung",
+    description: "Intensive Tiefenreinigung für alle Oberflächen – die perfekte Basis für die Unterhaltsreinigung.",
+    href: "/reinigung/grundreinigung",
   },
 ];
 

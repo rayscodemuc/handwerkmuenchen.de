@@ -7,14 +7,19 @@ const services = [
     href: "/aussenanlagen/gruenpflege",
   },
   {
+    title: "Baumpflege",
+    description: "Verkehrssicherheit und Ästhetik durch professionelle Baumpflege von zertifizierten Experten.",
+    href: "/aussenanlagen/baumpflege",
+  },
+  {
     title: "Grauflächenreinigung",
     description: "Saubere Parkplätze und Wege für einen gepflegten Gesamteindruck Ihrer Immobilie.",
     href: "/aussenanlagen/grauflaechenreinigung",
   },
   {
-    title: "Baumpflege",
-    description: "Verkehrssicherheit und Ästhetik durch professionelle Baumpflege von zertifizierten Experten.",
-    href: "/aussenanlagen/baumpflege",
+    title: "Winterdienst",
+    description: "Sichere Wege und Flächen im Winter mit professioneller Schneeräumung und Streudienst.",
+    href: "/aussenanlagen/winterdienst",
   },
 ];
 
