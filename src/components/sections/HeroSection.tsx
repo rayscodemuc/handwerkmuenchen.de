@@ -1,4 +1,5 @@
 import { AnimatedButton } from "@/components/ui/animated-button";
+import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-facility.jpg";
 
 export function HeroSection() {
@@ -42,9 +43,11 @@ export function HeroSection() {
 
             {/* CTA Button */}
             <div className="mt-10">
-              <AnimatedButton className="bg-white text-foreground hover:bg-foreground hover:text-white">
-                Angebot anfragen
-              </AnimatedButton>
+              <Link to="/anfrage">
+                <AnimatedButton className="bg-white text-foreground hover:bg-foreground hover:text-white">
+                  Angebot anfragen
+                </AnimatedButton>
+              </Link>
             </div>
           </div>
         </div>
