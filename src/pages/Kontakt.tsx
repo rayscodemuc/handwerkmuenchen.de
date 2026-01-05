@@ -35,7 +35,7 @@ const contactInfo = [
 
 export default function Kontakt() {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="theme-contact flex min-h-screen flex-col">
       <Header />
       <main className="flex-1">
         {/* Hero Section */}
