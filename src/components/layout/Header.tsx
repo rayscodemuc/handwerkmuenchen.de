@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import logo from "@/assets/logo.png";
 
 const primaryNav = [
-  { name: "Privat", href: "#", active: true },
-  { name: "Gewerbe", href: "#" },
+  { name: "Startseite", href: "/", active: true },
+  { name: "Qualitätsmanagement", href: "#quality" },
   { name: "Über uns", href: "#about" },
   { name: "Kontakt", href: "#contact" },
 ];
@@ -66,17 +66,16 @@ export function Header() {
 
             {/* CTA Button */}
             <Button variant="hero-white" size="lg" className="rounded-full px-6">
-              Anfrage
+              Partner werden
             </Button>
 
-            {/* Sign In Dropdown */}
+            {/* Anfrage Button */}
             <Button 
               variant="ghost" 
               size="lg"
               className="rounded-full border border-foreground/30 text-foreground hover:bg-foreground/10 hover:text-foreground px-6"
             >
-              Anmelden
-              <ChevronDown className="h-4 w-4" />
+              Anfrage
             </Button>
           </div>
 
@@ -144,14 +143,13 @@ export function Header() {
             {/* Mobile CTAs */}
             <div className="flex flex-col gap-3 pt-4 border-t border-foreground/10">
               <Button variant="hero-white" className="w-full rounded-full">
-                Anfrage
+                Partner werden
               </Button>
               <Button 
                 variant="ghost" 
                 className="w-full rounded-full border border-foreground/30 text-foreground hover:bg-foreground/10 hover:text-foreground"
               >
-                Anmelden
-                <ChevronDown className="h-4 w-4" />
+                Anfrage
               </Button>
             </div>
           </div>
