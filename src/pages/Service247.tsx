@@ -78,18 +78,12 @@ const Service247 = () => {
                 Notfälle kennen keine Öffnungszeiten. Deshalb sind wir rund um die Uhr für Sie da – 
                 an 365 Tagen im Jahr, auch an Wochenenden und Feiertagen.
               </p>
-              <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+              <div className="mt-10">
                 <Link to="/anfrage">
                   <AnimatedButton className="bg-white text-foreground hover:bg-foreground hover:text-white">
                     Notfall melden
                   </AnimatedButton>
                 </Link>
-                <a href="tel:+4912345678900">
-                  <AnimatedButton className="inline-flex items-center gap-2 border-2 border-foreground bg-transparent text-foreground hover:bg-foreground hover:text-white whitespace-nowrap">
-                    <Phone className="h-4 w-4 flex-shrink-0" />
-                    <span>Sofort anrufen</span>
-                  </AnimatedButton>
-                </a>
               </div>
             </div>
           </div>
