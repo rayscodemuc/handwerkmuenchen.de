@@ -2,22 +2,22 @@ import { AnimatedButton } from "@/components/ui/animated-button";
 
 export function CTASection() {
   return (
-    <section id="contact" className="bg-surface py-28 lg:py-36">
+    <section id="contact" className="bg-primary py-28 lg:py-36">
       <div className="container mx-auto px-4 lg:px-8">
         <div className="mx-auto max-w-3xl text-center">
-          <h2 className="text-4xl font-black tracking-tight text-foreground lg:text-5xl">
+          <h2 className="text-4xl font-black tracking-tight text-primary-foreground lg:text-5xl">
             Bereit durchzustarten?
           </h2>
-          <p className="mt-6 text-lg text-muted-foreground">
+          <p className="mt-6 text-lg text-primary-foreground/80">
             Lassen Sie uns gemeinsam die optimale Lösung für Ihr Objekt finden.
           </p>
 
           {/* CTA Buttons */}
           <div className="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <AnimatedButton className="h-14 px-10 text-base bg-primary text-primary-foreground hover:bg-foreground hover:text-background">
+            <AnimatedButton className="h-14 px-10 text-base bg-foreground text-background hover:bg-background hover:text-foreground">
               Jetzt starten
             </AnimatedButton>
-            <AnimatedButton className="h-14 px-10 text-base">
+            <AnimatedButton className="h-14 px-10 text-base border-2 border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary">
               Kontakt aufnehmen
             </AnimatedButton>
           </div>
