@@ -1,24 +1,24 @@
 import { Phone, Mail, MapPin } from "lucide-react";
+import { Link } from "react-router-dom";
 import logo from "@/assets/logo.png";
 
 const footerLinks = {
   leistungen: [
-    { name: "Elektrotechnik", href: "#" },
-    { name: "Sanitär & Heizung", href: "#" },
-    { name: "Unterhaltsreinigung", href: "#" },
-    { name: "Winterdienst", href: "#" },
-    { name: "Grünpflege", href: "#" },
+    { name: "Elektrotechnik", href: "/handwerk/elektrotechnik" },
+    { name: "Sanitär & Heizung", href: "/handwerk/sanitaer-heizung" },
+    { name: "Unterhaltsreinigung", href: "/reinigung/unterhaltsreinigung" },
+    { name: "Winterdienst", href: "/facility-management/winterdienst" },
+    { name: "Grünpflege", href: "/aussenanlagen/gruenpflege" },
   ],
   unternehmen: [
-    { name: "Über uns", href: "#" },
-    { name: "Karriere", href: "#" },
-    { name: "Referenzen", href: "#" },
-    { name: "Kontakt", href: "#" },
+    { name: "Über uns", href: "/ueber-uns" },
+    { name: "Partner werden", href: "/partner-werden" },
+    { name: "Kontakt", href: "/kontakt" },
+    { name: "Anfrage", href: "/anfrage" },
   ],
   rechtliches: [
-    { name: "Datenschutz", href: "#" },
-    { name: "Impressum", href: "#" },
-    { name: "AGB", href: "#" },
+    { name: "Datenschutz", href: "/datenschutz" },
+    { name: "Impressum", href: "/impressum" },
   ],
 };
 
@@ -29,9 +29,9 @@ export function Footer() {
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-5 lg:gap-8">
           {/* Logo & Contact Info */}
           <div className="lg:col-span-2">
-            <a href="/" className="inline-block">
+            <Link to="/" className="inline-block">
               <img src={logo} alt="Mr.Clean Services" className="h-12 w-auto" />
-            </a>
+            </Link>
             <p className="mt-6 max-w-sm text-muted-foreground leading-relaxed">
               Ihr Partner für professionelles Facility Management und Gebäudereinigung in der Region.
             </p>
@@ -59,12 +59,12 @@ export function Footer() {
             <ul className="mt-6 space-y-4">
               {footerLinks.leistungen.map((link) => (
                 <li key={link.name}>
-                  <a
-                    href={link.href}
+                  <Link
+                    to={link.href}
                     className="text-muted-foreground transition-colors hover:text-foreground"
                   >
                     {link.name}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -78,12 +78,12 @@ export function Footer() {
             <ul className="mt-6 space-y-4">
               {footerLinks.unternehmen.map((link) => (
                 <li key={link.name}>
-                  <a
-                    href={link.href}
+                  <Link
+                    to={link.href}
                     className="text-muted-foreground transition-colors hover:text-foreground"
                   >
                     {link.name}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -97,12 +97,12 @@ export function Footer() {
             <ul className="mt-6 space-y-4">
               {footerLinks.rechtliches.map((link) => (
                 <li key={link.name}>
-                  <a
-                    href={link.href}
+                  <Link
+                    to={link.href}
                     className="text-muted-foreground transition-colors hover:text-foreground"
                   >
                     {link.name}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
