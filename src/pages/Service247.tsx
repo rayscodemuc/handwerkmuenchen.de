@@ -92,7 +92,7 @@ const Service247 = () => {
               <div className="mt-10">
                 <AnimatedButton 
                   onClick={() => setIsEmergencyDialogOpen(true)}
-                  className="bg-white text-foreground hover:bg-foreground hover:text-white"
+                  className="bg-red-600 text-white hover:bg-red-700"
                 >
                   Notfall melden
                 </AnimatedButton>
