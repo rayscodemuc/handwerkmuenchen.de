@@ -5,7 +5,6 @@ import logo from "@/assets/logo.png";
 
 const primaryNav = [
   { name: "Startseite", href: "/", active: true },
-  { name: "Qualitätsmanagement", href: "#quality" },
   { name: "Über uns", href: "#about" },
   { name: "Kontakt", href: "#contact" },
 ];
