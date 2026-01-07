@@ -45,6 +45,11 @@ import Baumpflege from "./pages/services/Baumpflege";
 import Grauflaechenreinigung from "./pages/services/Grauflaechenreinigung";
 import WinterdienstAussen from "./pages/services/WinterdienstAussen";
 
+// Standort Pages
+import Muenchen from "./pages/standorte/Muenchen";
+import Berlin from "./pages/standorte/Berlin";
+import Hamburg from "./pages/standorte/Hamburg";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -93,6 +98,11 @@ const App = () => (
           <Route path="/aussenanlagen/baumpflege" element={<Baumpflege />} />
           <Route path="/aussenanlagen/grauflaechenreinigung" element={<Grauflaechenreinigung />} />
           <Route path="/aussenanlagen/winterdienst" element={<WinterdienstAussen />} />
+          
+          {/* Standorte */}
+          <Route path="/standorte/muenchen" element={<Muenchen />} />
+          <Route path="/standorte/berlin" element={<Berlin />} />
+          <Route path="/standorte/hamburg" element={<Hamburg />} />
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
