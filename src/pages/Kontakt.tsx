@@ -1,6 +1,7 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ContactForm } from "@/components/ContactForm";
+import { GermanyMap } from "@/components/GermanyMap";
 import { Phone, Mail, MapPin, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -108,11 +109,9 @@ export default function Kontakt() {
                   ))}
                 </div>
 
-                {/* Map Placeholder */}
-                <div className="mt-8 aspect-video overflow-hidden rounded-3xl bg-muted">
-                  <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-                    Karte
-                  </div>
+                {/* Germany Map */}
+                <div className="mt-8 overflow-hidden rounded-3xl border border-border bg-primary/5 p-4">
+                  <GermanyMap className="w-full h-[300px]" />
                 </div>
               </div>
             </div>
