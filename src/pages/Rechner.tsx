@@ -110,6 +110,28 @@ export default function Rechner() {
     setState((prev) => ({ ...prev, ...updates }));
   };
 
+  const updateStateAndAdvance = (updates: Partial<CalculatorState>, shouldAdvance = false) => {
+    setState((prev) => ({ ...prev, ...updates }));
+    if (shouldAdvance) {
+      setTimeout(() => setStep((s) => s + 1), 300);
+    }
+  };
+
+  // Auto-advance für Step 1: Service auswählen
+  const selectService = (service: ServiceType) => {
+    updateStateAndAdvance({ service, auftragsart: null, reinigungType: null, objektType: null }, true);
+  };
+
+  // Auto-advance für Step 2: Auftragsart (bei Reinigung/Tiefgarage)
+  const selectAuftragsart = (auftragsart: AuftragsartType) => {
+    updateStateAndAdvance({ auftragsart }, true);
+  };
+
+  // Auto-advance für Hausmeister Objektart
+  const selectObjektart = (objektType: ObjektType) => {
+    updateStateAndAdvance({ objektType }, true);
+  };
+
   const calculatePrice = (): { price: number; isMonthly: boolean } => {
     let price = 0;
     const isMonthly = state.auftragsart === "regelmässig";
@@ -314,7 +336,7 @@ export default function Rechner() {
                             {serviceOptions.map((option) => (
                               <button
                                 key={option.id}
-                                onClick={() => updateState({ service: option.id as ServiceType })}
+                                onClick={() => selectService(option.id as ServiceType)}
                                 className={cn(
                                   "p-6 rounded-xl border-2 text-left transition-all hover:border-primary/50",
                                   state.service === option.id
@@ -370,7 +392,7 @@ export default function Rechner() {
                                   <Label className="text-base mb-3 block">Art des Auftrags</Label>
                                   <div className="grid sm:grid-cols-2 gap-4">
                                     <button
-                                      onClick={() => updateState({ auftragsart: "einmalig" })}
+                                      onClick={() => selectAuftragsart("einmalig")}
                                       className={cn(
                                         "p-5 rounded-xl border-2 text-left transition-all hover:border-primary/50 flex items-start gap-4",
                                         state.auftragsart === "einmalig"
@@ -385,7 +407,7 @@ export default function Rechner() {
                                       </div>
                                     </button>
                                     <button
-                                      onClick={() => updateState({ auftragsart: "regelmässig" })}
+                                      onClick={() => selectAuftragsart("regelmässig")}
                                       className={cn(
                                         "p-5 rounded-xl border-2 text-left transition-all hover:border-primary/50 flex items-start gap-4",
                                         state.auftragsart === "regelmässig"
@@ -429,7 +451,7 @@ export default function Rechner() {
                                 <Label className="text-base mb-3 block">Art des Auftrags</Label>
                                 <div className="grid sm:grid-cols-2 gap-4">
                                   <button
-                                    onClick={() => updateState({ auftragsart: "einmalig" })}
+                                    onClick={() => selectAuftragsart("einmalig")}
                                     className={cn(
                                       "p-5 rounded-xl border-2 text-left transition-all hover:border-primary/50 flex items-start gap-4",
                                       state.auftragsart === "einmalig"
@@ -444,7 +466,7 @@ export default function Rechner() {
                                     </div>
                                   </button>
                                   <button
-                                    onClick={() => updateState({ auftragsart: "regelmässig" })}
+                                    onClick={() => selectAuftragsart("regelmässig")}
                                     className={cn(
                                       "p-5 rounded-xl border-2 text-left transition-all hover:border-primary/50 flex items-start gap-4",
                                       state.auftragsart === "regelmässig"
@@ -472,7 +494,7 @@ export default function Rechner() {
                               ].map((type) => (
                                 <button
                                   key={type.id}
-                                  onClick={() => updateState({ objektType: type.id as ObjektType })}
+                                  onClick={() => selectObjektart(type.id as ObjektType)}
                                   className={cn(
                                     "p-5 rounded-xl border-2 text-left transition-all hover:border-primary/50",
                                     state.objektType === type.id
