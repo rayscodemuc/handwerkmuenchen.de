@@ -54,6 +54,7 @@ import Augsburg from "./pages/standorte/Augsburg";
 import Ingolstadt from "./pages/standorte/Ingolstadt";
 import Nuernberg from "./pages/standorte/Nuernberg";
 import Frankfurt from "./pages/standorte/Frankfurt";
+import Rechner from "./pages/Rechner";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +74,7 @@ const App = () => (
           <Route path="/24-7-service" element={<Service247 />} />
           <Route path="/datenschutz" element={<Datenschutz />} />
           <Route path="/impressum" element={<Impressum />} />
+          <Route path="/rechner" element={<Rechner />} />
           
           {/* Category Overview Pages */}
           <Route path="/handwerk" element={<HandwerkCategory />} />

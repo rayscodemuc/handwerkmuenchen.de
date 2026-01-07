@@ -5,6 +5,7 @@ import { ServicesSection } from "@/components/sections/ServicesSection";
 import { WhyUsSection } from "@/components/sections/WhyUsSection";
 import { CTASection } from "@/components/sections/CTASection";
 import { SEOHead } from "@/components/SEOHead";
+import { StickyCTA, MobileStickyCTA } from "@/components/StickyCTA";
 
 const Index = () => {
   return (
@@ -21,6 +22,8 @@ const Index = () => {
         <CTASection />
       </main>
       <Footer />
+      <StickyCTA />
+      <MobileStickyCTA />
     </div>
   );
 };
