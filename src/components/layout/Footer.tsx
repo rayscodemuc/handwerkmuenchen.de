@@ -4,11 +4,10 @@ import logo from "@/assets/logo.png";
 
 const footerLinks = {
   leistungen: [
-    { name: "Elektrotechnik", href: "/handwerk/elektrotechnik" },
-    { name: "Sanitär & Heizung", href: "/handwerk/sanitaer-heizung" },
-    { name: "Unterhaltsreinigung", href: "/reinigung/unterhaltsreinigung" },
-    { name: "Winterdienst", href: "/facility-management/winterdienst" },
-    { name: "Grünpflege", href: "/aussenanlagen/gruenpflege" },
+    { name: "Handwerk", href: "/handwerk" },
+    { name: "Facility Management", href: "/facility-management" },
+    { name: "Reinigung", href: "/reinigung" },
+    { name: "Außenanlagen", href: "/aussenanlagen" },
   ],
   unternehmen: [
     { name: "Über uns", href: "/ueber-uns" },
