@@ -10,19 +10,19 @@ const services = [
   {
     icon: Zap,
     title: "Elektrotechnik",
-    description: "Installation, Wartung und Reparatur elektrischer Anlagen nach höchsten Sicherheitsstandards.",
+    description: "Installationen, Prüfungen und Reparaturen elektrischer Anlagen.",
     link: "/handwerk/elektrotechnik",
   },
   {
     icon: Droplets,
     title: "Sanitär & Heizung",
-    description: "Komplettservice für Ihre Sanitär- und Heizungsanlagen – von der Wartung bis zur Reparatur.",
+    description: "Wartung und Reparatur von Sanitär- und Heizungsanlagen.",
     link: "/handwerk/sanitaer-heizung",
   },
   {
     icon: Settings,
     title: "Service & Wartung",
-    description: "Regelmäßige Wartung und schneller Service für alle technischen Anlagen.",
+    description: "Regelmäßige Wartung für alle technischen Anlagen.",
     link: "/handwerk/service-wartung",
   },
 ];

@@ -4,31 +4,31 @@ import { CTASection } from "@/components/sections/CTASection";
 import { SEOHead } from "@/components/SEOHead";
 import { AnimatedButton } from "@/components/ui/animated-button";
 import { Link } from "react-router-dom";
-import { Trees, Leaf, TreeDeciduous, Snowflake, Clock, Shield, Users } from "lucide-react";
+import { Trees, Leaf, TreeDeciduous, Snowflake, Brush, Clock, Shield, Users } from "lucide-react";
 
 const services = [
   {
     icon: Leaf,
     title: "Grünpflege",
-    description: "Professionelle Pflege von Rasenflächen, Beeten und Hecken.",
+    description: "Fachgerechte Pflege von Rasen, Beeten und Hecken.",
     link: "/aussenanlagen/gruenpflege",
+  },
+  {
+    icon: Brush,
+    title: "Grauflächenreinigung",
+    description: "Reinigung von Wegen und befestigten Flächen.",
+    link: "/aussenanlagen/grauflaechenreinigung",
   },
   {
     icon: TreeDeciduous,
     title: "Baumpflege",
-    description: "Fachgerechter Baumschnitt und Baumpflege nach Vorschrift.",
+    description: "Fachgerechter Baumschnitt nach Vorschrift.",
     link: "/aussenanlagen/baumpflege",
-  },
-  {
-    icon: Trees,
-    title: "Grauflächenreinigung",
-    description: "Reinigung von Wegen, Plätzen und befestigten Flächen.",
-    link: "/aussenanlagen/grauflaechenreinigung",
   },
   {
     icon: Snowflake,
     title: "Winterdienst",
-    description: "Zuverlässiger Räum- und Streudienst für sichere Wege.",
+    description: "Zuverlässiger Räum- und Streudienst.",
     link: "/aussenanlagen/winterdienst",
   },
 ];
