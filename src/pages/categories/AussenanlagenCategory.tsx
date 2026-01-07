@@ -10,21 +10,21 @@ import { Trees, Leaf, TreeDeciduous, Snowflake, Brush, Clock, Shield, Users } fr
 const services = [
   {
     icon: Leaf,
-    title: "Grünpflege",
+    title: "Garten- und Grünpflege",
     description: "Fachgerechte Pflege von Rasen, Beeten und Hecken.",
     link: "/aussenanlagen/gruenpflege",
   },
   {
-    icon: Brush,
-    title: "Grauflächenreinigung",
-    description: "Reinigung von Wegen und befestigten Flächen.",
-    link: "/aussenanlagen/grauflaechenreinigung",
-  },
-  {
     icon: TreeDeciduous,
-    title: "Baumpflege",
+    title: "Baumpflege & Rückschnitt",
     description: "Fachgerechter Baumschnitt nach Vorschrift.",
     link: "/aussenanlagen/baumpflege",
+  },
+  {
+    icon: Brush,
+    title: "Grauflächenreinigung & Gehwegpflege",
+    description: "Reinigung von Wegen und befestigten Flächen.",
+    link: "/aussenanlagen/grauflaechenreinigung",
   },
   {
     icon: Snowflake,
@@ -110,11 +110,8 @@ export default function AussenanlagenCategory() {
         <section className="bg-background py-24 lg:py-32">
           <div className="container mx-auto px-4 lg:px-8">
             <div className="text-center">
-              <p className="text-sm font-semibold uppercase tracking-wider text-primary">
-                Unsere Leistungen
-              </p>
-              <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground lg:text-4xl">
-                Außenanlagen-Services
+              <h2 className="text-3xl font-bold tracking-tight text-foreground lg:text-4xl">
+                Pflege und Instandhaltung Ihrer Außenflächen
               </h2>
               <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
                 Grünpflege, Baumpflege und Winterdienst aus einer Hand.

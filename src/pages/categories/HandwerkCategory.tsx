@@ -10,20 +10,20 @@ import { Wrench, Zap, Droplets, Settings, CheckCircle, Clock, Users } from "luci
 const services = [
   {
     icon: Zap,
-    title: "Elektrotechnik",
+    title: "Elektrotechnik für Gewerbe & Privat",
     description: "Installationen, Prüfungen und Reparaturen elektrischer Anlagen.",
     link: "/handwerk/elektrotechnik",
   },
   {
     icon: Droplets,
-    title: "Sanitär & Heizung",
+    title: "Sanitär- und Heizungslösungen",
     description: "Wartung und Reparatur von Sanitär- und Heizungsanlagen.",
     link: "/handwerk/sanitaer-heizung",
   },
   {
     icon: Settings,
-    title: "Service & Wartung",
-    description: "Regelmäßige Wartung für alle technischen Anlagen.",
+    title: "Regelmäßige Wartung & Instandsetzung",
+    description: "Planmäßige Wartung für alle technischen Anlagen.",
     link: "/handwerk/service-wartung",
   },
 ];
@@ -104,14 +104,11 @@ export default function HandwerkCategory() {
         <section className="bg-background py-24 lg:py-32">
           <div className="container mx-auto px-4 lg:px-8">
             <div className="text-center">
-              <p className="text-sm font-semibold uppercase tracking-wider text-primary">
-                Unsere Leistungen
-              </p>
-              <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground lg:text-4xl">
-                Handwerkliche Kompetenz
+              <h2 className="text-3xl font-bold tracking-tight text-foreground lg:text-4xl">
+                Unsere Leistungen im Bereich Handwerk & Technik
               </h2>
               <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-                Elektro, Sanitär und Heizung – alles aus einer Hand.
+                Elektro, Sanitär und Heizung – koordiniert aus einer Hand.
               </p>
             </div>
 
