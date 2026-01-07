@@ -1,15 +1,21 @@
 import { Link } from "react-router-dom";
-import { ChevronRight, Wrench, Building2, Sparkles, TreePine, ArrowRight } from "lucide-react";
+import { ChevronRight, Wrench, Building2, Sparkles, TreePine, ArrowRight, MapPin, Send } from "lucide-react";
+import { useState } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { SEOHead } from "@/components/SEOHead";
 import { AnimatedButton } from "@/components/ui/animated-button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
 import heroImage from "@/assets/hero-facility.jpg";
 
 interface LocationPageLayoutProps {
   city: string;
   seoTitle: string;
   seoDescription: string;
+  districts?: string[];
+  localHighlight?: string;
 }
 
 const services = [
@@ -39,7 +45,26 @@ const services = [
   },
 ];
 
-export default function LocationPageLayout({ city, seoTitle, seoDescription }: LocationPageLayoutProps) {
+export default function LocationPageLayout({ 
+  city, 
+  seoTitle, 
+  seoDescription,
+  districts = [],
+  localHighlight
+}: LocationPageLayoutProps) {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    message: "",
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    toast.success(`Ihre Anfrage aus ${city} wurde gesendet!`);
+    setFormData({ name: "", email: "", phone: "", message: "" });
+  };
+
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
@@ -64,7 +89,6 @@ export default function LocationPageLayout({ city, seoTitle, seoDescription }: L
       <main className="flex-1">
         {/* Hero Section */}
         <section className="relative flex min-h-[540px] items-center overflow-hidden bg-background lg:min-h-[650px]">
-          {/* Background Image */}
           <div className="absolute inset-0">
             <img
               src={heroImage}
@@ -75,7 +99,6 @@ export default function LocationPageLayout({ city, seoTitle, seoDescription }: L
           </div>
 
           <div className="container relative z-10 mx-auto px-4 py-20 lg:px-8 lg:py-28">
-            {/* Breadcrumbs */}
             <nav className="mb-8 flex items-center gap-2 text-sm text-muted-foreground">
               <Link to="/" className="transition-colors hover:text-primary">
                 Startseite
@@ -89,23 +112,69 @@ export default function LocationPageLayout({ city, seoTitle, seoDescription }: L
                 Standort {city}
               </p>
               <h1 className="mt-4 text-4xl font-black tracking-tight text-foreground lg:text-5xl xl:text-6xl">
-                Mr. Clean Services – Ihr Partner in {city}
+                Ihr Partner für FM, Handwerk & Reinigung in {city}
               </h1>
               <p className="mt-6 text-lg text-muted-foreground lg:text-xl">
                 Professionelles Facility Management, Handwerk, Reinigung und Außenanlagenpflege für Gewerbe- und Wohnimmobilien in {city} und Umgebung.
               </p>
 
               <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-              <Link to={`/anfrage?standort=${city.toLowerCase()}`}>
-                <AnimatedButton className="h-14 px-10 text-base">
-                  Anfrage für {city} stellen
-                </AnimatedButton>
-              </Link>
-              <Link to="/kontakt">
-                <AnimatedButton className="h-14 px-10 text-base border-foreground/30 hover:border-foreground">
-                  Kontakt aufnehmen
-                </AnimatedButton>
-              </Link>
+                <a href="#kontakt-formular">
+                  <AnimatedButton className="h-14 px-10 text-base">
+                    Anfrage für {city} stellen
+                  </AnimatedButton>
+                </a>
+                <Link to="/kontakt">
+                  <AnimatedButton className="h-14 px-10 text-base border-foreground/30 hover:border-foreground">
+                    Kontakt aufnehmen
+                  </AnimatedButton>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Local Section */}
+        <section className="bg-muted/50 py-20 lg:py-28">
+          <div className="container mx-auto px-4 lg:px-8">
+            <div className="mx-auto max-w-4xl">
+              <div className="flex items-center justify-center gap-3 mb-6">
+                <MapPin className="h-8 w-8 text-primary" />
+                <h2 className="text-3xl font-bold tracking-tight text-foreground lg:text-4xl">
+                  Lokale Präsenz in {city}
+                </h2>
+              </div>
+              
+              <p className="text-center text-lg text-muted-foreground leading-relaxed mb-8">
+                {localHighlight || `Von ${districts[0] || "der Innenstadt"} bis ${districts[1] || "den Außenbezirken"} – wir sind schnell vor Ort. Unser Team betreut Objekte im gesamten Stadtgebiet von ${city} und Umgebung.`}
+              </p>
+
+              {districts.length > 0 && (
+                <div className="flex flex-wrap justify-center gap-3 mt-8">
+                  {districts.map((district) => (
+                    <div 
+                      key={district}
+                      className="rounded-full bg-primary/10 px-5 py-2.5 text-sm font-medium text-primary"
+                    >
+                      {district}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="mt-12 grid gap-4 sm:grid-cols-3">
+                <div className="rounded-2xl border border-border bg-card p-6 text-center">
+                  <div className="text-3xl font-black text-primary">24/7</div>
+                  <div className="mt-2 text-sm text-muted-foreground">Notdienst verfügbar</div>
+                </div>
+                <div className="rounded-2xl border border-border bg-card p-6 text-center">
+                  <div className="text-3xl font-black text-primary">&lt; 2h</div>
+                  <div className="mt-2 text-sm text-muted-foreground">Reaktionszeit in {city}</div>
+                </div>
+                <div className="rounded-2xl border border-border bg-card p-6 text-center">
+                  <div className="text-3xl font-black text-primary">100%</div>
+                  <div className="mt-2 text-sm text-muted-foreground">Regionale Kompetenz</div>
+                </div>
               </div>
             </div>
           </div>
@@ -119,10 +188,10 @@ export default function LocationPageLayout({ city, seoTitle, seoDescription }: L
                 Unsere Leistungen
               </p>
               <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground lg:text-4xl">
-                Full-Service für Ihre Immobilien in {city}
+                Unser Service-Angebot in {city}
               </h2>
               <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-                Von der Gebäudetechnik bis zur Außenanlagenpflege – alle Gewerke aus einer Hand.
+                Unser Service-Angebot für gewerbliche und private Kunden in {city} – alle Gewerke aus einer Hand.
               </p>
             </div>
 
@@ -152,54 +221,76 @@ export default function LocationPageLayout({ city, seoTitle, seoDescription }: L
           </div>
         </section>
 
-        {/* Local Trust Section */}
-        <section className="bg-muted/50 py-20 lg:py-28">
+        {/* Contact Form Section */}
+        <section id="kontakt-formular" className="bg-primary py-20 lg:py-28">
           <div className="container mx-auto px-4 lg:px-8">
-            <div className="mx-auto max-w-3xl text-center">
-              <h2 className="text-3xl font-bold tracking-tight text-foreground lg:text-4xl">
-                Lokale Präsenz, überregionale Kompetenz
-              </h2>
-              <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
-                Wir betreuen Objekte im gesamten Stadtgebiet von {city} und Umgebung mit eigenem Personal und regionalen Partnern. Durch unser Netzwerk aus qualifizierten Fachkräften garantieren wir kurze Reaktionszeiten und höchste Servicequalität.
-              </p>
-              <div className="mt-8 flex flex-wrap justify-center gap-4">
-                <div className="rounded-full bg-primary/10 px-6 py-3 text-sm font-medium text-primary">
-                  Eigenes Personal vor Ort
-                </div>
-                <div className="rounded-full bg-primary/10 px-6 py-3 text-sm font-medium text-primary">
-                  Geprüfte regionale Partner
-                </div>
-                <div className="rounded-full bg-primary/10 px-6 py-3 text-sm font-medium text-primary">
-                  Kurze Reaktionszeiten
-                </div>
+            <div className="mx-auto max-w-2xl">
+              <div className="text-center mb-12">
+                <h2 className="text-3xl font-black tracking-tight text-primary-foreground lg:text-4xl">
+                  Jetzt Anfrage für {city} stellen
+                </h2>
+                <p className="mt-4 text-primary-foreground/80">
+                  Lassen Sie uns gemeinsam die optimale Lösung für Ihr Objekt finden.
+                </p>
               </div>
-            </div>
-          </div>
-        </section>
 
-        {/* CTA Section */}
-        <section className="bg-primary py-28 lg:py-36">
-          <div className="container mx-auto px-4 lg:px-8">
-            <div className="mx-auto max-w-3xl text-center">
-              <h2 className="text-4xl font-black tracking-tight text-primary-foreground lg:text-5xl">
-                Jetzt Anfrage für {city} stellen
-              </h2>
-              <p className="mt-6 text-lg text-primary-foreground/80">
-                Lassen Sie uns gemeinsam die optimale Lösung für Ihr Objekt in {city} finden.
-              </p>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <input type="hidden" name="betreff" value={`Anfrage aus ${city}`} />
+                
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <div>
+                    <label className="text-sm font-medium text-primary-foreground">Name *</label>
+                    <Input
+                      required
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="mt-2 bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/50"
+                      placeholder="Ihr Name"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-primary-foreground">E-Mail *</label>
+                    <Input
+                      required
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className="mt-2 bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/50"
+                      placeholder="ihre@email.de"
+                    />
+                  </div>
+                </div>
 
-              <div className="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Link to={`/anfrage?standort=${city.toLowerCase()}`}>
-                <AnimatedButton className="h-14 px-10 text-base bg-foreground text-background hover:bg-background hover:text-foreground">
-                  Kostenlos anfragen
+                <div>
+                  <label className="text-sm font-medium text-primary-foreground">Telefon</label>
+                  <Input
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    className="mt-2 bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/50"
+                    placeholder="Ihre Telefonnummer"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-primary-foreground">Ihre Nachricht *</label>
+                  <Textarea
+                    required
+                    value={formData.message}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    className="mt-2 min-h-[120px] bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/50"
+                    placeholder={`Beschreiben Sie Ihr Anliegen in ${city}...`}
+                  />
+                </div>
+
+                <AnimatedButton 
+                  type="submit"
+                  className="w-full h-14 text-base bg-foreground text-background hover:bg-background hover:text-foreground"
+                >
+                  <Send className="mr-2 h-5 w-5" />
+                  Anfrage aus {city} absenden
                 </AnimatedButton>
-              </Link>
-              <Link to="/kontakt">
-                <AnimatedButton className="h-14 px-10 text-base text-primary-foreground hover:bg-primary-foreground hover:text-primary">
-                  Kontakt aufnehmen
-                </AnimatedButton>
-              </Link>
-              </div>
+              </form>
             </div>
           </div>
         </section>
