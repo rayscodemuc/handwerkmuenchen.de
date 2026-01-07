@@ -83,8 +83,8 @@ export function ContactForm({
   }
 
   const inputClasses = isDark
-    ? "bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/50"
-    : "";
+    ? "bg-white border-primary-foreground/20 text-foreground placeholder:text-muted-foreground"
+    : "bg-white";
 
   const labelClasses = isDark ? "text-primary-foreground" : "";
 
