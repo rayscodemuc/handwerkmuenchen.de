@@ -37,6 +37,7 @@ const secondaryNav = [
       { name: "Unterhaltsreinigung", href: "/reinigung/unterhaltsreinigung" },
       { name: "Büroreinigung", href: "/reinigung/bueroreinigung" },
       { name: "Fensterreinigung", href: "/reinigung/fensterreinigung" },
+      { name: "Glas- & Fassadenpflege", href: "/reinigung/glas-fassade" },
       { 
         name: "Sonderreinigung", 
         href: "/reinigung/sonderreinigung",

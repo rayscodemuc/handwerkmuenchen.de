@@ -38,6 +38,7 @@ import Fensterreinigung from "./pages/services/Fensterreinigung";
 import Sonderreinigung from "./pages/services/Sonderreinigung";
 import Tiefgaragenreinigung from "./pages/services/Tiefgaragenreinigung";
 import Grundreinigung from "./pages/services/Grundreinigung";
+import GlasFassade from "./pages/services/GlasFassade";
 
 // Außenanlagen Service Pages
 import Gruenpflege from "./pages/services/Gruenpflege";
@@ -96,6 +97,7 @@ const App = () => (
           <Route path="/reinigung/sonderreinigung" element={<Sonderreinigung />} />
           <Route path="/reinigung/tiefgaragenreinigung" element={<Tiefgaragenreinigung />} />
           <Route path="/reinigung/grundreinigung" element={<Grundreinigung />} />
+          <Route path="/reinigung/glas-fassade" element={<GlasFassade />} />
           
           {/* Außenanlagen */}
           <Route path="/aussenanlagen/gruenpflege" element={<Gruenpflege />} />
