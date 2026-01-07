@@ -1,5 +1,6 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { Link } from "react-router-dom";
 
 export default function Datenschutz() {
   return (
@@ -19,84 +20,138 @@ export default function Datenschutz() {
         <section className="bg-background py-16 lg:py-20">
           <div className="container mx-auto px-4 lg:px-8">
             <div className="prose prose-lg max-w-4xl text-foreground">
-              <p className="text-muted-foreground mb-8">
-                Stand: Januar 2025
+
+              <h2 className="text-2xl font-bold mt-10 mb-4">1. Allgemeine Hinweise</h2>
+              <p className="text-muted-foreground mb-6">
+                Der Schutz Ihrer personenbezogenen Daten ist uns ein wichtiges Anliegen. Wir behandeln 
+                Ihre personenbezogenen Daten vertraulich und entsprechend den gesetzlichen Datenschutzvorschriften 
+                sowie dieser Datenschutzerklärung.
+              </p>
+              <p className="text-muted-foreground mb-6">
+                Diese Datenschutzerklärung erläutert, welche Daten wir erheben, wie wir sie verwenden 
+                und welche Rechte Ihnen zustehen.
               </p>
 
-              <h2 className="text-2xl font-bold mt-10 mb-4">1. Verantwortlicher</h2>
-              <p className="text-muted-foreground mb-6">
-                Verantwortlicher für die Datenverarbeitung auf dieser Website ist:
+              <h2 className="text-2xl font-bold mt-10 mb-4">2. Verantwortliche Stelle</h2>
+              <p className="text-muted-foreground mb-4">
+                Verantwortlich für die Datenverarbeitung auf dieser Website ist:
               </p>
               <p className="text-foreground mb-6">
                 Mr. Clean Services GmbH<br />
-                Agnes-Bernauer-Str. 11<br />
-                80687 München<br />
+                Landsbergerstraße<br />
+                81241 München<br />
+                Deutschland
+              </p>
+              <p className="text-foreground mb-6">
+                Telefon: +49 (0)89 25006354<br />
                 E-Mail: kontakt@mr-clean-services.de<br />
-                Telefon: +49 (0)89 25006354
+                Website: www.mr-clean-services.de
               </p>
 
-              <h2 className="text-2xl font-bold mt-10 mb-4">2. Erhebung und Speicherung personenbezogener Daten</h2>
-              <p className="text-muted-foreground mb-6">
-                Beim Besuch unserer Website werden automatisch Informationen allgemeiner Natur erfasst. 
-                Diese Informationen (Server-Logfiles) beinhalten etwa die Art des Webbrowsers, das verwendete 
-                Betriebssystem, den Domainnamen Ihres Internet-Service-Providers und ähnliches. Hierbei handelt 
-                es sich ausschließlich um Informationen, welche keine Rückschlüsse auf Ihre Person zulassen.
-              </p>
-
-              <h2 className="text-2xl font-bold mt-10 mb-4">3. Kontaktformular</h2>
-              <p className="text-muted-foreground mb-6">
-                Wenn Sie uns per Kontaktformular Anfragen zukommen lassen, werden Ihre Angaben aus dem 
-                Anfrageformular inklusive der von Ihnen dort angegebenen Kontaktdaten zwecks Bearbeitung 
-                der Anfrage und für den Fall von Anschlussfragen bei uns gespeichert. Diese Daten geben 
-                wir nicht ohne Ihre Einwilligung weiter.
-              </p>
-              <p className="text-muted-foreground mb-6">
-                Die Verarbeitung der in das Kontaktformular eingegebenen Daten erfolgt somit ausschließlich 
-                auf Grundlage Ihrer Einwilligung (Art. 6 Abs. 1 lit. a DSGVO). Sie können diese Einwilligung 
-                jederzeit widerrufen.
-              </p>
-
-              <h2 className="text-2xl font-bold mt-10 mb-4">4. Ihre Rechte</h2>
+              <h2 className="text-2xl font-bold mt-10 mb-4">3. Erhebung und Speicherung personenbezogener Daten beim Besuch der Website</h2>
               <p className="text-muted-foreground mb-4">
-                Sie haben gegenüber uns folgende Rechte hinsichtlich der Sie betreffenden personenbezogenen Daten:
+                Beim Aufrufen unserer Website werden durch den Hosting-Provider automatisch Informationen 
+                in sogenannten Server-Logfiles erhoben und gespeichert. Diese Informationen umfassen insbesondere:
               </p>
               <ul className="list-disc pl-6 text-muted-foreground mb-6 space-y-2">
-                <li>Recht auf Auskunft (Art. 15 DSGVO)</li>
-                <li>Recht auf Berichtigung (Art. 16 DSGVO)</li>
-                <li>Recht auf Löschung (Art. 17 DSGVO)</li>
-                <li>Recht auf Einschränkung der Verarbeitung (Art. 18 DSGVO)</li>
-                <li>Recht auf Datenübertragbarkeit (Art. 20 DSGVO)</li>
-                <li>Recht auf Widerspruch gegen die Verarbeitung (Art. 21 DSGVO)</li>
+                <li>IP-Adresse</li>
+                <li>Datum und Uhrzeit der Anfrage</li>
+                <li>aufgerufene Seite bzw. Datei</li>
+                <li>Browsertyp und Browserversion</li>
+                <li>verwendetes Betriebssystem</li>
+                <li>Referrer-URL</li>
               </ul>
+              <p className="text-muted-foreground mb-6">
+                Diese Daten sind technisch erforderlich, um die Website korrekt auszuliefern, und dienen 
+                der Sicherstellung eines stabilen und sicheren Betriebs der Website.
+              </p>
+              <p className="text-muted-foreground mb-6">
+                <strong className="text-foreground">Rechtsgrundlage:</strong><br />
+                Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse)
+              </p>
+
+              <h2 className="text-2xl font-bold mt-10 mb-4">4. Kontaktaufnahme per E-Mail oder Kontaktformular</h2>
+              <p className="text-muted-foreground mb-6">
+                Wenn Sie uns per E-Mail oder über ein Kontaktformular kontaktieren, werden Ihre Angaben 
+                einschließlich der von Ihnen angegebenen Kontaktdaten gespeichert, um Ihre Anfrage zu 
+                bearbeiten und mögliche Anschlussfragen zu beantworten.
+              </p>
+              <p className="text-muted-foreground mb-6">
+                Diese Daten geben wir nicht ohne Ihre Einwilligung weiter.
+              </p>
+              <p className="text-muted-foreground mb-6">
+                <strong className="text-foreground">Rechtsgrundlage:</strong><br />
+                Art. 6 Abs. 1 lit. b DSGVO (vorvertragliche Maßnahmen bzw. Vertragserfüllung)
+              </p>
 
               <h2 className="text-2xl font-bold mt-10 mb-4">5. Cookies</h2>
               <p className="text-muted-foreground mb-6">
-                Unsere Website verwendet Cookies. Das sind kleine Textdateien, die Ihr Webbrowser auf Ihrem 
-                Endgerät speichert. Cookies helfen uns dabei, unser Angebot nutzerfreundlicher, effektiver 
-                und sicherer zu machen. Einige Cookies sind technisch notwendig, andere werden zur 
-                Analyse des Nutzerverhaltens verwendet.
+                Unsere Website verwendet Cookies. Cookies sind kleine Textdateien, die auf Ihrem Endgerät 
+                gespeichert werden und keine Schäden verursachen.
+              </p>
+              <p className="text-muted-foreground mb-6">
+                Wir verwenden ausschließlich technisch notwendige Cookies, die für den Betrieb der Website 
+                erforderlich sind. Eine Zusammenführung dieser Daten mit anderen Datenquellen erfolgt nicht.
+              </p>
+              <p className="text-muted-foreground mb-6">
+                <strong className="text-foreground">Rechtsgrundlage:</strong><br />
+                Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse)
               </p>
 
-              <h2 className="text-2xl font-bold mt-10 mb-4">6. SSL-Verschlüsselung</h2>
+              <h2 className="text-2xl font-bold mt-10 mb-4">6. Hosting</h2>
               <p className="text-muted-foreground mb-6">
-                Diese Seite nutzt aus Gründen der Sicherheit und zum Schutz der Übertragung vertraulicher 
-                Inhalte eine SSL-Verschlüsselung. Eine verschlüsselte Verbindung erkennen Sie daran, dass 
-                die Adresszeile des Browsers von &quot;http://&quot; auf &quot;https://&quot; wechselt und an dem 
-                Schloss-Symbol in Ihrer Browserzeile.
+                Diese Website wird bei einem externen Hosting-Dienstleister betrieben. Personenbezogene Daten 
+                werden nur in dem Umfang verarbeitet, der für den technischen Betrieb und die Bereitstellung 
+                der Website erforderlich ist.
+              </p>
+              <p className="text-muted-foreground mb-6">
+                <strong className="text-foreground">Rechtsgrundlage:</strong><br />
+                Art. 6 Abs. 1 lit. f DSGVO
               </p>
 
-              <h2 className="text-2xl font-bold mt-10 mb-4">7. Änderung unserer Datenschutzbestimmungen</h2>
+              <h2 className="text-2xl font-bold mt-10 mb-4">7. SSL- bzw. TLS-Verschlüsselung</h2>
               <p className="text-muted-foreground mb-6">
-                Wir behalten uns vor, diese Datenschutzerklärung anzupassen, damit sie stets den aktuellen 
-                rechtlichen Anforderungen entspricht oder um Änderungen unserer Leistungen in der 
-                Datenschutzerklärung umzusetzen.
+                Diese Website nutzt aus Sicherheitsgründen und zum Schutz der Übertragung vertraulicher 
+                Inhalte eine SSL- bzw. TLS-Verschlüsselung. Eine verschlüsselte Verbindung erkennen Sie daran, 
+                dass die Adresszeile des Browsers mit „https://" beginnt.
               </p>
 
-              <h2 className="text-2xl font-bold mt-10 mb-4">8. Fragen zum Datenschutz</h2>
-              <p className="text-muted-foreground mb-6">
-                Wenn Sie Fragen zum Datenschutz haben, schreiben Sie uns bitte eine E-Mail an: 
-                datenschutz@mrclean-services.de
+              <h2 className="text-2xl font-bold mt-10 mb-4">8. Ihre Rechte als betroffene Person</h2>
+              <p className="text-muted-foreground mb-4">
+                Sie haben im Rahmen der geltenden gesetzlichen Bestimmungen jederzeit das Recht auf:
               </p>
+              <ul className="list-disc pl-6 text-muted-foreground mb-6 space-y-2">
+                <li>Auskunft über Ihre gespeicherten personenbezogenen Daten</li>
+                <li>Berichtigung unrichtiger oder unvollständiger Daten</li>
+                <li>Löschung Ihrer gespeicherten Daten</li>
+                <li>Einschränkung der Verarbeitung</li>
+                <li>Datenübertragbarkeit</li>
+                <li>Widerspruch gegen die Verarbeitung Ihrer personenbezogenen Daten</li>
+              </ul>
+              <p className="text-muted-foreground mb-6">
+                Zur Wahrnehmung Ihrer Rechte genügt eine formlose Mitteilung an die oben genannte Kontaktadresse.
+              </p>
+
+              <h2 className="text-2xl font-bold mt-10 mb-4">9. Widerruf Ihrer Einwilligung</h2>
+              <p className="text-muted-foreground mb-6">
+                Sofern die Verarbeitung Ihrer personenbezogenen Daten auf einer Einwilligung beruht, können 
+                Sie diese Einwilligung jederzeit widerrufen. Der Widerruf berührt nicht die Rechtmäßigkeit 
+                der bis zum Widerruf erfolgten Verarbeitung.
+              </p>
+
+              <h2 className="text-2xl font-bold mt-10 mb-4">10. Beschwerderecht bei der Aufsichtsbehörde</h2>
+              <p className="text-muted-foreground mb-6">
+                Im Falle datenschutzrechtlicher Verstöße steht Ihnen ein Beschwerderecht bei der zuständigen 
+                Datenschutzaufsichtsbehörde zu. Zuständig ist in der Regel der Datenschutzbeauftragte des 
+                Bundeslandes, in dem unser Unternehmen seinen Sitz hat.
+              </p>
+
+              <h2 className="text-2xl font-bold mt-10 mb-4">11. Aktualität und Änderung dieser Datenschutzerklärung</h2>
+              <p className="text-muted-foreground mb-6">
+                Diese Datenschutzerklärung ist aktuell gültig. Durch die Weiterentwicklung unserer Website 
+                oder aufgrund geänderter gesetzlicher Vorgaben kann eine Anpassung erforderlich werden.
+              </p>
+
             </div>
           </div>
         </section>
