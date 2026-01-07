@@ -1,4 +1,8 @@
 import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
+
+const BASE_URL = "https://mrclean-services.de";
+const DEFAULT_OG_IMAGE = "/assets/logo.png";
 
 interface SEOHeadProps {
   title: string;
@@ -6,6 +10,8 @@ interface SEOHeadProps {
   keywords?: string[];
   canonicalUrl?: string;
   structuredData?: object;
+  ogImage?: string;
+  ogType?: "website" | "article";
 }
 
 export function SEOHead({
@@ -14,43 +20,61 @@ export function SEOHead({
   keywords = [],
   canonicalUrl,
   structuredData,
+  ogImage,
+  ogType = "website",
 }: SEOHeadProps) {
+  const location = useLocation();
+  const fullTitle = `${title} | Mr.Clean Services GmbH`;
+  const currentUrl = canonicalUrl || `${BASE_URL}${location.pathname}`;
+  const imageUrl = ogImage ? `${BASE_URL}${ogImage}` : `${BASE_URL}${DEFAULT_OG_IMAGE}`;
+
   useEffect(() => {
     // Update document title
-    document.title = `${title} | Mr.Clean Services GmbH`;
+    document.title = fullTitle;
 
-    // Update meta description
-    let metaDescription = document.querySelector('meta[name="description"]');
-    if (!metaDescription) {
-      metaDescription = document.createElement("meta");
-      metaDescription.setAttribute("name", "description");
-      document.head.appendChild(metaDescription);
-    }
-    metaDescription.setAttribute("content", description);
+    // Helper function to set meta tags
+    const setMetaTag = (property: string, content: string, isProperty = false) => {
+      const selector = isProperty ? `meta[property="${property}"]` : `meta[name="${property}"]`;
+      let meta = document.querySelector(selector) as HTMLMetaElement;
+      if (!meta) {
+        meta = document.createElement("meta");
+        meta.setAttribute(isProperty ? "property" : "name", property);
+        document.head.appendChild(meta);
+      }
+      meta.setAttribute("content", content);
+    };
 
-    // Update meta keywords
+    // Basic meta tags
+    setMetaTag("description", description);
     if (keywords.length > 0) {
-      let metaKeywords = document.querySelector('meta[name="keywords"]');
-      if (!metaKeywords) {
-        metaKeywords = document.createElement("meta");
-        metaKeywords.setAttribute("name", "keywords");
-        document.head.appendChild(metaKeywords);
-      }
-      metaKeywords.setAttribute("content", keywords.join(", "));
+      setMetaTag("keywords", keywords.join(", "));
     }
 
-    // Update canonical URL
-    if (canonicalUrl) {
-      let linkCanonical = document.querySelector('link[rel="canonical"]');
-      if (!linkCanonical) {
-        linkCanonical = document.createElement("link");
-        linkCanonical.setAttribute("rel", "canonical");
-        document.head.appendChild(linkCanonical);
-      }
-      linkCanonical.setAttribute("href", canonicalUrl);
-    }
+    // Open Graph tags for Facebook, LinkedIn, WhatsApp
+    setMetaTag("og:title", fullTitle, true);
+    setMetaTag("og:description", description, true);
+    setMetaTag("og:type", ogType, true);
+    setMetaTag("og:url", currentUrl, true);
+    setMetaTag("og:image", imageUrl, true);
+    setMetaTag("og:site_name", "Mr.Clean Services GmbH", true);
+    setMetaTag("og:locale", "de_DE", true);
 
-    // Add structured data (JSON-LD)
+    // Twitter Card tags
+    setMetaTag("twitter:card", "summary_large_image");
+    setMetaTag("twitter:title", fullTitle);
+    setMetaTag("twitter:description", description);
+    setMetaTag("twitter:image", imageUrl);
+
+    // Canonical URL
+    let linkCanonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
+    if (!linkCanonical) {
+      linkCanonical = document.createElement("link");
+      linkCanonical.setAttribute("rel", "canonical");
+      document.head.appendChild(linkCanonical);
+    }
+    linkCanonical.setAttribute("href", currentUrl);
+
+    // Structured data (JSON-LD)
     if (structuredData) {
       let scriptLD = document.querySelector('script[type="application/ld+json"]');
       if (!scriptLD) {
@@ -62,9 +86,9 @@ export function SEOHead({
     }
 
     return () => {
-      // Cleanup on unmount if needed
+      // Cleanup handled by next page load
     };
-  }, [title, description, keywords, canonicalUrl, structuredData]);
+  }, [fullTitle, description, keywords, currentUrl, imageUrl, ogType, structuredData]);
 
   return null;
 }
