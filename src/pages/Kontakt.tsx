@@ -110,8 +110,8 @@ export default function Kontakt() {
                 </div>
 
                 {/* Germany Map */}
-                <div className="mt-8 overflow-hidden rounded-3xl border border-border bg-primary/5 p-4">
-                  <GermanyMap className="w-full h-[300px]" />
+                <div className="mt-8 overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-primary/10 to-primary/5 p-6">
+                  <GermanyMap className="w-full h-[450px]" />
                 </div>
               </div>
             </div>
