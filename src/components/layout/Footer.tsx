@@ -148,9 +148,26 @@ export function Footer() {
               Unsere Standorte
             </h3>
             <ul className="mt-6 space-y-3">
-              {["München", "Augsburg", "Ingolstadt", "Nürnberg", "Frankfurt", "Hamburg", "Berlin"].map((city) => (
-                <li key={city} className="text-muted-foreground">
-                  {city}
+              {[
+                { name: "München", href: "/standorte/muenchen" },
+                { name: "Augsburg", href: null },
+                { name: "Ingolstadt", href: null },
+                { name: "Nürnberg", href: null },
+                { name: "Frankfurt", href: null },
+                { name: "Hamburg", href: "/standorte/hamburg" },
+                { name: "Berlin", href: "/standorte/berlin" },
+              ].map((city) => (
+                <li key={city.name}>
+                  {city.href ? (
+                    <Link
+                      to={city.href}
+                      className="text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      {city.name}
+                    </Link>
+                  ) : (
+                    <span className="text-muted-foreground">{city.name}</span>
+                  )}
                 </li>
               ))}
             </ul>
