@@ -16,6 +16,7 @@ interface LocationPageLayoutProps {
   seoDescription: string;
   districts?: string[];
   localHighlight?: string;
+  heroAltText?: string;
 }
 
 const services = [
@@ -50,7 +51,8 @@ export default function LocationPageLayout({
   seoTitle, 
   seoDescription,
   districts = [],
-  localHighlight
+  localHighlight,
+  heroAltText
 }: LocationPageLayoutProps) {
   const [formData, setFormData] = useState({
     name: "",
@@ -92,7 +94,7 @@ export default function LocationPageLayout({
           <div className="absolute inset-0">
             <img
               src={heroImage}
-              alt={`Mr. Clean Services in ${city}`}
+              alt={heroAltText || `Professionelle Gebäudereinigung und Facility Management in ${city} ${districts[0] || ""}`}
               className="h-full w-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/80 to-background/40" />

@@ -10,6 +10,7 @@ export default function Grundreinigung() {
       categoryHref="/reinigung"
       description="Intensive Grundreinigung in Berlin für alle Oberflächen. Tiefenreinigung als perfekte Basis für die regelmäßige Unterhaltsreinigung."
       longDescription="Die Grundreinigung ist die intensive Tiefenreinigung aller Flächen und Oberflächen. Sie schafft die optimale Basis für die laufende Reinigungspflege."
+      imageAlt="Intensive Grundreinigung und Tiefenreinigung aller Bodenbeläge"
       keywords={["Grundreinigung Berlin", "Tiefenreinigung", "Intensivreinigung", "Bodenreinigung"]}
       features={[
         "Intensive Bodenreinigung aller Belagsarten",

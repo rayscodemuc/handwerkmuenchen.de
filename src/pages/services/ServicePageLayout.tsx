@@ -28,6 +28,7 @@ interface ServicePageLayoutProps {
   benefits?: string[];
   faqs?: FAQ[];
   imageSrc?: string;
+  imageAlt?: string;
   categoryName: string;
   categoryHref: string;
   keywords?: string[];
@@ -43,6 +44,7 @@ export function ServicePageLayout({
   benefits,
   faqs,
   imageSrc,
+  imageAlt,
   categoryName,
   categoryHref,
   keywords = [],
@@ -218,7 +220,7 @@ export function ServicePageLayout({
                   {imageSrc ? (
                     <img
                       src={imageSrc}
-                      alt={`${title} - Mr.Clean Services`}
+                      alt={imageAlt || `${title} – Professioneller Service von Mr.Clean Services`}
                       className="h-full w-full object-cover"
                       loading="lazy"
                     />

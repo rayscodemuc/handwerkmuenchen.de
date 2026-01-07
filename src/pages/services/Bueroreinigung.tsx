@@ -10,6 +10,7 @@ export default function Bueroreinigung() {
       categoryHref="/reinigung"
       description="Professionelle Büroreinigung in Berlin für produktive Arbeitsplätze. Tägliche oder wöchentliche Reinigung nach Ihren Anforderungen."
       longDescription="Saubere Arbeitsplätze fördern die Gesundheit und Produktivität Ihrer Mitarbeiter. Unsere Büroreinigung sorgt für ein angenehmes Arbeitsumfeld."
+      imageAlt="Professionelle Büroreinigung für hygienische Arbeitsplätze"
       keywords={["Büroreinigung Berlin", "Arbeitsplatzreinigung", "Gewerbliche Reinigung", "Büro sauber machen"]}
       features={[
         "Tägliche Unterhaltsreinigung",

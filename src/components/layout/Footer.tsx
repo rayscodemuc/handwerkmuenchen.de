@@ -37,7 +37,7 @@ export function Footer() {
           {/* Logo & Contact Info */}
           <div className="lg:col-span-2">
             <Link to="/" className="inline-block">
-              <img src={logo} alt="Mr.Clean Services" className="h-12 w-auto" />
+              <img src={logo} alt="Mr.Clean Services – Facility Management und Gebäudereinigung" className="h-12 w-auto" />
             </Link>
             <p className="mt-6 max-w-sm text-muted-foreground leading-relaxed">
               Ihr Partner für professionelles Facility Management und Gebäudereinigung in der Region.

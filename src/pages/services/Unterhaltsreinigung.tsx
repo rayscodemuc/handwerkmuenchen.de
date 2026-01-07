@@ -10,6 +10,7 @@ export default function Unterhaltsreinigung() {
       categoryHref="/reinigung"
       description="Professionelle Unterhaltsreinigung für Büros, Praxen und Gewerbeobjekte in Berlin. Regelmäßige Reinigung für ein hygienisches Arbeitsumfeld."
       longDescription="Eine saubere Arbeitsumgebung steigert das Wohlbefinden und die Produktivität Ihrer Mitarbeiter. Unsere geschulten Reinigungskräfte sorgen für gleichbleibende Sauberkeit."
+      imageAlt="Professionelle Unterhaltsreinigung für Büro und Gewerbe"
       keywords={["Unterhaltsreinigung Berlin", "Gebäudereinigung", "Büroreinigung", "gewerbliche Reinigung"]}
       features={[
         "Tägliche, wöchentliche oder individuelle Intervalle",

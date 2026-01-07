@@ -10,6 +10,7 @@ export default function WinterdienstAussen() {
       categoryHref="/aussenanlagen"
       description="Professioneller Winterdienst für Außenanlagen in Berlin. Schneeräumung und Streudienst mit vollständiger Haftungsübernahme."
       longDescription="Sichere Gehwege und Parkplätze im Winter sind Pflicht. Wir übernehmen die Verkehrssicherungspflicht und dokumentieren jeden Einsatz."
+      imageAlt="Schneeräumung und Streudienst für sichere Außenanlagen im Winter"
       keywords={["Winterdienst Außenanlagen", "Schneeräumung Berlin", "Streudienst Parkplatz", "Räumpflicht"]}
       features={[
         "Schneeräumung auf allen Verkehrsflächen",

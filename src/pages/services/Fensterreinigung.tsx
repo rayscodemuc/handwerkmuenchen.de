@@ -10,6 +10,7 @@ export default function Fensterreinigung() {
       categoryHref="/reinigung"
       description="Professionelle Fensterreinigung in Berlin für strahlend saubere Glasflächen. Innen- und Außenreinigung für alle Höhen und Gebäudetypen."
       longDescription="Saubere Fenster verbessern den Lichteinfall und das Erscheinungsbild Ihres Gebäudes. Unsere Experten reinigen alle Glasflächen streifenfrei."
+      imageAlt="Streifenfreie Glas- und Fensterreinigung für Bürogebäude"
       keywords={["Fensterreinigung Berlin", "Glasreinigung", "Fassadenreinigung", "Schaufensterreinigung"]}
       features={[
         "Fensterreinigung innen und außen",

@@ -10,6 +10,7 @@ export default function Objektmanagement() {
       categoryHref="/facility-management"
       description="Strategisches Objektmanagement für Gewerbe- und Wohnimmobilien. Werterhaltung, Kostenoptimierung und professionelle Betreuung aus einer Hand."
       longDescription="Professionelles Objektmanagement ist die strategische Betreuung Ihrer Immobilie mit dem Ziel der langfristigen Werterhaltung und -steigerung."
+      imageAlt="Operatives Objektmanagement und Immobilienbetreuung"
       keywords={["Objektmanagement Berlin", "Property Management", "Immobilienverwaltung", "Facility Management"]}
       features={[
         "Strategische Objektbetreuung und Werterhaltung",
