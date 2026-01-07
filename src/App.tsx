@@ -49,6 +49,10 @@ import WinterdienstAussen from "./pages/services/WinterdienstAussen";
 import Muenchen from "./pages/standorte/Muenchen";
 import Berlin from "./pages/standorte/Berlin";
 import Hamburg from "./pages/standorte/Hamburg";
+import Augsburg from "./pages/standorte/Augsburg";
+import Ingolstadt from "./pages/standorte/Ingolstadt";
+import Nuernberg from "./pages/standorte/Nuernberg";
+import Frankfurt from "./pages/standorte/Frankfurt";
 
 const queryClient = new QueryClient();
 
@@ -103,6 +107,10 @@ const App = () => (
           <Route path="/standorte/muenchen" element={<Muenchen />} />
           <Route path="/standorte/berlin" element={<Berlin />} />
           <Route path="/standorte/hamburg" element={<Hamburg />} />
+          <Route path="/standorte/augsburg" element={<Augsburg />} />
+          <Route path="/standorte/ingolstadt" element={<Ingolstadt />} />
+          <Route path="/standorte/nuernberg" element={<Nuernberg />} />
+          <Route path="/standorte/frankfurt" element={<Frankfurt />} />
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

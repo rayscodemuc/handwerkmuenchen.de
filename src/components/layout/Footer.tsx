@@ -150,24 +150,20 @@ export function Footer() {
             <ul className="mt-6 space-y-3">
               {[
                 { name: "München", href: "/standorte/muenchen" },
-                { name: "Augsburg", href: null },
-                { name: "Ingolstadt", href: null },
-                { name: "Nürnberg", href: null },
-                { name: "Frankfurt", href: null },
+                { name: "Augsburg", href: "/standorte/augsburg" },
+                { name: "Ingolstadt", href: "/standorte/ingolstadt" },
+                { name: "Nürnberg", href: "/standorte/nuernberg" },
+                { name: "Frankfurt", href: "/standorte/frankfurt" },
                 { name: "Hamburg", href: "/standorte/hamburg" },
                 { name: "Berlin", href: "/standorte/berlin" },
               ].map((city) => (
                 <li key={city.name}>
-                  {city.href ? (
-                    <Link
-                      to={city.href}
-                      className="text-muted-foreground transition-colors hover:text-foreground"
-                    >
-                      {city.name}
-                    </Link>
-                  ) : (
-                    <span className="text-muted-foreground">{city.name}</span>
-                  )}
+                  <Link
+                    to={city.href}
+                    className="text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    {city.name}
+                  </Link>
                 </li>
               ))}
             </ul>
