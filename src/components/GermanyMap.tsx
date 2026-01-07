@@ -27,13 +27,8 @@ export function GermanyMap({ className }: { className?: string }) {
 
   return (
     <div className={cn("relative", className)}>
-      {/* Germany Map as background with brand colors applied via CSS filter */}
-      <div 
-        className="absolute inset-0 flex items-center justify-center"
-        style={{
-          filter: "hue-rotate(160deg) saturate(0.6) brightness(1.1)",
-        }}
-      >
+      {/* Germany Map as background with brand colors */}
+      <div className="absolute inset-0 flex items-center justify-center">
         <img 
           src={germanyMapSvg} 
           alt="Deutschlandkarte mit Standorten" 
