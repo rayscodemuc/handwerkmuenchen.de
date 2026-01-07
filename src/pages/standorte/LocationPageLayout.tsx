@@ -89,7 +89,7 @@ export default function LocationPageLayout({
               alt={heroAltText || `Professionelle Gebäudereinigung und Facility Management in ${city} ${districts[0] || ""}`}
               className="h-full w-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/80 to-background/40" />
+            <div className="absolute inset-0 bg-background/90 lg:bg-transparent lg:bg-gradient-to-r lg:from-background/95 lg:via-background/80 lg:to-background/40" />
           </div>
 
           <div className="container relative z-10 mx-auto px-4 py-20 lg:px-8 lg:py-28">
