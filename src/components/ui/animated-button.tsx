@@ -11,14 +11,16 @@ export function AnimatedButton({ children, className, ...props }: AnimatedButton
     <button
       {...props}
       className={cn(
-        "group relative flex h-12 items-center justify-center gap-2 overflow-hidden rounded-full border border-foreground/20 bg-background px-6 text-foreground transition-all duration-300 hover:bg-foreground hover:text-background",
+        "group relative flex h-12 items-center justify-center gap-2 overflow-hidden rounded-full border border-foreground/20 bg-background px-6 text-foreground transition-all duration-300",
+        // Hover effects only on devices with hover capability (no touch)
+        "@media(hover:hover){hover:bg-foreground hover:text-background}",
         className
       )}
     >
-      <span className="relative z-10 flex items-center gap-2 transition-transform duration-300 group-hover:-translate-x-2">
+      <span className="relative z-10 flex items-center gap-2 transition-transform duration-300 [@media(hover:hover)]:group-hover:-translate-x-2">
         {children}
       </span>
-      <ArrowRight className="relative z-10 h-5 w-5 opacity-0 transition-all duration-300 group-hover:opacity-100" />
+      <ArrowRight className="relative z-10 h-5 w-5 opacity-0 transition-all duration-300 [@media(hover:hover)]:group-hover:opacity-100" />
     </button>
   );
 }
