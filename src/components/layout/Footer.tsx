@@ -45,15 +45,15 @@ export function Footer() {
             <div className="mt-8 space-y-4">
               <div className="flex items-center gap-3 text-muted-foreground">
                 <Phone className="h-5 w-5 text-primary" strokeWidth={1.5} />
-                <span>+49 123 456 789</span>
+                <a href="tel:+498925006354" className="hover:text-foreground transition-colors">+49 (0)89 25006354</a>
               </div>
               <div className="flex items-center gap-3 text-muted-foreground">
                 <Mail className="h-5 w-5 text-primary" strokeWidth={1.5} />
-                <span>info@mrclean-services.de</span>
+                <a href="mailto:kontakt@mr-clean-services.de" className="hover:text-foreground transition-colors">kontakt@mr-clean-services.de</a>
               </div>
-              <div className="flex items-center gap-3 text-muted-foreground">
-                <MapPin className="h-5 w-5 text-primary" strokeWidth={1.5} />
-                <span>Musterstraße 123, 12345 Berlin</span>
+              <div className="flex items-start gap-3 text-muted-foreground">
+                <MapPin className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+                <span>Agnes-Bernauer-Str. 11, 80687 München</span>
               </div>
             </div>
           </div>

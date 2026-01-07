@@ -22,40 +22,45 @@ export default function Impressum() {
               
               <h2 className="text-2xl font-bold mt-10 mb-4">Angaben gemäß § 5 TMG</h2>
               <p className="text-foreground mb-6">
-                Mr.Clean Services GmbH<br />
-                Musterstraße 123<br />
-                12345 Berlin
+                Mr. Clean Services GmbH<br />
+                Agnes-Bernauer-Str. 11<br />
+                80687 München
+              </p>
+              <p className="text-foreground mb-6">
+                <strong>Büro – Pasing</strong><br />
+                Landsbergerstraße 456<br />
+                81241 München
               </p>
 
               <h2 className="text-2xl font-bold mt-10 mb-4">Vertreten durch</h2>
               <p className="text-foreground mb-6">
-                Max Mustermann (Geschäftsführer)
+                [Geschäftsführer]
               </p>
 
               <h2 className="text-2xl font-bold mt-10 mb-4">Kontakt</h2>
               <p className="text-foreground mb-6">
-                Telefon: +49 123 456 789 00<br />
-                E-Mail: info@mrclean-services.de
+                Telefon: +49 (0)89 25006354<br />
+                E-Mail: kontakt@mr-clean-services.de
               </p>
 
               <h2 className="text-2xl font-bold mt-10 mb-4">Registereintrag</h2>
               <p className="text-foreground mb-6">
                 Eintragung im Handelsregister<br />
-                Registergericht: Amtsgericht Berlin-Charlottenburg<br />
-                Registernummer: HRB 123456
+                Registergericht: Amtsgericht München<br />
+                Registernummer: [HRB-Nummer]
               </p>
 
               <h2 className="text-2xl font-bold mt-10 mb-4">Umsatzsteuer-ID</h2>
               <p className="text-foreground mb-6">
                 Umsatzsteuer-Identifikationsnummer gemäß § 27a Umsatzsteuergesetz:<br />
-                DE 123 456 789
+                [USt-IdNr.]
               </p>
 
               <h2 className="text-2xl font-bold mt-10 mb-4">Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV</h2>
               <p className="text-foreground mb-6">
-                Max Mustermann<br />
-                Musterstraße 123<br />
-                12345 Berlin
+                [Name]<br />
+                Agnes-Bernauer-Str. 11<br />
+                80687 München
               </p>
 
               <h2 className="text-2xl font-bold mt-10 mb-4">Streitschlichtung</h2>

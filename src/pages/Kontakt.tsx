@@ -8,29 +8,29 @@ const contactInfo = [
   {
     icon: Phone,
     title: "Telefon",
-    content: "+49 123 456 789",
+    content: "+49 (0)89 25006354",
     subContent: "Mo-Fr 8:00-18:00 Uhr",
-    href: "tel:+49123456789",
+    href: "tel:+498925006354",
   },
   {
     icon: Mail,
     title: "E-Mail",
-    content: "info@mrclean-services.de",
+    content: "kontakt@mr-clean-services.de",
     subContent: "Antwort innerhalb 24h",
-    href: "mailto:info@mrclean-services.de",
+    href: "mailto:kontakt@mr-clean-services.de",
   },
   {
     icon: MapPin,
     title: "Adresse",
-    content: "Musterstraße 123",
-    subContent: "12345 Berlin",
+    content: "Agnes-Bernauer-Str. 11",
+    subContent: "80687 München",
   },
   {
     icon: Clock,
     title: "Notdienst",
     content: "24/7 erreichbar",
-    subContent: "+49 123 456 000",
-    href: "tel:+49123456000",
+    subContent: "+49 (0)89 25006354",
+    href: "tel:+498925006354",
   },
 ];
 

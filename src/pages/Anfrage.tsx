@@ -34,19 +34,19 @@ const contactInfo = [
   {
     icon: Phone,
     title: "Telefon",
-    content: "+49 123 456 789 00",
-    href: "tel:+4912345678900",
+    content: "+49 (0)89 25006354",
+    href: "tel:+498925006354",
   },
   {
     icon: Mail,
     title: "E-Mail",
-    content: "info@mrclean-services.de",
-    href: "mailto:info@mrclean-services.de",
+    content: "kontakt@mr-clean-services.de",
+    href: "mailto:kontakt@mr-clean-services.de",
   },
   {
     icon: MapPin,
     title: "Adresse",
-    content: "Musterstraße 123, 12345 Berlin",
+    content: "Agnes-Bernauer-Str. 11, 80687 München",
     href: null,
   },
   {
