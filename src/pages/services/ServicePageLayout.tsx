@@ -90,23 +90,23 @@ export function ServicePageLayout({
       <Header />
       <main className="flex-1">
         {/* Breadcrumb */}
-        <nav className="bg-muted/50 py-4" aria-label="Breadcrumb">
+        <nav className="bg-primary py-4" aria-label="Breadcrumb">
           <div className="container mx-auto px-4 lg:px-8">
             <ol className="flex items-center gap-2 text-sm">
               <li>
-                <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link to="/" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">
                   Startseite
                 </Link>
               </li>
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              <ChevronRight className="h-4 w-4 text-primary-foreground/50" />
               <li>
-                <Link to={categoryHref} className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link to={categoryHref} className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">
                   {categoryName}
                 </Link>
               </li>
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              <ChevronRight className="h-4 w-4 text-primary-foreground/50" />
               <li>
-                <span className="font-medium text-foreground">{title}</span>
+                <span className="font-medium text-primary-foreground">{title}</span>
               </li>
             </ol>
           </div>
