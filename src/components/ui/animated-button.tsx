@@ -15,7 +15,7 @@ export function AnimatedButton({ children, className, ...props }: AnimatedButton
         className
       )}
     >
-      <span className="relative z-10 transition-transform duration-300 group-hover:-translate-x-2">
+      <span className="relative z-10 flex items-center gap-2 transition-transform duration-300 group-hover:-translate-x-2">
         {children}
       </span>
       <ArrowRight className="relative z-10 h-5 w-5 opacity-0 transition-all duration-300 group-hover:opacity-100" />
