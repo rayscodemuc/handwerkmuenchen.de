@@ -20,21 +20,16 @@ export default function Impressum() {
           <div className="container mx-auto px-4 lg:px-8">
             <div className="prose prose-lg max-w-4xl text-foreground">
               
-              <h2 className="text-2xl font-bold mt-10 mb-4">Angaben gemäß § 5 TMG</h2>
+              <h2 className="text-2xl font-bold mt-10 mb-4">Angaben gemäß § 5 DDG</h2>
               <p className="text-foreground mb-6">
-                Mr. Clean Services GmbH<br />
-                Agnes-Bernauer-Str. 11<br />
-                80687 München
-              </p>
-              <p className="text-foreground mb-6">
-                <strong>Büro – Pasing</strong><br />
-                Landsbergerstraße 456<br />
+                Mr Clean Services GmbH<br />
+                Landsbergerstraße<br />
                 81241 München
               </p>
 
               <h2 className="text-2xl font-bold mt-10 mb-4">Vertreten durch</h2>
               <p className="text-foreground mb-6">
-                [Geschäftsführer]
+                Firat Emre Mutluer
               </p>
 
               <h2 className="text-2xl font-bold mt-10 mb-4">Kontakt</h2>
@@ -46,24 +41,23 @@ export default function Impressum() {
               <h2 className="text-2xl font-bold mt-10 mb-4">Registereintrag</h2>
               <p className="text-foreground mb-6">
                 Eintragung im Handelsregister<br />
-                Registergericht: Amtsgericht München<br />
-                Registernummer: [HRB-Nummer]
+                Registergericht: München<br />
+                Registernummer: HRB260913
               </p>
 
               <h2 className="text-2xl font-bold mt-10 mb-4">Umsatzsteuer-ID</h2>
               <p className="text-foreground mb-6">
                 Umsatzsteuer-Identifikationsnummer gemäß § 27a Umsatzsteuergesetz:<br />
-                [USt-IdNr.]
+                DE336495598
               </p>
 
-              <h2 className="text-2xl font-bold mt-10 mb-4">Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV</h2>
-              <p className="text-foreground mb-6">
-                [Name]<br />
-                Agnes-Bernauer-Str. 11<br />
-                80687 München
+              <h2 className="text-2xl font-bold mt-10 mb-4">Verbraucherstreitbeilegung / Universalschlichtungsstelle</h2>
+              <p className="text-muted-foreground mb-6">
+                Wir nehmen nicht an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teil 
+                und sind dazu auch nicht verpflichtet.
               </p>
 
-              <h2 className="text-2xl font-bold mt-10 mb-4">Streitschlichtung</h2>
+              <h2 className="text-2xl font-bold mt-10 mb-4">EU-Streitschlichtung</h2>
               <p className="text-muted-foreground mb-6">
                 Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit: 
                 <a 
@@ -74,10 +68,6 @@ export default function Impressum() {
                 >
                   https://ec.europa.eu/consumers/odr
                 </a>
-              </p>
-              <p className="text-muted-foreground mb-6">
-                Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer 
-                Verbraucherschlichtungsstelle teilzunehmen.
               </p>
 
               <h2 className="text-2xl font-bold mt-10 mb-4">Haftung für Inhalte</h2>
@@ -101,6 +91,17 @@ export default function Impressum() {
                 deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der 
                 Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung 
                 des jeweiligen Autors bzw. Erstellers.
+              </p>
+
+              <h2 className="text-2xl font-bold mt-10 mb-4">Datenschutz</h2>
+              <p className="text-muted-foreground mb-6">
+                Informationen zum Umgang mit Ihren personenbezogenen Daten finden Sie in unserer{" "}
+                <a 
+                  href="/datenschutz"
+                  className="text-primary hover:underline"
+                >
+                  Datenschutzerklärung
+                </a>.
               </p>
             </div>
           </div>
