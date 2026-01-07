@@ -78,13 +78,8 @@ export default function HandwerkCategory() {
                 <p className="text-sm font-semibold uppercase tracking-wider text-primary">
                   Technische Dienstleistungen
                 </p>
-                <h1 className="mt-4 font-bold leading-[0.9] tracking-tight text-foreground">
-                  <span className="block text-[3rem] sm:text-[4rem] lg:text-[5rem] xl:text-[5.5rem]">
-                    Handwerk
-                  </span>
-                  <span className="block text-[3rem] sm:text-[4rem] lg:text-[5rem] xl:text-[5.5rem]">
-                    & Service
-                  </span>
+                <h1 className="mt-4 font-bold leading-[1.1] tracking-tight text-foreground text-[2.5rem] sm:text-[3rem] lg:text-[3.5rem] xl:text-[4rem]">
+                  Ihr Partner für Handwerk: Elektro, Sanitär & Heizung
                 </h1>
 
                 <p className="mt-8 max-w-[420px] text-base leading-relaxed text-foreground/70 lg:text-lg">

@@ -78,13 +78,8 @@ export default function FacilityManagementCategory() {
                 <p className="text-sm font-semibold uppercase tracking-wider text-primary">
                   Gebäudemanagement
                 </p>
-                <h1 className="mt-4 font-bold leading-[0.9] tracking-tight text-foreground">
-                  <span className="block text-[2.5rem] sm:text-[3.5rem] lg:text-[4rem] xl:text-[4.5rem]">
-                    Facility
-                  </span>
-                  <span className="block text-[2.5rem] sm:text-[3.5rem] lg:text-[4rem] xl:text-[4.5rem]">
-                    Management
-                  </span>
+                <h1 className="mt-4 font-bold leading-[1.1] tracking-tight text-foreground text-[2.5rem] sm:text-[3rem] lg:text-[3.5rem] xl:text-[4rem]">
+                  Professionelles Facility Management & Hausmeisterservice
                 </h1>
 
                 <p className="mt-8 max-w-[420px] text-base leading-relaxed text-foreground/70 lg:text-lg">

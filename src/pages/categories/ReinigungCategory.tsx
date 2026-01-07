@@ -96,16 +96,8 @@ export default function ReinigungCategory() {
                 <p className="text-sm font-semibold uppercase tracking-wider text-primary">
                   Gebäudeservice
                 </p>
-                <h1 className="mt-4 font-bold leading-[0.9] tracking-tight text-foreground">
-                  <span className="block text-[2.5rem] sm:text-[3.5rem] lg:text-[4.5rem] xl:text-[5rem]">
-                    Professionelle
-                  </span>
-                  <span className="block text-[2.5rem] sm:text-[3.5rem] lg:text-[4.5rem] xl:text-[5rem]">
-                    Reinigung für
-                  </span>
-                  <span className="block text-[2.5rem] sm:text-[3.5rem] lg:text-[4.5rem] xl:text-[5rem]">
-                    Ihr Objekt
-                  </span>
+                <h1 className="mt-4 font-bold leading-[1.1] tracking-tight text-foreground text-[2.5rem] sm:text-[3rem] lg:text-[3.5rem] xl:text-[4rem]">
+                  Professionelle Reinigung & Gebäudereinigung
                 </h1>
 
                 <p className="mt-8 max-w-[420px] text-base leading-relaxed text-foreground/70 lg:text-lg">
