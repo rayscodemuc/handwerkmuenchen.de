@@ -1,6 +1,7 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CTASection } from "@/components/sections/CTASection";
+import { CategoryTrustSection } from "@/components/sections/CategoryTrustSection";
 import { SEOHead } from "@/components/SEOHead";
 import { AnimatedButton } from "@/components/ui/animated-button";
 import { Link } from "react-router-dom";
@@ -167,6 +168,7 @@ export default function HandwerkCategory() {
           </div>
         </section>
 
+        <CategoryTrustSection />
         <CTASection />
       </main>
       <Footer />
