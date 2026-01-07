@@ -1,10 +1,8 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { AnimatedButton } from "@/components/ui/animated-button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+import { ContactForm } from "@/components/ContactForm";
 import { Phone, Mail, MapPin, Clock } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const contactInfo = [
   {
@@ -12,12 +10,14 @@ const contactInfo = [
     title: "Telefon",
     content: "+49 123 456 789",
     subContent: "Mo-Fr 8:00-18:00 Uhr",
+    href: "tel:+49123456789",
   },
   {
     icon: Mail,
     title: "E-Mail",
     content: "info@mrclean-services.de",
     subContent: "Antwort innerhalb 24h",
+    href: "mailto:info@mrclean-services.de",
   },
   {
     icon: MapPin,
@@ -30,7 +30,18 @@ const contactInfo = [
     title: "Notdienst",
     content: "24/7 erreichbar",
     subContent: "+49 123 456 000",
+    href: "tel:+49123456000",
   },
+];
+
+const locations = [
+  { name: "München", href: "/standorte/muenchen" },
+  { name: "Augsburg", href: "/standorte/augsburg" },
+  { name: "Ingolstadt", href: "/standorte/ingolstadt" },
+  { name: "Nürnberg", href: "/standorte/nuernberg" },
+  { name: "Frankfurt", href: "/standorte/frankfurt" },
+  { name: "Hamburg", href: "/standorte/hamburg" },
+  { name: "Berlin", href: "/standorte/berlin" },
 ];
 
 export default function Kontakt() {
@@ -57,56 +68,12 @@ export default function Kontakt() {
         <section className="bg-background py-20 lg:py-28">
           <div className="container mx-auto px-4 lg:px-8">
             <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
-              {/* Contact Form */}
-              <div className="rounded-3xl bg-surface p-8 lg:p-10">
-                <h2 className="text-2xl font-bold text-foreground">
-                  Nachricht senden
-                </h2>
-                <p className="mt-2 text-muted-foreground">
-                  Füllen Sie das Formular aus und wir melden uns schnellstmöglich.
-                </p>
-
-                <form className="mt-8 space-y-6">
-                  <div className="grid gap-6 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="firstName">Vorname</Label>
-                      <Input id="firstName" placeholder="Max" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="lastName">Nachname</Label>
-                      <Input id="lastName" placeholder="Mustermann" />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="email">E-Mail</Label>
-                    <Input id="email" type="email" placeholder="max@beispiel.de" />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Telefon (optional)</Label>
-                    <Input id="phone" type="tel" placeholder="+49 123 456 789" />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="subject">Betreff</Label>
-                    <Input id="subject" placeholder="Wie können wir helfen?" />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="message">Nachricht</Label>
-                    <Textarea
-                      id="message"
-                      placeholder="Beschreiben Sie Ihr Anliegen..."
-                      rows={5}
-                    />
-                  </div>
-
-                  <AnimatedButton className="w-full h-14 text-base bg-primary text-primary-foreground hover:bg-foreground hover:text-background">
-                    Nachricht senden
-                  </AnimatedButton>
-                </form>
-              </div>
+              {/* Contact Form with dynamic dropdowns */}
+              <ContactForm 
+                pageName="Kontaktseite"
+                title="Nachricht senden"
+                subtitle="Wählen Sie Ihren Standort und Ihr Anliegen – wir leiten Sie an den richtigen Ansprechpartner weiter."
+              />
 
               {/* Contact Info */}
               <div>
@@ -128,7 +95,13 @@ export default function Kontakt() {
                       </div>
                       <div>
                         <h3 className="font-semibold text-foreground">{info.title}</h3>
-                        <p className="mt-1 text-foreground">{info.content}</p>
+                        {info.href ? (
+                          <a href={info.href} className="mt-1 block text-foreground hover:text-primary transition-colors">
+                            {info.content}
+                          </a>
+                        ) : (
+                          <p className="mt-1 text-foreground">{info.content}</p>
+                        )}
                         <p className="text-sm text-muted-foreground">{info.subContent}</p>
                       </div>
                     </div>
@@ -162,14 +135,15 @@ export default function Kontakt() {
             </div>
 
             <div className="mt-12 grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7">
-              {["München", "Augsburg", "Ingolstadt", "Nürnberg", "Frankfurt", "Hamburg", "Berlin"].map((city) => (
-                <div
-                  key={city}
+              {locations.map((location) => (
+                <Link
+                  key={location.name}
+                  to={location.href}
                   className="flex items-center justify-center gap-2 rounded-2xl border border-border bg-card p-6 text-center transition-all hover:border-primary hover:shadow-lg"
                 >
                   <MapPin className="h-5 w-5 text-primary" />
-                  <span className="font-medium text-foreground">{city}</span>
-                </div>
+                  <span className="font-medium text-foreground">{location.name}</span>
+                </Link>
               ))}
             </div>
           </div>

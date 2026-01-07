@@ -1,17 +1,15 @@
 import { Link } from "react-router-dom";
-import { ChevronRight, Wrench, Building2, Sparkles, TreePine, ArrowRight, MapPin, Send } from "lucide-react";
-import { useState } from "react";
+import { ChevronRight, Wrench, Building2, Sparkles, TreePine, ArrowRight, MapPin } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { SEOHead } from "@/components/SEOHead";
 import { AnimatedButton } from "@/components/ui/animated-button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
+import { ContactForm } from "@/components/ContactForm";
 import heroImage from "@/assets/hero-facility.jpg";
 
 interface LocationPageLayoutProps {
   city: string;
+  citySlug?: string;
   seoTitle: string;
   seoDescription: string;
   districts?: string[];
@@ -48,24 +46,18 @@ const services = [
 
 export default function LocationPageLayout({ 
   city, 
+  citySlug,
   seoTitle, 
   seoDescription,
   districts = [],
   localHighlight,
   heroAltText
 }: LocationPageLayoutProps) {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    message: "",
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    toast.success(`Ihre Anfrage aus ${city} wurde gesendet!`);
-    setFormData({ name: "", email: "", phone: "", message: "" });
-  };
+  // Slug für E-Mail-Routing ableiten
+  const locationSlug = citySlug || city.toLowerCase()
+    .replace("ü", "ue")
+    .replace("ö", "oe")
+    .replace("ä", "ae");
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -236,63 +228,12 @@ export default function LocationPageLayout({
                 </p>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <input type="hidden" name="betreff" value={`Anfrage aus ${city}`} />
-                
-                <div className="grid gap-6 sm:grid-cols-2">
-                  <div>
-                    <label className="text-sm font-medium text-primary-foreground">Name *</label>
-                    <Input
-                      required
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="mt-2 bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/50"
-                      placeholder="Ihr Name"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-primary-foreground">E-Mail *</label>
-                    <Input
-                      required
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="mt-2 bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/50"
-                      placeholder="ihre@email.de"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium text-primary-foreground">Telefon</label>
-                  <Input
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="mt-2 bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/50"
-                    placeholder="Ihre Telefonnummer"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium text-primary-foreground">Ihre Nachricht *</label>
-                  <Textarea
-                    required
-                    value={formData.message}
-                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    className="mt-2 min-h-[120px] bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/50"
-                    placeholder={`Beschreiben Sie Ihr Anliegen in ${city}...`}
-                  />
-                </div>
-
-                <AnimatedButton 
-                  type="submit"
-                  className="w-full h-14 text-base bg-foreground text-background hover:bg-background hover:text-foreground"
-                >
-                  <Send className="mr-2 h-5 w-5" />
-                  Anfrage aus {city} absenden
-                </AnimatedButton>
-              </form>
+              <ContactForm
+                pageName={`Standort ${city}`}
+                presetLocation={locationSlug}
+                variant="dark"
+                showTitle={false}
+              />
             </div>
           </div>
         </section>
