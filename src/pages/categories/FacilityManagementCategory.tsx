@@ -10,20 +10,20 @@ import { Building2, Home, Snowflake, ClipboardList, Clock, Shield, Users } from 
 const services = [
   {
     icon: Home,
-    title: "Hausmeisterservice",
+    title: "Zuverlässiger Hausmeisterservice",
     description: "Ganzheitliche Betreuung für reibungslosen Gebäudebetrieb.",
     link: "/facility-management/hausmeisterservice",
   },
   {
     icon: Snowflake,
-    title: "Winterdienst",
-    description: "Professioneller Räum- und Streudienst für sichere Wege.",
+    title: "Professioneller Winterdienst",
+    description: "Räum- und Streudienst für sichere Wege im Winter.",
     link: "/facility-management/winterdienst",
   },
   {
     icon: ClipboardList,
-    title: "Objektmanagement",
-    description: "Operative Objektbetreuung mit Kontrollen und Dokumentation.",
+    title: "Operatives Objektmanagement",
+    description: "Objektbetreuung mit Kontrollen und Dokumentation.",
     link: "/facility-management/objektmanagement",
   },
 ];
@@ -104,11 +104,8 @@ export default function FacilityManagementCategory() {
         <section className="bg-background py-24 lg:py-32">
           <div className="container mx-auto px-4 lg:px-8">
             <div className="text-center">
-              <p className="text-sm font-semibold uppercase tracking-wider text-primary">
-                Unsere Leistungen
-              </p>
-              <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground lg:text-4xl">
-                Professionelles Objektmanagement
+              <h2 className="text-3xl font-bold tracking-tight text-foreground lg:text-4xl">
+                Ganzheitliche Betreuung Ihrer Immobilien
               </h2>
               <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
                 Hausmeisterservice, Winterdienst und Objektbetreuung aus einer Hand.

@@ -10,20 +10,20 @@ import { Sparkles, Building, PanelTop, FlaskConical, Clock, Shield, Users } from
 const services = [
   {
     icon: Building,
-    title: "Unterhaltsreinigung",
+    title: "Unterhaltsreinigung für Büro & Praxis",
     description: "Regelmäßige Reinigung für dauerhaft saubere Räumlichkeiten.",
     link: "/reinigung/unterhaltsreinigung",
   },
   {
     icon: PanelTop,
-    title: "Glas- & Fensterreinigung",
+    title: "Glas- und Fensterreinigung",
     description: "Streifenfreie Reinigung für klare Durchsicht.",
     link: "/reinigung/fensterreinigung",
   },
   {
     icon: FlaskConical,
-    title: "Sonderreinigung",
-    description: "Tiefgaragen- und Grundreinigung für spezielle Anforderungen.",
+    title: "Sonderreinigung: Tiefgaragen & Grundreinigung",
+    description: "Spezialreinigung für besondere Anforderungen.",
     link: "/reinigung/sonderreinigung",
   },
 ];
@@ -104,11 +104,8 @@ export default function ReinigungCategory() {
         <section className="bg-background py-24 lg:py-32">
           <div className="container mx-auto px-4 lg:px-8">
             <div className="text-center">
-              <p className="text-sm font-semibold uppercase tracking-wider text-primary">
-                Unsere Leistungen
-              </p>
-              <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground lg:text-4xl">
-                Reinigungsservices im Überblick
+              <h2 className="text-3xl font-bold tracking-tight text-foreground lg:text-4xl">
+                Werterhalt durch professionelle Gebäudereinigung
               </h2>
               <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
                 Von der täglichen Unterhaltsreinigung bis zur Spezialreinigung.
