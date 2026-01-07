@@ -10,7 +10,7 @@ const Index = () => {
   return (
     <div className="flex min-h-screen flex-col">
       <SEOHead
-        title="Startseite"
+        title="Facility Management, Handwerk & Reinigung in München, Hamburg, Berlin & bundesweit"
         description="Mr. Clean Services: Ihr zentraler Partner für Handwerk, Facility Management und Reinigung. Ein Ansprechpartner, volle Koordination & geprüfte Fachqualität aus einer Hand."
       />
       <Header />

@@ -145,6 +145,35 @@ export default function Kontakt() {
             </div>
           </div>
         </section>
+
+        {/* Einsatzgebiete Section */}
+        <section className="bg-muted/50 py-20 lg:py-28">
+          <div className="container mx-auto px-4 lg:px-8">
+            <div className="text-center">
+              <p className="text-sm font-semibold uppercase tracking-wider text-primary">
+                Bundesweiter Service
+              </p>
+              <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground lg:text-4xl">
+                Unsere Einsatzgebiete
+              </h2>
+              <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+                Von der Metropolregion München bis nach Hamburg – wir sind dort, wo Sie uns brauchen.
+              </p>
+            </div>
+
+            <div className="mt-12 grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7">
+              {["München", "Augsburg", "Ingolstadt", "Nürnberg", "Frankfurt", "Hamburg", "Berlin"].map((city) => (
+                <div
+                  key={city}
+                  className="flex items-center justify-center gap-2 rounded-2xl border border-border bg-card p-6 text-center transition-all hover:border-primary hover:shadow-lg"
+                >
+                  <MapPin className="h-5 w-5 text-primary" />
+                  <span className="font-medium text-foreground">{city}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
       </main>
       <Footer />
     </div>

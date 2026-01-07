@@ -33,7 +33,7 @@ export function Footer() {
   return (
     <footer className="border-t border-border bg-background">
       <div className="container mx-auto px-4 py-16 lg:px-8 lg:py-20">
-        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-6 lg:gap-8">
+        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-7 lg:gap-8">
           {/* Logo & Contact Info */}
           <div className="lg:col-span-2">
             <Link to="/" className="inline-block">
@@ -141,7 +141,26 @@ export function Footer() {
               )}
             </ul>
           </div>
+
+          {/* Standorte */}
+          <div>
+            <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground">
+              Unsere Standorte
+            </h3>
+            <ul className="mt-6 space-y-3">
+              {["München", "Augsburg", "Ingolstadt", "Nürnberg", "Frankfurt", "Hamburg", "Berlin"].map((city) => (
+                <li key={city} className="text-muted-foreground">
+                  {city}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
+
+        {/* SEO Text */}
+        <p className="mt-12 text-sm text-muted-foreground leading-relaxed max-w-4xl">
+          Mr. Clean Services ist Ihr überregionaler Partner für professionelles Facility Management, Handwerk und Reinigung in den Metropolregionen Deutschlands.
+        </p>
 
         {/* Bottom Section */}
         <div className="mt-16 flex flex-col items-center justify-between gap-6 border-t border-border pt-10 md:flex-row">
