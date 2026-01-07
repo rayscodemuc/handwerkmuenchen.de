@@ -34,17 +34,21 @@ import {
   Check,
   Calculator,
   Send,
+  CalendarCheck,
+  Repeat,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type ServiceType = "reinigung" | "tiefgarage" | "hausmeister" | "winterdienst" | null;
 type ReinigungType = "buero" | "glas" | "grund" | null;
 type ObjektType = "mfh" | "gewerbe" | "privat" | null;
+type AuftragsartType = "einmalig" | "regelmässig" | null;
 
 interface CalculatorState {
   service: ServiceType;
   reinigungType: ReinigungType;
   objektType: ObjektType;
+  auftragsart: AuftragsartType;
   stellplaetze: number;
   flaeche: number;
   frequenz: number;
@@ -59,6 +63,7 @@ const initialState: CalculatorState = {
   service: null,
   reinigungType: null,
   objektType: null,
+  auftragsart: null,
   stellplaetze: 50,
   flaeche: 500,
   frequenz: 3,
@@ -105,18 +110,29 @@ export default function Rechner() {
     setState((prev) => ({ ...prev, ...updates }));
   };
 
-  const calculatePrice = (): number => {
+  const calculatePrice = (): { price: number; isMonthly: boolean } => {
     let price = 0;
+    const isMonthly = state.auftragsart === "regelmässig";
 
     switch (state.service) {
       case "reinigung":
         if (state.reinigungType) {
           const factor = preisfaktoren.reinigung[state.reinigungType];
-          price = state.flaeche * factor * (state.frequenz / 5) * 4.33;
+          if (isMonthly) {
+            price = state.flaeche * factor * (state.frequenz / 5) * 4.33;
+          } else {
+            // Einmalauftrag: Höherer Einzelpreis
+            price = state.flaeche * factor * 1.5;
+          }
         }
         break;
       case "tiefgarage":
-        price = state.stellplaetze * preisfaktoren.tiefgarage * 4;
+        if (isMonthly) {
+          price = state.stellplaetze * preisfaktoren.tiefgarage * 4;
+        } else {
+          // Einmalauftrag Tiefgarage
+          price = state.stellplaetze * preisfaktoren.tiefgarage * 1.8;
+        }
         break;
       case "hausmeister":
         if (state.objektType) {
@@ -128,7 +144,7 @@ export default function Rechner() {
         break;
     }
 
-    return Math.round(price);
+    return { price: Math.round(price), isMonthly };
   };
 
   const canProceed = (): boolean => {
@@ -136,7 +152,12 @@ export default function Rechner() {
       case 1:
         return state.service !== null;
       case 2:
-        if (state.service === "reinigung") return state.reinigungType !== null;
+        if (state.service === "reinigung") {
+          return state.reinigungType !== null && state.auftragsart !== null;
+        }
+        if (state.service === "tiefgarage") {
+          return state.auftragsart !== null;
+        }
         if (state.service === "hausmeister") return state.objektType !== null;
         return true;
       case 3:
@@ -321,26 +342,66 @@ export default function Rechner() {
                           </h2>
 
                           {state.service === "reinigung" && (
-                            <div className="grid sm:grid-cols-3 gap-4">
-                              {[
-                                { id: "buero", label: "Büroreinigung", desc: "Regelmäßige Unterhaltsreinigung" },
-                                { id: "glas", label: "Glasreinigung", desc: "Fenster & Glasflächen" },
-                                { id: "grund", label: "Grundreinigung", desc: "Intensive Tiefenreinigung" },
-                              ].map((type) => (
-                                <button
-                                  key={type.id}
-                                  onClick={() => updateState({ reinigungType: type.id as ReinigungType })}
-                                  className={cn(
-                                    "p-5 rounded-xl border-2 text-left transition-all hover:border-primary/50",
-                                    state.reinigungType === type.id
-                                      ? "border-primary bg-primary/5"
-                                      : "border-border"
-                                  )}
-                                >
-                                  <h3 className="font-semibold text-foreground mb-1">{type.label}</h3>
-                                  <p className="text-sm text-muted-foreground">{type.desc}</p>
-                                </button>
-                              ))}
+                            <div className="space-y-6">
+                              <div className="grid sm:grid-cols-3 gap-4">
+                                {[
+                                  { id: "buero", label: "Büroreinigung", desc: "Regelmäßige Unterhaltsreinigung" },
+                                  { id: "glas", label: "Glasreinigung", desc: "Fenster & Glasflächen" },
+                                  { id: "grund", label: "Grundreinigung", desc: "Intensive Tiefenreinigung" },
+                                ].map((type) => (
+                                  <button
+                                    key={type.id}
+                                    onClick={() => updateState({ reinigungType: type.id as ReinigungType })}
+                                    className={cn(
+                                      "p-5 rounded-xl border-2 text-left transition-all hover:border-primary/50",
+                                      state.reinigungType === type.id
+                                        ? "border-primary bg-primary/5"
+                                        : "border-border"
+                                    )}
+                                  >
+                                    <h3 className="font-semibold text-foreground mb-1">{type.label}</h3>
+                                    <p className="text-sm text-muted-foreground">{type.desc}</p>
+                                  </button>
+                                ))}
+                              </div>
+
+                              {state.reinigungType && (
+                                <div>
+                                  <Label className="text-base mb-3 block">Art des Auftrags</Label>
+                                  <div className="grid sm:grid-cols-2 gap-4">
+                                    <button
+                                      onClick={() => updateState({ auftragsart: "einmalig" })}
+                                      className={cn(
+                                        "p-5 rounded-xl border-2 text-left transition-all hover:border-primary/50 flex items-start gap-4",
+                                        state.auftragsart === "einmalig"
+                                          ? "border-primary bg-primary/5"
+                                          : "border-border"
+                                      )}
+                                    >
+                                      <CalendarCheck className="h-6 w-6 text-primary shrink-0 mt-0.5" />
+                                      <div>
+                                        <h3 className="font-semibold text-foreground mb-1">Einmalauftrag</h3>
+                                        <p className="text-sm text-muted-foreground">Einmalige Reinigung ohne Vertragsbindung</p>
+                                      </div>
+                                    </button>
+                                    <button
+                                      onClick={() => updateState({ auftragsart: "regelmässig" })}
+                                      className={cn(
+                                        "p-5 rounded-xl border-2 text-left transition-all hover:border-primary/50 flex items-start gap-4",
+                                        state.auftragsart === "regelmässig"
+                                          ? "border-primary bg-primary/5"
+                                          : "border-border"
+                                      )}
+                                    >
+                                      <Repeat className="h-6 w-6 text-primary shrink-0 mt-0.5" />
+                                      <div>
+                                        <h3 className="font-semibold text-foreground mb-1">Unterhaltsreinigung</h3>
+                                        <p className="text-sm text-muted-foreground">Regelmäßige Reinigung nach Vereinbarung</p>
+                                      </div>
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           )}
 
@@ -361,6 +422,42 @@ export default function Rechner() {
                                 <div className="flex justify-between text-sm text-muted-foreground mt-2">
                                   <span>10</span>
                                   <span>500</span>
+                                </div>
+                              </div>
+
+                              <div>
+                                <Label className="text-base mb-3 block">Art des Auftrags</Label>
+                                <div className="grid sm:grid-cols-2 gap-4">
+                                  <button
+                                    onClick={() => updateState({ auftragsart: "einmalig" })}
+                                    className={cn(
+                                      "p-5 rounded-xl border-2 text-left transition-all hover:border-primary/50 flex items-start gap-4",
+                                      state.auftragsart === "einmalig"
+                                        ? "border-primary bg-primary/5"
+                                        : "border-border"
+                                    )}
+                                  >
+                                    <CalendarCheck className="h-6 w-6 text-primary shrink-0 mt-0.5" />
+                                    <div>
+                                      <h3 className="font-semibold text-foreground mb-1">Einmalauftrag</h3>
+                                      <p className="text-sm text-muted-foreground">Einmalige Grundreinigung der Tiefgarage</p>
+                                    </div>
+                                  </button>
+                                  <button
+                                    onClick={() => updateState({ auftragsart: "regelmässig" })}
+                                    className={cn(
+                                      "p-5 rounded-xl border-2 text-left transition-all hover:border-primary/50 flex items-start gap-4",
+                                      state.auftragsart === "regelmässig"
+                                        ? "border-primary bg-primary/5"
+                                        : "border-border"
+                                    )}
+                                  >
+                                    <Repeat className="h-6 w-6 text-primary shrink-0 mt-0.5" />
+                                    <div>
+                                      <h3 className="font-semibold text-foreground mb-1">Regelmäßige Reinigung</h3>
+                                      <p className="text-sm text-muted-foreground">Vierteljährlich oder nach Bedarf</p>
+                                    </div>
+                                  </button>
                                 </div>
                               </div>
                             </div>
@@ -441,7 +538,7 @@ export default function Rechner() {
                             </div>
                           )}
 
-                          {state.service === "reinigung" && (
+                          {state.service === "reinigung" && state.auftragsart === "regelmässig" && (
                             <div>
                               <Label className="text-base mb-3 block">
                                 Reinigungsfrequenz: <span className="font-bold text-primary">{state.frequenz}x pro Woche</span>
@@ -461,11 +558,23 @@ export default function Rechner() {
                             </div>
                           )}
 
+                          {state.service === "reinigung" && state.auftragsart === "einmalig" && (
+                            <div className="bg-muted/50 p-6 rounded-xl">
+                              <h3 className="font-semibold mb-2">Einmalauftrag – {state.reinigungType === "buero" ? "Büroreinigung" : state.reinigungType === "glas" ? "Glasreinigung" : "Grundreinigung"}</h3>
+                              <p className="text-muted-foreground">
+                                Einmalige {state.reinigungType === "grund" ? "Grundreinigung" : "Reinigung"} für <span className="font-semibold text-foreground">{state.flaeche} m²</span> ohne vertragliche Bindung.
+                              </p>
+                            </div>
+                          )}
+
                           {state.service === "tiefgarage" && (
                             <div className="bg-muted/50 p-6 rounded-xl">
-                              <h3 className="font-semibold mb-2">Zusammenfassung</h3>
+                              <h3 className="font-semibold mb-2">
+                                {state.auftragsart === "einmalig" ? "Einmalige Tiefgaragenreinigung" : "Regelmäßige Tiefgaragenreinigung"}
+                              </h3>
                               <p className="text-muted-foreground">
-                                Tiefgaragenreinigung für <span className="font-semibold text-foreground">{state.stellplaetze} Stellplätze</span>
+                                Reinigung für <span className="font-semibold text-foreground">{state.stellplaetze} Stellplätze</span>
+                                {state.auftragsart === "regelmässig" && " (vierteljährlich empfohlen)"}
                               </p>
                               <p className="text-sm text-muted-foreground mt-2">
                                 Inklusive Entfernung von Reifenabrieb, Ölflecken und Reinigung der Entwässerungsrinnen.
@@ -498,13 +607,15 @@ export default function Rechner() {
                             transition={{ duration: 0.5, type: "spring" }}
                             className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl p-10 mb-8"
                           >
-                            <p className="text-sm text-muted-foreground mb-2">Geschätzter Monatspreis</p>
+                            <p className="text-sm text-muted-foreground mb-2">
+                              {calculatePrice().isMonthly ? "Geschätzter Monatspreis" : "Geschätzter Einmalpreis"}
+                            </p>
                             <motion.p
                               className="text-5xl lg:text-6xl font-bold text-primary"
                               initial={{ y: 20 }}
                               animate={{ y: 0 }}
                             >
-                              ab {calculatePrice().toLocaleString("de-DE")} €
+                              ab {calculatePrice().price.toLocaleString("de-DE")} €
                             </motion.p>
                             <p className="text-sm text-muted-foreground mt-2">
                               zzgl. MwSt. · Richtpreis zur Orientierung
@@ -581,11 +692,12 @@ export default function Rechner() {
                             />
                           </div>
                           <div className="bg-muted/50 p-4 rounded-xl text-sm text-muted-foreground">
-                            <strong>Zusammenfassung:</strong> {state.service === "reinigung" && `${state.reinigungType === "buero" ? "Büroreinigung" : state.reinigungType === "glas" ? "Glasreinigung" : "Grundreinigung"}, ${state.flaeche} m², ${state.frequenz}x/Woche`}
-                            {state.service === "tiefgarage" && `Tiefgaragenreinigung, ${state.stellplaetze} Stellplätze`}
+                            <strong>Zusammenfassung:</strong>{" "}
+                            {state.service === "reinigung" && `${state.reinigungType === "buero" ? "Büroreinigung" : state.reinigungType === "glas" ? "Glasreinigung" : "Grundreinigung"} (${state.auftragsart === "einmalig" ? "Einmalauftrag" : "Unterhaltsreinigung"}), ${state.flaeche} m²${state.auftragsart === "regelmässig" ? `, ${state.frequenz}x/Woche` : ""}`}
+                            {state.service === "tiefgarage" && `Tiefgaragenreinigung (${state.auftragsart === "einmalig" ? "Einmalauftrag" : "Regelmäßig"}), ${state.stellplaetze} Stellplätze`}
                             {state.service === "hausmeister" && `Hausmeisterservice für ${state.objektType === "mfh" ? "Mehrfamilienhaus" : state.objektType === "gewerbe" ? "Gewerbeobjekt" : "Privathaus"}`}
                             {state.service === "winterdienst" && `Winterdienst, ${state.flaeche} m²`}
-                            {" · "}Richtpreis: ab {calculatePrice().toLocaleString("de-DE")} €/Monat
+                            {" · "}Richtpreis: ab {calculatePrice().price.toLocaleString("de-DE")} €{calculatePrice().isMonthly ? "/Monat" : " einmalig"}
                           </div>
                         </div>
                       )}
