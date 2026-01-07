@@ -91,11 +91,11 @@ export function GermanyMap({ className }: { className?: string }) {
 
               {/* Location label with background */}
               <rect
-                x={location.x - 50}
-                y={location.y - 45}
-                width="100"
-                height="24"
-                rx="12"
+                x={location.x - 55}
+                y={location.y - 50}
+                width="110"
+                height="28"
+                rx="14"
                 fill={activeLocation === location.name ? "hsl(var(--foreground))" : "hsl(var(--background) / 0.9)"}
                 stroke="hsl(var(--border))"
                 strokeWidth="1"
@@ -103,43 +103,17 @@ export function GermanyMap({ className }: { className?: string }) {
               />
               <text
                 x={location.x}
-                y={location.y - 28}
+                y={location.y - 30}
                 textAnchor="middle"
                 className="font-semibold transition-all duration-300"
                 style={{ 
-                  fontSize: "14px",
+                  fontSize: "18px",
                   fontFamily: "'Lexend', sans-serif",
                   fill: activeLocation === location.name ? "hsl(var(--background))" : "hsl(var(--foreground))",
                 }}
               >
                 {location.name}
               </text>
-              
-              {/* Description on hover */}
-              {activeLocation === location.name && (
-                <>
-                  <rect
-                    x={location.x - 45}
-                    y={location.y + 25}
-                    width="90"
-                    height="20"
-                    rx="10"
-                    fill="hsl(var(--primary))"
-                  />
-                  <text
-                    x={location.x}
-                    y={location.y + 40}
-                    textAnchor="middle"
-                    style={{ 
-                      fontSize: "11px",
-                      fontFamily: "'Lexend', sans-serif",
-                      fill: "hsl(var(--foreground))",
-                    }}
-                  >
-                    {location.description}
-                  </text>
-                </>
-              )}
             </Link>
           </g>
         ))}
