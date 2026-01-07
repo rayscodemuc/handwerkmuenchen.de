@@ -5,7 +5,7 @@ import { CategoryTrustSection } from "@/components/sections/CategoryTrustSection
 import { SEOHead } from "@/components/SEOHead";
 import { AnimatedButton } from "@/components/ui/animated-button";
 import { Link } from "react-router-dom";
-import { Building2, Home, Snowflake, ClipboardList, Clock, Shield, Users } from "lucide-react";
+import { Building2, Home, Snowflake, ClipboardList, Clock, Shield, Users, ChevronRight } from "lucide-react";
 
 const services = [
   {
@@ -60,6 +60,23 @@ export default function FacilityManagementCategory() {
       />
       <Header />
       <main className="flex-1">
+        {/* Breadcrumb */}
+        <nav className="bg-primary py-4" aria-label="Breadcrumb">
+          <div className="container mx-auto px-4 lg:px-8">
+            <ol className="flex items-center gap-2 text-sm">
+              <li>
+                <Link to="/" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">
+                  Startseite
+                </Link>
+              </li>
+              <ChevronRight className="h-4 w-4 text-primary-foreground/50" />
+              <li>
+                <span className="font-medium text-primary-foreground">Facility Management</span>
+              </li>
+            </ol>
+          </div>
+        </nav>
+
         {/* Hero Section */}
         <section className="relative overflow-hidden bg-[hsl(198,29%,76%)]">
           <div className="relative min-h-[540px] lg:min-h-[650px] pt-8 lg:pt-12">
