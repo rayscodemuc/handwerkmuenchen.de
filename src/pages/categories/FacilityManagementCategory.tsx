@@ -10,19 +10,19 @@ const services = [
   {
     icon: Home,
     title: "Hausmeisterservice",
-    description: "Professionelle Hausmeisterleistungen für einen reibungslosen Gebäudebetrieb.",
+    description: "Ganzheitliche Betreuung für reibungslosen Gebäudebetrieb.",
     link: "/facility-management/hausmeisterservice",
   },
   {
     icon: Snowflake,
     title: "Winterdienst",
-    description: "Zuverlässiger Räum- und Streudienst für sichere Wege im Winter.",
+    description: "Professioneller Räum- und Streudienst für sichere Wege.",
     link: "/facility-management/winterdienst",
   },
   {
     icon: ClipboardList,
     title: "Objektmanagement",
-    description: "Ganzheitliche Objektbetreuung mit regelmäßigen Kontrollen und Dokumentation.",
+    description: "Operative Objektbetreuung mit Kontrollen und Dokumentation.",
     link: "/facility-management/objektmanagement",
   },
 ];

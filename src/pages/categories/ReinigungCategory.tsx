@@ -4,7 +4,7 @@ import { CTASection } from "@/components/sections/CTASection";
 import { SEOHead } from "@/components/SEOHead";
 import { AnimatedButton } from "@/components/ui/animated-button";
 import { Link } from "react-router-dom";
-import { Sparkles, Building, Layers, FlaskConical, Car, Wind, Clock, Shield, Users } from "lucide-react";
+import { Sparkles, Building, PanelTop, FlaskConical, Clock, Shield, Users } from "lucide-react";
 
 const services = [
   {
@@ -14,34 +14,16 @@ const services = [
     link: "/reinigung/unterhaltsreinigung",
   },
   {
-    icon: Wind,
-    title: "Fensterreinigung",
-    description: "Streifenfreie Glas- und Fensterreinigung für klare Durchsicht.",
+    icon: PanelTop,
+    title: "Glas- & Fensterreinigung",
+    description: "Streifenfreie Reinigung für klare Durchsicht.",
     link: "/reinigung/fensterreinigung",
   },
   {
     icon: FlaskConical,
     title: "Sonderreinigung",
-    description: "Spezialreinigungen für besondere Anforderungen und Oberflächen.",
+    description: "Tiefgaragen- und Grundreinigung für spezielle Anforderungen.",
     link: "/reinigung/sonderreinigung",
-  },
-  {
-    icon: Car,
-    title: "Tiefgaragenreinigung",
-    description: "Professionelle Reinigung von Tiefgaragen und Parkhäusern.",
-    link: "/reinigung/tiefgaragenreinigung",
-  },
-  {
-    icon: Layers,
-    title: "Grundreinigung",
-    description: "Intensive Reinigung zur Wiederherstellung des Ursprungszustands.",
-    link: "/reinigung/grundreinigung",
-  },
-  {
-    icon: Building,
-    title: "Büroreinigung",
-    description: "Saubere Arbeitsplätze für ein produktives Arbeitsumfeld.",
-    link: "/reinigung/bueroreinigung",
   },
 ];
 
