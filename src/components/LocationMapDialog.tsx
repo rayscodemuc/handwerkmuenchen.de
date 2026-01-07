@@ -61,7 +61,7 @@ export function LocationMapDialog({ open, onOpenChange }: LocationMapDialogProps
           </div>
 
           {/* Contact Info */}
-          <div className="flex flex-wrap items-center justify-center gap-6 rounded-xl bg-primary p-4">
+          <div className="flex flex-col items-center justify-center gap-3 rounded-xl bg-primary p-4">
             <a 
               href="tel:+498925006354" 
               className="flex items-center gap-2 text-foreground hover:text-foreground/80 transition-colors"
