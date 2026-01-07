@@ -28,11 +28,11 @@ export default function Datenschutz() {
                 Verantwortlicher für die Datenverarbeitung auf dieser Website ist:
               </p>
               <p className="text-foreground mb-6">
-                Mr.Clean Services GmbH<br />
-                Musterstraße 123<br />
-                12345 Berlin<br />
-                E-Mail: datenschutz@mrclean-services.de<br />
-                Telefon: +49 123 456 789 00
+                Mr. Clean Services GmbH<br />
+                Agnes-Bernauer-Str. 11<br />
+                80687 München<br />
+                E-Mail: kontakt@mr-clean-services.de<br />
+                Telefon: +49 (0)89 25006354
               </p>
 
               <h2 className="text-2xl font-bold mt-10 mb-4">2. Erhebung und Speicherung personenbezogener Daten</h2>
