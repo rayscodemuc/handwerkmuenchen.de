@@ -10,6 +10,7 @@ export default function Tiefgaragenreinigung() {
       categoryHref="/reinigung"
       description="Professionelle Tiefgaragenreinigung in Berlin. Entfernung von Schmutz, Öl und Reifenabrieb für sichere und gepflegte Parkflächen."
       longDescription="Tiefgaragen sind besonderen Belastungen ausgesetzt. Unsere Spezialreinigung entfernt hartnäckigen Schmutz und sorgt für ein sauberes Parkerlebnis."
+      imageAlt="Maschinelle Tiefgaragenreinigung und Ölfleckentfernung"
       keywords={["Tiefgaragenreinigung Berlin", "Parkhaus reinigen", "Garagenreinigung", "Ölfleckentfernung"]}
       features={[
         "Maschinelle Bodenreinigung",

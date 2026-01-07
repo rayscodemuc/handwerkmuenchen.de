@@ -10,6 +10,7 @@ export default function Winterdienst() {
       categoryHref="/facility-management"
       description="Professioneller Winterdienst mit 100% Haftungsübernahme. Schneeräumung und Streudienst für Gewerbe- und Wohnimmobilien in Berlin."
       longDescription="Eis und Schnee stellen ein erhebliches Haftungsrisiko dar. Mit unserem Winterdienst übertragen Sie die Verkehrssicherungspflicht vollständig an uns."
+      imageAlt="Winterdienst und Schneeräumung für Gewerbeimmobilien"
       keywords={["Winterdienst Berlin", "Schneeräumung Gewerbe", "Streudienst", "Räumpflicht"]}
       features={[
         "100% Haftungsübernahme für Verkehrssicherungspflicht",

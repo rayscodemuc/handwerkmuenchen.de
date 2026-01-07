@@ -10,6 +10,7 @@ export default function GlasFassade() {
       categoryHref="/reinigung"
       description="Professionelle Glas- und Fassadenreinigung in Berlin. Strahlend saubere Glasflächen und gepflegte Fassaden für Ihren repräsentativen Auftritt."
       longDescription="Der erste Eindruck zählt. Saubere Glasflächen und gepflegte Fassaden präsentieren Ihr Unternehmen von der besten Seite."
+      imageAlt="Fachgerechte Glas- und Fassadenreinigung für Geschäftsgebäude"
       keywords={["Fassadenreinigung Berlin", "Glasreinigung Gewerbe", "Fassadenpflege", "Außenreinigung"]}
       features={[
         "Fensterreinigung innen und außen",

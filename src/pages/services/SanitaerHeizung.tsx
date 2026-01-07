@@ -10,6 +10,7 @@ export default function SanitaerHeizung() {
       categoryHref="/handwerk"
       description="Professionelle Sanitär- und Heizungsinstallation, Wartung und 24/7 Notdienst für Gewerbe- und Wohnimmobilien in Berlin und Brandenburg."
       longDescription="Von der Heizungswartung bis zur Rohrbruch-Behebung – unser erfahrenes Team aus Sanitär- und Heizungsinstallateuren steht Ihnen rund um die Uhr zur Verfügung. Wir sorgen für funktionierende Sanitäranlagen, effiziente Heizsysteme und schnelle Hilfe im Notfall."
+      imageAlt="Sanitär- und Heizungsinstallation durch qualifizierte Handwerker"
       keywords={["Sanitär Notdienst Berlin", "Heizungswartung", "Rohrbruch", "Heizungsinstallation"]}
       features={[
         "Installation und Wartung von Heizungsanlagen",

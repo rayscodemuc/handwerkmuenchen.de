@@ -8,6 +8,7 @@ export default function Nuernberg() {
       seoDescription="Professionelle Gebäudereinigung und Facility Management in Nürnberg. Handwerk, Reinigung und Objektbetreuung aus einer Hand."
       districts={["Altstadt", "St. Johannis", "Gostenhof", "Langwasser", "Röthenbach", "Zerzabelshof"]}
       localHighlight="Von der historischen Altstadt bis nach Langwasser und Röthenbach – unser Nürnberger Team betreut Objekte im gesamten Stadtgebiet und der Metropolregion."
+      heroAltText="Professionelle Unterhaltsreinigung und Facility Management in Nürnberg"
     />
   );
 }

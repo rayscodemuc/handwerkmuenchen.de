@@ -10,6 +10,7 @@ export default function Sonderreinigung() {
       categoryHref="/reinigung"
       description="Professionelle Sonderreinigung in Berlin für besondere Anforderungen. Von Baureinigung bis Industriereinigung – Speziallösungen für jeden Bedarf."
       longDescription="Manchmal reicht die reguläre Reinigung nicht aus. Unsere Sonderreinigung bietet spezialisierte Lösungen für besonders anspruchsvolle Reinigungsaufgaben."
+      imageAlt="Spezialisierte Sonderreinigung für Industrie und Gewerbe"
       keywords={["Sonderreinigung Berlin", "Baureinigung", "Industriereinigung", "Teppichreinigung"]}
       features={[
         "Baureinigung nach Renovierung",

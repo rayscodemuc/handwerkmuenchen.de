@@ -8,6 +8,7 @@ export default function Muenchen() {
       seoDescription="Ihr zuverlässiger Partner für Reinigung, Handwerk und Facility Management in München & Umland. Ein Ansprechpartner für alle Gewerke."
       districts={["Schwabing", "Bogenhausen", "Maxvorstadt", "Sendling", "Pasing", "Trudering"]}
       localHighlight="Von Schwabing bis Sendling, von Pasing bis Trudering – wir sind in allen Münchner Stadtteilen und im gesamten Umland für Sie im Einsatz."
+      heroAltText="Professionelle Gebäudereinigung und Facility Management in München Schwabing"
     />
   );
 }

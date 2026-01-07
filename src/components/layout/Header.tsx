@@ -81,7 +81,7 @@ export function Header() {
           <Link to="/" className="flex items-center">
             <img 
               src={logo} 
-              alt="Mr.Clean Services GmbH" 
+              alt="Mr.Clean Services – Ihr Partner für Facility Management, Handwerk und Reinigung" 
               className="h-10 w-auto lg:h-12"
             />
           </Link>

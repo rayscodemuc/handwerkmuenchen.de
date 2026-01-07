@@ -10,6 +10,7 @@ export default function Baumpflege() {
       categoryHref="/aussenanlagen"
       description="Professionelle Baumpflege in Berlin für gesunde Bäume und sichere Grundstücke. Baumschnitt, Fällung und Verkehrssicherungsprüfung."
       longDescription="Bäume brauchen regelmäßige Pflege für Gesundheit und Sicherheit. Unsere zertifizierten Baumpfleger sorgen für fachgerechte Behandlung."
+      imageAlt="Fachgerechte Baumpflege und Baumschnitt durch zertifizierte Experten"
       keywords={["Baumpflege Berlin", "Baumschnitt", "Baumfällung", "Verkehrssicherung Bäume"]}
       features={[
         "Baumschnitt und Kronenrückschnitt",

@@ -10,6 +10,7 @@ export default function Hausmeisterservice() {
       categoryHref="/facility-management"
       description="Professioneller Hausmeisterservice für Wohn- und Gewerbeobjekte in Berlin. Zuverlässige Betreuung, regelmäßige Kontrollen und schnelle Hilfe."
       longDescription="Ein gepflegtes Objekt steigert den Wert Ihrer Immobilie und sorgt für zufriedene Mieter. Unser Hausmeisterservice übernimmt alle anfallenden Aufgaben rund um Ihr Gebäude."
+      imageAlt="Zuverlässiger Hausmeisterservice für Wohn- und Gewerbeobjekte"
       keywords={["Hausmeister Berlin", "Hausmeisterservice Gewerbe", "Objektbetreuung", "Facility Service"]}
       features={[
         "Regelmäßige Objektbegehungen und Kontrollen",

@@ -10,6 +10,7 @@ export default function Gruenpflege() {
       categoryHref="/aussenanlagen"
       description="Professionelle Grünpflege in Berlin für gepflegte Außenanlagen. Rasenpflege, Heckenschnitt und Beetpflege für einen positiven ersten Eindruck."
       longDescription="Gepflegte Grünanlagen werten Ihre Immobilie auf und schaffen eine angenehme Atmosphäre für Mieter, Besucher und Mitarbeiter."
+      imageAlt="Garten- und Grünflächenpflege für Gewerbeimmobilien"
       keywords={["Grünpflege Berlin", "Rasenpflege Gewerbe", "Heckenschnitt", "Gartenpflege Immobilie"]}
       features={[
         "Rasenpflege und -schnitt",

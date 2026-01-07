@@ -10,6 +10,7 @@ export default function Elektrotechnik() {
       categoryHref="/handwerk"
       description="Rechtssichere Elektroprüfungen nach DGUV V3 und umfassende elektrotechnische Dienstleistungen für Gewerbe- und Wohnimmobilien in Berlin und Brandenburg."
       longDescription="Als zertifizierter Elektrofachbetrieb bieten wir Ihnen das komplette Spektrum elektrotechnischer Dienstleistungen. Von der gesetzlich vorgeschriebenen DGUV V3 Prüfung bis zur kompletten Elektroinstallation – unsere qualifizierten Elektriker sorgen für Sicherheit, Effizienz und Zuverlässigkeit in Ihren Objekten. Wir arbeiten nach den neuesten VDE-Normen und garantieren eine lückenlose Dokumentation aller Arbeiten."
+      imageAlt="Fachgerechte Elektroinstallation und Wartung durch Mr. Clean Services"
       keywords={["DGUV V3 Prüfung", "E-Check Berlin", "Elektroprüfung Gewerbe", "Thermografie", "Elektrofachbetrieb"]}
       features={[
         "DGUV V3 Prüfungen für ortsveränderliche Geräte",

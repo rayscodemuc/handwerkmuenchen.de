@@ -10,6 +10,7 @@ export default function ServiceWartung() {
       categoryHref="/handwerk"
       description="Professionelle Wartung und Instandhaltung technischer Anlagen für maximale Betriebssicherheit und Langlebigkeit Ihrer Gebäudetechnik."
       longDescription="Regelmäßige Wartung ist der Schlüssel zu zuverlässiger Gebäudetechnik. Unser Team kümmert sich um alle technischen Anlagen – von Heizung über Lüftung bis zu elektrischen Systemen."
+      imageAlt="Technische Wartung und Instandhaltung von Gebäudeanlagen"
       keywords={["Wartungsvertrag", "Instandhaltung Berlin", "Gebäudetechnik Wartung", "präventive Wartung"]}
       features={[
         "Wartungsverträge für alle technischen Gewerke",

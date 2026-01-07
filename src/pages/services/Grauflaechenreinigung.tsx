@@ -10,6 +10,7 @@ export default function Grauflaechenreinigung() {
       categoryHref="/aussenanlagen"
       description="Professionelle Grauflächenreinigung in Berlin für saubere Parkplätze, Wege und Hofflächen. Kehrmaschinen und Hochdruckreinigung."
       longDescription="Versiegelte Flächen wie Parkplätze und Gehwege sind die Visitenkarte Ihres Objekts. Wir sorgen für saubere und gepflegte Grauflächen."
+      imageAlt="Grauflächenreinigung und Gehwegpflege für gepflegte Außenanlagen"
       keywords={["Grauflächenreinigung Berlin", "Parkplatzreinigung", "Hofreinigung", "Kehrmaschinenreinigung"]}
       features={[
         "Kehrmaschinenreinigung",
