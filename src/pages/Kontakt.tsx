@@ -145,6 +145,24 @@ export default function Kontakt() {
                 </Link>
               ))}
             </div>
+
+            {/* Contact Info below locations */}
+            <div className="mt-12 flex flex-col items-center gap-4">
+              <a 
+                href="tel:+498925006354" 
+                className="flex items-center gap-2 text-lg font-medium text-foreground hover:text-primary transition-colors"
+              >
+                <Phone className="h-5 w-5 text-primary" />
+                +49 (0)89 25006354
+              </a>
+              <a 
+                href="mailto:kontakt@mr-clean-services.de" 
+                className="flex items-center gap-2 text-lg font-medium text-foreground hover:text-primary transition-colors"
+              >
+                <Mail className="h-5 w-5 text-primary" />
+                kontakt@mr-clean-services.de
+              </a>
+            </div>
           </div>
         </section>
       </main>
