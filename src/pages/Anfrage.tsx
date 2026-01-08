@@ -6,18 +6,20 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { Send, Phone, Mail, MapPin, Clock } from "lucide-react";
+import { useFormSubmit, type InquiryFormFields } from "@/hooks/useFormSubmit";
+
+const FORM_ID = "inquiry_form";
 
 const anfrageSchema = z.object({
-  name: z.string().trim().min(1, "Name ist erforderlich").max(100),
-  company: z.string().trim().max(100).optional(),
-  email: z.string().trim().email("Ungültige E-Mail-Adresse").max(255),
-  phone: z.string().trim().max(30).optional(),
-  service: z.string().min(1, "Bitte wählen Sie eine Leistung"),
+  customer_name: z.string().trim().min(1, "Name ist erforderlich").max(100),
+  company_name: z.string().trim().max(100).optional(),
+  customer_email: z.string().trim().email("Ungültige E-Mail-Adresse").max(255),
+  customer_phone: z.string().trim().max(30).optional(),
+  service_type: z.string().min(1, "Bitte wählen Sie eine Leistung"),
   message: z.string().trim().min(1, "Nachricht ist erforderlich").max(2000),
-  privacy: z.boolean().refine((val) => val === true, "Bitte stimmen Sie der Datenschutzerklärung zu"),
+  privacy_accepted: z.boolean().refine((val) => val === true, "Bitte stimmen Sie der Datenschutzerklärung zu"),
 });
 
 const serviceOptions = [
@@ -58,20 +60,20 @@ const contactInfo = [
 ];
 
 export default function Anfrage() {
-  const { toast } = useToast();
+  const { submitForm } = useFormSubmit();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    company: "",
-    email: "",
-    phone: "",
-    service: "",
+  const [formData, setFormData] = useState<InquiryFormFields>({
+    customer_name: "",
+    company_name: "",
+    customer_email: "",
+    customer_phone: "",
+    service_type: "",
     message: "",
-    privacy: false,
+    privacy_accepted: false,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleChange = (field: string, value: string | boolean) => {
+  const handleChange = (field: keyof InquiryFormFields, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: "" }));
@@ -96,22 +98,19 @@ export default function Anfrage() {
 
     setIsSubmitting(true);
     
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    
-    toast({
-      title: "Anfrage erfolgreich gesendet",
-      description: "Wir werden uns schnellstmöglich bei Ihnen melden.",
+    await submitForm(FORM_ID, formData, {
+      successTitle: "Anfrage erfolgreich gesendet",
+      successDescription: "Wir werden uns schnellstmöglich bei Ihnen melden.",
     });
     
     setFormData({
-      name: "",
-      company: "",
-      email: "",
-      phone: "",
-      service: "",
+      customer_name: "",
+      company_name: "",
+      customer_email: "",
+      customer_phone: "",
+      service_type: "",
       message: "",
-      privacy: false,
+      privacy_accepted: false,
     });
     setIsSubmitting(false);
   };
@@ -192,63 +191,68 @@ export default function Anfrage() {
 
                   <div className="grid gap-6 md:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="name">Name *</Label>
+                      <Label htmlFor="customer_name">Name *</Label>
                       <Input
-                        id="name"
-                        value={formData.name}
-                        onChange={(e) => handleChange("name", e.target.value)}
+                        id="customer_name"
+                        name="customer_name"
+                        value={formData.customer_name}
+                        onChange={(e) => handleChange("customer_name", e.target.value)}
                         placeholder="Max Mustermann"
-                        className={errors.name ? "border-destructive" : ""}
+                        className={errors.customer_name ? "border-destructive" : ""}
                       />
-                      {errors.name && (
-                        <p className="text-sm text-destructive">{errors.name}</p>
+                      {errors.customer_name && (
+                        <p className="text-sm text-destructive">{errors.customer_name}</p>
                       )}
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="company">Firma (optional)</Label>
+                      <Label htmlFor="company_name">Firma (optional)</Label>
                       <Input
-                        id="company"
-                        value={formData.company}
-                        onChange={(e) => handleChange("company", e.target.value)}
+                        id="company_name"
+                        name="company_name"
+                        value={formData.company_name}
+                        onChange={(e) => handleChange("company_name", e.target.value)}
                         placeholder="Ihre Firma GmbH"
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="email">E-Mail *</Label>
+                      <Label htmlFor="customer_email">E-Mail *</Label>
                       <Input
-                        id="email"
+                        id="customer_email"
+                        name="customer_email"
                         type="email"
-                        value={formData.email}
-                        onChange={(e) => handleChange("email", e.target.value)}
+                        value={formData.customer_email}
+                        onChange={(e) => handleChange("customer_email", e.target.value)}
                         placeholder="max@beispiel.de"
-                        className={errors.email ? "border-destructive" : ""}
+                        className={errors.customer_email ? "border-destructive" : ""}
                       />
-                      {errors.email && (
-                        <p className="text-sm text-destructive">{errors.email}</p>
+                      {errors.customer_email && (
+                        <p className="text-sm text-destructive">{errors.customer_email}</p>
                       )}
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="phone">Telefon (optional)</Label>
+                      <Label htmlFor="customer_phone">Telefon (optional)</Label>
                       <Input
-                        id="phone"
+                        id="customer_phone"
+                        name="customer_phone"
                         type="tel"
-                        value={formData.phone}
-                        onChange={(e) => handleChange("phone", e.target.value)}
+                        value={formData.customer_phone}
+                        onChange={(e) => handleChange("customer_phone", e.target.value)}
                         placeholder="+49 123 456789"
                       />
                     </div>
                   </div>
 
                   <div className="mt-6 space-y-2">
-                    <Label htmlFor="service">Gewünschte Leistung *</Label>
+                    <Label htmlFor="service_type">Gewünschte Leistung *</Label>
                     <Select
-                      value={formData.service}
-                      onValueChange={(value) => handleChange("service", value)}
+                      name="service_type"
+                      value={formData.service_type}
+                      onValueChange={(value) => handleChange("service_type", value)}
                     >
-                      <SelectTrigger className={errors.service ? "border-destructive" : ""}>
+                      <SelectTrigger className={errors.service_type ? "border-destructive" : ""}>
                         <SelectValue placeholder="Leistung auswählen" />
                       </SelectTrigger>
                       <SelectContent>
@@ -259,8 +263,8 @@ export default function Anfrage() {
                         ))}
                       </SelectContent>
                     </Select>
-                    {errors.service && (
-                      <p className="text-sm text-destructive">{errors.service}</p>
+                    {errors.service_type && (
+                      <p className="text-sm text-destructive">{errors.service_type}</p>
                     )}
                   </div>
 
@@ -268,6 +272,7 @@ export default function Anfrage() {
                     <Label htmlFor="message">Ihre Nachricht *</Label>
                     <Textarea
                       id="message"
+                      name="message"
                       value={formData.message}
                       onChange={(e) => handleChange("message", e.target.value)}
                       placeholder="Beschreiben Sie Ihr Anliegen, Ihren Bedarf oder Ihre Fragen..."
@@ -281,14 +286,15 @@ export default function Anfrage() {
 
                   <div className="mt-6 flex items-start gap-3">
                     <Checkbox
-                      id="privacy"
-                      checked={formData.privacy}
-                      onCheckedChange={(checked) => handleChange("privacy", checked === true)}
-                      className={errors.privacy ? "border-destructive" : ""}
+                      id="privacy_accepted"
+                      name="privacy_accepted"
+                      checked={formData.privacy_accepted}
+                      onCheckedChange={(checked) => handleChange("privacy_accepted", checked === true)}
+                      className={errors.privacy_accepted ? "border-destructive" : ""}
                     />
                     <div className="grid gap-1.5 leading-none">
                       <Label
-                        htmlFor="privacy"
+                        htmlFor="privacy_accepted"
                         className="text-sm font-normal text-muted-foreground cursor-pointer"
                       >
                         Ich stimme der Verarbeitung meiner Daten gemäß der{" "}
@@ -297,8 +303,8 @@ export default function Anfrage() {
                         </a>{" "}
                         zu. *
                       </Label>
-                      {errors.privacy && (
-                        <p className="text-sm text-destructive">{errors.privacy}</p>
+                      {errors.privacy_accepted && (
+                        <p className="text-sm text-destructive">{errors.privacy_accepted}</p>
                       )}
                     </div>
                   </div>

@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useContactForm, locationOptions, serviceOptions, ContactFormData } from "@/hooks/useContactForm";
+import { useContactForm, locationOptions, serviceOptions } from "@/hooks/useContactForm";
 import { cn } from "@/lib/utils";
 
 interface ContactFormProps {
@@ -103,59 +103,63 @@ export function ContactForm({
 
       <form onSubmit={handleSubmit} className={cn("space-y-6", showTitle && "mt-8")}>
         {/* Hidden field for page tracking */}
-        <input type="hidden" name="pageName" value={pageName || ""} />
+        <input type="hidden" name="page_name" value={pageName || ""} />
 
         <div className="grid gap-6 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="firstName" className={labelClasses}>Vorname *</Label>
+            <Label htmlFor="customer_first_name" className={labelClasses}>Vorname *</Label>
             <Input
-              id="firstName"
-              value={formData.firstName}
-              onChange={(e) => handleChange("firstName", e.target.value)}
+              id="customer_first_name"
+              name="customer_first_name"
+              value={formData.customer_first_name}
+              onChange={(e) => handleChange("customer_first_name", e.target.value)}
               placeholder="Max"
-              className={cn(inputClasses, errors.firstName && "border-destructive")}
+              className={cn(inputClasses, errors.customer_first_name && "border-destructive")}
             />
-            {errors.firstName && (
-              <p className="text-sm text-destructive">{errors.firstName}</p>
+            {errors.customer_first_name && (
+              <p className="text-sm text-destructive">{errors.customer_first_name}</p>
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="lastName" className={labelClasses}>Nachname *</Label>
+            <Label htmlFor="customer_last_name" className={labelClasses}>Nachname *</Label>
             <Input
-              id="lastName"
-              value={formData.lastName}
-              onChange={(e) => handleChange("lastName", e.target.value)}
+              id="customer_last_name"
+              name="customer_last_name"
+              value={formData.customer_last_name}
+              onChange={(e) => handleChange("customer_last_name", e.target.value)}
               placeholder="Mustermann"
-              className={cn(inputClasses, errors.lastName && "border-destructive")}
+              className={cn(inputClasses, errors.customer_last_name && "border-destructive")}
             />
-            {errors.lastName && (
-              <p className="text-sm text-destructive">{errors.lastName}</p>
+            {errors.customer_last_name && (
+              <p className="text-sm text-destructive">{errors.customer_last_name}</p>
             )}
           </div>
         </div>
 
         <div className="grid gap-6 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="email" className={labelClasses}>E-Mail *</Label>
+            <Label htmlFor="customer_email" className={labelClasses}>E-Mail *</Label>
             <Input
-              id="email"
+              id="customer_email"
+              name="customer_email"
               type="email"
-              value={formData.email}
-              onChange={(e) => handleChange("email", e.target.value)}
+              value={formData.customer_email}
+              onChange={(e) => handleChange("customer_email", e.target.value)}
               placeholder="max@beispiel.de"
-              className={cn(inputClasses, errors.email && "border-destructive")}
+              className={cn(inputClasses, errors.customer_email && "border-destructive")}
             />
-            {errors.email && (
-              <p className="text-sm text-destructive">{errors.email}</p>
+            {errors.customer_email && (
+              <p className="text-sm text-destructive">{errors.customer_email}</p>
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="phone" className={labelClasses}>Telefon (optional)</Label>
+            <Label htmlFor="customer_phone" className={labelClasses}>Telefon (optional)</Label>
             <Input
-              id="phone"
+              id="customer_phone"
+              name="customer_phone"
               type="tel"
-              value={formData.phone}
-              onChange={(e) => handleChange("phone", e.target.value)}
+              value={formData.customer_phone}
+              onChange={(e) => handleChange("customer_phone", e.target.value)}
               placeholder="+49 123 456 789"
               className={inputClasses}
             />
@@ -167,10 +171,11 @@ export function ContactForm({
           <div className="grid gap-6 sm:grid-cols-2">
             {showLocationDropdown && (
               <div className="space-y-2">
-                <Label htmlFor="location" className={labelClasses}>Welcher Standort?</Label>
+                <Label htmlFor="city" className={labelClasses}>Welcher Standort?</Label>
                 <Select
-                  value={formData.location}
-                  onValueChange={(value) => handleChange("location", value)}
+                  name="city"
+                  value={formData.city}
+                  onValueChange={(value) => handleChange("city", value)}
                 >
                   <SelectTrigger className={inputClasses}>
                     <SelectValue placeholder="Standort wählen" />
@@ -187,10 +192,11 @@ export function ContactForm({
             )}
             {showServiceDropdown && (
               <div className="space-y-2">
-                <Label htmlFor="service" className={labelClasses}>Welches Gewerk?</Label>
+                <Label htmlFor="service_type" className={labelClasses}>Welches Gewerk?</Label>
                 <Select
-                  value={formData.service}
-                  onValueChange={(value) => handleChange("service", value)}
+                  name="service_type"
+                  value={formData.service_type}
+                  onValueChange={(value) => handleChange("service_type", value)}
                 >
                   <SelectTrigger className={inputClasses}>
                     <SelectValue placeholder="Gewerk wählen" />
@@ -212,6 +218,7 @@ export function ContactForm({
           <Label htmlFor="message" className={labelClasses}>Nachricht *</Label>
           <Textarea
             id="message"
+            name="message"
             value={formData.message}
             onChange={(e) => handleChange("message", e.target.value)}
             placeholder="Beschreiben Sie Ihr Anliegen..."

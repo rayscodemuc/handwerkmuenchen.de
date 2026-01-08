@@ -7,15 +7,17 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
+import { useFormSubmit, type PartnerFormFields } from "@/hooks/useFormSubmit";
+
+const FORM_ID = "partner_application_form";
 
 const partnerFormSchema = z.object({
-  company: z.string().trim().min(1, "Firmenname ist erforderlich").max(100),
-  contact: z.string().trim().min(1, "Ansprechpartner ist erforderlich").max(100),
-  email: z.string().trim().email("Ungültige E-Mail-Adresse").max(255),
-  phone: z.string().trim().min(1, "Telefonnummer ist erforderlich").max(30),
-  category: z.string().min(1, "Bitte wählen Sie einen Bereich"),
+  company_name: z.string().trim().min(1, "Firmenname ist erforderlich").max(100),
+  contact_person: z.string().trim().min(1, "Ansprechpartner ist erforderlich").max(100),
+  customer_email: z.string().trim().email("Ungültige E-Mail-Adresse").max(255),
+  customer_phone: z.string().trim().min(1, "Telefonnummer ist erforderlich").max(30),
+  service_category: z.string().min(1, "Bitte wählen Sie einen Bereich"),
   region: z.string().trim().min(1, "Region ist erforderlich").max(100),
   message: z.string().trim().max(1000).optional(),
 });
@@ -90,20 +92,20 @@ const serviceCategories = [
 ];
 
 export default function PartnerWerden() {
-  const { toast } = useToast();
+  const { submitForm } = useFormSubmit();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    company: "",
-    contact: "",
-    email: "",
-    phone: "",
-    category: "",
+  const [formData, setFormData] = useState<PartnerFormFields>({
+    company_name: "",
+    contact_person: "",
+    customer_email: "",
+    customer_phone: "",
+    service_category: "",
     region: "",
     message: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleChange = (field: string, value: string) => {
+  const handleChange = (field: keyof PartnerFormFields, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: "" }));
@@ -128,20 +130,17 @@ export default function PartnerWerden() {
 
     setIsSubmitting(true);
     
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    
-    toast({
-      title: "Bewerbung erfolgreich gesendet",
-      description: "Wir werden uns in Kürze bei Ihnen melden.",
+    await submitForm(FORM_ID, formData, {
+      successTitle: "Bewerbung erfolgreich gesendet",
+      successDescription: "Wir werden uns in Kürze bei Ihnen melden.",
     });
     
     setFormData({
-      company: "",
-      contact: "",
-      email: "",
-      phone: "",
-      category: "",
+      company_name: "",
+      contact_person: "",
+      customer_email: "",
+      customer_phone: "",
+      service_category: "",
       region: "",
       message: "",
     });
@@ -266,70 +265,75 @@ export default function PartnerWerden() {
               <form onSubmit={handleSubmit} className="rounded-3xl bg-surface p-8 lg:p-10">
                 <div className="grid gap-6 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="company">Firmenname *</Label>
+                    <Label htmlFor="company_name">Firmenname *</Label>
                     <Input
-                      id="company"
-                      value={formData.company}
-                      onChange={(e) => handleChange("company", e.target.value)}
+                      id="company_name"
+                      name="company_name"
+                      value={formData.company_name}
+                      onChange={(e) => handleChange("company_name", e.target.value)}
                       placeholder="Ihre Firma GmbH"
-                      className={errors.company ? "border-destructive" : ""}
+                      className={errors.company_name ? "border-destructive" : ""}
                     />
-                    {errors.company && (
-                      <p className="text-sm text-destructive">{errors.company}</p>
+                    {errors.company_name && (
+                      <p className="text-sm text-destructive">{errors.company_name}</p>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="contact">Ansprechpartner *</Label>
+                    <Label htmlFor="contact_person">Ansprechpartner *</Label>
                     <Input
-                      id="contact"
-                      value={formData.contact}
-                      onChange={(e) => handleChange("contact", e.target.value)}
+                      id="contact_person"
+                      name="contact_person"
+                      value={formData.contact_person}
+                      onChange={(e) => handleChange("contact_person", e.target.value)}
                       placeholder="Max Mustermann"
-                      className={errors.contact ? "border-destructive" : ""}
+                      className={errors.contact_person ? "border-destructive" : ""}
                     />
-                    {errors.contact && (
-                      <p className="text-sm text-destructive">{errors.contact}</p>
+                    {errors.contact_person && (
+                      <p className="text-sm text-destructive">{errors.contact_person}</p>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="email">E-Mail *</Label>
+                    <Label htmlFor="customer_email">E-Mail *</Label>
                     <Input
-                      id="email"
+                      id="customer_email"
+                      name="customer_email"
                       type="email"
-                      value={formData.email}
-                      onChange={(e) => handleChange("email", e.target.value)}
+                      value={formData.customer_email}
+                      onChange={(e) => handleChange("customer_email", e.target.value)}
                       placeholder="info@ihre-firma.de"
-                      className={errors.email ? "border-destructive" : ""}
+                      className={errors.customer_email ? "border-destructive" : ""}
                     />
-                    {errors.email && (
-                      <p className="text-sm text-destructive">{errors.email}</p>
+                    {errors.customer_email && (
+                      <p className="text-sm text-destructive">{errors.customer_email}</p>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Telefon *</Label>
+                    <Label htmlFor="customer_phone">Telefon *</Label>
                     <Input
-                      id="phone"
+                      id="customer_phone"
+                      name="customer_phone"
                       type="tel"
-                      value={formData.phone}
-                      onChange={(e) => handleChange("phone", e.target.value)}
+                      value={formData.customer_phone}
+                      onChange={(e) => handleChange("customer_phone", e.target.value)}
                       placeholder="+49 123 456789"
-                      className={errors.phone ? "border-destructive" : ""}
+                      className={errors.customer_phone ? "border-destructive" : ""}
                     />
-                    {errors.phone && (
-                      <p className="text-sm text-destructive">{errors.phone}</p>
+                    {errors.customer_phone && (
+                      <p className="text-sm text-destructive">{errors.customer_phone}</p>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="category">Tätigkeitsbereich *</Label>
+                    <Label htmlFor="service_category">Tätigkeitsbereich *</Label>
                     <Select
-                      value={formData.category}
-                      onValueChange={(value) => handleChange("category", value)}
+                      name="service_category"
+                      value={formData.service_category}
+                      onValueChange={(value) => handleChange("service_category", value)}
                     >
-                      <SelectTrigger className={errors.category ? "border-destructive" : ""}>
+                      <SelectTrigger className={errors.service_category ? "border-destructive" : ""}>
                         <SelectValue placeholder="Bereich auswählen" />
                       </SelectTrigger>
                       <SelectContent>
@@ -340,8 +344,8 @@ export default function PartnerWerden() {
                         ))}
                       </SelectContent>
                     </Select>
-                    {errors.category && (
-                      <p className="text-sm text-destructive">{errors.category}</p>
+                    {errors.service_category && (
+                      <p className="text-sm text-destructive">{errors.service_category}</p>
                     )}
                   </div>
 
@@ -349,6 +353,7 @@ export default function PartnerWerden() {
                     <Label htmlFor="region">Einsatzregion *</Label>
                     <Input
                       id="region"
+                      name="region"
                       value={formData.region}
                       onChange={(e) => handleChange("region", e.target.value)}
                       placeholder="z.B. Berlin, Brandenburg"
@@ -364,6 +369,7 @@ export default function PartnerWerden() {
                   <Label htmlFor="message">Nachricht (optional)</Label>
                   <Textarea
                     id="message"
+                    name="message"
                     value={formData.message}
                     onChange={(e) => handleChange("message", e.target.value)}
                     placeholder="Erzählen Sie uns mehr über Ihr Unternehmen und Ihre Leistungen..."
