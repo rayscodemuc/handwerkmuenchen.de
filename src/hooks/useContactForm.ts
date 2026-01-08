@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { z } from "zod";
+import { useFormSubmit, type ContactFormFields } from "@/hooks/useFormSubmit";
 
 // Ziel-E-Mail für späteres E-Mail-Routing (einfach hier anpassen)
 export const EMAIL_CONFIG = {
@@ -40,12 +41,12 @@ export const serviceOptions = [
 ];
 
 export const contactFormSchema = z.object({
-  firstName: z.string().trim().min(1, "Vorname ist erforderlich").max(50),
-  lastName: z.string().trim().min(1, "Nachname ist erforderlich").max(50),
-  email: z.string().trim().email("Ungültige E-Mail-Adresse").max(255),
-  phone: z.string().trim().max(30).optional(),
-  location: z.string().optional(),
-  service: z.string().optional(),
+  customer_first_name: z.string().trim().min(1, "Vorname ist erforderlich").max(50),
+  customer_last_name: z.string().trim().min(1, "Nachname ist erforderlich").max(50),
+  customer_email: z.string().trim().email("Ungültige E-Mail-Adresse").max(255),
+  customer_phone: z.string().trim().max(30).optional(),
+  city: z.string().optional(),
+  service_type: z.string().optional(),
   message: z.string().trim().min(1, "Nachricht ist erforderlich").max(2000),
 });
 
@@ -57,17 +58,20 @@ interface UseContactFormOptions {
   presetService?: string;
 }
 
+const FORM_ID = "contact_form";
+
 export function useContactForm(options: UseContactFormOptions = {}) {
   const location = useLocation();
+  const { submitForm } = useFormSubmit();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [formData, setFormData] = useState<ContactFormData>({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    location: options.presetLocation || "",
-    service: options.presetService || "",
+  const [formData, setFormData] = useState<ContactFormFields>({
+    customer_first_name: "",
+    customer_last_name: "",
+    customer_email: "",
+    customer_phone: "",
+    city: options.presetLocation || "",
+    service_type: options.presetService || "",
     message: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -91,16 +95,16 @@ export function useContactForm(options: UseContactFormOptions = {}) {
 
   // E-Mail-Routing basierend auf Standort/Gewerk
   const getTargetEmail = (): string => {
-    if (formData.location && EMAIL_CONFIG.locationEmails[formData.location as keyof typeof EMAIL_CONFIG.locationEmails]) {
-      return EMAIL_CONFIG.locationEmails[formData.location as keyof typeof EMAIL_CONFIG.locationEmails];
+    if (formData.city && EMAIL_CONFIG.locationEmails[formData.city as keyof typeof EMAIL_CONFIG.locationEmails]) {
+      return EMAIL_CONFIG.locationEmails[formData.city as keyof typeof EMAIL_CONFIG.locationEmails];
     }
-    if (formData.service && EMAIL_CONFIG.serviceEmails[formData.service as keyof typeof EMAIL_CONFIG.serviceEmails]) {
-      return EMAIL_CONFIG.serviceEmails[formData.service as keyof typeof EMAIL_CONFIG.serviceEmails];
+    if (formData.service_type && EMAIL_CONFIG.serviceEmails[formData.service_type as keyof typeof EMAIL_CONFIG.serviceEmails]) {
+      return EMAIL_CONFIG.serviceEmails[formData.service_type as keyof typeof EMAIL_CONFIG.serviceEmails];
     }
     return EMAIL_CONFIG.defaultEmail;
   };
 
-  const handleChange = (field: keyof ContactFormData, value: string) => {
+  const handleChange = (field: keyof ContactFormFields, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: "" }));
@@ -125,24 +129,14 @@ export function useContactForm(options: UseContactFormOptions = {}) {
 
     setIsSubmitting(true);
 
-    // Betreff für E-Mail
-    const subject = `Neue Anfrage via ${getPageName()}`;
-    const targetEmail = getTargetEmail();
-
-    // Daten für späteren API-Call vorbereiten
-    const submissionData = {
+    // Zusätzliche Daten für E-Mail-Routing
+    const extendedFormData = {
       ...formData,
-      subject,
-      targetEmail,
-      pageName: getPageName(),
-      pageUrl: location.pathname,
-      submittedAt: new Date().toISOString(),
+      target_email: getTargetEmail(),
+      page_name: getPageName(),
     };
 
-    console.log("Form submission data:", submissionData);
-
-    // Simulate form submission (später durch echten API-Call ersetzen)
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await submitForm(FORM_ID, extendedFormData);
 
     setIsSuccess(true);
     setIsSubmitting(false);
@@ -150,12 +144,12 @@ export function useContactForm(options: UseContactFormOptions = {}) {
 
   const resetForm = () => {
     setFormData({
-      firstName: "",
-      lastName: "",
-      email: "",
-      phone: "",
-      location: options.presetLocation || "",
-      service: options.presetService || "",
+      customer_first_name: "",
+      customer_last_name: "",
+      customer_email: "",
+      customer_phone: "",
+      city: options.presetLocation || "",
+      service_type: options.presetService || "",
       message: "",
     });
     setIsSuccess(false);
@@ -163,8 +157,8 @@ export function useContactForm(options: UseContactFormOptions = {}) {
   };
 
   const getSuccessMessage = () => {
-    const locationLabel = locationOptions.find(l => l.value === formData.location)?.label;
-    const serviceLabel = serviceOptions.find(s => s.value === formData.service)?.label;
+    const locationLabel = locationOptions.find(l => l.value === formData.city)?.label;
+    const serviceLabel = serviceOptions.find(s => s.value === formData.service_type)?.label;
     
     if (locationLabel && serviceLabel) {
       return `Vielen Dank! Ihr Ansprechpartner für ${serviceLabel} in ${locationLabel} wird sich in Kürze bei Ihnen melden.`;
