@@ -1,10 +1,138 @@
-import { Send, CheckCircle2, RotateCcw } from "lucide-react";
+import { useState } from "react";
+import { supabase } from "@/lib/supabase"; 
+import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useContactForm, locationOptions, serviceOptions } from "@/hooks/useContactForm";
+import { Send, CheckCircle2, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+export const locationOptions = [
+  { value: "muenchen", label: "München" },
+  { value: "augsburg", label: "Augsburg" },
+  { value: "ingolstadt", label: "Ingolstadt" },
+  { value: "nuernberg", label: "Nürnberg" },
+  { value: "frankfurt", label: "Frankfurt" },
+  { value: "hamburg", label: "Hamburg" },
+  { value: "berlin", label: "Berlin" },
+];
+
+export const serviceOptions = [
+  { value: "handwerk", label: "Handwerk (Elektro, Sanitär, Heizung)" },
+  { value: "facility", label: "Facility Management" },
+  { value: "reinigung", label: "Reinigung" },
+  { value: "aussenanlagen", label: "Außenanlagen & Grünpflege" },
+];
+
+export const useContactForm = ({ pageName, presetLocation, presetService }: any = {}) => {
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [errors, setErrors] = useState<any>({});
+
+  const [formData, setFormData] = useState({
+    customer_first_name: "",
+    customer_last_name: "",
+    customer_email: "",
+    customer_phone: "",
+    message: "",
+    city: presetLocation || "",
+    service_type: presetService || ""
+  });
+
+  const handleChange = (name: string, value: string) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (errors[name]) setErrors((prev: any) => ({ ...prev, [name]: null }));
+  };
+
+  const resetForm = () => {
+    setFormData({
+      customer_first_name: "",
+      customer_last_name: "",
+      customer_email: "",
+      customer_phone: "",
+      message: "",
+      city: "",
+      service_type: ""
+    });
+    setIsSuccess(false);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e?.preventDefault();
+    setIsSubmitting(true);
+    setErrors({});
+
+    // Validierung
+    const newErrors: any = {};
+    if (!formData.customer_first_name) newErrors.customer_first_name = "Vorname ist erforderlich";
+    if (!formData.customer_last_name) newErrors.customer_last_name = "Nachname ist erforderlich";
+    if (!formData.customer_email) newErrors.customer_email = "E-Mail ist erforderlich";
+    if (!formData.message) newErrors.message = "Nachricht ist erforderlich";
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const sourceUrl = typeof window !== "undefined" ? window.location.href : "";
+      const { error } = await supabase
+        .from('leads')
+        .insert([{ 
+          customer_name: `${formData.customer_first_name} ${formData.customer_last_name}`.trim(),
+          email: formData.customer_email, 
+          phone: formData.customer_phone, 
+          message: formData.message,
+          service_type: formData.service_type || 'Kontaktanfrage',
+          city: formData.city || 'Nicht angegeben',
+          form_id: pageName || 'contact_form',
+          page_url: typeof window !== "undefined" ? window.location.pathname : "",
+          source_url: sourceUrl
+        }]);
+
+      if (error) throw error;
+
+      setIsSuccess(true);
+      toast({ title: "Erfolg!", description: "Ihre Nachricht wurde gesendet." });
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "Fehler", description: error.message });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const getSuccessMessage = () => {
+    const locationLabel = locationOptions.find(l => l.value === formData.city)?.label;
+    const serviceLabel = serviceOptions.find(s => s.value === formData.service_type)?.label;
+    
+    if (locationLabel && serviceLabel) {
+      return `Vielen Dank! Ihr Ansprechpartner für ${serviceLabel} in ${locationLabel} wird sich in Kürze bei Ihnen melden.`;
+    }
+    if (locationLabel) {
+      return `Vielen Dank! Ihr Ansprechpartner in ${locationLabel} wird sich in Kürze bei Ihnen melden.`;
+    }
+    if (serviceLabel) {
+      return `Vielen Dank! Ihr Ansprechpartner für ${serviceLabel} wird sich in Kürze bei Ihnen melden.`;
+    }
+    return "Vielen Dank! Wir werden uns in Kürze bei Ihnen melden.";
+  };
+
+  return { 
+    formData,
+    errors,
+    isSubmitting,
+    isSuccess,
+    handleChange,
+    handleSubmit,
+    resetForm,
+    getSuccessMessage,
+    showLocationDropdown: true,
+    showServiceDropdown: true
+  };
+};
 
 interface ContactFormProps {
   className?: string;
@@ -83,8 +211,8 @@ export function ContactForm({
   }
 
   const inputClasses = isDark
-    ? "bg-white border-primary-foreground/20 text-foreground placeholder:text-muted-foreground"
-    : "bg-white";
+    ? "bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/50"
+    : "";
 
   const labelClasses = isDark ? "text-primary-foreground" : "";
 
@@ -103,14 +231,12 @@ export function ContactForm({
 
       <form onSubmit={handleSubmit} className={cn("space-y-6", showTitle && "mt-8")}>
         {/* Hidden field for page tracking */}
-        <input type="hidden" name="page_name" value={pageName || ""} />
-
+        <input type="hidden" name="pageName" value={pageName || ""} />
         <div className="grid gap-6 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="customer_first_name" className={labelClasses}>Vorname *</Label>
+            <Label htmlFor="firstName" className={labelClasses}>Vorname *</Label>
             <Input
-              id="customer_first_name"
-              name="customer_first_name"
+              id="firstName"
               value={formData.customer_first_name}
               onChange={(e) => handleChange("customer_first_name", e.target.value)}
               placeholder="Max"
@@ -121,10 +247,9 @@ export function ContactForm({
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="customer_last_name" className={labelClasses}>Nachname *</Label>
+            <Label htmlFor="lastName" className={labelClasses}>Nachname *</Label>
             <Input
-              id="customer_last_name"
-              name="customer_last_name"
+              id="lastName"
               value={formData.customer_last_name}
               onChange={(e) => handleChange("customer_last_name", e.target.value)}
               placeholder="Mustermann"
@@ -138,10 +263,9 @@ export function ContactForm({
 
         <div className="grid gap-6 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="customer_email" className={labelClasses}>E-Mail *</Label>
+            <Label htmlFor="email" className={labelClasses}>E-Mail *</Label>
             <Input
-              id="customer_email"
-              name="customer_email"
+              id="email"
               type="email"
               value={formData.customer_email}
               onChange={(e) => handleChange("customer_email", e.target.value)}
@@ -153,10 +277,9 @@ export function ContactForm({
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="customer_phone" className={labelClasses}>Telefon (optional)</Label>
+            <Label htmlFor="phone" className={labelClasses}>Telefon (optional)</Label>
             <Input
-              id="customer_phone"
-              name="customer_phone"
+              id="phone"
               type="tel"
               value={formData.customer_phone}
               onChange={(e) => handleChange("customer_phone", e.target.value)}
@@ -171,9 +294,8 @@ export function ContactForm({
           <div className="grid gap-6 sm:grid-cols-2">
             {showLocationDropdown && (
               <div className="space-y-2">
-                <Label htmlFor="city" className={labelClasses}>Welcher Standort?</Label>
+                <Label htmlFor="location" className={labelClasses}>Welcher Standort?</Label>
                 <Select
-                  name="city"
                   value={formData.city}
                   onValueChange={(value) => handleChange("city", value)}
                 >
@@ -192,9 +314,8 @@ export function ContactForm({
             )}
             {showServiceDropdown && (
               <div className="space-y-2">
-                <Label htmlFor="service_type" className={labelClasses}>Welches Gewerk?</Label>
+                <Label htmlFor="service" className={labelClasses}>Welches Gewerk?</Label>
                 <Select
-                  name="service_type"
                   value={formData.service_type}
                   onValueChange={(value) => handleChange("service_type", value)}
                 >
@@ -218,7 +339,6 @@ export function ContactForm({
           <Label htmlFor="message" className={labelClasses}>Nachricht *</Label>
           <Textarea
             id="message"
-            name="message"
             value={formData.message}
             onChange={(e) => handleChange("message", e.target.value)}
             placeholder="Beschreiben Sie Ihr Anliegen..."

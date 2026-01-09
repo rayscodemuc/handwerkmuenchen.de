@@ -9,29 +9,29 @@ const contactInfo = [
   {
     icon: Phone,
     title: "Telefon",
-    content: "+49 (0)89 25006354",
+    content: "+49 123 456 789",
     subContent: "Mo-Fr 8:00-18:00 Uhr",
-    href: "tel:+498925006354",
+    href: "tel:+49123456789",
   },
   {
     icon: Mail,
     title: "E-Mail",
-    content: "kontakt@mr-clean-services.de",
+    content: "info@mrclean-services.de",
     subContent: "Antwort innerhalb 24h",
-    href: "mailto:kontakt@mr-clean-services.de",
+    href: "mailto:info@mrclean-services.de",
   },
   {
     icon: MapPin,
     title: "Adresse",
-    content: "Agnes-Bernauer-Str. 11",
-    subContent: "80687 München",
+    content: "Musterstraße 123",
+    subContent: "12345 Berlin",
   },
   {
     icon: Clock,
     title: "Notdienst",
     content: "24/7 erreichbar",
-    subContent: "+49 (0)89 25006354",
-    href: "tel:+498925006354",
+    subContent: "+49 123 456 000",
+    href: "tel:+49123456000",
   },
 ];
 
@@ -109,9 +109,9 @@ export default function Kontakt() {
                   ))}
                 </div>
 
-                {/* Germany Map */}
-                <div className="mt-8 overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-primary/10 to-primary/5 p-6">
-                  <GermanyMap className="w-full h-[450px]" />
+                {/* Map */}
+                <div className="mt-8 aspect-video overflow-hidden rounded-3xl bg-muted">
+                  <GermanyMap className="w-full h-full" />
                 </div>
               </div>
             </div>
@@ -144,24 +144,6 @@ export default function Kontakt() {
                   <span className="font-medium text-foreground">{location.name}</span>
                 </Link>
               ))}
-            </div>
-
-            {/* Contact Info below locations */}
-            <div className="mt-12 flex flex-col items-center gap-4">
-              <a 
-                href="tel:+498925006354" 
-                className="flex items-center gap-2 text-lg font-medium text-foreground hover:text-primary transition-colors"
-              >
-                <Phone className="h-5 w-5 text-primary" />
-                +49 (0)89 25006354
-              </a>
-              <a 
-                href="mailto:kontakt@mr-clean-services.de" 
-                className="flex items-center gap-2 text-lg font-medium text-foreground hover:text-primary transition-colors"
-              >
-                <Mail className="h-5 w-5 text-primary" />
-                kontakt@mr-clean-services.de
-              </a>
             </div>
           </div>
         </section>
