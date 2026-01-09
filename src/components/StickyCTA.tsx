@@ -1,8 +1,15 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Calculator } from "lucide-react";
 import { motion } from "framer-motion";
 
 export function StickyCTA() {
+  const location = useLocation();
+  
+  // Button nicht auf der Rechner-Seite anzeigen
+  if (location.pathname === "/rechner") {
+    return null;
+  }
+  
   return (
     <motion.div
       initial={{ x: 100, opacity: 0 }}
@@ -22,6 +29,13 @@ export function StickyCTA() {
 }
 
 export function MobileStickyCTA() {
+  const location = useLocation();
+  
+  // Button nicht auf der Rechner-Seite anzeigen
+  if (location.pathname === "/rechner") {
+    return null;
+  }
+  
   return (
     <motion.div
       initial={{ y: 100, opacity: 0 }}
