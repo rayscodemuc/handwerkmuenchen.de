@@ -170,7 +170,9 @@ export function Header() {
       </div>
 
       {/* Secondary Navigation Row - Desktop (hidden when scrolled) */}
-      <div className={`hidden md:block transition-all duration-300 overflow-hidden ${isScrolled ? 'max-h-0 opacity-0' : 'max-h-20 opacity-100'}`}>
+      <div 
+        className={`hidden md:block transition-all duration-300 ${isScrolled ? 'h-0 opacity-0 pointer-events-none' : 'h-12 opacity-100'}`}
+      >
         <nav className="container mx-auto flex h-12 items-center gap-12 px-4 lg:px-8">
           {secondaryNav.map((item) => (
             <div
@@ -189,7 +191,7 @@ export function Header() {
 
               {/* Dropdown Menu */}
               {openDropdown === item.name && (
-                <div className="absolute left-0 top-full pt-2">
+                <div className="absolute left-0 top-full pt-2 z-50">
                   <div className="min-w-[220px] rounded-xl bg-background p-2 shadow-lg border border-border">
                     {item.subItems.map((subItem) => (
                       <div key={subItem.name}>
