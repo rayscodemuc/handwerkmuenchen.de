@@ -1,65 +1,94 @@
 import { BlogServicePageLayout } from "./BlogServicePageLayout";
-import { Building, BarChart, Users, FileText, Settings, TrendingUp, Shield, Clock, Target } from "lucide-react";
+import { Building, BarChart, Users, FileText, Settings, TrendingUp, Shield, Clock, Target, CheckCircle } from "lucide-react";
 
 export default function Objektmanagement() {
   return (
     <BlogServicePageLayout
       title="Objektmanagement"
-      subtitle="Facility Management"
+      subtitle="Technisches Asset Management & Kostenoptimierung"
       categoryName="Facility Management"
       categoryHref="/facility-management"
-      description="Strategisches Objektmanagement für Werterhaltung und Kostenoptimierung. Ein Ansprechpartner für alle Gewerke und Dienstleister."
-      intro="Professionelles Objektmanagement ist die strategische Steuerung aller Facility-Dienstleistungen mit dem Ziel der langfristigen Werterhaltung Ihrer Immobilie. Wir übernehmen die Rolle des technischen Asset Managers: Planung, Steuerung, Kontrolle und kontinuierliche Optimierung – ein Ansprechpartner für alles."
+      description="Strategisches Objektmanagement für Gewerbeimmobilien. Zentrale Steuerung aller Gewerke, datenbasiertes Reporting und langfristige Werterhaltung."
+      intro="Für Eigentümer und Asset Manager mit größeren Immobilienportfolios ist fragmentiertes Facility Management ein Kostentreiber. Unterschiedliche Dienstleister, fehlende Transparenz und reaktive Instandhaltung führen zu Budgetüberschreitungen und Wertverfall. Unser Objektmanagement übernimmt die strategische Steuerung aller technischen Dienstleistungen: ein Ansprechpartner, datenbasierte Entscheidungen und planbare Kosten für langfristigen Werterhalt."
       imageSrc=""
-      imageAlt="Facility Manager bei Objektbegehung mit digitalem Tablet"
-      imageCaption="Digitales Objektmanagement mit Echtzeit-Reporting"
+      imageAlt="Objektmanager bei strategischer Portfolioanalyse"
+      imageCaption="Datenbasiertes Objektmanagement für optimierte Immobilienperformance"
       sections={[
         {
-          title: "Was Objektmanagement von Hausverwaltung unterscheidet",
-          content: "Während die klassische Hausverwaltung auf kaufmännische Aspekte fokussiert, konzentriert sich Objektmanagement auf die technisch-infrastrukturelle Optimierung. Wir analysieren Lebenszykluskosten, planen Instandhaltungen vorausschauend und steuern alle Gewerke zentral."
+          title: "Vom Verwalter zum strategischen Partner",
+          content: "Klassische Hausverwaltung reagiert auf Probleme – professionelles Objektmanagement agiert vorausschauend. Wir analysieren Lebenszykluskosten, planen Instandhaltungen über 5-10 Jahre und optimieren kontinuierlich. Das Ergebnis: planbare Budgets, vermiedene Notfälle und nachweisbare Wertsteigerung. Für institutionelle Investoren liefern wir ESG-konforme Reportings."
         },
         {
-          title: "Datenbasierte Entscheidungen",
-          content: "Unser Reporting liefert KPIs zu Kosten, Qualität und Verfügbarkeit. Benchmarking mit vergleichbaren Objekten zeigt Optimierungspotenziale. So treffen Sie Entscheidungen auf Basis von Fakten – nicht Bauchgefühl."
+          title: "Zentrale Dienstleistersteuerung",
+          content: "Fragmentierte Verträge mit dutzenden Dienstleistern erzeugen Abstimmungschaos und Schnittstellenprobleme. Wir bündeln alle Gewerke unter einer Steuerung: Reinigung, Wartung, Winterdienst, Sicherheit, Grünpflege. Ausschreibung, Vergabe, Qualitätskontrolle und Abrechnung aus einer Hand. Sie haben einen Ansprechpartner – wir koordinieren den Rest."
         },
         {
-          title: "Lieferantenmanagement und Qualitätskontrolle",
-          content: "Wir übernehmen Ausschreibung, Vergabe und Steuerung aller Dienstleister. Regelmäßige Qualitätskontrollen mit dokumentierten Begehungen stellen sicher, dass vereinbarte Standards eingehalten werden."
+          title: "Datenbasierte Entscheidungsgrundlagen",
+          content: "Unser Reporting liefert KPIs zu Kosten, Qualität, Verfügbarkeit und Nachhaltigkeit. Benchmarking mit vergleichbaren Objekten zeigt Optimierungspotenziale. Digitale Dashboards ermöglichen Echtzeit-Einblick in alle Objekte. So treffen Sie Investitionsentscheidungen auf Basis von Fakten – nicht Schätzungen."
         }
       ]}
       highlightBox={{
         icon: TrendingUp,
-        title: "Werterhaltung durch Planung",
-        text: "Mit mehrjährigen Instandhaltungsbudgets vermeiden Sie Investitionsstaus und plötzliche Großausgaben. Sie investieren planbar in den Werterhalt Ihrer Immobilie."
+        title: "10-20% Kosteneinsparung im ersten Jahr",
+        text: "Durch Rahmenverträge, Prozessoptimierung und präventive Instandhaltung realisieren unsere Kunden typischerweise 10-20 % Einsparung bei den Facility-Kosten – bei gleichzeitig höherer Qualität und Transparenz."
       }}
       stats={[
+        { value: "10-20%", label: "Kosteneinsparung" },
         { value: "1", label: "Ansprechpartner" },
-        { value: "100%", label: "Transparenz" },
-        { value: "KPI", label: "Reporting" }
+        { value: "Echtzeit", label: "KPI-Reporting" }
       ]}
       services={[
-        { title: "Strategische Planung", description: "Langfristige Instandhaltungsbudgets.", icon: TrendingUp },
-        { title: "Kostenoptimierung", description: "Analyse und Benchmarking.", icon: BarChart },
-        { title: "Dienstleistersteuerung", description: "Ausschreibung, Vergabe, Kontrolle.", icon: Users },
-        { title: "Qualitätsmanagement", description: "Regelmäßige Begehungen und Audits.", icon: Target },
-        { title: "Dokumentenmanagement", description: "Digitale Ablage aller Unterlagen.", icon: FileText },
-        { title: "Prozessoptimierung", description: "Kontinuierliche Verbesserung.", icon: Settings }
+        { title: "Strategische Instandhaltungsplanung", description: "Mehrjährige Budgets für planbare Investitionen.", icon: TrendingUp },
+        { title: "Kostenoptimierung & Benchmarking", description: "Analyse, Vergleich und Identifikation von Einsparpotenzialen.", icon: BarChart },
+        { title: "Dienstleistersteuerung", description: "Ausschreibung, Vergabe, SLA-Monitoring und Qualitätskontrolle.", icon: Users },
+        { title: "Qualitätsmanagement", description: "Regelmäßige Begehungen, Audits und Mängeltracking.", icon: Target },
+        { title: "Digitales Dokumentenmanagement", description: "Revisionssichere Ablage aller Verträge, Protokolle und Nachweise.", icon: FileText },
+        { title: "Prozessoptimierung", description: "Kontinuierliche Verbesserung durch PDCA-Zyklen.", icon: Settings }
       ]}
-      quote="Gutes Objektmanagement macht sich unsichtbar – Sie merken es daran, dass alles funktioniert."
+      quote="Für institutionelle Investoren und Asset Manager mit großen Portfolios bieten wir mandantenspezifisches Reporting nach Ihren Standards – inklusive ESG-Kennzahlen und Nachhaltigkeitsberichten."
       faqs={[
-        { question: "Für welche Objektgrößen ist Objektmanagement sinnvoll?", answer: "Ab etwa 5.000 m² oder bei komplexen Nutzungen (Gewerbe, gemischte Nutzung) rechnet sich professionelles Objektmanagement." },
-        { question: "Wie unterscheidet sich das von Property Management?", answer: "Property Management umfasst zusätzlich kaufmännische Aspekte wie Mietverwaltung. Wir fokussieren auf das technische Facility Management." },
-        { question: "Wie schnell sehe ich Einsparungen?", answer: "Erste Quick Wins (Rahmenverträge, Prozessoptimierung) oft nach 3-6 Monaten. Strukturelle Einsparungen von 10-20 % im ersten Jahr sind realistisch." },
-        { question: "Wie erfolgt das Reporting?", answer: "Monatliche oder quartalsweise Berichte mit KPIs, Kostenübersichten und Maßnahmenempfehlungen – digital oder als Präsentation." }
+        { 
+          question: "Ab welcher Objektgröße lohnt sich Objektmanagement?", 
+          answer: "Ab etwa 5.000 m² oder bei mehreren Objekten rechnet sich professionelles Objektmanagement. Die Einsparungen durch optimierte Prozesse und Rahmenverträge übersteigen die Management-Kosten typischerweise bereits im ersten Jahr." 
+        },
+        { 
+          question: "Wie unterscheidet sich Objektmanagement von Property Management?", 
+          answer: "Property Management umfasst zusätzlich kaufmännische Aspekte wie Mietverwaltung und Nebenkostenabrechnung. Wir fokussieren auf das technische Facility Management – arbeiten aber Hand in Hand mit Ihrem Property Manager." 
+        },
+        { 
+          question: "Wie schnell sehe ich Einsparungen?", 
+          answer: "Erste Quick Wins durch Rahmenverträge und Prozessoptimierung oft nach 3-6 Monaten. Strukturelle Einsparungen von 10-20 % sind im ersten Jahr realistisch. Bei größeren Portfolios oft schneller." 
+        },
+        { 
+          question: "Welche Reportings erhalte ich?", 
+          answer: "Standard: monatliche Kostenübersichten, quartalsweise Management-Reports mit KPIs und Maßnahmenempfehlungen. Auf Wunsch: Echtzeit-Dashboards, ESG-Reportings, individuelle Auswertungen nach Ihren Anforderungen." 
+        },
+        { 
+          question: "Können Sie mehrere Standorte bundesweit betreuen?", 
+          answer: "Ja, wir steuern Portfolios mit hunderten Objekten bundesweit. Einheitliche Prozesse, konsolidiertes Reporting, ein Ansprechpartner auf Managementebene – unabhängig vom Standort." 
+        }
       ]}
       relatedLinks={[
         { label: "Alle Facility-Management-Leistungen", href: "/facility-management" },
         { label: "Hausmeisterservice", href: "/facility-management/hausmeisterservice" },
         { label: "Service & Wartung", href: "/handwerk/service-wartung" },
         { label: "Frankfurt", href: "/standorte/frankfurt" },
+        { label: "Hamburg", href: "/standorte/hamburg" },
         { label: "München", href: "/standorte/muenchen" }
       ]}
-      keywords={["Objektmanagement", "Property Management", "Facility Management", "Immobilienverwaltung", "technisches Gebäudemanagement"]}
+      keywords={[
+        "Objektmanagement Gewerbe",
+        "technisches Asset Management",
+        "Facility Management Steuerung",
+        "Immobilienmanagement",
+        "Dienstleistersteuerung",
+        "KPI Reporting Immobilien"
+      ]}
+      trustBadges={[
+        { icon: BarChart, label: "KPI-Reporting" },
+        { icon: Shield, label: "10-20% Einsparung" },
+        { icon: CheckCircle, label: "Zentrale Steuerung" }
+      ]}
     />
   );
 }
