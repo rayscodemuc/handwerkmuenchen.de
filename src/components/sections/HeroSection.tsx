@@ -6,8 +6,8 @@ import { CheckCircle2, Calculator } from "lucide-react";
 export function HeroSection() {
   return (
     <section className="relative overflow-hidden bg-[hsl(198,29%,76%)]">
-      {/* Main Container - Extended to include header space */}
-      <div className="relative min-h-[640px] lg:min-h-[750px] pt-36 lg:pt-44">
+      {/* Main Container */}
+      <div className="relative min-h-[540px] lg:min-h-[650px] pt-8 lg:pt-12">
       {/* Full Background Image */}
       <div className="absolute inset-0">
         <img
