@@ -8,24 +8,19 @@ export function HeroSection() {
     <section className="relative overflow-hidden bg-[hsl(198,29%,76%)]">
       {/* Main Container */}
       <div className="relative min-h-[540px] lg:min-h-[650px] pt-8 lg:pt-12">
-        {/* Background Image with Diagonal Clip - Full Width */}
-        <div 
-          className="absolute inset-0"
+      {/* Full Background Image */}
+      <div className="absolute inset-0">
+        <img
+          src={heroImage}
+          alt="Partnerschaft und Vertrauen - Händeschütteln zwischen Geschäftspartnern"
+          className="h-full w-full object-cover pointer-events-none"
           style={{
-            clipPath: "polygon(55% 0, 100% 0, 100% 100%, 35% 100%)",
+            objectPosition: "center center",
           }}
-        >
-          <img
-            src={heroImage}
-            alt="Partnerschaft und Vertrauen - Händeschütteln zwischen Geschäftspartnern"
-            className="h-full w-full object-cover pointer-events-none"
-            style={{
-              objectPosition: "75% center",
-            }}
-          />
-          {/* Gradient overlay for better text readability - centered */}
-          <div className="absolute inset-0 bg-[hsl(198,29%,76%)]/80 lg:bg-[hsl(198,29%,76%)]/70" />
-        </div>
+        />
+        {/* Gradient overlay for better text readability */}
+        <div className="absolute inset-0 bg-[hsl(198,29%,76%)]/75 lg:bg-[hsl(198,29%,76%)]/65" />
+      </div>
 
         {/* Content Container - Centered */}
         <div className="container relative mx-auto flex min-h-[560px] sm:min-h-[500px] items-center justify-center px-4 lg:min-h-[600px] lg:px-8">
