@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Menu, X, ChevronDown, Clock, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
@@ -67,14 +67,39 @@ export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
   
-  // Scroll detection
+  // Scroll detection (with hysteresis + rAF to prevent jitter)
+  const isScrolledRef = useRef(false);
+
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+    const SHRINK_AT = 80;
+    const EXPAND_AT = 40;
+
+    let ticking = false;
+
+    const update = () => {
+      const y = window.scrollY;
+      const next = isScrolledRef.current
+        ? !(y < EXPAND_AT)
+        : y > SHRINK_AT;
+
+      if (next !== isScrolledRef.current) {
+        isScrolledRef.current = next;
+        setIsScrolled(next);
+      }
+      ticking = false;
     };
-    
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(update);
+    };
+
+    // Initialize on mount
+    onScroll();
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
   
   // Check if current page is Kontakt (dark background needs white text)
