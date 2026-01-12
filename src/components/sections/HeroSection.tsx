@@ -9,29 +9,15 @@ export function HeroSection() {
       {/* Main Container */}
       <div className="relative min-h-[600px] sm:min-h-[540px] lg:min-h-[650px] pt-8 lg:pt-12">
         
-        {/* Mobile: Full background image with overlay */}
-        <div className="absolute inset-0 lg:hidden">
+        {/* Full background image with overlay for all devices */}
+        <div className="absolute inset-0">
           <img
             src={heroImage}
             alt="Professionelles Facility-Management Team bei der Arbeit"
             className="h-full w-full object-cover pointer-events-none"
           />
-          {/* Dark overlay for better text readability on mobile */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[hsl(198,29%,76%)]/95 via-[hsl(198,29%,76%)]/85 to-[hsl(198,29%,76%)]/70" />
-        </div>
-
-        {/* Desktop: Diagonal clipped image */}
-        <div 
-          className="absolute inset-0 hidden lg:block"
-          style={{
-            clipPath: "polygon(55% 0, 100% 0, 100% 100%, 35% 100%)",
-          }}
-        >
-          <img
-            src={heroImage}
-            alt="Professionelles Facility-Management Team bei der Arbeit"
-            className="h-full w-full object-cover pointer-events-none"
-          />
+          {/* Gradient overlay for better text readability */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[hsl(198,29%,76%)]/95 via-[hsl(198,29%,76%)]/80 to-transparent lg:from-[hsl(198,29%,76%)]/90 lg:via-[hsl(198,29%,76%)]/70 lg:to-transparent" />
         </div>
 
         {/* Content Container */}
