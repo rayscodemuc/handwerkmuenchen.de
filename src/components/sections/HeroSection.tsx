@@ -1,5 +1,6 @@
 import { AnimatedButton } from "@/components/ui/animated-button";
 import { Link } from "react-router-dom";
+import { Calculator, CheckCircle2 } from "lucide-react";
 import heroImage from "@/assets/hero-facility.png";
 
 export function HeroSection() {
@@ -41,13 +42,33 @@ export function HeroSection() {
             für Partner, Mitarbeiter und Kunden, die mehr erwarten als bloße Pflichterfüllung.
             </p>
 
-            {/* CTA Button */}
-            <div className="mt-10">
+            {/* CTA Buttons */}
+            <div className="mt-10 flex flex-col sm:flex-row gap-4">
               <Link to="/anfrage">
-                <AnimatedButton className="bg-white text-foreground hover:bg-foreground hover:text-white">
+                <AnimatedButton className="bg-foreground text-white hover:bg-foreground/90 shadow-lg shadow-foreground/20 text-base px-8 py-6">
                   Angebot anfragen
                 </AnimatedButton>
               </Link>
+              <Link to="/rechner">
+                <AnimatedButton 
+                  className="border-foreground/30 bg-transparent text-foreground hover:bg-foreground/10 text-base px-8 py-6"
+                >
+                  <Calculator className="w-5 h-5" />
+                  Preis berechnen
+                </AnimatedButton>
+              </Link>
+            </div>
+
+            {/* Trust Badge */}
+            <div className="mt-6 flex items-center gap-6 text-sm text-foreground/60">
+              <span className="flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-green-600" />
+                Kostenlos & unverbindlich
+              </span>
+              <span className="flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-green-600" />
+                Antwort in 24h
+              </span>
             </div>
           </div>
         </div>
