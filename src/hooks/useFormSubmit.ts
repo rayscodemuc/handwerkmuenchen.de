@@ -61,33 +61,33 @@ function normalizeFormData<T extends object>(
   // Formular-spezifische Normalisierung
   if ('customer_name' in formData) {
     // InquiryFormFields oder CalculatorFormFields
-    const data = formData as InquiryFormFields | CalculatorFormFields;
+    const data = formData as unknown as InquiryFormFields & Partial<CalculatorFormFields>;
     const isCalculator = formId === 'calculator_form' || formId === 'service_calculator';
     return {
       ...baseData,
       customer_name: data.customer_name,
       email: data.customer_email,
       phone: data.customer_phone,
-      message: data.message || (isCalculator && 'additional_message' in data ? data.additional_message : ''),
+      message: data.message || (isCalculator && data.additional_message ? data.additional_message : ''),
       service_type: data.service_type,
-      city: 'city' in data ? data.city : undefined,
+      city: data.city,
       additional_data: {
-        ...(formId === 'inquiry_form' && 'company_name' in data ? { company_name: data.company_name } : {}),
-        ...(formId === 'inquiry_form' && 'privacy_accepted' in data ? { privacy_accepted: data.privacy_accepted } : {}),
-        ...(isCalculator && 'service_subtype' in data ? { service_subtype: data.service_subtype } : {}),
-        ...(isCalculator && 'object_type' in data ? { object_type: data.object_type } : {}),
-        ...(isCalculator && 'order_type' in data ? { order_type: data.order_type } : {}),
-        ...(isCalculator && 'area_sqm' in data ? { area_sqm: data.area_sqm } : {}),
-        ...(isCalculator && 'parking_spaces' in data ? { parking_spaces: data.parking_spaces } : {}),
-        ...(isCalculator && 'frequency_per_week' in data ? { frequency_per_week: data.frequency_per_week } : {}),
-        ...(isCalculator && 'estimated_price' in data ? { estimated_price: data.estimated_price } : {}),
-        ...(isCalculator && 'is_monthly_price' in data ? { is_monthly_price: data.is_monthly_price } : {}),
-        ...(isCalculator && 'additional_message' in data ? { additional_message: data.additional_message } : {}),
+        ...(formId === 'inquiry_form' && data.company_name ? { company_name: data.company_name } : {}),
+        ...(formId === 'inquiry_form' && data.privacy_accepted !== undefined ? { privacy_accepted: data.privacy_accepted } : {}),
+        ...(isCalculator && data.service_subtype ? { service_subtype: data.service_subtype } : {}),
+        ...(isCalculator && data.object_type ? { object_type: data.object_type } : {}),
+        ...(isCalculator && data.order_type ? { order_type: data.order_type } : {}),
+        ...(isCalculator && data.area_sqm ? { area_sqm: data.area_sqm } : {}),
+        ...(isCalculator && data.parking_spaces ? { parking_spaces: data.parking_spaces } : {}),
+        ...(isCalculator && data.frequency_per_week ? { frequency_per_week: data.frequency_per_week } : {}),
+        ...(isCalculator && data.estimated_price ? { estimated_price: data.estimated_price } : {}),
+        ...(isCalculator && data.is_monthly_price !== undefined ? { is_monthly_price: data.is_monthly_price } : {}),
+        ...(isCalculator && data.additional_message ? { additional_message: data.additional_message } : {}),
       },
     };
   } else if ('company_name' in formData && 'contact_person' in formData) {
     // PartnerFormFields
-    const data = formData as PartnerFormFields;
+    const data = formData as unknown as PartnerFormFields;
     return {
       ...baseData,
       customer_name: data.contact_person,
