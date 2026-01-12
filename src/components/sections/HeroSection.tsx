@@ -1,20 +1,26 @@
 import { AnimatedButton } from "@/components/ui/animated-button";
 import { Link } from "react-router-dom";
-import { Calculator, CheckCircle2 } from "lucide-react";
-import heroImage from "@/assets/hero-facility.png";
+import heroImage from "@/assets/hero-facility.jpg";
 
 export function HeroSection() {
   return (
     <section className="relative overflow-hidden bg-[hsl(198,29%,76%)]">
       {/* Main Container */}
-      <div className="relative min-h-[600px] sm:min-h-[540px] lg:min-h-[650px] pt-8 lg:pt-12">
-        
-        {/* Full background image with overlay for all devices */}
-        <div className="absolute inset-0">
+      <div className="relative min-h-[540px] lg:min-h-[650px] pt-8 lg:pt-12">
+        {/* Background Image with Diagonal Clip - Full Width */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            clipPath: "polygon(55% 0, 100% 0, 100% 100%, 35% 100%)",
+          }}
+        >
           <img
             src={heroImage}
-            alt="Professionelles Facility-Management Team bei der Arbeit"
+            alt="Partnerschaft und Vertrauen - Händeschütteln zwischen Geschäftspartnern"
             className="h-full w-full object-cover pointer-events-none"
+            style={{
+              objectPosition: "75% center",
+            }}
           />
           {/* Gradient overlay for better text readability - centered */}
           <div className="absolute inset-0 bg-[hsl(198,29%,76%)]/80 lg:bg-[hsl(198,29%,76%)]/70" />

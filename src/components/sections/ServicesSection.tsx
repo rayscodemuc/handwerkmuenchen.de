@@ -40,10 +40,11 @@ export function ServicesSection() {
         {/* Section Header */}
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-4xl font-black tracking-tight text-foreground lg:text-5xl xl:text-6xl">
-            Unsere Leistungen
+            Leistungen, die über den Standard hinausgehen
           </h2>
           <p className="mt-6 text-lg text-muted-foreground lg:text-xl">
-            Wir bieten Ihnen maßgeschneiderte Lösungen für alle Bereiche des Facility Managements.
+          Haben Sie genug von Standard-Lösungen, die Ihre Bedürfnisse ignorieren? Wir rollen die Branche neu auf und ersetzen starre Abläufe durch echtes Fachwissen und menschliche Werte. Erleben Sie Facility Management, 
+          das mit Leidenschaft geführt wird – für alle, die eine Partnerschaft mit Substanz suchen.
           </p>
         </div>
 
