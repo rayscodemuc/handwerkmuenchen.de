@@ -1,38 +1,39 @@
-import { ServicePageLayout } from "./ServicePageLayout";
+import { BlogServicePageLayout } from "./BlogServicePageLayout";
 import { Wrench, Sparkles, Building, Droplets, ShieldCheck, Trash2 } from "lucide-react";
 
 export default function Sonderreinigung() {
   return (
-    <ServicePageLayout
+    <BlogServicePageLayout
       title="Sonderreinigung"
       subtitle="Reinigung"
       categoryName="Reinigung"
       categoryHref="/reinigung"
-      description="Professionelle Sonderreinigung in Berlin für besondere Anforderungen. Von Baureinigung bis Industriereinigung – Speziallösungen für jeden Bedarf."
-      longDescription="Manchmal reicht die reguläre Reinigung nicht aus. Unsere Sonderreinigung bietet spezialisierte Lösungen für besonders anspruchsvolle Reinigungsaufgaben."
-      imageAlt="Spezialisierte Sonderreinigung für Industrie und Gewerbe"
-      keywords={["Sonderreinigung Berlin", "Baureinigung", "Industriereinigung", "Teppichreinigung"]}
-      features={[
-        "Baureinigung nach Renovierung",
-        "Teppich- und Polsterreinigung",
-        "Industriereinigung",
-        "Desinfektion und Hygiene",
-        "Steinpflege und Bodenversiegelung",
-        "Entrümpelung und Entsorgung",
+      description="Spezialisierte Sonderreinigung für besondere Anforderungen. Von Baureinigung bis Industriereinigung."
+      intro="Manchmal reicht die reguläre Reinigung nicht aus. Unsere Sonderreinigung bietet spezialisierte Lösungen für besonders anspruchsvolle Reinigungsaufgaben."
+      sections={[
+        { title: "Baureinigung nach Renovierung", content: "Nach Bauarbeiten entfernen wir Baustaub, Mörtelreste und Schutzfolien – für bezugsfertige Räumlichkeiten." },
+        { title: "Industriereinigung", content: "Produktionshallen, Lagerflächen und technische Anlagen erfordern spezielle Reinigungsverfahren und -mittel." },
       ]}
-      detailedFeatures={[
-        { title: "Baureinigung", description: "Professionelle Reinigung nach Bau- oder Renovierungsarbeiten.", icon: Wrench },
-        { title: "Teppichreinigung", description: "Tiefenreinigung von Teppichen und Polstermöbeln.", icon: Sparkles },
-        { title: "Industriereinigung", description: "Spezialreinigung für Produktions- und Lagerflächen.", icon: Building },
-        { title: "Desinfektion", description: "Hygienische Desinfektion für sensible Bereiche.", icon: ShieldCheck },
-        { title: "Steinpflege", description: "Reinigung und Versiegelung von Naturstein.", icon: Droplets },
-        { title: "Entrümpelung", description: "Fachgerechte Räumung und Entsorgung.", icon: Trash2 },
+      highlightBox={{ icon: ShieldCheck, title: "Desinfektion", text: "Für sensible Bereiche bieten wir professionelle Desinfektion nach RKI-Richtlinien." }}
+      stats={[{ value: "Speziell", label: "für jeden Bedarf" }, { value: "Modern", label: "Technik" }, { value: "Schnell", label: "verfügbar" }]}
+      services={[
+        { title: "Baureinigung", description: "Nach Bau- oder Renovierungsarbeiten.", icon: Wrench },
+        { title: "Teppichreinigung", description: "Tiefenreinigung von Textilien.", icon: Sparkles },
+        { title: "Industriereinigung", description: "Produktions- und Lagerflächen.", icon: Building },
+        { title: "Desinfektion", description: "Hygienische Desinfektion.", icon: ShieldCheck },
+        { title: "Steinpflege", description: "Reinigung und Versiegelung.", icon: Droplets },
+        { title: "Entrümpelung", description: "Räumung und Entsorgung.", icon: Trash2 },
       ]}
-      benefits={["Spezialisierte Lösungen", "Moderne Technik", "Erfahrene Teams", "Schnelle Verfügbarkeit", "Faire Preise", "Umweltfreundlich"]}
       faqs={[
-        { question: "Was ist bei einer Baureinigung enthalten?", answer: "Entfernung von Baustaub, Reinigung aller Oberflächen, Fensterreinigung und Bodenbehandlung." },
+        { question: "Was ist bei einer Baureinigung enthalten?", answer: "Entfernung von Baustaub, Reinigung aller Oberflächen, Fenster und Bodenbehandlung." },
         { question: "Wie lange dauert eine Grundreinigung?", answer: "Je nach Fläche und Verschmutzungsgrad 1-3 Tage." },
       ]}
+      relatedLinks={[
+        { label: "Alle Reinigungsleistungen", href: "/reinigung" },
+        { label: "Grundreinigung", href: "/reinigung/grundreinigung" },
+        { label: "Berlin", href: "/standorte/berlin" },
+      ]}
+      keywords={["Sonderreinigung", "Baureinigung", "Industriereinigung", "Desinfektion"]}
     />
   );
 }
