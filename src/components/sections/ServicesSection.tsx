@@ -43,8 +43,7 @@ export function ServicesSection() {
             Leistungen, die über den Standard hinausgehen
           </h2>
           <p className="mt-6 text-lg text-muted-foreground lg:text-xl">
-          Haben Sie genug von Standard-Lösungen, die Ihre Bedürfnisse ignorieren? Wir rollen die Branche neu auf und ersetzen starre Abläufe durch echtes Fachwissen und menschliche Werte. Erleben Sie Facility Management, 
-          das mit Leidenschaft geführt wird – für alle, die eine Partnerschaft mit Substanz suchen.
+            Haben Sie genug von Standard-Lösungen, die Ihre Bedürfnisse ignorieren? Wir rollen die Branche neu auf und ersetzen starre Abläufe durch echtes Fachwissen und menschliche Werte. Erleben Sie Facility Management, das mit Leidenschaft geführt wird – für alle, die eine Partnerschaft mit Substanz suchen.
           </p>
         </div>
 
