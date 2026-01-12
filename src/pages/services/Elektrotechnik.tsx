@@ -10,10 +10,18 @@ export default function Elektrotechnik() {
       categoryName="Handwerk"
       categoryHref="/handwerk"
       description="Rechtssichere Elektroprüfung nach DGUV Vorschrift 3 und zertifizierte Elektrotechnik für komplexe Immobilienportfolios. Maximale Haftungssicherheit nach DIN VDE."
-      longDescription="Sicherheit in der Elektrotechnik ist eine Frage der Haftung. Als zertifizierter Fachbetrieb für Gebäudetechnik eliminieren wir Betriebsrisiken durch systematische Prüfzyklen und präventive Instandhaltung. Wir decken das gesamte Spektrum ab: von der gesetzlich geforderten DGUV V3 Prüfung ortsveränderlicher Geräte bis hin zur thermografischen Analyse hochkomplexer Industrieanlagen. Unsere Prozesse sind auf die Betriebssicherheitsverordnung (BetrSichV) optimiert und garantieren eine gerichtsfeste Dokumentation für Versicherungen und Berufsgenossenschaften."
+      longDescription={`Die Verantwortung für elektrische Sicherheit in Gewerbe- und Industrieimmobilien ist eine der kritischsten Pflichten für Betreiber, Hausverwaltungen und Facility Manager. Als zertifizierter Elektrofachbetrieb mit Spezialisierung auf komplexe Immobilienportfolios eliminiert Mr. Clean Services systematisch alle Betriebsrisiken durch normkonforme Prüfzyklen und präventive Instandhaltungsstrategien. Unsere Leistungen sind auf die spezifischen Anforderungen von Logistikzentren, Industrieanlagen, Bürokomplexen und Wohnungsbaugesellschaften zugeschnitten.
+
+Im Zentrum unserer Arbeit steht die lückenlose Einhaltung der Betriebssicherheitsverordnung (BetrSichV) sowie der Technischen Regeln für Betriebssicherheit (TRBS). Wir führen die gesetzlich vorgeschriebene DGUV V3 Prüfung für ortsveränderliche und ortsfeste Betriebsmittel durch – von der Kaffeemaschine bis zur Hochspannungsanlage. Jede Prüfung basiert auf einer individuellen Gefährdungsbeurteilung, die wir gemeinsam mit Ihnen erstellen und dokumentieren. Das Ergebnis: maximale Rechtssicherheit gegenüber Berufsgenossenschaften, Versicherungen und im Schadensfall vor Gericht.
+
+Darüber hinaus bieten wir präventive Diagnostik durch industrielle Thermografie. Diese berührungslose Messtechnik identifiziert thermische Anomalien in Schaltschränken, Verteilungen und Kabeltrassen, bevor es zu Produktionsausfällen oder Bränden kommt. Für Kunden mit erhöhten Sicherheitsanforderungen erfüllen wir die strengen Kriterien der VdS-Konformität – ein Qualitätsmerkmal, das von führenden Sachversicherern anerkannt wird.
+
+Unser digitales Prüfmanagement garantiert audit-sichere Dokumentation in Echtzeit. Alle Prüfprotokolle sind revisionssicher archiviert und jederzeit für interne Audits, ISO-Zertifizierungen oder Behördenanfragen abrufbar. Für Hausverwaltungen und Property Manager bieten wir skalierbare Rahmenverträge mit bundesweiter Abdeckung – von München über Frankfurt und Hamburg bis Berlin.
+
+Als Teil unseres Handwerk-Leistungsspektrums arbeiten wir eng mit unseren Sanitär- und Wartungsteams zusammen. So erhalten Sie alle technischen Gewerke aus einer Hand – effizient koordiniert und mit einem zentralen Ansprechpartner.`}
       imageSrc={elektrotechnikImage}
       imageAlt="Elektrotechnik Schaltschrank mit Sicherungen für DGUV V3 Prüfung"
-      keywords={["DGUV V3 Prüfung", "Elektroprüfung Gewerbe", "DIN VDE 0105-100", "Betriebssicherheitsverordnung", "Thermografie Elektro", "Elektrofachbetrieb Facility Management"]}
+      keywords={["DGUV V3 Prüfung", "Elektroprüfung Gewerbe", "DIN VDE 0105-100", "Betriebssicherheitsverordnung", "Thermografie Elektro", "Elektrofachbetrieb Facility Management", "VdS Konformität", "Gefährdungsbeurteilung Elektro", "TRBS Prüfung"]}
       features={[
         "DGUV V3 Prüfung (ortsveränderlich & ortsfest)",
         "Wartung elektrischer Anlagen nach DIN VDE 0105-100",
@@ -81,6 +89,16 @@ export default function Elektrotechnik() {
           question: "Wie wird die Dokumentation bereitgestellt?",
           answer: "Sie erhalten alle Prüfprotokolle in digitaler Form. Diese enthalten Einzelauflistungen jedes geprüften Betriebsmittels inklusive Inventarnummer, Messergebnissen und dem Status (Bestanden/Nicht Bestanden).",
         },
+        {
+          question: "Bieten Sie DGUV V3 Prüfungen bundesweit an?",
+          answer: "Ja, wir sind deutschlandweit aktiv. Unsere Teams sind in allen Metropolregionen wie Berlin, Hamburg, München, Frankfurt und dem gesamten Bundesgebiet einsatzbereit. Für Immobilienportfolios bieten wir zentral koordinierte Rahmenverträge.",
+        },
+      ]}
+      relatedLinks={[
+        { label: "Alle Handwerk-Leistungen", href: "/handwerk" },
+        { label: "Elektrotechnik Berlin", href: "/standorte/berlin" },
+        { label: "Elektrotechnik Hamburg", href: "/standorte/hamburg" },
+        { label: "Elektrotechnik München", href: "/standorte/muenchen" },
       ]}
     />
   );
