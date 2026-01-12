@@ -16,14 +16,14 @@ export function HeroSection() {
             alt="Professionelles Facility-Management Team bei der Arbeit"
             className="h-full w-full object-cover pointer-events-none"
           />
-          {/* Gradient overlay for better text readability */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[hsl(198,29%,76%)]/95 via-[hsl(198,29%,76%)]/80 to-transparent lg:from-[hsl(198,29%,76%)]/90 lg:via-[hsl(198,29%,76%)]/70 lg:to-transparent" />
+          {/* Gradient overlay for better text readability - centered */}
+          <div className="absolute inset-0 bg-[hsl(198,29%,76%)]/80 lg:bg-[hsl(198,29%,76%)]/70" />
         </div>
 
-        {/* Content Container */}
-        <div className="container relative mx-auto flex min-h-[560px] sm:min-h-[500px] items-center px-4 lg:min-h-[600px] lg:px-8">
-          {/* Left Content */}
-          <div className="relative z-10 w-full py-12 sm:py-16 lg:w-1/2 lg:py-24">
+        {/* Content Container - Centered */}
+        <div className="container relative mx-auto flex min-h-[560px] sm:min-h-[500px] items-center justify-center px-4 lg:min-h-[600px] lg:px-8">
+          {/* Centered Content */}
+          <div className="relative z-10 w-full max-w-3xl py-12 sm:py-16 lg:py-24 text-center">
             {/* Main Headline - Smaller on mobile */}
             <h1 className="font-bold leading-[0.9] tracking-tight text-foreground">
               <span className="block text-[2.5rem] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[5.5rem] xl:text-[6.5rem]">
@@ -35,12 +35,12 @@ export function HeroSection() {
             </h1>
 
             {/* Subheadline */}
-            <p className="mt-6 sm:mt-8 max-w-[420px] text-sm sm:text-base leading-relaxed text-foreground/80 lg:text-lg lg:text-foreground/70">
+            <p className="mt-6 sm:mt-8 mx-auto max-w-[520px] text-sm sm:text-base leading-relaxed text-foreground/80 lg:text-lg lg:text-foreground/70">
               Weg von der Austauschbarkeit, hin zur persönlichen Verantwortung. Mr. Clean Services verbindet professionelles Facility Management mit echter Handschlagqualität.
             </p>
 
-            {/* CTA Buttons - Full width on mobile */}
-            <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4">
+            {/* CTA Buttons - Centered */}
+            <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
               <Link to="/anfrage" className="w-full sm:w-auto">
                 <AnimatedButton className="w-full sm:w-auto bg-foreground text-white hover:bg-foreground/90 shadow-lg shadow-foreground/20 text-base px-8 py-5 sm:py-6">
                   Angebot anfragen
@@ -56,13 +56,13 @@ export function HeroSection() {
               </Link>
             </div>
 
-            {/* Trust Badge - Stack on mobile */}
-            <div className="mt-5 sm:mt-6 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 text-sm text-foreground/70 sm:text-foreground/60">
-              <span className="flex items-center gap-1.5">
+            {/* Trust Badge - Centered */}
+            <div className="mt-5 sm:mt-6 flex flex-col sm:flex-row justify-center sm:items-center gap-2 sm:gap-6 text-sm text-foreground/70 sm:text-foreground/60">
+              <span className="flex items-center justify-center gap-1.5">
                 <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
                 Kostenlos & unverbindlich
               </span>
-              <span className="flex items-center gap-1.5">
+              <span className="flex items-center justify-center gap-1.5">
                 <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
                 Antwort in 24h
               </span>
