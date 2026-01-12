@@ -68,13 +68,15 @@ export function Header() {
   
   // Check if current page is Kontakt (dark background needs white text)
   const isKontaktPage = location.pathname === "/kontakt";
+  // Check if current page is Index (transparent header over hero)
+  const isIndexPage = location.pathname === "/";
   const textColor = isKontaktPage ? "text-white" : "text-foreground";
   const textColorMuted = isKontaktPage ? "text-white/70" : "text-foreground/70";
   const borderColor = isKontaktPage ? "border-white/30" : "border-foreground/30";
   const hoverBg = isKontaktPage ? "hover:bg-white/10" : "hover:bg-foreground/10";
 
   return (
-    <header className="relative z-50 w-full bg-primary">
+    <header className={`relative z-50 w-full ${isIndexPage ? 'bg-transparent absolute top-0 left-0 right-0' : 'bg-primary'}`}>
       {/* Primary Navigation Row */}
       <div className={`border-b ${isKontaktPage ? 'border-white/10' : 'border-foreground/10'} py-2`}>
         <nav className="container mx-auto flex h-20 items-center px-4 lg:px-8">
