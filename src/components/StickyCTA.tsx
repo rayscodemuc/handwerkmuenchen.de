@@ -42,7 +42,8 @@ export function StickyCTA() {
     >
       <Link
         to="/rechner"
-        className="flex items-center gap-3 bg-orange-500 hover:bg-orange-600 text-white px-5 py-4 rounded-l-xl shadow-2xl transition-all hover:pr-8 group"
+        className="flex items-center gap-3 text-white px-5 py-4 rounded-l-xl shadow-2xl transition-all hover:pr-8 group animate-pulse"
+        style={{ backgroundColor: '#578ea5' }}
       >
         <Calculator className="h-5 w-5 shrink-0" />
         <span className="font-semibold whitespace-nowrap">Angebot berechnen</span>
@@ -88,7 +89,8 @@ export function MobileStickyCTA() {
     >
       <Link
         to="/rechner"
-        className="flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-6 py-4 rounded-xl shadow-2xl w-full font-semibold"
+        className="flex items-center justify-center gap-2 text-white px-6 py-4 rounded-xl shadow-2xl w-full font-semibold animate-pulse"
+        style={{ backgroundColor: '#578ea5' }}
       >
         <Calculator className="h-5 w-5" />
         Angebot berechnen
