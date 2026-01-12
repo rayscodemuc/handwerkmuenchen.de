@@ -5,9 +5,9 @@ import { CheckCircle2, Calculator } from "lucide-react";
 
 export function HeroSection() {
   return (
-    <section className="relative overflow-hidden bg-[hsl(198,29%,76%)]">
-      {/* Main Container */}
-      <div className="relative min-h-[540px] lg:min-h-[650px] pt-8 lg:pt-12">
+    <section className="relative overflow-hidden bg-primary -mt-[1px]">
+      {/* Main Container - negative margin pulls hero under header */}
+      <div className="relative min-h-[480px] lg:min-h-[580px]">
       {/* Full Background Image */}
       <div className="absolute inset-0">
         <img
@@ -19,7 +19,7 @@ export function HeroSection() {
           }}
         />
         {/* Gradient overlay for better text readability */}
-        <div className="absolute inset-0 bg-[hsl(198,29%,76%)]/75 lg:bg-[hsl(198,29%,76%)]/65" />
+        <div className="absolute inset-0 bg-primary/75 lg:bg-primary/65" />
       </div>
 
         {/* Content Container - Centered */}
