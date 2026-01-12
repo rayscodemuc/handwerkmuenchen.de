@@ -5,59 +5,59 @@ import { CategoryTrustSection } from "@/components/sections/CategoryTrustSection
 import { SEOHead } from "@/components/SEOHead";
 import { AnimatedButton } from "@/components/ui/animated-button";
 import { Link } from "react-router-dom";
-import { Wrench, Zap, Droplets, Settings, CheckCircle, Clock, Users, ChevronRight } from "lucide-react";
+import { Wrench, Zap, Droplets, Settings, CheckCircle, Clock, Users, ChevronRight, CheckCircle2 } from "lucide-react";
 
 const services = [
   {
     icon: Zap,
-    title: "Elektrotechnik für Gewerbe & Privat",
-    description: "Installationen, Prüfungen und Reparaturen elektrischer Anlagen.",
+    title: "High-End Elektrotechnik",
+    description: "Wir planen und installieren nicht nur – wir denken mit. Von intelligenter Sensorik bis zur ausfallsicheren Anlage für Gewerbe und Privat.",
     link: "/handwerk/elektrotechnik",
   },
   {
     icon: Droplets,
-    title: "Sanitär- und Heizungslösungen",
-    description: "Wartung und Reparatur von Sanitär- und Heizungsanlagen.",
+    title: "Smartes Sanitär & Heizung",
+    description: "Effizienz durch Technik, Werterhalt durch Verstand. Wir finden Lösungen, wo andere nur Komponenten austauschen.",
     link: "/handwerk/sanitaer-heizung",
   },
   {
     icon: Settings,
-    title: "Regelmäßige Wartung & Instandsetzung",
-    description: "Planmäßige Wartung für alle technischen Anlagen.",
+    title: "Präzisions-Wartung",
+    description: "Kein Abhaken von Listen. Wir nutzen digitale Diagnostik, um Schwachstellen zu finden, bevor sie zum teuren Problem werden.",
     link: "/handwerk/service-wartung",
   },
 ];
 
 const reasons = [
   {
-    icon: Wrench,
-    title: "Fachgerechte Koordination",
-    description: "Ein Ansprechpartner koordiniert alle Gewerke für Sie.",
-  },
-  {
-    icon: Clock,
-    title: "Schnelle Reparatur",
-    description: "Kurze Reaktionszeiten bei Störungen und Notfällen.",
-  },
-  {
-    icon: CheckCircle,
-    title: "Geprüfte Qualität",
-    description: "Qualifizierte Handwerker mit nachweisbarer Fachkompetenz.",
+    icon: Zap,
+    title: "Digitale Präzision",
+    description: "Wir nutzen modernste Messtechnik und smarte Diagnose-Tools für Fehleranalysen, die das bloße Auge übersieht.",
   },
   {
     icon: Users,
-    title: "Regionale Partner",
-    description: "Eigenes Team ergänzt durch zertifizierte Partner vor Ort.",
+    title: "Menschliche Instanz",
+    description: "Technik liefert Daten, wir liefern die Lösung. Die finale Entscheidung und Beratung erfolgt immer durch Ihren persönlichen Experten.",
+  },
+  {
+    icon: Settings,
+    title: "Zukunftssichere Systeme",
+    description: "Wir verbauen keine Technik von gestern. Wir planen Anlagen, die auch in 20 Jahren noch effizient und smart funktionieren.",
+  },
+  {
+    icon: Wrench,
+    title: "Handwerk 4.0",
+    description: "Effiziente digitale Prozesse im Hintergrund sorgen dafür, dass wir uns vor Ort zu 100% auf das Wesentliche konzentrieren können: Ihr Projekt.",
   },
 ];
 
 export default function HandwerkCategory() {
   return (
     <div className="flex min-h-screen flex-col">
-      <SEOHead
-        title="Handwerk & Service: Elektro, Sanitär, Heizung"
-        description="Alles für Elektro, Sanitär & Heizung. Wir koordinieren Reparaturen und Wartungen durch unser Team und geprüfte Partner. Schnell, zuverlässig & fachgerecht."
-      />
+<SEOHead
+  title="Handwerk & Gebäudetechnik mit Handschlagqualität | Mr.Clean"
+  description="Maximum Tech trifft menschliche Verantwortung. Wir sind die Rebellen im Handwerk: Modernste Sensorik, digitale Präzision und Experten, bei denen ein Wort noch zählt."
+/>
       <Header />
       <main className="flex-1">
         {/* Breadcrumb */}
@@ -78,44 +78,98 @@ export default function HandwerkCategory() {
         </nav>
 
         {/* Hero Section */}
-        <section className="relative overflow-hidden bg-[hsl(198,29%,76%)]">
+        <section className="relative overflow-hidden bg-[hsl(198,29%,76%)] bg-[radial-gradient(#00000005_1px,transparent_1px)] [background-size:20px_20px]">
+        {/* Rest des Inhalts bleibt gleich */}
           <div className="relative min-h-[540px] lg:min-h-[650px] pt-8 lg:pt-12">
-            <div 
-              className="absolute inset-0"
-              style={{
-                clipPath: "polygon(55% 0, 100% 0, 100% 100%, 35% 100%)",
-              }}
-            >
-              <div className="h-full w-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center">
-                <Wrench className="h-48 w-48 text-primary/30" />
-              </div>
-            </div>
-
-            <div className="container relative mx-auto flex min-h-[500px] items-center px-4 lg:min-h-[600px] lg:px-8">
-              <div className="relative z-10 w-full py-16 lg:w-1/2 lg:py-24">
-                <p className="text-sm font-semibold uppercase tracking-wider text-primary">
+            {/* Content Container - Centered */}
+            <div className="container relative mx-auto flex min-h-[560px] sm:min-h-[500px] items-center justify-center px-4 lg:min-h-[600px] lg:px-8">
+              {/* Centered Content */}
+              <div className="relative z-10 w-full max-w-3xl py-12 sm:py-16 lg:py-24 text-center">
+                {/* Subtitle */}
+                <p className="text-sm font-semibold uppercase tracking-wider text-primary mb-4">
                   Technische Dienstleistungen
                 </p>
-                <h1 className="mt-4 font-bold leading-[1.1] tracking-tight text-foreground text-[2.5rem] sm:text-[3rem] lg:text-[3.5rem] xl:text-[4rem]">
-                  Ihr Partner für Handwerk: Elektro, Sanitär & Heizung
-                </h1>
+                
+                {/* Main Headline - Smaller on mobile */}
+                <h1 className="font-bold leading-[0.9] tracking-tight text-foreground">
+  <span className="block text-[2.5rem] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[5.5rem] xl:text-[6.5rem]">
+  Gegen den Strom.
+  </span>
+  <span className="block text-[2.5rem] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[5.5rem] xl:text-[6.5rem]">
+  Für den Wert.
+  </span>
+</h1>
 
-                <p className="mt-8 max-w-[420px] text-base leading-relaxed text-foreground/70 lg:text-lg">
-                  Professionelle Handwerksleistungen für Ihre Immobilien. Von Elektroinstallationen 
-                  bis zur Heizungswartung – wir halten Ihre Gebäudetechnik funktionsfähig.
+                {/* Subheadline */}
+                <p className="mt-6 sm:mt-8 mx-auto max-w-[520px] text-sm sm:text-base leading-relaxed text-foreground/80 lg:text-lg lg:text-foreground/70">
+                Wir beherrschen die Technik von morgen, um die Werte von heute zu erhalten. 
+  Während andere auf Massenabfertigung setzen, nutzen wir <strong>modernste Sensorik und digitale Präzision </strong> 
+  als Werkzeug – aber niemals als Ersatz für den Menschen. Bei uns trifft 
+  <strong> technisches Maximum auf echte Handschlagqualität</strong>. 
+  Keine KI-Bots, keine anonymen Prozesse, sondern Experten mit Verantwortung.
                 </p>
 
-                <div className="mt-10">
-                  <Link to="/anfrage">
-                    <AnimatedButton className="bg-white text-foreground hover:bg-foreground hover:text-white">
-                      Angebot anfragen
+                {/* CTA Button - Centered */}
+                <div className="mt-8 sm:mt-10 flex justify-center">
+                  <Link to="/anfrage" className="w-full sm:w-auto">
+                    <AnimatedButton className="w-full sm:w-auto bg-foreground text-white hover:bg-foreground/90 shadow-lg shadow-foreground/20 text-base px-8 py-5 sm:py-6">
+                      Werterhalt sichern
                     </AnimatedButton>
                   </Link>
+                </div>
+
+                {/* Trust Badge - Centered */}
+                <div className="mt-5 sm:mt-6 flex flex-col sm:flex-row justify-center sm:items-center gap-2 sm:gap-6 text-sm text-foreground/70 sm:text-foreground/60">
+                  <span className="flex items-center justify-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
+                    Kostenlos & unverbindlich
+                  </span>
+                  <span className="flex items-center justify-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
+                    Antwort in 24h
+                  </span>
                 </div>
               </div>
             </div>
           </div>
         </section>
+
+        {/* Tech & Human Connection Section */}
+<section className="bg-foreground text-white py-24">
+  <div className="container mx-auto px-4 lg:px-8">
+    <div className="grid gap-16 lg:grid-cols-2 items-center">
+      <div>
+        <h2 className="text-3xl font-bold tracking-tight lg:text-4xl mb-6">
+          Technik am Limit. <br />
+          Beratung auf Augenhöhe.
+        </h2>
+        <p className="text-white/70 text-lg mb-8">
+          Wir investieren massiv in modernste Messtechnik und digitale Tools, um Fehler zu finden, bevor sie teuer werden. Aber wir investieren genauso viel in unsere Leute. Denn am Ende ist es nicht der Algorithmus, der Ihre Heizung repariert oder die Elektrik sichert – sondern ein Mensch mit Ehre und Verstand.
+        </p>
+        <ul className="space-y-4">
+          {[
+            "Keine KI-Bots in der Beratung",
+            "Modernste thermografische Analyse",
+            "Digitale Dokumentation in Echtzeit",
+            "Direkter Draht zum Meister"
+          ].map((item) => (
+            <li key={item} className="flex items-center gap-3">
+              <CheckCircle2 className="h-5 w-5 text-primary" />
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className="relative aspect-square lg:aspect-video rounded-2xl overflow-hidden bg-muted/20 flex items-center justify-center border border-white/10">
+        {/* Hier später ein Bild von einem High-Tech Tool in einer Hand einfügen */}
+        <div className="text-center p-8">
+          <Settings className="h-16 w-16 text-primary mx-auto mb-4 animate-spin-slow" />
+          <p className="text-xl font-medium">Precision meets Personality</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
         {/* Services Section */}
         <section className="bg-background py-24 lg:py-32">
@@ -148,6 +202,8 @@ export default function HandwerkCategory() {
             </div>
           </div>
         </section>
+
+        
 
         {/* Why Us Section */}
         <section className="bg-muted/50 py-24 lg:py-32">
