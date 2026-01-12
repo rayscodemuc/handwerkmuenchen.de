@@ -1,55 +1,94 @@
 import { BlogServicePageLayout } from "./BlogServicePageLayout";
-import { Building2, Clock, Sparkles, Coffee, Trash2, Users } from "lucide-react";
+import { Building2, Clock, Sparkles, Coffee, Trash2, Users, Shield, CheckCircle, BarChart, Leaf } from "lucide-react";
 
 export default function Bueroreinigung() {
   return (
     <BlogServicePageLayout
       title="Büroreinigung"
-      subtitle="Reinigung"
+      subtitle="Produktive Arbeitsumgebung & Mitarbeitergesundheit"
       categoryName="Reinigung"
       categoryHref="/reinigung"
-      description="Professionelle Büroreinigung für produktive Arbeitsplätze. Tägliche oder wöchentliche Reinigung nach Ihren Anforderungen."
-      intro="Saubere Arbeitsplätze fördern die Gesundheit und Produktivität Ihrer Mitarbeiter. Unsere geschulten Reinigungskräfte sorgen für ein angenehmes Arbeitsumfeld – zuverlässig und diskret."
+      description="Professionelle Büroreinigung für Gewerbeimmobilien. Feste Teams, flexible Zeiten und dokumentierte Qualitätsstandards für produktive Arbeitsplätze."
+      intro="Für Unternehmen mit Büroflächen ist Sauberkeit mehr als Optik – sie ist ein Produktivitätsfaktor. Studien belegen: Saubere Arbeitsplätze reduzieren krankheitsbedingte Ausfälle um bis zu 20 %. Als Reinigungsdienstleister für Gewerbeimmobilien übernehmen wir die komplette Büroreinigung mit festen Teams, flexiblen Zeiten und dokumentierten Qualitätsstandards."
+      imageSrc=""
+      imageAlt="Professionelle Büroreinigung mit geschultem Personal"
+      imageCaption="Feste Reinigungsteams für gleichbleibende Qualität"
       sections={[
         {
-          title: "Flexibel nach Ihren Wünschen",
-          content: "Ob tägliche Unterhaltsreinigung oder wöchentliche Grundpflege – wir passen uns Ihrem Betriebsablauf an. Die Reinigung erfolgt vor oder nach den Bürozeiten, um den Arbeitsfluss nicht zu stören.",
+          title: "Feste Teams statt wechselndes Personal",
+          content: "Der häufigste Grund für Beschwerden bei Reinigungsdienstleistern: ständig wechselndes Personal. Unsere festen Objektteams kennen Ihre Räumlichkeiten, Ihre Anforderungen und Ihre Ansprechpartner. Das schafft Vertrauen, garantiert gleichbleibende Qualität und ermöglicht direkte Kommunikation bei Sonderwünschen."
         },
         {
-          title: "Festes Reinigungsteam",
-          content: "Sie erhalten ein vertrautes Team, das Ihre Räumlichkeiten und Anforderungen kennt. Das schafft Vertrauen und garantiert gleichbleibend hohe Qualität.",
+          title: "Reinigung außerhalb der Bürozeiten",
+          content: "Niemand möchte während der Arbeit gestört werden. Unsere Reinigungsteams arbeiten vor Bürobeginn, nach Feierabend oder nachts – je nach Ihrem Betriebsablauf. Bei Bedarf auch am Wochenende. So ist Ihr Büro jeden Morgen sauber, ohne dass der Arbeitsfluss unterbrochen wird."
         },
+        {
+          title: "Dokumentierte Qualitätskontrolle",
+          content: "Regelmäßige Qualitätskontrollen durch unsere Objektleiter stellen sicher, dass Standards eingehalten werden. Mängel werden sofort korrigiert, Sonderwünsche zeitnah umgesetzt. Auf Wunsch erhalten Sie monatliche Reports mit Leistungskennzahlen."
+        }
       ]}
       highlightBox={{
-        icon: Users,
-        title: "Persönlicher Ansprechpartner",
-        text: "Ein fester Objektleiter betreut Ihr Gebäude, führt regelmäßige Qualitätskontrollen durch und ist Ihr direkter Kontakt für alle Anliegen.",
+        icon: Shield,
+        title: "Hygienekonzepte nach TRBA 220",
+        text: "Für sensible Bereiche wie Gesundheitswesen, Lebensmittelverarbeitung oder Labore erstellen wir individuelle Hygienekonzepte nach TRBA 220 und führen Desinfektionsreinigung nach RKI-Richtlinien durch."
       }}
       stats={[
-        { value: "5x", label: "pro Woche möglich" },
-        { value: "Fest", label: "Team zugewiesen" },
-        { value: "Flexibel", label: "Reinigungszeiten" },
+        { value: "20%", label: "weniger Krankheitstage" },
+        { value: "1", label: "Fester Objektleiter" },
+        { value: "Flexibel", label: "Reinigungszeiten" }
       ]}
       services={[
-        { title: "Arbeitsplatzreinigung", description: "Schreibtische, Ablagen und Arbeitsflächen.", icon: Building2 },
-        { title: "Sanitärbereiche", description: "Hygienische Reinigung und Desinfektion.", icon: Sparkles },
-        { title: "Küchen & Sozialräume", description: "Aufenthaltsräume und Gemeinschaftsbereiche.", icon: Coffee },
-        { title: "Entsorgung", description: "Papierkörbe leeren und Mülltrennung.", icon: Trash2 },
-        { title: "Flexible Zeiten", description: "Reinigung vor oder nach Geschäftszeiten.", icon: Clock },
-        { title: "Festes Team", description: "Vertrautes Personal für Ihr Objekt.", icon: Users },
+        { title: "Arbeitsplatzreinigung", description: "Schreibtische, Ablagen, Arbeitsflächen und Technik.", icon: Building2 },
+        { title: "Sanitärbereich-Hygiene", description: "Tägliche Desinfektion nach TRBA-Standards.", icon: Sparkles },
+        { title: "Küchen & Sozialräume", description: "Aufenthaltsräume, Teeküchen und Gemeinschaftsbereiche.", icon: Coffee },
+        { title: "Flexible Reinigungszeiten", description: "Vor, nach oder außerhalb der Bürozeiten.", icon: Clock },
+        { title: "Feste Objektteams", description: "Gleiches Personal für Vertrauen und Qualität.", icon: Users },
+        { title: "Nachhaltige Reinigungsmittel", description: "EU-Ecolabel-zertifizierte Produkte.", icon: Leaf }
       ]}
-      quote="Eine saubere Arbeitsumgebung steigert nachweislich die Mitarbeiterzufriedenheit und reduziert krankheitsbedingte Ausfälle."
+      quote="Für Property Manager mit mehreren Bürostandorten bieten wir Rahmenverträge mit einheitlichen Standards, konsolidiertem Reporting und einem zentralen Ansprechpartner."
       faqs={[
-        { question: "Wann wird gereinigt?", answer: "Die Reinigung erfolgt nach Ihren Wünschen – vor oder nach den Bürozeiten, auch am Wochenende möglich." },
-        { question: "Können Sonderwünsche berücksichtigt werden?", answer: "Ja, wir passen den Leistungsumfang individuell an Ihre Bedürfnisse an." },
+        { 
+          question: "Wie stellen Sie gleichbleibende Qualität sicher?", 
+          answer: "Durch feste Objektteams, regelmäßige Schulungen, dokumentierte Arbeitsabläufe und unangekündigte Qualitätskontrollen durch unsere Objektleiter. Bei Unterschreitung der Standards greifen definierte Eskalationsprozesse." 
+        },
+        { 
+          question: "Können Sie auch sensible Bereiche reinigen?", 
+          answer: "Ja, wir erstellen individuelle Hygienekonzepte für Arztpraxen, Labore, Rechenzentren und Lebensmittelbetriebe. Unser Personal ist nach TRBA 220 geschult und führt Desinfektionsreinigung nach RKI-Richtlinien durch." 
+        },
+        { 
+          question: "Was passiert bei Sonderwünschen oder Beschwerden?", 
+          answer: "Ihr fester Objektleiter ist Ihr direkter Ansprechpartner. Sonderwünsche werden in der Regel innerhalb von 24 Stunden umgesetzt, Beschwerden sofort bearbeitet und dokumentiert." 
+        },
+        { 
+          question: "Können Sie mehrere Standorte bundesweit betreuen?", 
+          answer: "Ja, wir betreuen Unternehmen mit dutzenden Bürostandorten über einen zentralen Rahmenvertrag. Einheitliche Prozesse, konsolidiertes Reporting, ein Ansprechpartner." 
+        },
+        { 
+          question: "Welche Reinigungsmittel werden verwendet?", 
+          answer: "Wir setzen auf EU-Ecolabel-zertifizierte, umweltfreundliche Produkte. Für spezielle Anforderungen (Desinfektion, Allergiker) passen wir das Produktspektrum individuell an." 
+        }
       ]}
       relatedLinks={[
         { label: "Alle Reinigungsleistungen", href: "/reinigung" },
         { label: "Unterhaltsreinigung", href: "/reinigung/unterhaltsreinigung" },
         { label: "Grundreinigung", href: "/reinigung/grundreinigung" },
-        { label: "Berlin", href: "/standorte/berlin" },
+        { label: "Frankfurt", href: "/standorte/frankfurt" },
+        { label: "Hamburg", href: "/standorte/hamburg" },
+        { label: "München", href: "/standorte/muenchen" }
       ]}
-      keywords={["Büroreinigung", "Arbeitsplatzreinigung", "Gewerbliche Reinigung"]}
+      keywords={[
+        "Büroreinigung Gewerbe",
+        "Arbeitsplatzreinigung",
+        "Gewerbliche Reinigung",
+        "TRBA 220",
+        "Hygienekonzept Büro",
+        "Reinigungsdienstleister"
+      ]}
+      trustBadges={[
+        { icon: Users, label: "Feste Teams" },
+        { icon: CheckCircle, label: "Qualitätskontrolle" },
+        { icon: Leaf, label: "EU-Ecolabel" }
+      ]}
     />
   );
 }

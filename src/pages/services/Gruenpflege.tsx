@@ -1,65 +1,48 @@
 import { BlogServicePageLayout } from "./BlogServicePageLayout";
-import { Leaf, Scissors, Flower, TreeDeciduous, Droplets, Calendar, Sun, Shield } from "lucide-react";
+import { Leaf, Scissors, Flower, TreeDeciduous, Droplets, Calendar, Shield, CheckCircle, BarChart } from "lucide-react";
 
 export default function Gruenpflege() {
   return (
     <BlogServicePageLayout
       title="Grünpflege"
-      subtitle="Außenanlagen"
+      subtitle="Außenanlagenpflege & Immobilienwertsteigerung"
       categoryName="Außenanlagen"
       categoryHref="/aussenanlagen"
-      description="Ganzjährige Grünpflege für Gewerbeimmobilien. Rasenpflege, Heckenschnitt, Beetpflege und saisonale Bepflanzung."
-      intro="Gepflegte Grünanlagen werten Ihre Immobilie auf, verbessern das Mikroklima und steigern die Zufriedenheit von Mietern und Mitarbeitern. Unsere ganzjährige Grünpflege umfasst alle Leistungen von der Rasenpflege bis zur professionellen Baumpflege."
+      description="Ganzjährige Grünpflege für Gewerbeimmobilien. Rasenpflege, Heckenschnitt, Beetpflege und Bewässerungsmanagement für repräsentative Außenanlagen."
+      intro="Gepflegte Grünanlagen sind mehr als Dekoration – sie steigern den Immobilienwert um bis zu 15 %, erhöhen die Mieterzufriedenheit und prägen den ersten Eindruck bei Kunden und Besuchern. Für Property Manager und Facility-Verantwortliche übernehmen wir die komplette ganzjährige Grünpflege mit planbaren Kosten und dokumentierter Qualität."
       imageSrc=""
-      imageAlt="Professionelle Rasenpflege mit Aufsitzmäher auf Gewerbefläche"
-      imageCaption="Regelmäßige Rasenpflege für repräsentative Außenanlagen"
+      imageAlt="Professionelle Grünpflege auf Gewerbefläche"
+      imageCaption="Repräsentative Außenanlagen für Gewerbeimmobilien"
       sections={[
-        {
-          title: "Der Wert gepflegter Grünanlagen",
-          content: "Studien belegen: Attraktive Außenanlagen steigern den Immobilienwert um bis zu 15 %. Für Gewerbeimmobilien sind sie Teil des Markenauftritts. Vernachlässigte Grünflächen hingegen signalisieren mangelnde Sorgfalt – mit negativen Folgen für Mieterzufriedenheit und Vermietbarkeit."
-        },
-        {
-          title: "Jahreszeitengerechte Pflege",
-          content: "Im Frühjahr bereiten wir Rasenflächen mit Vertikutieren und Düngen vor. Im Sommer steht regelmäßiger Schnitt im Fokus. Der Herbst bringt Laubbeseitigung und Rückschnitte, der Winter Schutzmaßnahmen für empfindliche Pflanzen. Wir planen voraus und agieren proaktiv."
-        },
-        {
-          title: "Bewässerungsmanagement",
-          content: "Ob manuelle Bewässerung oder automatische Beregnungsanlage – wir übernehmen Installation, Wartung und saisonale Einstellung. Smarte Systeme mit Bodenfeuchtesensoren sparen bis zu 50 % Wasser gegenüber konventioneller Beregnung."
-        }
+        { title: "Werterhalt durch professionelle Pflege", content: "Vernachlässigte Grünflächen signalisieren mangelnde Sorgfalt und mindern die Attraktivität für Mieter und Investoren. Regelmäßige Pflege nach Jahresplan hält Ihre Außenanlagen in Topzustand." },
+        { title: "Jahreszeitengerechte Maßnahmen", content: "Frühjahr: Vertikutieren, Düngen, Rückschnitt. Sommer: Regelmäßiger Schnitt, Bewässerung. Herbst: Laubbeseitigung, Wintervorbereitung. Winter: Schutzmaßnahmen für empfindliche Pflanzen." },
+        { title: "Smartes Bewässerungsmanagement", content: "Mit Bodenfeuchtesensoren und automatischen Beregnungsanlagen sparen wir bis zu 50 % Wasser. Installation, Wartung und saisonale Einstellung inklusive." }
       ]}
-      highlightBox={{
-        icon: Calendar,
-        title: "Saisonale Bepflanzung",
-        text: "Auf Wunsch bepflanzen wir Beete und Kübel saisonal mit Frühjahrs-, Sommer- oder Herbstblühern – für ein ansprechendes Erscheinungsbild zu jeder Jahreszeit."
-      }}
-      stats={[
-        { value: "Wöchentlich", label: "Rasenschnitt" },
-        { value: "4 Saisons", label: "Ganzjährig" },
-        { value: "50%", label: "Wassereinsparung" }
-      ]}
+      highlightBox={{ icon: Shield, title: "Verkehrssicherungspflicht erfüllt", text: "Wir dokumentieren alle Pflegemaßnahmen revisionssicher. Bei Unfällen durch herabfallende Äste oder rutschiges Laub sind Sie haftungsrechtlich abgesichert." }}
+      stats={[{ value: "15%", label: "Wertsteigerung" }, { value: "4 Saisons", label: "Ganzjährig" }, { value: "50%", label: "Wassereinsparung" }]}
       services={[
         { title: "Rasenpflege", description: "Mähen, Vertikutieren, Düngen, Nachsaat.", icon: Leaf },
-        { title: "Heckenschnitt", description: "Form- und Verjüngungsschnitt.", icon: Scissors },
-        { title: "Beetpflege", description: "Unkraut, Mulchen, Bepflanzung.", icon: Flower },
-        { title: "Baumpflege", description: "Kronenpflege, Totholzentfernung.", icon: TreeDeciduous },
-        { title: "Bewässerung", description: "Installation und Wartung von Anlagen.", icon: Droplets },
-        { title: "Laubbeseitigung", description: "Herbstlaub von Flächen und Dachrinnen.", icon: Sun }
+        { title: "Heckenschnitt", description: "Form- und Verjüngungsschnitt nach Bedarf.", icon: Scissors },
+        { title: "Beetpflege", description: "Unkraut, Mulchen, saisonale Bepflanzung.", icon: Flower },
+        { title: "Baumpflege", description: "Kronenpflege und Totholzentfernung.", icon: TreeDeciduous },
+        { title: "Bewässerung", description: "Installation und Wartung automatischer Anlagen.", icon: Droplets },
+        { title: "Jahresplan", description: "Planbare Termine und transparente Kosten.", icon: Calendar }
       ]}
-      quote="Gepflegte Grünanlagen sind mehr als Dekoration – sie sind Lebensqualität und Wertsteigerung."
+      quote="Für Portfolios mit mehreren Standorten bieten wir Rahmenverträge mit einheitlichen Standards und konsolidiertem Reporting."
       faqs={[
-        { question: "Wie oft sollte der Rasen gemäht werden?", answer: "In der Wachstumssaison empfehlen wir wöchentlichen bis 14-tägigen Schnitt. Die optimale Schnitthöhe liegt bei 4-5 cm." },
-        { question: "Übernehmen Sie auch die Bepflanzung?", answer: "Ja, wir planen und realisieren saisonale Bepflanzungen nach Ihren Wünschen oder unseren Gestaltungsvorschlägen." },
-        { question: "Was passiert mit dem Grünschnitt?", answer: "Der Grünschnitt wird von uns entsorgt – entweder zur Kompostierung oder zur energetischen Verwertung." },
-        { question: "Bieten Sie auch Winterschutz für Pflanzen?", answer: "Ja, wir schützen empfindliche Gehölze und Stauden mit Vlies, Mulch oder anderen Maßnahmen vor Frost." }
+        { question: "Wie oft wird der Rasen gemäht?", answer: "In der Wachstumssaison wöchentlich bis 14-tägig, je nach Wachstum und Witterung." },
+        { question: "Übernehmen Sie auch Bepflanzung?", answer: "Ja, wir planen und realisieren saisonale Bepflanzungen nach Ihren Wünschen." },
+        { question: "Was passiert mit dem Grünschnitt?", answer: "Wird von uns fachgerecht entsorgt – zur Kompostierung oder energetischen Verwertung." },
+        { question: "Können Sie mehrere Standorte betreuen?", answer: "Ja, bundesweite Betreuung über Rahmenvertrag mit einheitlichen Standards." }
       ]}
       relatedLinks={[
-        { label: "Alle Außenanlagen-Leistungen", href: "/aussenanlagen" },
+        { label: "Außenanlagen", href: "/aussenanlagen" },
         { label: "Baumpflege", href: "/aussenanlagen/baumpflege" },
         { label: "Winterdienst", href: "/aussenanlagen/winterdienst" },
-        { label: "München", href: "/standorte/muenchen" },
-        { label: "Frankfurt", href: "/standorte/frankfurt" }
+        { label: "München", href: "/standorte/muenchen" }
       ]}
-      keywords={["Grünpflege Gewerbe", "Rasenpflege", "Heckenschnitt", "Gartenpflege", "Außenanlagenpflege"]}
+      keywords={["Grünpflege Gewerbe", "Rasenpflege", "Außenanlagenpflege", "Gartenpflege Gewerbeimmobilien"]}
+      trustBadges={[{ icon: Calendar, label: "Jahresplan" }, { icon: Shield, label: "Haftungssicherheit" }, { icon: CheckCircle, label: "Dokumentiert" }]}
     />
   );
 }

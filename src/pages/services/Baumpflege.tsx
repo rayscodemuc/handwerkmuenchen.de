@@ -1,55 +1,46 @@
 import { BlogServicePageLayout } from "./BlogServicePageLayout";
-import { TreeDeciduous, Scissors, Shield, AlertTriangle, FileText, Eye } from "lucide-react";
+import { TreeDeciduous, Scissors, Shield, AlertTriangle, FileText, Eye, Clock, CheckCircle } from "lucide-react";
 
 export default function Baumpflege() {
   return (
     <BlogServicePageLayout
       title="Baumpflege"
-      subtitle="Außenanlagen"
+      subtitle="Verkehrssicherung & Baumkataster nach FLL"
       categoryName="Außenanlagen"
       categoryHref="/aussenanlagen"
-      description="Professionelle Baumpflege für gesunde Bäume und sichere Grundstücke. Baumschnitt, Fällung und Verkehrssicherungsprüfung."
-      intro="Bäume sind ein wertvolles Gut auf Ihrem Grundstück – aber sie brauchen regelmäßige Pflege für Gesundheit und Sicherheit. Unsere zertifizierten Baumpfleger sorgen für fachgerechte Behandlung nach FLL-Richtlinien."
+      description="Professionelle Baumpflege für Gewerbeimmobilien. Baumkontrolle, Kronenpflege und digitales Baumkataster für Haftungssicherheit."
+      intro="Als Grundstückseigentümer haften Sie für Schäden durch herabfallende Äste oder umstürzende Bäume. Regelmäßige Baumkontrollen nach FLL-Richtlinien sind Pflicht – und der Nachweis im Schadensfall entscheidend. Wir übernehmen Kontrolle, Pflege und Dokumentation mit digitalem Baumkataster."
+      imageSrc=""
+      imageAlt="Professionelle Baumpflege durch zertifizierte Fachkräfte"
+      imageCaption="FLL-zertifizierte Baumpflege für Verkehrssicherheit"
       sections={[
-        {
-          title: "Verkehrssicherungspflicht erfüllen",
-          content: "Als Grundstückseigentümer haften Sie für Schäden durch herabfallende Äste oder umstürzende Bäume. Regelmäßige Baumkontrollen nach FLL-Richtlinien dokumentieren die Erfüllung Ihrer Verkehrssicherungspflicht.",
-        },
-        {
-          title: "Fachgerechte Baumpflege",
-          content: "Vom Formschnitt junger Bäume über die Kronenpflege bis zur Totholzentfernung – wir führen alle Arbeiten nach den Vorgaben der ZTV-Baumpflege durch.",
-        },
+        { title: "Verkehrssicherungspflicht erfüllen", content: "Jährliche Baumkontrollen nach FLL-Richtlinien dokumentieren die Erfüllung Ihrer Verkehrssicherungspflicht. Im Schadensfall ist die lückenlose Dokumentation Ihr Schutz vor Haftungsansprüchen." },
+        { title: "Fachgerechte Baumpflege nach ZTV", content: "Vom Formschnitt über Kronenpflege bis zur Totholzentfernung – alle Arbeiten nach ZTV-Baumpflege. Zertifizierte Baumpfleger mit Seilklettertechnik für alle Höhen." },
+        { title: "Digitales Baumkataster", content: "Jeder Baum wird erfasst, kontrolliert und im digitalen Baumkataster dokumentiert. Mit Fotos, Maßnahmenhistorie und Terminüberwachung – jederzeit abrufbar für Behörden und Versicherungen." }
       ]}
-      highlightBox={{
-        icon: Shield,
-        title: "Vollständige Dokumentation",
-        text: "Jede Baumkontrolle wird in einem digitalen Baumkataster dokumentiert – rechtssicher und jederzeit abrufbar für Versicherungen und Behörden.",
-      }}
-      stats={[
-        { value: "FLL", label: "Zertifiziert" },
-        { value: "24h", label: "Sturmschaden-Hilfe" },
-        { value: "100%", label: "Dokumentiert" },
-      ]}
+      highlightBox={{ icon: Shield, title: "Rechtssichere Dokumentation", text: "Jede Baumkontrolle wird digital dokumentiert mit Fotos, Maßnahmenempfehlungen und Terminplanung. Gerichtsfest und jederzeit abrufbar." }}
+      stats={[{ value: "FLL", label: "Zertifiziert" }, { value: "24h", label: "Sturmschaden-Hilfe" }, { value: "Digital", label: "Baumkataster" }]}
       services={[
-        { title: "Baumschnitt", description: "Fachgerechter Schnitt für gesundes Wachstum.", icon: Scissors },
-        { title: "Kronenpflege", description: "Auslichtung und Formgebung der Baumkrone.", icon: TreeDeciduous },
-        { title: "Verkehrssicherung", description: "Entfernung von Totholz und Gefahrenästen.", icon: Shield },
-        { title: "Sturmschäden", description: "Schnelle Hilfe bei umgestürzten Bäumen.", icon: AlertTriangle },
-        { title: "Baumkontrolle", description: "Regelmäßige Prüfung nach FLL-Richtlinien.", icon: Eye },
-        { title: "Baumkataster", description: "Digitale Dokumentation aller Bäume.", icon: FileText },
+        { title: "Baumkontrolle", description: "Jährliche Prüfung nach FLL-Richtlinien.", icon: Eye },
+        { title: "Kronenpflege", description: "Auslichtung und Formgebung.", icon: TreeDeciduous },
+        { title: "Totholzentfernung", description: "Verkehrssicherung durch Entfernung.", icon: Shield },
+        { title: "Sturmschäden", description: "24h-Notdienst bei umgestürzten Bäumen.", icon: AlertTriangle },
+        { title: "Baumschnitt", description: "Fachgerechter Schnitt nach ZTV.", icon: Scissors },
+        { title: "Baumkataster", description: "Digitale Dokumentation aller Bäume.", icon: FileText }
       ]}
-      quote="Gesunde Bäume steigern den Wert Ihrer Immobilie und schaffen eine angenehme Atmosphäre für Mieter und Besucher."
+      quote="Bei Sturmschäden sind wir innerhalb von 24 Stunden vor Ort – für Absicherung, Räumung und Dokumentation."
       faqs={[
-        { question: "Wann ist der beste Zeitpunkt für Baumschnitt?", answer: "Die meisten Schnittarbeiten erfolgen im Spätwinter (Februar/März). Totholz kann ganzjährig entfernt werden." },
-        { question: "Brauche ich eine Genehmigung für Baumfällung?", answer: "In den meisten Fällen ja. Wir beraten Sie und übernehmen die Antragstellung bei der zuständigen Behörde." },
+        { question: "Wann ist Baumschnitt erlaubt?", answer: "Hauptschnittzeit Februar/März vor dem Austrieb. Totholz und Verkehrssicherungsmaßnahmen ganzjährig möglich." },
+        { question: "Brauche ich eine Genehmigung für Fällung?", answer: "In den meisten Fällen ja. Wir beraten Sie und übernehmen die Antragstellung." },
+        { question: "Wie oft muss kontrolliert werden?", answer: "Mindestens jährlich, bei Risikobäumen halbjährlich oder nach Sturmereignissen." }
       ]}
       relatedLinks={[
-        { label: "Alle Außenanlagen-Leistungen", href: "/aussenanlagen" },
+        { label: "Außenanlagen", href: "/aussenanlagen" },
         { label: "Grünpflege", href: "/aussenanlagen/gruenpflege" },
-        { label: "Berlin", href: "/standorte/berlin" },
-        { label: "München", href: "/standorte/muenchen" },
+        { label: "Berlin", href: "/standorte/berlin" }
       ]}
-      keywords={["Baumpflege", "Baumschnitt", "Baumfällung", "Verkehrssicherung", "FLL"]}
+      keywords={["Baumpflege Gewerbe", "Baumkontrolle FLL", "Verkehrssicherung Bäume", "Baumkataster"]}
+      trustBadges={[{ icon: Shield, label: "FLL-zertifiziert" }, { icon: Clock, label: "24h Notdienst" }, { icon: CheckCircle, label: "Dokumentiert" }]}
     />
   );
 }

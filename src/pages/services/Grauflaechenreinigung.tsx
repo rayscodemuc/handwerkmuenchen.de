@@ -1,55 +1,44 @@
 import { BlogServicePageLayout } from "./BlogServicePageLayout";
-import { Car, Droplets, Leaf, Eye, Trash2, Calendar } from "lucide-react";
+import { Car, Droplets, Leaf, Eye, Trash2, Calendar, Shield, CheckCircle, Clock } from "lucide-react";
 
 export default function Grauflaechenreinigung() {
   return (
     <BlogServicePageLayout
       title="Grauflächenreinigung"
-      subtitle="Außenanlagen"
+      subtitle="Verkehrsflächen & Parkplatzpflege"
       categoryName="Außenanlagen"
       categoryHref="/aussenanlagen"
-      description="Professionelle Grauflächenreinigung für saubere Parkplätze, Wege und Hofflächen. Kehrmaschinen und Hochdruckreinigung."
-      intro="Versiegelte Flächen wie Parkplätze und Gehwege sind die Visitenkarte Ihres Objekts. Wir sorgen für saubere, gepflegte Grauflächen – mit modernster Technik und regelmäßigen Intervallen."
+      description="Professionelle Grauflächenreinigung für Gewerbeimmobilien. Parkplätze, Wege und Hofflächen mit Kehrmaschinen und Hochdruckreinigung."
+      intro="Versiegelte Flächen sind die Visitenkarte Ihres Objekts. Verschmutzte Parkplätze und ungepflegte Zufahrten signalisieren Vernachlässigung. Für Property Manager bedeutet regelmäßige Grauflächenreinigung: Werterhalt, Verkehrssicherheit und zufriedene Mieter."
+      imageSrc=""
+      imageAlt="Professionelle Grauflächenreinigung mit Kehrmaschine"
+      imageCaption="Maschinelle Reinigung für gepflegte Verkehrsflächen"
       sections={[
-        {
-          title: "Effiziente Flächenreinigung",
-          content: "Moderne Kehrmaschinen und Hochdruckgeräte ermöglichen die effiziente Reinigung auch großer Flächen. Von der täglichen Kehrichtbeseitigung bis zur intensiven Tiefenreinigung.",
-        },
-        {
-          title: "Gepflegter erster Eindruck",
-          content: "Saubere Parkplätze und Zufahrten signalisieren Professionalität und Wertschätzung gegenüber Mietern, Kunden und Besuchern.",
-        },
+        { title: "Erster Eindruck zählt", content: "Parkplätze und Zufahrten sind oft das Erste, was Besucher sehen. Saubere Flächen signalisieren Professionalität und Wertschätzung." },
+        { title: "Effiziente Flächenreinigung", content: "Mit modernen Aufsitzkehrmaschinen reinigen wir über 1.000 m² pro Stunde. Für hartnäckige Verschmutzungen setzen wir Hochdruckreinigung ein." },
+        { title: "Unkrautbekämpfung inklusive", content: "Unkraut in Fugen und Randbereichen wird thermisch oder mechanisch entfernt – für dauerhaft gepflegte Flächen ohne Chemie." }
       ]}
-      highlightBox={{
-        icon: Car,
-        title: "Moderne Kehrmaschinen",
-        text: "Unsere Aufsitzkehrmaschinen reinigen große Flächen schnell und gründlich – auch in Tiefgaragen und Parkhäusern einsetzbar.",
-      }}
-      stats={[
-        { value: "1.000+", label: "m² pro Stunde" },
-        { value: "Wöchentlich", label: "bis monatlich" },
-        { value: "Alle", label: "Flächenarten" },
-      ]}
+      highlightBox={{ icon: Shield, title: "Verkehrssicherheit dokumentiert", text: "Regelmäßige Reinigung und Dokumentation erfüllen Ihre Verkehrssicherungspflicht. Bei Unfällen durch Laub oder Verschmutzung sind Sie abgesichert." }}
+      stats={[{ value: "1.000+", label: "m² pro Stunde" }, { value: "Wöchentlich", label: "bis monatlich" }, { value: "100%", label: "Dokumentiert" }]}
       services={[
-        { title: "Kehrmaschine", description: "Effiziente Flächenreinigung mit modernen Geräten.", icon: Car },
+        { title: "Kehrmaschine", description: "Effiziente Flächenreinigung großer Areale.", icon: Car },
         { title: "Hochdruck", description: "Tiefenreinigung für hartnäckigen Schmutz.", icon: Droplets },
-        { title: "Unkrautentfernung", description: "Beseitigung von Unkraut in Fugen.", icon: Leaf },
+        { title: "Unkrautentfernung", description: "Thermisch oder mechanisch, ohne Chemie.", icon: Leaf },
         { title: "Kontrolle", description: "Regelmäßige Zustandsprüfung.", icon: Eye },
         { title: "Müllbeseitigung", description: "Entfernung von Unrat und Abfall.", icon: Trash2 },
-        { title: "Regelmäßigkeit", description: "Planbare Reinigungsintervalle.", icon: Calendar },
+        { title: "Jahresplan", description: "Planbare Intervalle und Kosten.", icon: Calendar }
       ]}
-      quote="Ölflecken und eingetrocknete Verschmutzungen entfernen wir mit speziellen Hochdruckverfahren – für dauerhaft saubere Flächen."
       faqs={[
-        { question: "Wie oft sollten Grauflächen gereinigt werden?", answer: "Je nach Nutzung wöchentlich bis monatlich für optimale Ergebnisse." },
-        { question: "Können auch private Parkplätze gereinigt werden?", answer: "Ja, wir reinigen Flächen jeder Größe für Gewerbe und Wohnanlagen." },
+        { question: "Wie oft sollten Grauflächen gereinigt werden?", answer: "Je nach Nutzung wöchentlich bis monatlich. Wir erstellen einen individuellen Plan." },
+        { question: "Können auch Ölflecken entfernt werden?", answer: "Ja, mit Spezialverfahren entfernen wir auch eingetrocknete Öl- und Kraftstoffflecken." }
       ]}
       relatedLinks={[
-        { label: "Alle Außenanlagen-Leistungen", href: "/aussenanlagen" },
+        { label: "Außenanlagen", href: "/aussenanlagen" },
         { label: "Tiefgaragenreinigung", href: "/reinigung/tiefgaragenreinigung" },
-        { label: "Winterdienst", href: "/aussenanlagen/winterdienst" },
-        { label: "Berlin", href: "/standorte/berlin" },
+        { label: "Winterdienst", href: "/aussenanlagen/winterdienst" }
       ]}
-      keywords={["Grauflächenreinigung", "Parkplatzreinigung", "Hofreinigung", "Kehrmaschine"]}
+      keywords={["Grauflächenreinigung", "Parkplatzreinigung", "Hofreinigung Gewerbe", "Kehrmaschine"]}
+      trustBadges={[{ icon: Car, label: "Moderne Technik" }, { icon: Shield, label: "Verkehrssicherheit" }, { icon: CheckCircle, label: "Dokumentiert" }]}
     />
   );
 }

@@ -1,55 +1,94 @@
 import { BlogServicePageLayout } from "./BlogServicePageLayout";
-import { Sparkles, Layers, Sun, Droplets, Home, CheckCircle } from "lucide-react";
+import { Sparkles, Layers, Sun, Droplets, Home, CheckCircle, Shield, Clock, Calendar } from "lucide-react";
 
 export default function Grundreinigung() {
   return (
     <BlogServicePageLayout
       title="Grundreinigung"
-      subtitle="Reinigung"
+      subtitle="Intensive Tiefenreinigung & Übergabereinigung"
       categoryName="Reinigung"
       categoryHref="/reinigung"
-      description="Intensive Grundreinigung für alle Oberflächen. Die perfekte Basis für die regelmäßige Unterhaltsreinigung."
-      intro="Die Grundreinigung ist die intensive Tiefenreinigung aller Flächen und Oberflächen. Sie schafft die optimale Basis für die laufende Reinigungspflege und entfernt auch hartnäckigste Verschmutzungen."
+      description="Professionelle Grundreinigung für Gewerbeimmobilien. Intensive Tiefenreinigung aller Flächen mit dokumentierter Abnahme."
+      intro="Die Grundreinigung ist der Reset-Knopf für Ihre Immobilie. Nach Renovierung, bei Mieterwechsel oder wenn die reguläre Reinigung nicht mehr ausreicht – eine professionelle Grundreinigung schafft den Ausgangszustand für langfristige Sauberkeit zurück. Für Hausverwaltungen und Property Manager ist sie unverzichtbar bei Übergaben und Neuvermietungen."
+      imageSrc=""
+      imageAlt="Professionelle Grundreinigung in Gewerbeimmobilie"
+      imageCaption="Intensive Tiefenreinigung für bezugsfertige Räumlichkeiten"
       sections={[
         {
-          title: "Von Boden bis Decke",
-          content: "Bei einer Grundreinigung wird jede Fläche intensiv behandelt – Böden, Wände, Decken, Heizkörper, Leuchten und alle Oberflächen werden gründlich gereinigt.",
+          title: "Von Boden bis Decke – kein Detail ausgelassen",
+          content: "Bei einer Grundreinigung wird jede Fläche intensiv behandelt: Böden werden maschinell gereinigt, Heizkörper entstaubt, Leuchten demontiert und gereinigt, Fenster und Rahmen gesäubert, Sanitärbereiche entkalkt, Schränke und Regale innen gereinigt. Das Ergebnis ist ein Gebäude, das aussieht wie neu."
         },
         {
-          title: "Perfekte Basis",
-          content: "Nach einer Grundreinigung ist die regelmäßige Unterhaltsreinigung wesentlich effizienter. Der Sauberkeitszustand bleibt länger erhalten.",
+          title: "Perfekte Basis für laufende Pflege",
+          content: "Nach einer professionellen Grundreinigung ist die regelmäßige Unterhaltsreinigung wesentlich effizienter. Der Sauberkeitszustand bleibt länger erhalten, die Reinigungszeiten verkürzen sich und die Kosten sinken langfristig. Die Investition in eine Grundreinigung zahlt sich mehrfach aus."
         },
+        {
+          title: "Dokumentierte Übergabe",
+          content: "Bei Mieterwechseln oder Übergaben führen wir eine gemeinsame Abnahme mit Protokoll und Fotodokumentation durch. So vermeiden Sie Streitigkeiten über den Zustand und haben rechtssichere Nachweise für Kautionsabrechnungen."
+        }
       ]}
       highlightBox={{
-        icon: CheckCircle,
-        title: "Gemeinsame Abnahme",
-        text: "Nach Abschluss der Grundreinigung führen wir gemeinsam mit Ihnen eine Qualitätskontrolle durch – so stellen wir sicher, dass alle Anforderungen erfüllt sind.",
+        icon: Shield,
+        title: "Übergabefertig mit Abnahmeprotokoll",
+        text: "Nach Abschluss der Grundreinigung führen wir gemeinsam mit Ihnen eine Qualitätskontrolle durch. Das Abnahmeprotokoll mit Fotodokumentation ist Ihr Nachweis für einwandfreien Übergabezustand."
       }}
       stats={[
         { value: "100%", label: "Alle Flächen" },
-        { value: "1-3", label: "Tage Dauer" },
-        { value: "1-2x", label: "pro Jahr" },
+        { value: "1-3 Tage", label: "Durchführung" },
+        { value: "Protokoll", label: "Dokumentiert" }
       ]}
       services={[
-        { title: "Bodenintensivierung", description: "Tiefenreinigung aller Bodenbeläge.", icon: Layers },
-        { title: "Oberflächenpflege", description: "Reinigung aller Flächen bis in die Details.", icon: Sparkles },
-        { title: "Lichtreinigung", description: "Reinigung von Leuchten für mehr Licht.", icon: Sun },
-        { title: "Sanitärreinigung", description: "Intensive Entkalkung aller Bereiche.", icon: Droplets },
-        { title: "Gesamtobjekt", description: "Vom Boden bis zur Decke.", icon: Home },
-        { title: "Abnahme", description: "Gemeinsame Qualitätskontrolle.", icon: CheckCircle },
+        { title: "Bodenintensivierung", description: "Maschinelle Tiefenreinigung aller Bodenbeläge.", icon: Layers },
+        { title: "Oberflächenpflege", description: "Intensive Reinigung aller Flächen und Details.", icon: Sparkles },
+        { title: "Leuchtenreinigung", description: "Demontage und Reinigung für maximales Licht.", icon: Sun },
+        { title: "Sanitärentkalkung", description: "Intensive Entkalkung und Desinfektion.", icon: Droplets },
+        { title: "Komplettreinigung", description: "Vom Boden bis zur Decke, alle Bereiche.", icon: Home },
+        { title: "Dokumentierte Abnahme", description: "Protokoll mit Fotodokumentation.", icon: CheckCircle }
       ]}
-      quote="Eine professionelle Grundreinigung verlängert die Lebensdauer Ihrer Bodenbeläge und reduziert langfristig die Reinigungskosten."
+      quote="Eine professionelle Grundreinigung verlängert die Lebensdauer Ihrer Bodenbeläge um Jahre und reduziert langfristig die Reinigungskosten."
       faqs={[
-        { question: "Wann ist eine Grundreinigung sinnvoll?", answer: "Nach Renovierung, bei Mieterwechsel oder wenn die reguläre Reinigung nicht mehr ausreicht." },
-        { question: "Wie oft sollte grundgereinigt werden?", answer: "Je nach Nutzung 1-2 Mal jährlich oder bei Bedarf." },
+        { 
+          question: "Wann ist eine Grundreinigung notwendig?", 
+          answer: "Bei Mieterwechsel, nach Renovierung oder Bauarbeiten, bei starker Verschmutzung oder wenn die reguläre Unterhaltsreinigung nicht mehr ausreicht. Auch als jährliche Intensivpflege empfohlen." 
+        },
+        { 
+          question: "Wie lange dauert eine Grundreinigung?", 
+          answer: "Je nach Fläche und Verschmutzungsgrad 1-3 Tage. Eine 500 m² Bürofläche ist typischerweise in 1-2 Tagen fertig. Wir arbeiten auch nachts oder am Wochenende." 
+        },
+        { 
+          question: "Was ist im Leistungsumfang enthalten?", 
+          answer: "Standard: Maschinelle Bodenreinigung, Fenster mit Rahmen, Heizkörper, Leuchten, Sanitärbereiche, Türen und Zargen, Schränke innen. Erweiterbar um Spezialleistungen wie Teppichreinigung oder Steinpflege." 
+        },
+        { 
+          question: "Erhalten wir ein Abnahmeprotokoll?", 
+          answer: "Ja, bei Übergaben führen wir eine gemeinsame Abnahme mit Protokoll und Fotodokumentation durch. Rechtssicher für Kautionsabrechnungen und Mietvertragsübergaben." 
+        },
+        { 
+          question: "Wie oft sollte grundgereinigt werden?", 
+          answer: "Mindestens einmal jährlich als Intensivpflege, zusätzlich bei Mieterwechsel oder nach Baumaßnahmen. Bei stark frequentierten Objekten auch halbjährlich." 
+        }
       ]}
       relatedLinks={[
         { label: "Alle Reinigungsleistungen", href: "/reinigung" },
         { label: "Unterhaltsreinigung", href: "/reinigung/unterhaltsreinigung" },
         { label: "Sonderreinigung", href: "/reinigung/sonderreinigung" },
+        { label: "Frankfurt", href: "/standorte/frankfurt" },
         { label: "Berlin", href: "/standorte/berlin" },
+        { label: "München", href: "/standorte/muenchen" }
       ]}
-      keywords={["Grundreinigung", "Tiefenreinigung", "Intensivreinigung", "Bodenreinigung"]}
+      keywords={[
+        "Grundreinigung Gewerbe",
+        "Tiefenreinigung",
+        "Intensivreinigung",
+        "Übergabereinigung",
+        "Bodenreinigung",
+        "Mieterwechsel Reinigung"
+      ]}
+      trustBadges={[
+        { icon: CheckCircle, label: "Abnahmeprotokoll" },
+        { icon: Layers, label: "Maschinelle Reinigung" },
+        { icon: Clock, label: "1-3 Tage" }
+      ]}
     />
   );
 }
