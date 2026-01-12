@@ -78,16 +78,16 @@ export default function HandwerkCategory() {
         </nav>
 
         {/* Hero Section */}
-        <section className="relative overflow-hidden bg-foreground">
+        <section className="relative overflow-hidden bg-[hsl(198,29%,76%)]">
           {/* Background Pattern & Gradient */}
           <div className="absolute inset-0">
             {/* Geometric pattern overlay */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,hsl(198,29%,76%)/0.15,transparent_50%),radial-gradient(circle_at_80%_20%,hsl(198,29%,76%)/0.1,transparent_50%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,hsl(var(--foreground))/0.08,transparent_50%),radial-gradient(circle_at_80%_20%,hsl(var(--foreground))/0.05,transparent_50%)]" />
             {/* Subtle grid pattern */}
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(198,29%,76%)/0.03_1px,transparent_1px),linear-gradient(to_bottom,hsl(198,29%,76%)/0.03_1px,transparent_1px)] bg-[size:60px_60px]" />
-            {/* Animated gradient accent */}
-            <div className="absolute -top-1/2 -right-1/4 w-[800px] h-[800px] rounded-full bg-gradient-to-br from-primary/20 via-primary/5 to-transparent blur-3xl" />
-            <div className="absolute -bottom-1/4 -left-1/4 w-[600px] h-[600px] rounded-full bg-gradient-to-tr from-primary/15 via-transparent to-transparent blur-3xl" />
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--foreground))/0.03_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--foreground))/0.03_1px,transparent_1px)] bg-[size:60px_60px]" />
+            {/* Gradient accents */}
+            <div className="absolute -top-1/2 -right-1/4 w-[800px] h-[800px] rounded-full bg-gradient-to-br from-white/30 via-white/10 to-transparent blur-3xl" />
+            <div className="absolute -bottom-1/4 -left-1/4 w-[600px] h-[600px] rounded-full bg-gradient-to-tr from-foreground/10 via-transparent to-transparent blur-3xl" />
           </div>
 
           <div className="relative min-h-[580px] lg:min-h-[680px] pt-8 lg:pt-12">
@@ -97,56 +97,56 @@ export default function HandwerkCategory() {
               <div className="relative z-10 w-full max-w-4xl py-12 sm:py-16 lg:py-24 text-center">
                 {/* Decorative line */}
                 <div className="flex items-center justify-center gap-4 mb-6">
-                  <div className="h-px w-12 bg-primary/50" />
-                  <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">
+                  <div className="h-px w-12 bg-foreground/30" />
+                  <p className="text-sm font-semibold uppercase tracking-[0.2em] text-foreground/70">
                     Technische Dienstleistungen
                   </p>
-                  <div className="h-px w-12 bg-primary/50" />
+                  <div className="h-px w-12 bg-foreground/30" />
                 </div>
                 
                 {/* Main Headline */}
-                <h1 className="font-bold leading-[0.95] tracking-tight text-white">
+                <h1 className="font-bold leading-[0.95] tracking-tight text-foreground">
                   <span className="block text-[2.5rem] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[5.5rem] xl:text-[6rem]">
                     Gegen den Strom.
                   </span>
-                  <span className="block text-[2.5rem] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[5.5rem] xl:text-[6rem] text-primary">
+                  <span className="block text-[2.5rem] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[5.5rem] xl:text-[6rem]">
                     Für den Wert.
                   </span>
                 </h1>
 
                 {/* Subheadline */}
-                <p className="mt-8 sm:mt-10 mx-auto max-w-[600px] text-base sm:text-lg leading-relaxed text-white/70">
+                <p className="mt-8 sm:mt-10 mx-auto max-w-[600px] text-base sm:text-lg leading-relaxed text-foreground/70">
                   Wir beherrschen die Technik von morgen, um die Werte von heute zu erhalten. 
-                  <span className="text-white font-medium"> Modernste Sensorik und digitale Präzision </span> 
+                  <span className="text-foreground font-medium"> Modernste Sensorik und digitale Präzision </span> 
                   als Werkzeug – aber niemals als Ersatz für den Menschen. 
-                  <span className="text-white font-medium"> Technisches Maximum trifft echte Handschlagqualität</span>.
+                  <span className="text-foreground font-medium"> Technisches Maximum trifft echte Handschlagqualität</span>.
                 </p>
 
                 {/* CTA Button - Centered */}
                 <div className="mt-10 sm:mt-12 flex justify-center">
                   <Link to="/anfrage" className="w-full sm:w-auto">
-                    <AnimatedButton className="w-full sm:w-auto bg-primary text-foreground hover:bg-primary/90 shadow-lg shadow-primary/30 text-base px-10 py-5 sm:py-6 font-semibold">
+                    <AnimatedButton className="w-full sm:w-auto bg-foreground text-white hover:bg-foreground/90 shadow-lg shadow-foreground/20 text-base px-10 py-5 sm:py-6 font-semibold">
                       Werterhalt sichern
                     </AnimatedButton>
                   </Link>
                 </div>
 
                 {/* Trust Badge - Centered */}
-                <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row justify-center sm:items-center gap-3 sm:gap-8 text-sm text-white/60">
+                <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row justify-center sm:items-center gap-3 sm:gap-8 text-sm text-foreground/60">
                   <span className="flex items-center justify-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
                     Kostenlos & unverbindlich
                   </span>
                   <span className="flex items-center justify-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
                     Antwort in 24h
                   </span>
                 </div>
 
                 {/* Decorative bottom element */}
-                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden lg:flex flex-col items-center gap-2 text-white/40">
+                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden lg:flex flex-col items-center gap-2 text-foreground/40">
                   <span className="text-xs uppercase tracking-widest">Mehr entdecken</span>
-                  <div className="w-px h-8 bg-gradient-to-b from-white/40 to-transparent" />
+                  <div className="w-px h-8 bg-gradient-to-b from-foreground/40 to-transparent" />
                 </div>
               </div>
             </div>
