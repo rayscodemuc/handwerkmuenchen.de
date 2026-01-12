@@ -54,8 +54,8 @@ export function HeroSection() {
             }}
           />
         </picture>
-        {/* Gradient overlay - reduced for better image visibility */}
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/50 via-primary/40 to-primary/55 lg:from-primary/35 lg:via-primary/30 lg:to-primary/45" />
+        {/* Gradient overlay - subtle image visibility */}
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/75 to-primary/85 lg:from-primary/70 lg:via-primary/65 lg:to-primary/75" />
       </div>
 
         {/* Content Container - Centered */}
