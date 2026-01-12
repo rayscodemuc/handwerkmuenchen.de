@@ -5,7 +5,7 @@ import { Footer } from "@/components/layout/Footer";
 import { SEOHead } from "@/components/SEOHead";
 import { AnimatedButton } from "@/components/ui/animated-button";
 import { ContactForm } from "@/components/ContactForm";
-import heroImage from "@/assets/hero-facility.jpg";
+import heroImage from "@/assets/hero-facility.png";
 
 interface LocationPageLayoutProps {
   city: string;
