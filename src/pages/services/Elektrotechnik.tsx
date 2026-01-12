@@ -4,80 +4,80 @@ import { Zap, FileCheck, Thermometer, Clock, Shield, FileText } from "lucide-rea
 export default function Elektrotechnik() {
   return (
     <ServicePageLayout
-      title="Elektrotechnik"
-      subtitle="Handwerk"
+      title="Elektrotechnik & DGUV V3 Prüfung"
+      subtitle="Industrieller Standard"
       categoryName="Handwerk"
       categoryHref="/handwerk"
-      description="Rechtssichere Elektroprüfungen nach DGUV V3 und umfassende elektrotechnische Dienstleistungen für Gewerbe- und Wohnimmobilien in Berlin und Brandenburg."
-      longDescription="Als zertifizierter Elektrofachbetrieb bieten wir Ihnen das komplette Spektrum elektrotechnischer Dienstleistungen. Von der gesetzlich vorgeschriebenen DGUV V3 Prüfung bis zur kompletten Elektroinstallation – unsere qualifizierten Elektriker sorgen für Sicherheit, Effizienz und Zuverlässigkeit in Ihren Objekten. Wir arbeiten nach den neuesten VDE-Normen und garantieren eine lückenlose Dokumentation aller Arbeiten."
-      imageAlt="Fachgerechte Elektroinstallation und Wartung durch Mr. Clean Services"
-      keywords={["DGUV V3 Prüfung", "E-Check Berlin", "Elektroprüfung Gewerbe", "Thermografie", "Elektrofachbetrieb"]}
+      description="Rechtssichere Elektroprüfung nach DGUV Vorschrift 3 und zertifizierte Elektrotechnik für komplexe Immobilienportfolios. Maximale Haftungssicherheit nach DIN VDE."
+      longDescription="Sicherheit in der Elektrotechnik ist eine Frage der Haftung. Als zertifizierter Fachbetrieb für Gebäudetechnik eliminieren wir Betriebsrisiken durch systematische Prüfzyklen und präventive Instandhaltung. Wir decken das gesamte Spektrum ab: von der gesetzlich geforderten DGUV V3 Prüfung ortsveränderlicher Geräte bis hin zur thermografischen Analyse hochkomplexer Industrieanlagen. Unsere Prozesse sind auf die Betriebssicherheitsverordnung (BetrSichV) optimiert und garantieren eine gerichtsfeste Dokumentation für Versicherungen und Berufsgenossenschaften."
+      imageAlt="Zertifizierte Elektroprüfung und technische Gebäudeausrüstung durch Mr. Clean Services"
+      keywords={["DGUV V3 Prüfung", "Elektroprüfung Gewerbe", "DIN VDE 0105-100", "Betriebssicherheitsverordnung", "Thermografie Elektro", "Elektrofachbetrieb Facility Management"]}
       features={[
-        "DGUV V3 Prüfungen für ortsveränderliche Geräte",
-        "Prüfung ortsfester elektrischer Anlagen nach DIN VDE 0105",
-        "E-Check für Gewerbeobjekte und Wohnanlagen",
-        "Thermografie zur präventiven Fehleranalyse",
-        "Lückenlose Dokumentation und digitale Prüfprotokolle",
-        "24/7 Notdienst bei elektrischen Störungen",
-        "Energieeffizienz-Beratung und LED-Umrüstung",
-        "Installation von Ladestationen für E-Mobilität",
+        "DGUV V3 Prüfung (ortsveränderlich & ortsfest)",
+        "Wartung elektrischer Anlagen nach DIN VDE 0105-100",
+        "Präventive Instandhaltung durch Thermografie",
+        "Rechtssichere Dokumentation gemäß BetrSichV",
+        "Messung und Prüfung von Schutzmaßnahmen",
+        "24/7 Störungsmanagement & Entstörung",
+        "Energetische Inspektion von Beleuchtungsanlagen",
+        "Aufbau und Wartung von Ladeinfrastruktur (E-Mobilität)",
       ]}
       detailedFeatures={[
         {
-          title: "DGUV V3 Prüfung",
-          description: "Gesetzlich vorgeschriebene Prüfung aller elektrischen Betriebsmittel nach DGUV Vorschrift 3. Wir prüfen ortsveränderliche und ortsfeste Geräte gemäß den Unfallverhütungsvorschriften.",
+          title: "Rechtssichere DGUV V3",
+          description: "Wir übernehmen die Betreiberverantwortung. Unsere Prüfungen erfolgen strikt nach DGUV Vorschrift 3, um Ihren Versicherungsschutz und die Haftungsfreistellung der Geschäftsführung zu garantieren.",
           icon: FileCheck,
         },
         {
-          title: "Thermografie-Analyse",
-          description: "Moderne Wärmebildtechnik zur frühzeitigen Erkennung von Überlastungen, losen Verbindungen und potenziellen Brandherden in elektrischen Anlagen.",
+          title: "Industrielle Thermografie",
+          description: "Berührungslose Fehlersuche mittels Infrarot. Wir detektieren thermische Anomalien in Verteilungen und Schaltschränken, bevor es zu kostspieligen Produktionsausfällen oder Bränden kommt.",
           icon: Thermometer,
         },
         {
-          title: "24/7 Notdienst",
-          description: "Elektrische Störungen können jederzeit auftreten. Unser Notdienst ist rund um die Uhr erreichbar und innerhalb kürzester Zeit vor Ort.",
-          icon: Clock,
-        },
-        {
-          title: "Blitzschutz & Überspannungsschutz",
-          description: "Installation und Wartung von Blitzschutzanlagen sowie Überspannungsschutz für sensible elektronische Geräte und Anlagen.",
+          title: "Prüfung ortsfester Anlagen",
+          description: "Umfassende Inspektion der gesamten Elektroinstallation nach DIN VDE 0105. Wir sichern die langfristige Funktionsfähigkeit Ihrer Gebäudeinfrastruktur.",
           icon: Zap,
         },
         {
-          title: "Sicherheitsprüfungen",
-          description: "Regelmäßige Überprüfung von Sicherungsanlagen, FI-Schaltern und Notbeleuchtung gemäß geltenden Vorschriften.",
+          title: "Audit-Safe Reporting",
+          description: "Digitale Prüfprotokolle in Echtzeit. Unsere Dokumentation ist revisionssicher und erfüllt die Anforderungen aller gängigen Zertifizierungen und Audits.",
+          icon: FileText,
+        },
+        {
+          title: "Haftungsschutz",
+          description: "Wir minimieren Ihr persönliches Haftungsrisiko durch lückenlose Einhaltung der TRBS (Technische Regeln für Betriebssicherheit).",
           icon: Shield,
         },
         {
-          title: "Digitale Dokumentation",
-          description: "Alle Prüfungen werden digital dokumentiert. Sie erhalten Zugang zu Ihren Prüfprotokollen und werden automatisch an Folgetermine erinnert.",
-          icon: FileText,
+          title: "Schnelle Intervention",
+          description: "Skalierbare Teams für Großobjekte. Wir führen Prüfungen und Reparaturen effizient und störungsfrei im laufenden Betrieb durch.",
+          icon: Clock,
         },
       ]}
       benefits={[
-        "Rechtssicherheit durch normgerechte Prüfungen",
-        "Minimierung von Ausfallzeiten",
-        "Reduzierung von Versicherungsrisiken",
-        "Energiekosteneinsparung",
-        "Wertsteigerung Ihrer Immobilie",
-        "Schnelle Reaktionszeiten",
+        "Gerichtsfeste Rechtssicherheit",
+        "Vermeidung von Brand- und Unfallrisiken",
+        "Werterhaltung der technischen Infrastruktur",
+        "Reduzierung von Stillstandszeiten",
+        "Konformität mit Berufsgenossenschaften",
+        "Skalierbare Lösungen für Standortnetze",
       ]}
       faqs={[
         {
-          question: "Wie oft muss eine DGUV V3 Prüfung durchgeführt werden?",
-          answer: "Die Prüffristen hängen von der Art des Geräts und den Einsatzbedingungen ab. Ortsveränderliche Geräte in Büros müssen in der Regel alle 24 Monate geprüft werden, bei erhöhter Beanspruchung (z.B. auf Baustellen) alle 6 Monate. Ortsfeste Anlagen werden alle 4 Jahre geprüft.",
+          question: "Warum ist die DGUV V3 Prüfung für Unternehmen verpflichtend?",
+          answer: "Die Prüfung ist durch die Berufsgenossenschaften und die Betriebssicherheitsverordnung (BetrSichV) vorgeschrieben. Sie dient dem Unfallschutz und ist im Schadensfall die einzige Absicherung gegen Regressforderungen der Versicherungen.",
         },
         {
-          question: "Was kostet eine Elektroprüfung?",
-          answer: "Die Kosten richten sich nach der Anzahl der zu prüfenden Geräte und Anlagen. Wir erstellen Ihnen gerne ein individuelles Angebot. Bei regelmäßigen Prüfungen bieten wir attraktive Rahmenvertragskonditionen an.",
+          question: "In welchen Zyklen müssen elektrische Anlagen geprüft werden?",
+          answer: "Die Fristen werden mittels Gefährdungsbeurteilung ermittelt. In der Regel gelten für ortsveränderliche Geräte 6-24 Monate und für ortsfeste Anlagen 48 Monate, je nach Gefährdungspotenzial der Umgebung.",
         },
         {
-          question: "Können die Prüfungen auch außerhalb der Geschäftszeiten erfolgen?",
-          answer: "Ja, wir passen uns Ihren betrieblichen Abläufen an. Prüfungen können auch am Wochenende oder nachts durchgeführt werden, um Ihren Betrieb nicht zu stören.",
+          question: "Was unterscheidet die Thermografie von der Standardprüfung?",
+          answer: "Die Thermografie erkennt Belastungszustände und Übergangswiderstände visuell, die bei einer reinen Messung oft unentdeckt bleiben. Sie ist das effektivste Werkzeug zur Brandprävention.",
         },
         {
-          question: "Was passiert, wenn Mängel festgestellt werden?",
-          answer: "Festgestellte Mängel werden dokumentiert und nach Schweregrad klassifiziert. Kleinere Mängel können oft sofort behoben werden. Bei größeren Mängeln erhalten Sie einen detaillierten Maßnahmenplan mit Prioritäten und Kostenvoranschlag.",
+          question: "Wie wird die Dokumentation bereitgestellt?",
+          answer: "Sie erhalten alle Prüfprotokolle in digitaler Form. Diese enthalten Einzelauflistungen jedes geprüften Betriebsmittels inklusive Inventarnummer, Messergebnissen und dem Status (Bestanden/Nicht Bestanden).",
         },
       ]}
     />
