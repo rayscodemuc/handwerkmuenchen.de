@@ -8,21 +8,19 @@ export function HeroSection() {
     <section className="relative overflow-hidden bg-primary -mt-[1px]">
       {/* Main Container - negative margin pulls hero under header */}
       <div className="relative min-h-[480px] lg:min-h-[580px]">
-        {/* Full Background Image */}
-        <div className="absolute inset-0">
-          <img
-            src={heroImage}
-            alt="Partnerschaft und Vertrauen - Händeschütteln zwischen Geschäftspartnern"
-            className="h-full w-full object-cover pointer-events-none"
-            style={{
-              objectPosition: "center center",
-            }}
-          />
-          {/* Layer 1: fester Header-Farbblock (verhindert "Durchscheinen" des Bildes direkt unter dem Header) */}
-          <div className="absolute inset-x-0 top-0 h-28 bg-primary md:h-44" />
-          {/* Layer 2: Verlauf für Lesbarkeit, nach unten transparenter */}
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/95 via-primary/75 to-primary/45 lg:via-primary/65 lg:to-primary/40" />
-        </div>
+      {/* Full Background Image */}
+      <div className="absolute inset-0">
+        <img
+          src={heroImage}
+          alt="Partnerschaft und Vertrauen - Händeschütteln zwischen Geschäftspartnern"
+          className="h-full w-full object-cover pointer-events-none"
+          style={{
+            objectPosition: "center center",
+          }}
+        />
+        {/* Gradient overlay for better text readability */}
+        <div className="absolute inset-0 bg-primary/75 lg:bg-primary/65" />
+      </div>
 
         {/* Content Container - Centered */}
         <div className="container relative mx-auto flex min-h-[560px] sm:min-h-[500px] items-center justify-center px-4 lg:min-h-[600px] lg:px-8">
