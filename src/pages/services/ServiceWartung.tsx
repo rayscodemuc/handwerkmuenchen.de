@@ -1,5 +1,6 @@
 import { BlogServicePageLayout } from "./BlogServicePageLayout";
 import { Wrench, Calendar, FileText, Clock, Settings, ShieldCheck, Activity, TrendingUp, AlertTriangle, BarChart } from "lucide-react";
+import serviceWartungImage from "@/assets/techniker-wartung-reparatur-gewerbe-facility.jpg";
 
 export default function ServiceWartung() {
   return (
@@ -10,7 +11,7 @@ export default function ServiceWartung() {
       categoryHref="/handwerk"
       description="Gewerkübergreifende Anlagenwartung nach DIN 31051. Maximale Verfügbarkeit, planbare Kosten und volle Rechtssicherheit."
       intro="Technische Anlagen sind das Rückgrat jeder Gewerbeimmobilie. Ein ungeplanter Ausfall der Heizung im Winter, ein defekter Aufzug oder eine ausgefallene Lüftungsanlage im Rechenzentrum – die Folgekosten übersteigen die Wartungskosten um ein Vielfaches. Als gewerkübergreifender Wartungsdienstleister übernehmen wir die vollständige Betreiberverantwortung für Ihre technischen Anlagen nach DIN 31051 und VDMA 24186."
-      imageSrc=""
+      imageSrc={serviceWartungImage}
       imageAlt="Techniker bei der Wartung einer Lüftungsanlage nach DIN 31051"
       imageCaption="Systematische Anlagenwartung für maximale Betriebssicherheit"
       sections={[
