@@ -28,17 +28,17 @@ export function HeroSection() {
             {/* Main Headline */}
             <h1 className="font-bold leading-[0.9] tracking-tight text-foreground">
               <span className="block text-[3.5rem] sm:text-[4.5rem] lg:text-[5.5rem] xl:text-[6.5rem]">
-                Sauberkeit
+                Partnerschaft
               </span>
               <span className="block text-[3.5rem] sm:text-[4.5rem] lg:text-[5.5rem] xl:text-[6.5rem]">
-                schafft Werte
+                statt nur Vertrag
               </span>
             </h1>
 
             {/* Subheadline */}
             <p className="mt-8 max-w-[420px] text-base leading-relaxed text-foreground/70 lg:text-lg">
-              Mr.Clean Services ist Ihr zuverlässiger Partner für professionelles 
-              Facility Management – von der Reinigung bis zur Gebäudeverwaltung.
+            Weg von der Austauschbarkeit, hin zur persönlichen Verantwortung. Mr. Clean Services verbindet professionelles Facility Management mit echter Handschlagqualität – 
+            für Partner, Mitarbeiter und Kunden, die mehr erwarten als bloße Pflichterfüllung.
             </p>
 
             {/* CTA Button */}

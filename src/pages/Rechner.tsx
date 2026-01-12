@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Building2,
@@ -55,6 +56,12 @@ interface CalculatorState {
   parking_spaces: number;
   area_sqm: number;
   frequency_per_week: number;
+  // Winterdienst spezifische Felder
+  machine_area_sqm: number; // Maschinelle Räumung
+  manual_area_sqm: number; // Manuelle Räumung
+  has_liability_coverage: boolean; // Haftungsübernahme
+  has_streugut: boolean; // Streugut
+  has_express: boolean; // Express-Zuschlag
   customer_name: string;
   customer_email: string;
   customer_phone: string;
@@ -70,6 +77,12 @@ const initialState: CalculatorState = {
   parking_spaces: 50,
   area_sqm: 500,
   frequency_per_week: 3,
+  // Winterdienst spezifische Felder
+  machine_area_sqm: 0,
+  manual_area_sqm: 0,
+  has_liability_coverage: false,
+  has_streugut: false,
+  has_express: false,
   customer_name: "",
   customer_email: "",
   customer_phone: "",
@@ -123,7 +136,18 @@ export default function Rechner() {
 
   // Auto-advance für Step 1: Service auswählen
   const selectService = (service: ServiceType) => {
-    updateStateAndAdvance({ service_type: service, order_type: null, service_subtype: null, object_type: null }, true);
+    updateStateAndAdvance({ 
+      service_type: service, 
+      order_type: null, 
+      service_subtype: null, 
+      object_type: null,
+      // Winterdienst Felder zurücksetzen
+      machine_area_sqm: 0,
+      manual_area_sqm: 0,
+      has_liability_coverage: false,
+      has_streugut: false,
+      has_express: false,
+    }, true);
   };
 
   // Auto-advance für Step 2: Auftragsart (bei Reinigung/Tiefgarage)
@@ -165,9 +189,45 @@ export default function Rechner() {
           price = preisfaktoren.hausmeister[state.object_type] * 4.33;
         }
         break;
-      case "winterdienst":
-        price = state.area_sqm * preisfaktoren.winterdienst * 12;
+      case "winterdienst": {
+        // 1. Flächenberechnung für maschinelle Räumung mit gestaffelten Preisen
+        let maschinelleRaeumung = 0;
+        
+        if (state.machine_area_sqm < 500) {
+          // Mindestpauschale von 150€ pro Einsatz
+          maschinelleRaeumung = 150;
+        } else if (state.machine_area_sqm >= 500 && state.machine_area_sqm <= 2000) {
+          // 1,85€/m² (Mittelwert)
+          maschinelleRaeumung = state.machine_area_sqm * 1.85;
+        } else {
+          // > 2000 m²: 1,00€/m²
+          maschinelleRaeumung = state.machine_area_sqm * 1.00;
+        }
+        
+        // 2. Manuelle Räumung (Ecken/Türen): ca. 5,00€/m²
+        const manuelleRaeumung = state.manual_area_sqm * 5.00;
+        
+        // 3. Monatliche Bereitschaftspauschale: 450€
+        let bereitschaftspauschale = 450;
+        
+        // 4. Express-Zuschlag: +15% auf Bereitschaftspauschale
+        if (state.has_express) {
+          bereitschaftspauschale = bereitschaftspauschale * 1.15;
+        }
+        
+        // 5. Haftungsübernahme: +20% auf Bereitschaftspauschale
+        if (state.has_liability_coverage) {
+          bereitschaftspauschale = bereitschaftspauschale * 1.20;
+        }
+        
+        // 6. Streugut: 0,30€/m² (auf gesamte Fläche)
+        const totalArea = state.machine_area_sqm + state.manual_area_sqm;
+        const streugut = state.has_streugut ? totalArea * 0.30 : 0;
+        
+        // Gesamtpreis (monatlich)
+        price = maschinelleRaeumung + manuelleRaeumung + bereitschaftspauschale + streugut;
         break;
+      }
     }
 
     return { price: Math.round(price), isMonthly };
@@ -539,20 +599,44 @@ export default function Rechner() {
                             <div className="space-y-6">
                               <div>
                                 <Label className="text-base mb-3 block">
-                                  Zu räumende Fläche: <span className="font-bold text-primary">{state.area_sqm} m²</span>
+                                  Maschinelle Räumung: <span className="font-bold text-primary">{state.machine_area_sqm} m²</span>
                                 </Label>
                                 <Slider
-                                  value={[state.area_sqm]}
-                                  onValueChange={([v]) => updateState({ area_sqm: v })}
-                                  min={50}
-                                  max={5000}
+                                  value={[state.machine_area_sqm]}
+                                  onValueChange={([v]) => updateState({ machine_area_sqm: v })}
+                                  min={0}
+                                  max={10000}
                                   step={50}
                                   className="w-full"
                                 />
                                 <div className="flex justify-between text-sm text-muted-foreground mt-2">
-                                  <span>50 m²</span>
-                                  <span>5.000 m²</span>
+                                  <span>0 m²</span>
+                                  <span>10.000 m²</span>
                                 </div>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  Fläche, die maschinell geräumt werden kann
+                                </p>
+                              </div>
+                              
+                              <div>
+                                <Label className="text-base mb-3 block">
+                                  Manuelle Räumung (Ecken/Türen): <span className="font-bold text-primary">{state.manual_area_sqm} m²</span>
+                                </Label>
+                                <Slider
+                                  value={[state.manual_area_sqm]}
+                                  onValueChange={([v]) => updateState({ manual_area_sqm: v })}
+                                  min={0}
+                                  max={500}
+                                  step={10}
+                                  className="w-full"
+                                />
+                                <div className="flex justify-between text-sm text-muted-foreground mt-2">
+                                  <span>0 m²</span>
+                                  <span>500 m²</span>
+                                </div>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  Fläche, die manuell geräumt werden muss (ca. 5,00€/m²)
+                                </p>
                               </div>
                             </div>
                           )}
@@ -631,13 +715,71 @@ export default function Rechner() {
                           )}
 
                           {state.service_type === "winterdienst" && (
-                            <div className="bg-muted/50 p-6 rounded-xl">
-                              <h3 className="font-semibold mb-2">Leistungsumfang</h3>
-                              <ul className="text-sm text-muted-foreground space-y-1">
-                                <li>• Schneeräumung inkl. Streudienst</li>
-                                <li>• Bereitschaft an allen Wintertagen</li>
-                                <li>• Dokumentation aller Einsätze</li>
-                              </ul>
+                            <div className="space-y-6">
+                              <div className="bg-muted/50 p-6 rounded-xl space-y-4">
+                                <h3 className="font-semibold mb-4">Optionale Leistungen</h3>
+                                
+                                <div className="flex items-start space-x-3">
+                                  <Checkbox
+                                    id="streugut"
+                                    checked={state.has_streugut}
+                                    onCheckedChange={(checked) => updateState({ has_streugut: checked === true })}
+                                    className="mt-1"
+                                  />
+                                  <div className="flex-1">
+                                    <Label htmlFor="streugut" className="font-medium cursor-pointer">
+                                      Streugut (0,30€/m²)
+                                    </Label>
+                                    <p className="text-sm text-muted-foreground">
+                                      Streusalz oder Streusplitt wird gestellt
+                                    </p>
+                                  </div>
+                                </div>
+                                
+                                <div className="flex items-start space-x-3">
+                                  <Checkbox
+                                    id="express"
+                                    checked={state.has_express}
+                                    onCheckedChange={(checked) => updateState({ has_express: checked === true })}
+                                    className="mt-1"
+                                  />
+                                  <div className="flex-1">
+                                    <Label htmlFor="express" className="font-medium cursor-pointer">
+                                      Express-Zuschlag (+15% auf Bereitschaftspauschale)
+                                    </Label>
+                                    <p className="text-sm text-muted-foreground">
+                                      Priorität bei Einsätzen, schnellere Reaktionszeit
+                                    </p>
+                                  </div>
+                                </div>
+                                
+                                <div className="flex items-start space-x-3">
+                                  <Checkbox
+                                    id="liability"
+                                    checked={state.has_liability_coverage}
+                                    onCheckedChange={(checked) => updateState({ has_liability_coverage: checked === true })}
+                                    className="mt-1"
+                                  />
+                                  <div className="flex-1">
+                                    <Label htmlFor="liability" className="font-medium cursor-pointer">
+                                      Vollständige Haftungsübernahme für Glatteisunfälle (+20% auf Bereitschaftspauschale)
+                                    </Label>
+                                    <p className="text-sm text-muted-foreground">
+                                      Wir übernehmen die volle Haftung bei Glatteisunfällen auf Ihrer Fläche
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <div className="bg-primary/5 p-4 rounded-xl border border-primary/20">
+                                <h4 className="font-semibold text-sm mb-2">Inklusive Leistungen:</h4>
+                                <ul className="text-sm text-muted-foreground space-y-1">
+                                  <li>• Monatliche Bereitschaftspauschale: 450€</li>
+                                  <li>• Schneeräumung nach Bedarf</li>
+                                  <li>• Bereitschaft an allen Wintertagen</li>
+                                  <li>• Dokumentation aller Einsätze</li>
+                                </ul>
+                              </div>
                             </div>
                           )}
                         </div>
@@ -749,7 +891,7 @@ export default function Rechner() {
                             {state.service_type === "reinigung" && `${state.service_subtype === "buero" ? "Büroreinigung" : state.service_subtype === "glas" ? "Glasreinigung" : "Grundreinigung"} (${state.order_type === "einmalig" ? "Einmalauftrag" : "Unterhaltsreinigung"}), ${state.area_sqm} m²${state.order_type === "regelmässig" ? `, ${state.frequency_per_week}x/Woche` : ""}`}
                             {state.service_type === "tiefgarage" && `Tiefgaragenreinigung (${state.order_type === "einmalig" ? "Einmalauftrag" : "Regelmäßig"}), ${state.parking_spaces} Stellplätze`}
                             {state.service_type === "hausmeister" && `Hausmeisterservice für ${state.object_type === "mfh" ? "Mehrfamilienhaus" : state.object_type === "gewerbe" ? "Gewerbeobjekt" : "Privathaus"}`}
-                            {state.service_type === "winterdienst" && `Winterdienst, ${state.area_sqm} m²`}
+                            {state.service_type === "winterdienst" && `Winterdienst, ${state.machine_area_sqm + state.manual_area_sqm} m² (${state.machine_area_sqm} m² maschinell, ${state.manual_area_sqm} m² manuell)${state.has_streugut ? ", mit Streugut" : ""}${state.has_express ? ", Express" : ""}${state.has_liability_coverage ? ", mit Haftungsübernahme" : ""}`}
                             {" · "}Richtpreis: ab {calculatePrice().price.toLocaleString("de-DE")} €{calculatePrice().isMonthly ? "/Monat" : " einmalig"}
                           </div>
                         </div>
