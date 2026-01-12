@@ -1,5 +1,6 @@
 import { ServicePageLayout } from "./ServicePageLayout";
 import { Zap, FileCheck, Thermometer, Clock, Shield, FileText } from "lucide-react";
+import elektrotechnikImage from "@/assets/elektrotechnik-schaltschrank-dguv-v3-pruefung.jpg";
 
 export default function Elektrotechnik() {
   return (
@@ -10,7 +11,8 @@ export default function Elektrotechnik() {
       categoryHref="/handwerk"
       description="Rechtssichere Elektroprüfung nach DGUV Vorschrift 3 und zertifizierte Elektrotechnik für komplexe Immobilienportfolios. Maximale Haftungssicherheit nach DIN VDE."
       longDescription="Sicherheit in der Elektrotechnik ist eine Frage der Haftung. Als zertifizierter Fachbetrieb für Gebäudetechnik eliminieren wir Betriebsrisiken durch systematische Prüfzyklen und präventive Instandhaltung. Wir decken das gesamte Spektrum ab: von der gesetzlich geforderten DGUV V3 Prüfung ortsveränderlicher Geräte bis hin zur thermografischen Analyse hochkomplexer Industrieanlagen. Unsere Prozesse sind auf die Betriebssicherheitsverordnung (BetrSichV) optimiert und garantieren eine gerichtsfeste Dokumentation für Versicherungen und Berufsgenossenschaften."
-      imageAlt="Zertifizierte Elektroprüfung und technische Gebäudeausrüstung durch Mr. Clean Services"
+      imageSrc={elektrotechnikImage}
+      imageAlt="Elektrotechnik Schaltschrank mit Sicherungen für DGUV V3 Prüfung"
       keywords={["DGUV V3 Prüfung", "Elektroprüfung Gewerbe", "DIN VDE 0105-100", "Betriebssicherheitsverordnung", "Thermografie Elektro", "Elektrofachbetrieb Facility Management"]}
       features={[
         "DGUV V3 Prüfung (ortsveränderlich & ortsfest)",
