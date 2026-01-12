@@ -1,20 +1,43 @@
 import { Link, useLocation } from "react-router-dom";
 import { Calculator } from "lucide-react";
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 
 export function StickyCTA() {
   const location = useLocation();
+  const [isVisible, setIsVisible] = useState(false);
   
   // Button nicht auf der Rechner-Seite anzeigen
   if (location.pathname === "/rechner") {
     return null;
   }
+
+  const isHomepage = location.pathname === "/";
+
+  useEffect(() => {
+    if (!isHomepage) {
+      // Auf anderen Seiten nach kurzer Verzögerung anzeigen
+      const timer = setTimeout(() => setIsVisible(true), 1000);
+      return () => clearTimeout(timer);
+    }
+
+    const handleScroll = () => {
+      // Hero-Sektion ist ca. 70vh hoch, wir zeigen den Button nach ~60% davon
+      const heroHeight = window.innerHeight * 0.6;
+      setIsVisible(window.scrollY > heroHeight);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    handleScroll(); // Initial check
+    
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isHomepage]);
   
   return (
     <motion.div
       initial={{ x: 100, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      transition={{ delay: 1, duration: 0.5 }}
+      animate={{ x: isVisible ? 0 : 100, opacity: isVisible ? 1 : 0 }}
+      transition={{ duration: 0.4 }}
       className="fixed right-0 top-1/2 -translate-y-1/2 z-50 hidden lg:block"
     >
       <Link
@@ -30,17 +53,37 @@ export function StickyCTA() {
 
 export function MobileStickyCTA() {
   const location = useLocation();
+  const [isVisible, setIsVisible] = useState(false);
   
   // Button nicht auf der Rechner-Seite anzeigen
   if (location.pathname === "/rechner") {
     return null;
   }
+
+  const isHomepage = location.pathname === "/";
+
+  useEffect(() => {
+    if (!isHomepage) {
+      const timer = setTimeout(() => setIsVisible(true), 1000);
+      return () => clearTimeout(timer);
+    }
+
+    const handleScroll = () => {
+      const heroHeight = window.innerHeight * 0.5;
+      setIsVisible(window.scrollY > heroHeight);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+    
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isHomepage]);
   
   return (
     <motion.div
       initial={{ y: 100, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ delay: 1, duration: 0.5 }}
+      animate={{ y: isVisible ? 0 : 100, opacity: isVisible ? 1 : 0 }}
+      transition={{ duration: 0.4 }}
       className="fixed bottom-4 left-4 right-4 z-50 lg:hidden"
     >
       <Link
