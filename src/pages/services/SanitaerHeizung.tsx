@@ -1,5 +1,6 @@
 import { BlogServicePageLayout } from "./BlogServicePageLayout";
 import { Droplets, Gauge, ShieldCheck, Activity, Thermometer, Clock, FileText, AlertTriangle } from "lucide-react";
+import sanitaerHeizungImage from "@/assets/sanitaer-heizung-anlage-wartung.jpg";
 
 export default function SanitaerHeizung() {
   return (
@@ -10,7 +11,7 @@ export default function SanitaerHeizung() {
       categoryHref="/handwerk"
       description="Zertifizierte Wartung und Instandhaltung technischer Gebäudeanlagen. Wir schützen Ihre Assets gegen Systemausfälle und Wasserschäden."
       intro="Sanitär- und Heizungsanlagen sind die kritische Infrastruktur jeder Gewerbeimmobilie. Ein ungeplanter Ausfall bedeutet nicht nur Komfortverlust – er gefährdet Geschäftsprozesse, verursacht Wasserschäden in Millionenhöhe und zieht bei Verstößen gegen die Trinkwasserverordnung 2024 empfindliche Bußgelder nach sich. Als zertifizierter SHK-Fachbetrieb mit bundesweiter Präsenz übernehmen wir die vollständige Betreiberverantwortung für Ihre haustechnischen Anlagen."
-      imageSrc=""
+      imageSrc={sanitaerHeizungImage}
       imageAlt="Heizungsanlage mit Rohrleitungen und Armaturen für gewerbliche SHK-Wartung nach TrinkwV"
       imageCaption="Professionelle Heizungswartung Gewerbe nach DVGW und EnEV-Standard"
       sections={[
