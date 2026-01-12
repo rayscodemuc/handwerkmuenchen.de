@@ -1,23 +1,58 @@
 import { AnimatedButton } from "@/components/ui/animated-button";
 import { Link } from "react-router-dom";
-import heroImage from "@/assets/hero-facility.png";
+import heroImageDesktop from "@/assets/hero-facility-desktop.webp";
+import heroImageMobile from "@/assets/hero-facility-mobile.webp";
 import { CheckCircle2, Calculator } from "lucide-react";
+import { useEffect } from "react";
 
 export function HeroSection() {
+  // Preload hero image for LCP optimization
+  useEffect(() => {
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'image';
+    link.type = 'image/webp';
+    // Use desktop image for preload on larger screens
+    link.href = window.innerWidth >= 768 ? heroImageDesktop : heroImageMobile;
+    link.fetchPriority = 'high';
+    document.head.appendChild(link);
+    
+    return () => {
+      document.head.removeChild(link);
+    };
+  }, []);
+
   return (
     <section className="relative overflow-hidden bg-primary -mt-[1px]">
       {/* Main Container - negative margin pulls hero under header */}
       <div className="relative min-h-[480px] lg:min-h-[580px]">
-      {/* Full Background Image */}
+      {/* Full Background Image with Art Direction */}
       <div className="absolute inset-0">
-        <img
-          src={heroImage}
-          alt="Partnerschaft und Vertrauen - Händeschütteln zwischen Geschäftspartnern"
-          className="h-full w-full object-cover pointer-events-none"
-          style={{
-            objectPosition: "center center",
-          }}
-        />
+        <picture>
+          {/* Mobile: Portrait crop optimized for smaller screens */}
+          <source 
+            media="(max-width: 767px)" 
+            srcSet={heroImageMobile}
+            type="image/webp"
+          />
+          {/* Desktop: Wide 16:9 format */}
+          <source 
+            media="(min-width: 768px)" 
+            srcSet={heroImageDesktop}
+            type="image/webp"
+          />
+          <img
+            src={heroImageDesktop}
+            alt="Partnerschaft und Vertrauen - Händeschütteln zwischen Geschäftspartnern"
+            className="h-full w-full object-cover pointer-events-none"
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+            style={{
+              objectPosition: "center center",
+            }}
+          />
+        </picture>
         {/* Gradient overlay for better text readability */}
         <div className="absolute inset-0 bg-primary/75 lg:bg-primary/65" />
       </div>
