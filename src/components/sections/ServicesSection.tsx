@@ -5,7 +5,7 @@ import { Wrench, Building2, Sparkles, TreeDeciduous, ArrowRight } from "lucide-r
 const services = [
   {
     id: "handwerk",
-    title: "Handwerk",
+    title: "Handwerk & Technik",
     description: "Elektrotechnik, Sanitär & Heizung sowie Service & Wartung – fachgerecht koordiniert durch unser Team und geprüfte Partner.",
     href: "/handwerk",
     icon: Wrench,
