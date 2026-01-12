@@ -1,6 +1,6 @@
 import { BlogServicePageLayout } from "./BlogServicePageLayout";
 import { Droplets, Gauge, ShieldCheck, Activity, Thermometer, Clock, FileText, AlertTriangle } from "lucide-react";
-import sanitaerHeizungImage from "@/assets/sanitaer-heizung-anlage-wartung.jpg";
+import sanitaerHeizungImage from "@/assets/sanitaer-heizung-rohrleitungen-wartung-gewerbe.jpg";
 
 export default function SanitaerHeizung() {
   return (
