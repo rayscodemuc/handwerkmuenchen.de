@@ -85,7 +85,10 @@ export function Header() {
   const hoverBg = isKontaktPage ? "hover:bg-white/10" : "hover:bg-foreground/10";
 
   return (
-    <header className={`sticky top-0 z-50 w-full bg-primary transition-shadow duration-300 ${isScrolled ? 'shadow-lg' : ''}`}>
+    <header 
+      className={`sticky top-0 z-50 w-full transition-all duration-300 ${isScrolled ? 'shadow-lg' : ''}`}
+      style={{ backgroundColor: isScrolled ? '#578ea5' : 'hsl(var(--primary))' }}
+    >
       {/* Primary Navigation Row */}
       <div className={`border-b ${isKontaktPage ? 'border-white/10' : 'border-foreground/10'} transition-all duration-300 ${isScrolled ? 'py-0' : 'py-2'}`}>
         <nav className={`container mx-auto flex items-center px-4 lg:px-8 transition-all duration-300 ${isScrolled ? 'h-14' : 'h-20'}`}>
