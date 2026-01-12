@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Menu, X, ChevronDown, Clock, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
@@ -64,7 +64,18 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [locationDialogOpen, setLocationDialogOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
+  
+  // Scroll detection
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+    
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
   
   // Check if current page is Kontakt (dark background needs white text)
   const isKontaktPage = location.pathname === "/kontakt";
@@ -74,16 +85,16 @@ export function Header() {
   const hoverBg = isKontaktPage ? "hover:bg-white/10" : "hover:bg-foreground/10";
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-primary">
+    <header className={`sticky top-0 z-50 w-full bg-primary transition-shadow duration-300 ${isScrolled ? 'shadow-lg' : ''}`}>
       {/* Primary Navigation Row */}
-      <div className={`border-b ${isKontaktPage ? 'border-white/10' : 'border-foreground/10'} py-2`}>
-        <nav className="container mx-auto flex h-20 items-center px-4 lg:px-8">
+      <div className={`border-b ${isKontaktPage ? 'border-white/10' : 'border-foreground/10'} transition-all duration-300 ${isScrolled ? 'py-0' : 'py-2'}`}>
+        <nav className={`container mx-auto flex items-center px-4 lg:px-8 transition-all duration-300 ${isScrolled ? 'h-14' : 'h-20'}`}>
           {/* Logo */}
           <Link to="/" className="flex items-center">
             <img 
               src={logo} 
               alt="Mr.Clean Services – Ihr Partner für Facility Management, Handwerk und Reinigung" 
-              className="h-10 w-auto lg:h-12"
+              className={`w-auto transition-all duration-300 ${isScrolled ? 'h-8 lg:h-9' : 'h-10 lg:h-12'}`}
             />
           </Link>
 
@@ -158,9 +169,9 @@ export function Header() {
         </nav>
       </div>
 
-      {/* Secondary Navigation Row - Desktop */}
-      <div className="hidden md:block">
-        <nav className="container mx-auto flex h-16 items-center gap-12 px-4 lg:px-8">
+      {/* Secondary Navigation Row - Desktop (hidden when scrolled) */}
+      <div className={`hidden md:block transition-all duration-300 overflow-hidden ${isScrolled ? 'max-h-0 opacity-0' : 'max-h-20 opacity-100'}`}>
+        <nav className="container mx-auto flex h-12 items-center gap-12 px-4 lg:px-8">
           {secondaryNav.map((item) => (
             <div
               key={item.name}
