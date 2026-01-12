@@ -85,10 +85,10 @@ export function Header() {
   const hoverBg = isKontaktPage ? "hover:bg-white/10" : "hover:bg-foreground/10";
 
   return (
-    <header className={`sticky top-0 z-50 w-full bg-primary transition-shadow duration-300 ${isScrolled ? 'shadow-lg' : ''}`}>
+    <header className={`sticky top-0 z-50 w-full bg-primary transition-all duration-300 ease-out ${isScrolled ? 'shadow-lg' : ''}`}>
       {/* Primary Navigation Row */}
-      <div className={`border-b ${isKontaktPage ? 'border-white/10' : 'border-foreground/10'} transition-all duration-300 ${isScrolled ? 'py-0' : 'py-2'}`}>
-        <nav className={`container mx-auto flex items-center px-4 lg:px-8 transition-all duration-300 ${isScrolled ? 'h-14' : 'h-20'}`}>
+      <div className={`border-b ${isKontaktPage ? 'border-white/10' : 'border-foreground/10'}`}>
+        <nav className={`container mx-auto flex items-center px-4 lg:px-8 transition-[height] duration-300 ease-out ${isScrolled ? 'h-14' : 'h-20'}`}>
           {/* Logo */}
           <Link to="/" className="flex items-center">
             <img 
@@ -171,9 +171,9 @@ export function Header() {
 
       {/* Secondary Navigation Row - Desktop (hidden when scrolled) */}
       <div 
-        className={`hidden md:block transition-all duration-300 ${isScrolled ? 'h-0 opacity-0 pointer-events-none' : 'h-12 opacity-100'}`}
+        className={`hidden md:block transition-[height,opacity] duration-300 ease-out ${isScrolled ? 'h-0 opacity-0 pointer-events-none overflow-hidden' : 'h-12 opacity-100'}`}
       >
-        <nav className="container mx-auto flex h-12 items-center gap-12 px-4 lg:px-8">
+        <nav className="container mx-auto flex h-full items-center gap-12 px-4 lg:px-8">
           {secondaryNav.map((item) => (
             <div
               key={item.name}
