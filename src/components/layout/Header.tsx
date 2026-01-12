@@ -74,7 +74,7 @@ export function Header() {
   const hoverBg = isKontaktPage ? "hover:bg-white/10" : "hover:bg-foreground/10";
 
   return (
-    <header className="relative z-50 w-full bg-primary">
+    <header className="sticky top-0 z-50 w-full bg-primary">
       {/* Primary Navigation Row */}
       <div className={`border-b ${isKontaktPage ? 'border-white/10' : 'border-foreground/10'} py-2`}>
         <nav className="container mx-auto flex h-20 items-center px-4 lg:px-8">
