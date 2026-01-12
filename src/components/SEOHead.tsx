@@ -74,15 +74,21 @@ export function SEOHead({
     }
     linkCanonical.setAttribute("href", currentUrl);
 
-    // Structured data (JSON-LD)
+    // Structured data (JSON-LD) - supports single object or array
     if (structuredData) {
-      let scriptLD = document.querySelector('script[type="application/ld+json"]');
-      if (!scriptLD) {
-        scriptLD = document.createElement("script");
+      // Remove existing structured data scripts
+      document.querySelectorAll('script[type="application/ld+json"][data-seo-head="true"]').forEach(el => el.remove());
+      
+      // Handle array of structured data or single object
+      const dataArray = Array.isArray(structuredData) ? structuredData : [structuredData];
+      
+      dataArray.forEach((data, index) => {
+        const scriptLD = document.createElement("script");
         scriptLD.setAttribute("type", "application/ld+json");
+        scriptLD.setAttribute("data-seo-head", "true");
+        scriptLD.textContent = JSON.stringify(data);
         document.head.appendChild(scriptLD);
-      }
-      scriptLD.textContent = JSON.stringify(structuredData);
+      });
     }
 
     return () => {

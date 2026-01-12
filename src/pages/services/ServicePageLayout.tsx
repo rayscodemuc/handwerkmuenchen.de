@@ -1,10 +1,12 @@
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CTASection } from "@/components/sections/CTASection";
 import { AnimatedButton } from "@/components/ui/animated-button";
 import { SEOHead } from "@/components/SEOHead";
 import { Link } from "react-router-dom";
-import { Check, ChevronRight, Clock, Shield, Award, Phone } from "lucide-react";
+import { Check, ChevronRight, Clock, Shield, Award, Phone, ArrowRight } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 
 interface ServiceFeature {
@@ -16,6 +18,11 @@ interface ServiceFeature {
 interface FAQ {
   question: string;
   answer: string;
+}
+
+interface RelatedLink {
+  label: string;
+  href: string;
 }
 
 interface ServicePageLayoutProps {
@@ -32,6 +39,7 @@ interface ServicePageLayoutProps {
   categoryName: string;
   categoryHref: string;
   keywords?: string[];
+  relatedLinks?: RelatedLink[];
 }
 
 export function ServicePageLayout({
@@ -48,26 +56,69 @@ export function ServicePageLayout({
   categoryName,
   categoryHref,
   keywords = [],
+  relatedLinks = [],
 }: ServicePageLayoutProps) {
-  // SEO structured data for Service
+  const location = useLocation();
+  const canonicalUrl = `https://mrclean-services.de${location.pathname}`;
+
+  // Add canonical link tag
+  useEffect(() => {
+    // Remove existing canonical if any
+    const existingCanonical = document.querySelector('link[rel="canonical"]');
+    if (existingCanonical) {
+      existingCanonical.remove();
+    }
+    
+    // Add new canonical
+    const link = document.createElement('link');
+    link.rel = 'canonical';
+    link.href = canonicalUrl;
+    document.head.appendChild(link);
+
+    return () => {
+      link.remove();
+    };
+  }, [canonicalUrl]);
+
+  // SEO structured data for Service (Schema.org)
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Service",
+    "@id": canonicalUrl,
     name: title,
     description: description,
     provider: {
       "@type": "Organization",
       name: "Mr.Clean Services GmbH",
       url: "https://mrclean-services.de",
+      logo: "https://mrclean-services.de/logo.png",
+      contactPoint: {
+        "@type": "ContactPoint",
+        telephone: "+49-123-4567890",
+        contactType: "customer service",
+        availableLanguage: ["German", "English"],
+      },
     },
     areaServed: {
       "@type": "Country",
       name: "Germany",
     },
     serviceType: subtitle,
+    hasOfferCatalog: {
+      "@type": "OfferCatalog",
+      name: title,
+      itemListElement: features.map((feature, index) => ({
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: feature,
+        },
+        position: index + 1,
+      })),
+    },
   };
 
-  // FAQ structured data
+  // FAQ structured data (Schema.org FAQPage)
   const faqStructuredData = faqs && faqs.length > 0 ? {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -81,34 +132,55 @@ export function ServicePageLayout({
     })),
   } : null;
 
+  // Combined structured data for single script tag
+  const combinedStructuredData = faqStructuredData 
+    ? [structuredData, faqStructuredData]
+    : [structuredData];
+
   return (
     <div className="flex min-h-screen flex-col">
       <SEOHead
         title={title}
         description={description}
         keywords={[title, subtitle, "Facility Management", "Berlin", ...keywords]}
-        structuredData={structuredData}
+        structuredData={combinedStructuredData}
+        canonicalUrl={canonicalUrl}
       />
       <Header />
       <main className="flex-1">
-        {/* Breadcrumb */}
+        {/* Breadcrumb with BreadcrumbList Schema */}
         <nav className="bg-primary py-4" aria-label="Breadcrumb">
           <div className="container mx-auto px-4 lg:px-8">
-            <ol className="flex items-center gap-2 text-sm">
-              <li>
-                <Link to="/" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">
-                  Startseite
+            <ol 
+              className="flex items-center gap-2 text-sm"
+              itemScope
+              itemType="https://schema.org/BreadcrumbList"
+            >
+              <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
+                <Link 
+                  to="/" 
+                  className="text-primary-foreground/70 hover:text-primary-foreground transition-colors"
+                  itemProp="item"
+                >
+                  <span itemProp="name">Startseite</span>
                 </Link>
+                <meta itemProp="position" content="1" />
               </li>
-              <ChevronRight className="h-4 w-4 text-primary-foreground/50" />
-              <li>
-                <Link to={categoryHref} className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">
-                  {categoryName}
+              <ChevronRight className="h-4 w-4 text-primary-foreground/50" aria-hidden="true" />
+              <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
+                <Link 
+                  to={categoryHref} 
+                  className="text-primary-foreground/70 hover:text-primary-foreground transition-colors"
+                  itemProp="item"
+                >
+                  <span itemProp="name">{categoryName}</span>
                 </Link>
+                <meta itemProp="position" content="2" />
               </li>
-              <ChevronRight className="h-4 w-4 text-primary-foreground/50" />
-              <li>
-                <span className="font-medium text-primary-foreground">{title}</span>
+              <ChevronRight className="h-4 w-4 text-primary-foreground/50" aria-hidden="true" />
+              <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
+                <span className="font-medium text-primary-foreground" itemProp="name">{title}</span>
+                <meta itemProp="position" content="3" />
               </li>
             </ol>
           </div>
@@ -135,7 +207,7 @@ export function ServicePageLayout({
                 </Link>
                 <a href="tel:+491234567890">
                   <AnimatedButton className="border-2 border-primary-foreground bg-transparent text-primary-foreground hover:bg-primary-foreground hover:text-primary">
-                    <Phone className="mr-2 h-4 w-4" />
+                    <Phone className="mr-2 h-4 w-4" aria-hidden="true" />
                     Jetzt anrufen
                   </AnimatedButton>
                 </a>
@@ -150,7 +222,7 @@ export function ServicePageLayout({
             <div className="flex flex-wrap items-center justify-center gap-8 lg:gap-16">
               <div className="flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                  <Clock className="h-6 w-6 text-primary" />
+                  <Clock className="h-6 w-6 text-primary" aria-hidden="true" />
                 </div>
                 <div>
                   <p className="font-semibold text-foreground">24/7 Erreichbar</p>
@@ -159,7 +231,7 @@ export function ServicePageLayout({
               </div>
               <div className="flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                  <Shield className="h-6 w-6 text-primary" />
+                  <Shield className="h-6 w-6 text-primary" aria-hidden="true" />
                 </div>
                 <div>
                   <p className="font-semibold text-foreground">Zertifiziert</p>
@@ -168,7 +240,7 @@ export function ServicePageLayout({
               </div>
               <div className="flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                  <Award className="h-6 w-6 text-primary" />
+                  <Award className="h-6 w-6 text-primary" aria-hidden="true" />
                 </div>
                 <div>
                   <p className="font-semibold text-foreground">10+ Jahre</p>
@@ -189,16 +261,39 @@ export function ServicePageLayout({
                   Warum {title} von Mr.Clean Services?
                 </h2>
                 {longDescription && (
-                  <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
-                    {longDescription}
-                  </p>
+                  <div className="mt-6 space-y-4 text-lg text-muted-foreground leading-relaxed">
+                    {longDescription.split('\n\n').map((paragraph, index) => (
+                      <p key={index}>{paragraph}</p>
+                    ))}
+                  </div>
+                )}
+
+                {/* Internal Links Section */}
+                {relatedLinks && relatedLinks.length > 0 && (
+                  <div className="mt-8 rounded-xl border border-border bg-muted/50 p-6">
+                    <p className="text-sm font-semibold text-foreground mb-3">
+                      Verwandte Leistungen & Standorte
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {relatedLinks.map((link, index) => (
+                        <Link
+                          key={index}
+                          to={link.href}
+                          className="inline-flex items-center gap-1 rounded-full bg-background px-4 py-2 text-sm font-medium text-foreground border border-border hover:border-primary hover:text-primary transition-colors"
+                        >
+                          {link.label}
+                          <ArrowRight className="h-3 w-3" aria-hidden="true" />
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
                 )}
 
                 <ul className="mt-10 space-y-4">
                   {features.map((feature) => (
                     <li key={feature} className="flex items-start gap-3">
                       <div className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                        <Check className="h-3 w-3 text-primary" />
+                        <Check className="h-3 w-3 text-primary" aria-hidden="true" />
                       </div>
                       <span className="text-foreground">{feature}</span>
                     </li>
@@ -214,7 +309,7 @@ export function ServicePageLayout({
                 </div>
               </div>
 
-              {/* Image */}
+              {/* Image with LCP optimization */}
               <div className="relative">
                 <div className="aspect-[4/3] overflow-hidden rounded-3xl bg-muted">
                   {imageSrc ? (
@@ -222,7 +317,9 @@ export function ServicePageLayout({
                       src={imageSrc}
                       alt={imageAlt || `${title} – Professioneller Service von Mr.Clean Services`}
                       className="h-full w-full object-cover"
-                      loading="lazy"
+                      loading="eager"
+                      fetchPriority="high"
+                      decoding="async"
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center text-muted-foreground">
@@ -234,7 +331,7 @@ export function ServicePageLayout({
                   )}
                 </div>
                 {/* Decorative elements */}
-                <div className="absolute -bottom-6 -right-6 -z-10 h-full w-full rounded-3xl bg-primary/10" />
+                <div className="absolute -bottom-6 -right-6 -z-10 h-full w-full rounded-3xl bg-primary/10" aria-hidden="true" />
               </div>
             </div>
           </div>
@@ -257,18 +354,18 @@ export function ServicePageLayout({
                 {detailedFeatures.map((feature, index) => {
                   const IconComponent = feature.icon || Check;
                   return (
-                    <div
+                    <article
                       key={index}
                       className="rounded-2xl bg-background p-8 shadow-sm transition-shadow hover:shadow-md"
                     >
                       <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-                        <IconComponent className="h-6 w-6 text-primary" />
+                        <IconComponent className="h-6 w-6 text-primary" aria-hidden="true" />
                       </div>
                       <h3 className="text-xl font-bold text-foreground">{feature.title}</h3>
                       <p className="mt-3 text-muted-foreground leading-relaxed">
                         {feature.description}
                       </p>
-                    </div>
+                    </article>
                   );
                 })}
               </div>
@@ -296,7 +393,7 @@ export function ServicePageLayout({
                       className="flex items-center gap-3 rounded-xl border border-border bg-card p-4"
                     >
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                        <Check className="h-4 w-4" />
+                        <Check className="h-4 w-4" aria-hidden="true" />
                       </div>
                       <span className="font-medium text-foreground">{benefit}</span>
                     </div>
@@ -321,28 +418,25 @@ export function ServicePageLayout({
 
                 <div className="mt-12 space-y-6">
                   {faqs.map((faq, index) => (
-                    <div
+                    <article
                       key={index}
                       className="rounded-2xl bg-background p-6 shadow-sm"
+                      itemScope
+                      itemType="https://schema.org/Question"
                     >
-                      <h3 className="text-lg font-semibold text-foreground">
+                      <h3 className="text-lg font-semibold text-foreground" itemProp="name">
                         {faq.question}
                       </h3>
-                      <p className="mt-3 text-muted-foreground leading-relaxed">
-                        {faq.answer}
-                      </p>
-                    </div>
+                      <div itemScope itemType="https://schema.org/Answer" itemProp="acceptedAnswer">
+                        <p className="mt-3 text-muted-foreground leading-relaxed" itemProp="text">
+                          {faq.answer}
+                        </p>
+                      </div>
+                    </article>
                   ))}
                 </div>
               </div>
             </div>
-            {/* Add FAQ structured data */}
-            {faqStructuredData && (
-              <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(faqStructuredData) }}
-              />
-            )}
           </section>
         )}
 
