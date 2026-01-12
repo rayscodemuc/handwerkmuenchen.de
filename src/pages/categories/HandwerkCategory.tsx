@@ -90,29 +90,22 @@ export default function HandwerkCategory() {
             <div className="absolute -bottom-1/4 -left-1/4 w-[600px] h-[600px] rounded-full bg-gradient-to-tr from-foreground/10 via-transparent to-transparent blur-3xl" />
           </div>
 
-          <div className="relative min-h-[580px] lg:min-h-[680px] pt-8 lg:pt-12">
-            {/* Content Container - Centered */}
-            <div className="container relative mx-auto flex min-h-[580px] sm:min-h-[520px] items-center justify-center px-4 lg:min-h-[640px] lg:px-8">
-              {/* Centered Content */}
-              <div className="relative z-10 w-full max-w-4xl py-12 sm:py-16 lg:py-24 text-center">
-                {/* Decorative line */}
-                <div className="flex items-center justify-center gap-4 mb-6">
-                  <div className="h-px w-12 bg-foreground/30" />
-                  <p className="text-sm font-semibold uppercase tracking-[0.2em] text-foreground/70">
-                    Technische Dienstleistungen
-                  </p>
-                  <div className="h-px w-12 bg-foreground/30" />
-                </div>
+           <div className="relative min-h-[580px] lg:min-h-[680px] pt-4 lg:pt-6">
+             {/* Content Container - Centered */}
+             <div className="container relative mx-auto flex min-h-[580px] sm:min-h-[520px] items-center justify-center px-4 lg:min-h-[640px] lg:px-8">
+               {/* Centered Content */}
+               <div className="relative z-10 w-full max-w-4xl py-8 sm:py-12 lg:py-16 text-center">
+
                 
-                {/* Main Headline */}
-                <h1 className="font-bold leading-[0.95] tracking-tight text-foreground">
-                  <span className="block text-[2.5rem] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[5.5rem] xl:text-[6rem]">
-                    Gegen den Strom.
-                  </span>
-                  <span className="block text-[2.5rem] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[5.5rem] xl:text-[6rem]">
-                    Für den Wert.
-                  </span>
-                </h1>
+                 {/* Main Headline */}
+                 <h1 className="font-bold leading-[0.95] tracking-tight text-foreground">
+                   <span className="block text-[2.5rem] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[5.5rem] xl:text-[6rem]">
+                     Gegen den Strom.
+                   </span>
+                   <span className="block mt-2 sm:mt-3 md:mt-4 text-[2.5rem] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[5.5rem] xl:text-[6rem]">
+                     Für den Wert.
+                   </span>
+                 </h1>
 
                 {/* Subheadline */}
                 <p className="mt-8 sm:mt-10 mx-auto max-w-[600px] text-base sm:text-lg leading-relaxed text-foreground/70">
@@ -143,11 +136,7 @@ export default function HandwerkCategory() {
                   </span>
                 </div>
 
-                {/* Decorative bottom element */}
-                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden lg:flex flex-col items-center gap-2 text-foreground/40">
-                  <span className="text-xs uppercase tracking-widest">Mehr entdecken</span>
-                  <div className="w-px h-8 bg-gradient-to-b from-foreground/40 to-transparent" />
-                </div>
+
               </div>
             </div>
           </div>

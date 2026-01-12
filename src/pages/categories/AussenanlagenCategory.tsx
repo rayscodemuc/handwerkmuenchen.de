@@ -5,55 +5,55 @@ import { CategoryTrustSection } from "@/components/sections/CategoryTrustSection
 import { SEOHead } from "@/components/SEOHead";
 import { AnimatedButton } from "@/components/ui/animated-button";
 import { Link } from "react-router-dom";
-import { Trees, Leaf, TreeDeciduous, Snowflake, Brush, Clock, Shield, Users, ChevronRight } from "lucide-react";
+import { Trees, Leaf, TreeDeciduous, Snowflake, Brush, Clock, Shield, Users, ChevronRight, CheckCircle2 } from "lucide-react";
 
 const services = [
   {
     icon: Leaf,
-    title: "Garten- und Grünpflege",
-    description: "Fachgerechte Pflege von Rasen, Beeten und Hecken.",
+    title: "Grünpflege",
+    description: "Wir überlassen das Wachstum nicht dem Zufall. Systematische Rasen-, Beet- und Heckenpflege für ein kompromissloses Erscheinungsbild.",
     link: "/aussenanlagen/gruenpflege",
   },
   {
     icon: TreeDeciduous,
-    title: "Baumpflege & Rückschnitt",
-    description: "Fachgerechter Baumschnitt nach Vorschrift.",
+    title: "Baumpflege",
+    description: "Vitalität trifft Sicherheit. Fachgerechte Schnitte und Kontrolle nach FLL-Richtlinien zur langfristigen Substanzsicherung.",
     link: "/aussenanlagen/baumpflege",
   },
   {
     icon: Brush,
-    title: "Grauflächenreinigung & Gehwegpflege",
-    description: "Reinigung von Wegen und befestigten Flächen.",
+    title: "Grauflächenreinigung",
+    description: "Porentiefe Reinheit für Wege und Plätze. Wir eliminieren Wildwuchs und Verschmutzung, bevor sie die Bausubstanz angreifen.",
     link: "/aussenanlagen/grauflaechenreinigung",
   },
   {
     icon: Snowflake,
     title: "Winterdienst",
-    description: "Zuverlässiger Räum- und Streudienst.",
+    description: "Haftungssicherheit statt Hoffnung. Wir garantieren schnee- und eisfreie Flächen nach strengster Gemeindesatzung – ohne Wenn und Aber.",
     link: "/aussenanlagen/winterdienst",
   },
 ];
 
 const reasons = [
   {
-    icon: Trees,
-    title: "Gepflegter Eindruck",
-    description: "Repräsentative Außenanlagen für Ihr Unternehmen.",
+    icon: Shield,
+    title: "Haftung geklärt",
+    description: "Wir übernehmen die volle Verkehrssicherungspflicht. Sie sind rechtlich zu 100% abgesichert.",
   },
   {
     icon: Clock,
-    title: "Ganzjähriger Service",
-    description: "Von der Grünpflege im Sommer bis zum Winterdienst.",
+    title: "Präzises Timing",
+    description: "Ob Vegetationsphasen oder plötzlicher Wintereinbruch – unsere Logistik ist der Natur immer einen Schritt voraus.",
   },
   {
-    icon: Shield,
-    title: "Verkehrssicherheit",
-    description: "Erfüllung aller gesetzlichen Pflichten.",
+    icon: Trees,
+    title: "Repräsentation",
+    description: "Ihr Außengelände ist die Visitenkarte Ihres Unternehmens. Wir sorgen dafür, dass sie glänzt.",
   },
   {
     icon: Users,
-    title: "Fachkundige Teams",
-    description: "Erfahrenes Personal mit moderner Ausrüstung.",
+    title: "Eigene Kolonnen",
+    description: "Keine Subunternehmer-Lotto. Wir arbeiten mit eigenem Fachpersonal und industriellem Maschinenpark.",
   },
 ];
 
@@ -61,62 +61,65 @@ export default function AussenanlagenCategory() {
   return (
     <div className="flex min-h-screen flex-col">
       <SEOHead
-        title="Grünpflege, Winterdienst & Außenanlagen"
-        description="Gepflegte Außenanlagen das ganze Jahr: Grünpflege, Baumpflege und Grauflächenreinigung. Zuverlässiger Service für einen starken ersten Eindruck."
+        title="Außenanlagen & Winterdienst | Werterhalt im Freien | Mr.Clean"
+        description="Ihre Außenanlagen sind kein Zufallsprodukt. Wir steuern Grünpflege, Baumpflege und Winterdienst mit industrieller Präzision."
       />
       <Header />
       <main className="flex-1">
-        {/* Breadcrumb */}
         <nav className="bg-primary py-4" aria-label="Breadcrumb">
           <div className="container mx-auto px-4 lg:px-8">
             <ol className="flex items-center gap-2 text-sm">
               <li>
-                <Link to="/" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">
-                  Startseite
-                </Link>
+                <Link to="/" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">Startseite</Link>
               </li>
               <ChevronRight className="h-4 w-4 text-primary-foreground/50" />
-              <li>
-                <span className="font-medium text-primary-foreground">Außenanlagen</span>
-              </li>
+              <li><span className="font-medium text-primary-foreground">Außenanlagen</span></li>
             </ol>
           </div>
         </nav>
 
         {/* Hero Section */}
         <section className="relative overflow-hidden bg-[hsl(198,29%,76%)]">
-          <div className="relative min-h-[540px] lg:min-h-[650px] pt-8 lg:pt-12">
-            <div 
-              className="absolute inset-0"
-              style={{
-                clipPath: "polygon(55% 0, 100% 0, 100% 100%, 35% 100%)",
-              }}
-            >
-              <div className="h-full w-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center">
-                <Trees className="h-48 w-48 text-primary/30" />
-              </div>
-            </div>
+          <div className="absolute inset-0">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,hsl(var(--foreground))/0.08,transparent_50%),radial-gradient(circle_at_80%_20%,hsl(var(--foreground))/0.05,transparent_50%)]" />
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--foreground))/0.03_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--foreground))/0.03_1px,transparent_1px)] bg-[size:60px_60px]" />
+          </div>
 
-            <div className="container relative mx-auto flex min-h-[500px] items-center px-4 lg:min-h-[600px] lg:px-8">
-              <div className="relative z-10 w-full py-16 lg:w-1/2 lg:py-24">
-                <p className="text-sm font-semibold uppercase tracking-wider text-primary">
-                  Grünflächen & Außenbereich
-                </p>
-                <h1 className="mt-4 font-bold leading-[1.1] tracking-tight text-foreground text-[2.5rem] sm:text-[3rem] lg:text-[3.5rem] xl:text-[4rem]">
-                  Außenanlagenpflege, Grünpflege & Winterdienst
-                </h1>
+           <div className="relative min-h-[580px] lg:min-h-[680px] pt-4 lg:pt-6">
+             <div className="container relative mx-auto flex min-h-[580px] sm:min-h-[520px] items-center justify-center px-4 lg:min-h-[640px] lg:px-8">
+               <div className="relative z-10 w-full max-w-4xl py-8 sm:py-12 lg:py-16 text-center">
 
-                <p className="mt-8 max-w-[420px] text-base leading-relaxed text-foreground/70 lg:text-lg">
-                  Ganzheitliche Pflege Ihrer Außenanlagen für sichere und ansprechende 
-                  Grundstücke. Der erste Eindruck zählt – wir sorgen dafür.
+                 <h1 className="font-bold leading-[0.95] tracking-tight text-foreground">
+                   <span className="block text-[2.5rem] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[5.5rem] xl:text-[6rem]">
+                     Natur braucht
+                   </span>
+                   <span className="block mt-2 sm:mt-3 md:mt-4 text-[2.5rem] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[5.5rem] xl:text-[6rem]">
+                     Disziplin.
+                   </span>
+                 </h1>
+
+                <p className="mt-8 sm:mt-10 mx-auto max-w-[600px] text-base sm:text-lg leading-relaxed text-foreground/70">
+                    Verwilderte Flächen kosten Geld und Image. Wir steuern Ihre Außenanlagen mit <span className="text-foreground font-bold underline decoration-primary">ökologischer Härte</span>. 
+                    Vom Sommerschnitt bis zur Winterhaftung – wir zähmen das Umfeld Ihrer Immobilie.
                 </p>
 
-                <div className="mt-10">
-                  <Link to="/anfrage">
-                    <AnimatedButton className="bg-white text-foreground hover:bg-foreground hover:text-white">
-                      Angebot anfragen
+                <div className="mt-10 sm:mt-12 flex justify-center">
+                  <Link to="/anfrage" className="w-full sm:w-auto">
+                    <AnimatedButton className="w-full sm:w-auto bg-foreground text-white hover:bg-foreground/90 shadow-lg shadow-foreground/20 text-base px-10 py-5 sm:py-6 font-semibold">
+                      Gelände-Check anfordern
                     </AnimatedButton>
                   </Link>
+                </div>
+
+                <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row justify-center sm:items-center gap-3 sm:gap-8 text-sm text-foreground/60">
+                  <span className="flex items-center justify-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-green-600" />
+                    Haftungsübernahme Winterdienst
+                  </span>
+                  <span className="flex items-center justify-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-green-600" />
+                    Industrieller Fuhrpark
+                  </span>
                 </div>
               </div>
             </div>
@@ -126,63 +129,17 @@ export default function AussenanlagenCategory() {
         {/* Services Section */}
         <section className="bg-background py-24 lg:py-32">
           <div className="container mx-auto px-4 lg:px-8">
-            <div className="text-center">
-              <h2 className="text-3xl font-bold tracking-tight text-foreground lg:text-4xl">
-                Pflege und Instandhaltung Ihrer Außenflächen
-              </h2>
-              <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-                Grünpflege, Baumpflege und Winterdienst aus einer Hand.
-              </p>
+            <div className="text-center mb-16">
+              <h2 className="text-3xl font-bold tracking-tight text-foreground lg:text-4xl">Beherrschte Außenflächen</h2>
+              <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">Vom Parkplatz bis zur Parkanlage – wir liefern die Struktur, die Ihr Standort verdient.</p>
             </div>
-
-            <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
               {services.map((service) => (
-                <Link
-                  key={service.title}
-                  to={service.link}
-                  className="group rounded-2xl border border-border bg-card p-8 transition-all hover:border-primary hover:shadow-lg"
-                >
+                <Link key={service.title} to={service.link} className="group rounded-2xl border border-border bg-card p-8 transition-all hover:border-primary hover:shadow-lg">
                   <service.icon className="h-12 w-12 text-primary" />
-                  <h3 className="mt-6 text-xl font-semibold text-foreground group-hover:text-primary">
-                    {service.title}
-                  </h3>
-                  <p className="mt-3 text-muted-foreground">
-                    {service.description}
-                  </p>
+                  <h3 className="mt-6 text-xl font-semibold text-foreground group-hover:text-primary">{service.title}</h3>
+                  <p className="mt-3 text-muted-foreground">{service.description}</p>
                 </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Why Us Section */}
-        <section className="bg-muted/50 py-24 lg:py-32">
-          <div className="container mx-auto px-4 lg:px-8">
-            <div className="text-center">
-              <p className="text-sm font-semibold uppercase tracking-wider text-primary">
-                Ihre Vorteile
-              </p>
-              <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground lg:text-4xl">
-                Warum Mr.Clean Außenanlagen?
-              </h2>
-            </div>
-
-            <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-              {reasons.map((reason) => (
-                <div
-                  key={reason.title}
-                  className="rounded-2xl border border-border bg-card p-6 text-center transition-all hover:border-primary hover:shadow-lg"
-                >
-                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
-                    <reason.icon className="h-7 w-7 text-primary" />
-                  </div>
-                  <h3 className="mt-4 text-lg font-semibold text-foreground">
-                    {reason.title}
-                  </h3>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    {reason.description}
-                  </p>
-                </div>
               ))}
             </div>
           </div>

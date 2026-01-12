@@ -5,49 +5,49 @@ import { CategoryTrustSection } from "@/components/sections/CategoryTrustSection
 import { SEOHead } from "@/components/SEOHead";
 import { AnimatedButton } from "@/components/ui/animated-button";
 import { Link } from "react-router-dom";
-import { Sparkles, Building, PanelTop, FlaskConical, Clock, Shield, Users, ChevronRight } from "lucide-react";
+import { Building2, ShieldCheck, BarChart3, Settings, Users, ChevronRight, CheckCircle2, Cpu, Zap, LineChart } from "lucide-react";
 
 const services = [
   {
-    icon: Building,
-    title: "Unterhaltsreinigung für Büro & Praxis",
-    description: "Regelmäßige Reinigung für dauerhaft saubere Räumlichkeiten.",
+    icon: Cpu,
+    title: "Unterhaltsreinigung",
+    description: "Wir sichern die tägliche Performance Ihrer Flächen mit Systematik und einem Auge für Details, die andere übersehen.",
     link: "/reinigung/unterhaltsreinigung",
   },
   {
-    icon: PanelTop,
-    title: "Glas- und Fensterreinigung",
-    description: "Streifenfreie Reinigung für klare Durchsicht.",
-    link: "/reinigung/fensterreinigung",
+    icon: ShieldCheck,
+    title: "Glas- & Fassadenreinigung",
+    description: "Der erste Eindruck zählt. Wir sorgen für streifenfreie Brillanz und schützen die Substanz Ihrer Gebäudehülle.",
+    link: "/reinigung/glas-fassade",
   },
   {
-    icon: FlaskConical,
-    title: "Sonderreinigung: Tiefgaragen & Grundreinigung",
-    description: "Spezialreinigung für besondere Anforderungen.",
+    icon: BarChart3,
+    title: "Sonderreinigung",
+    description: "Härtefälle sind unser Spezialgebiet. Von Baureinigung bis Desinfektion – wir liefern Reinheit, wo Standard scheitert.",
     link: "/reinigung/sonderreinigung",
   },
 ];
 
 const reasons = [
   {
-    icon: Sparkles,
-    title: "Hygiene & Sauberkeit",
-    description: "Höchste Hygienestandards für ein gesundes Arbeitsumfeld.",
-  },
-  {
-    icon: Shield,
-    title: "Qualitätsgarantie",
-    description: "Regelmäßige Kontrollen sichern gleichbleibende Ergebnisse.",
-  },
-  {
-    icon: Clock,
-    title: "Flexible Einsatzzeiten",
-    description: "Reinigung nach Ihrem Zeitplan – auch nachts und am Wochenende.",
+    icon: LineChart,
+    title: "Digitale Kontrolle",
+    description: "Wir liefern keine Versprechen, sondern Fakten. Digitale Checklisten zeigen Ihnen jederzeit den Status der Reinigung.",
   },
   {
     icon: Users,
-    title: "Geschultes Personal",
-    description: "Erfahrene Reinigungskräfte mit professioneller Ausbildung.",
+    title: "Feste Teams",
+    description: "Kein Personal-Lotto. Wir setzen auf beständige Teams, die Ihr Objekt kennen und Verantwortung persönlich nehmen.",
+  },
+  {
+    icon: Zap,
+    title: "Reaktions-Speed",
+    description: "Bedarf kurzfristig geändert? Durch unsere flachen Hierarchien sind wir sofort einsatzbereit, wenn es brennt.",
+  },
+  {
+    icon: Settings,
+    title: "Keine Massenabfertigung",
+    description: "Wir betreuen nur eine ausgewählte Anzahl an Objekten, um unsere extrem hohen Qualitätsstandards zu garantieren.",
   },
 ];
 
@@ -55,8 +55,8 @@ export default function ReinigungCategory() {
   return (
     <div className="flex min-h-screen flex-col">
       <SEOHead
-        title="Professionelle Reinigung & Gebäudeservice"
-        description="Glänzende Ergebnisse für Ihr Objekt: Unterhaltsreinigung, Glas- und Fensterreinigung sowie Sonderreinigungen (TG & Grundreinigung) vom Profi."
+        title="Gebäudereinigung mit System | Werterhalt durch Reinheit | Mr.Clean"
+        description="Reinigung neu definiert. Wir putzen nicht nur – wir pflegen Werte durch High-End Systematik und menschliche Expertise. Kein Standard, sondern Präzision."
       />
       <Header />
       <main className="flex-1">
@@ -79,38 +79,89 @@ export default function ReinigungCategory() {
 
         {/* Hero Section */}
         <section className="relative overflow-hidden bg-[hsl(198,29%,76%)]">
-          <div className="relative min-h-[540px] lg:min-h-[650px] pt-8 lg:pt-12">
-            <div 
-              className="absolute inset-0"
-              style={{
-                clipPath: "polygon(55% 0, 100% 0, 100% 100%, 35% 100%)",
-              }}
-            >
-              <div className="h-full w-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center">
-                <Sparkles className="h-48 w-48 text-primary/30" />
-              </div>
-            </div>
+          {/* Background Pattern & Gradient */}
+          <div className="absolute inset-0">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,hsl(var(--foreground))/0.08,transparent_50%),radial-gradient(circle_at_80%_20%,hsl(var(--foreground))/0.05,transparent_50%)]" />
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--foreground))/0.03_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--foreground))/0.03_1px,transparent_1px)] bg-[size:60px_60px]" />
+            <div className="absolute -top-1/2 -right-1/4 w-[800px] h-[800px] rounded-full bg-gradient-to-br from-white/30 via-white/10 to-transparent blur-3xl" />
+            <div className="absolute -bottom-1/4 -left-1/4 w-[600px] h-[600px] rounded-full bg-gradient-to-tr from-foreground/10 via-transparent to-transparent blur-3xl" />
+          </div>
 
-            <div className="container relative mx-auto flex min-h-[500px] items-center px-4 lg:min-h-[600px] lg:px-8">
-              <div className="relative z-10 w-full py-16 lg:w-1/2 lg:py-24">
-                <p className="text-sm font-semibold uppercase tracking-wider text-primary">
-                  Gebäudeservice
+           <div className="relative min-h-[580px] lg:min-h-[680px] pt-4 lg:pt-6">
+             <div className="container relative mx-auto flex min-h-[580px] sm:min-h-[520px] items-center justify-center px-4 lg:min-h-[640px] lg:px-8">
+               <div className="relative z-10 w-full max-w-4xl py-8 sm:py-12 lg:py-16 text-center">
+
+                {/* Main Headline */}
+               <h1 className="font-bold leading-[0.95] tracking-tight text-foreground">
+                   <span className="block text-[2.5rem] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[5.5rem] xl:text-[6rem]">
+                     Sauberkeit
+                   </span>
+                   <span className="block mt-2 sm:mt-3 md:mt-4 text-[2.5rem] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[5.5rem] xl:text-[6rem]">
+                     schafft Werte.
+                   </span>
+                 </h1>
+
+                {/* Subheadline */}
+                <p className="mt-8 sm:mt-10 mx-auto max-w-[600px] text-base sm:text-lg leading-relaxed text-foreground/70">
+                    Hygiene ist kein Zufall, sondern das Ergebnis höchster Disziplin. Wir schützen die Substanz Ihrer Immobilien durch <span className="text-foreground font-bold underline decoration-primary">systematische Reinheit</span>. 
+                    Wo andere nur oberflächlich wischen, sichern wir langfristig die Qualität und Gesundheit Ihres Arbeitsumfelds.
                 </p>
-                <h1 className="mt-4 font-bold leading-[1.1] tracking-tight text-foreground text-[2.5rem] sm:text-[3rem] lg:text-[3.5rem] xl:text-[4rem]">
-                  Professionelle Reinigung & Gebäudereinigung
-                </h1>
 
-                <p className="mt-8 max-w-[420px] text-base leading-relaxed text-foreground/70 lg:text-lg">
-                  Von der täglichen Unterhaltsreinigung bis zur Spezialreinigung – 
-                  wir sorgen für Hygiene und Sauberkeit in Ihren Räumlichkeiten.
-                </p>
-
-                <div className="mt-10">
-                  <Link to="/anfrage">
-                    <AnimatedButton className="bg-white text-foreground hover:bg-foreground hover:text-white">
-                      Angebot anfragen
+                {/* CTA Button - Centered */}
+                <div className="mt-10 sm:mt-12 flex justify-center">
+                  <Link to="/anfrage" className="w-full sm:w-auto">
+                    <AnimatedButton className="w-full sm:w-auto bg-foreground text-white hover:bg-foreground/90 shadow-lg shadow-foreground/20 text-base px-10 py-5 sm:py-6 font-semibold">
+                      Reinheits-Check anfordern
                     </AnimatedButton>
                   </Link>
+                </div>
+
+                {/* Trust Badge - Centered */}
+                <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row justify-center sm:items-center gap-3 sm:gap-8 text-sm text-foreground/60">
+                  <span className="flex items-center justify-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
+                    Feste Reinigungsteams
+                  </span>
+                  <span className="flex items-center justify-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
+                    Digitale Leistungsnachweise
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Tech & Human Connection Section */}
+        <section className="bg-foreground text-white py-24">
+          <div className="container mx-auto px-4 lg:px-8">
+            <div className="grid gap-16 lg:grid-cols-2 items-center">
+              <div>
+                <h2 className="text-3xl font-bold tracking-tight lg:text-4xl mb-6">
+                  Hygienische Intelligenz. <br />
+                  Sichtbare Verantwortung.
+                </h2>
+                <p className="text-white/70 text-lg mb-8">
+                  Echte Reinigung ist kein Handwerk von der Stange, sondern eine Frage der Einstellung. Wir kombinieren moderne Systematik mit geschultem Personal, das Verantwortung noch persönlich nimmt. Bei uns gibt es kein „schnell drüberwischen“, sondern nur Ergebnisse, die einer kritischen Prüfung standhalten.
+                </p>
+                <ul className="space-y-4">
+                  {[
+                    "Kein Personal-Hopping – feste Ansprechpartner",
+                    "Einsatz von High-End Equipment",
+                    "Transparente Echtzeit-Dokumentation",
+                    "Strengste Einhaltung von Hygiene-Standards"
+                  ].map((item) => (
+                    <li key={item} className="flex items-center gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-primary" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="relative aspect-square lg:aspect-video rounded-2xl overflow-hidden bg-muted/20 flex items-center justify-center border border-white/10">
+                <div className="text-center p-8">
+                  <Settings className="h-16 w-16 text-primary mx-auto mb-4 animate-spin-slow" />
+                  <p className="text-xl font-medium">Purity meets Professionalism</p>
                 </div>
               </div>
             </div>
@@ -122,14 +173,14 @@ export default function ReinigungCategory() {
           <div className="container mx-auto px-4 lg:px-8">
             <div className="text-center">
               <h2 className="text-3xl font-bold tracking-tight text-foreground lg:text-4xl">
-                Werterhalt durch professionelle Gebäudereinigung
+                Werterhalt durch Reinheit
               </h2>
               <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-                Von der täglichen Unterhaltsreinigung bis zur Spezialreinigung.
+                Vom Bürokomplex bis zur Industriehalle – wir liefern Lösungen, die über den Standard hinausgehen.
               </p>
             </div>
 
-            <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-16 grid gap-8 md:grid-cols-3">
               {services.map((service) => (
                 <Link
                   key={service.title}
