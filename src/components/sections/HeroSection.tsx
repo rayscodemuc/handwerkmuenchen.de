@@ -1,6 +1,7 @@
 import { AnimatedButton } from "@/components/ui/animated-button";
 import { Link } from "react-router-dom";
-import heroImage from "@/assets/hero-facility.jpg";
+import heroImage from "@/assets/hero-facility.png";
+import { CheckCircle2, Calculator } from "lucide-react";
 
 export function HeroSection() {
   return (
