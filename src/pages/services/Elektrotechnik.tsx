@@ -455,7 +455,6 @@ export default function Elektrotechnik() {
                 <Link to="/anfrage">
                   <AnimatedButton className="h-16 px-10 text-lg">
                     Angebot anfordern
-                    <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
                   </AnimatedButton>
                 </Link>
               </div>
