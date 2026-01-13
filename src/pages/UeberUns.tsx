@@ -430,7 +430,7 @@ export default function UeberUns() {
         <section className="bg-background py-20 lg:py-28">
           <div className="container mx-auto px-4 lg:px-8">
             <div className="mx-auto max-w-2xl text-center">
-              <span className="text-sm font-semibold uppercase tracking-wider text-primary">
+              <span className="text-sm font-semibold uppercase tracking-wider text-slate-600">
                 Stimmen unserer Partner
               </span>
               <h2 className="mt-3 text-3xl font-black tracking-tight text-foreground lg:text-4xl">
@@ -448,7 +448,7 @@ export default function UeberUns() {
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   className="relative rounded-3xl bg-surface p-8 border border-border"
                 >
-                  <Quote className="absolute top-6 right-6 h-8 w-8 text-primary/20" />
+                  <Quote className="absolute top-6 right-6 h-8 w-8 text-slate-400/40" />
                   <div className="flex gap-1 mb-4">
                     {Array.from({ length: testimonial.rating }).map((_, i) => (
                       <Star key={i} className="h-5 w-5 fill-amber-400 text-amber-400" />
@@ -458,8 +458,8 @@ export default function UeberUns() {
                     "{testimonial.quote}"
                   </p>
                   <div className="mt-6 flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Users className="h-6 w-6 text-primary" />
+                    <div className="h-12 w-12 rounded-full bg-slate-800/10 flex items-center justify-center">
+                      <Users className="h-6 w-6 text-slate-700" />
                     </div>
                     <div>
                       <p className="font-semibold text-foreground">{testimonial.author}</p>
@@ -473,32 +473,32 @@ export default function UeberUns() {
         </section>
 
         {/* Partner Section */}
-        <section className="bg-primary py-20 lg:py-28">
+        <section className="bg-slate-800 py-20 lg:py-28">
           <div className="container mx-auto px-4 lg:px-8">
             <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 items-center">
               <div>
-                <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white/90">
+                <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-medium text-white">
                   <Handshake className="h-4 w-4" />
                   Für Handwerker
                 </span>
                 <h2 className="mt-6 text-3xl font-black tracking-tight text-white lg:text-4xl">
                   Werde Partner<br />auf Augenhöhe
                 </h2>
-                <p className="mt-6 text-lg text-white/80 leading-relaxed">
+                <p className="mt-6 text-lg text-white/85 leading-relaxed">
                   Du bist stolzer Handwerker und suchst einen Partner, der deine Arbeit wertschätzt? 
                   Bei uns bist du keine Nummer – sondern ein geschätztes Mitglied unseres Teams.
                 </p>
                 <ul className="mt-8 space-y-4">
                   {["Faire Konditionen", "Regelmäßige Aufträge", "Kollegiales Miteinander", "Pünktliche Bezahlung"].map((item) => (
                     <li key={item} className="flex items-center gap-3 text-white">
-                      <CheckCircle2 className="h-5 w-5 text-white/80" />
+                      <CheckCircle2 className="h-5 w-5 text-white" />
                       {item}
                     </li>
                   ))}
                 </ul>
                 <div className="mt-8">
                   <Link to="/partner-werden">
-                    <Button className="h-14 px-8 text-base rounded-full bg-white text-primary hover:bg-white/90">
+                    <Button className="h-14 px-8 text-base rounded-full bg-white text-slate-800 hover:bg-white/90">
                       Jetzt Partner werden
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
