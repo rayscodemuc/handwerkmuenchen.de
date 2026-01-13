@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
 const BASE_URL = "https://mrclean-services.de";
 const DEFAULT_OG_IMAGE = "/assets/logo.png";
@@ -22,8 +23,9 @@ export function SEOHead({
   ogImage,
   ogType = "website",
 }: SEOHeadProps) {
+  const location = useLocation();
   const fullTitle = `${title} | Mr.Clean Services GmbH`;
-  const currentUrl = canonicalUrl || (typeof window !== 'undefined' ? `${BASE_URL}${window.location.pathname}` : BASE_URL);
+  const currentUrl = canonicalUrl || `${BASE_URL}${location.pathname}`;
   const imageUrl = ogImage ? `${BASE_URL}${ogImage}` : `${BASE_URL}${DEFAULT_OG_IMAGE}`;
 
   useEffect(() => {

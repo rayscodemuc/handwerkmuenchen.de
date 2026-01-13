@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Menu, X, ChevronDown, Clock, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link, useLocation } from "react-router-dom";
 import { LocationMapDialog } from "@/components/LocationMapDialog";
 import logo from "@/assets/logo.png";
 
@@ -64,7 +65,7 @@ export function Header() {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [locationDialogOpen, setLocationDialogOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const pathname = typeof window !== 'undefined' ? window.location.pathname : '/';
+  const location = useLocation();
   
   // Scroll detection (with hysteresis + rAF to prevent jitter)
   const isScrolledRef = useRef(false);
@@ -102,7 +103,7 @@ export function Header() {
   }, []);
   
   // Check if current page is Kontakt (dark background needs white text)
-  const isKontaktPage = pathname === "/kontakt";
+  const isKontaktPage = location.pathname === "/kontakt";
   const textColor = isKontaktPage ? "text-white" : "text-foreground";
   const textColorMuted = isKontaktPage ? "text-white/70" : "text-foreground/70";
   const borderColor = isKontaktPage ? "border-white/30" : "border-foreground/30";
@@ -114,22 +115,22 @@ export function Header() {
       <div className={`border-b ${isKontaktPage ? 'border-white/10' : 'border-foreground/10'}`}>
         <nav className={`container mx-auto flex items-center px-4 lg:px-8 transition-[height] duration-300 ease-out ${isScrolled ? 'h-14' : 'h-20'}`}>
           {/* Logo */}
-          <a href="/" className="flex items-center">
+          <Link to="/" className="flex items-center">
             <img 
               src={logo} 
               alt="Mr.Clean Services – Ihr Partner für Facility Management, Handwerk und Reinigung" 
               className={`w-auto transition-all duration-300 ${isScrolled ? 'h-8 lg:h-9' : 'h-10 lg:h-12'}`}
             />
-          </a>
+          </Link>
 
           {/* Primary Nav - Desktop */}
           <div className="hidden md:flex md:items-center md:gap-8 md:ml-20">
             {primaryNav.map((item) => {
-              const isActive = pathname === item.href;
+              const isActive = location.pathname === item.href;
               return (
-                <a
+                <Link
                   key={item.name}
-                  href={item.href}
+                  to={item.href}
                   className={`relative text-lg font-medium transition-colors ${
                     isActive 
                       ? textColor 
@@ -140,7 +141,7 @@ export function Header() {
                   {isActive && (
                     <span className={`absolute -bottom-1 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full ${isKontaktPage ? 'bg-white' : 'bg-foreground'}`} />
                   )}
-                </a>
+                </Link>
               );
             })}
           </div>
@@ -148,13 +149,13 @@ export function Header() {
           {/* Right Side Actions - Desktop */}
           <div className="hidden md:flex md:items-center md:gap-3 md:ml-auto">
             {/* Icon Buttons */}
-            <a 
-              href="/24-7-service"
+            <Link 
+              to="/24-7-service"
               className="flex h-12 items-center justify-center gap-1.5 rounded-full bg-red-600 px-4 text-white transition-colors hover:bg-red-700"
             >
               <Clock className="h-4 w-4" />
               <span className="text-sm font-semibold">24/7</span>
-            </a>
+            </Link>
             <button 
               onClick={() => setLocationDialogOpen(true)}
               className={`flex h-12 w-12 items-center justify-center rounded-full border ${borderColor} ${textColor} transition-colors ${hoverBg}`}
@@ -163,14 +164,14 @@ export function Header() {
             </button>
 
             {/* CTA Button */}
-            <a href="/partner-werden">
+            <Link to="/partner-werden">
               <Button variant="hero-white" size="lg" className="rounded-full px-6">
                 Partner werden
               </Button>
-            </a>
+            </Link>
 
             {/* Anfrage Button */}
-            <a href="/anfrage">
+            <Link to="/anfrage">
               <Button 
                 variant="ghost" 
                 size="lg"
@@ -178,7 +179,7 @@ export function Header() {
               >
                 Anfrage
               </Button>
-            </a>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -205,13 +206,13 @@ export function Header() {
               onMouseEnter={() => setOpenDropdown(item.name)}
               onMouseLeave={() => setOpenDropdown(null)}
             >
-              <a
-                href={item.href}
+              <Link
+                to={item.href}
                 className={`flex items-center gap-1 text-base font-semibold ${textColorMuted} transition-colors hover:${textColor}`}
               >
                 {item.name}
                 <ChevronDown className={`h-4 w-4 transition-transform ${openDropdown === item.name ? 'rotate-180' : ''}`} />
-              </a>
+              </Link>
 
               {/* Dropdown Menu */}
               {openDropdown === item.name && (
@@ -219,20 +220,20 @@ export function Header() {
                   <div className="min-w-[220px] rounded-xl bg-background p-2 shadow-lg border border-border">
                     {item.subItems.map((subItem) => (
                       <div key={subItem.name}>
-                        <a
-                          href={subItem.href}
+                        <Link
+                          to={subItem.href}
                           className="block rounded-lg px-4 py-3 text-sm font-medium text-foreground/70 transition-colors hover:bg-muted hover:text-foreground"
                         >
                           {subItem.name}
-                        </a>
+                        </Link>
                         {subItem.subItems && subItem.subItems.map((nestedItem) => (
-                          <a
+                          <Link
                             key={nestedItem.name}
-                            href={nestedItem.href}
+                            to={nestedItem.href}
                             className="block rounded-lg px-8 py-2 text-sm text-foreground/50 transition-colors hover:bg-muted hover:text-foreground"
                           >
                             {nestedItem.name}
-                          </a>
+                          </Link>
                         ))}
                       </div>
                     ))}
@@ -251,11 +252,11 @@ export function Header() {
             {/* Primary Nav Items */}
             <div className={`pb-4 border-b ${isKontaktPage ? 'border-white/10' : 'border-foreground/10'}`}>
               {primaryNav.map((item) => {
-                const isActive = pathname === item.href;
+                const isActive = location.pathname === item.href;
                 return (
-                  <a
+                  <Link
                     key={item.name}
-                    href={item.href}
+                    to={item.href}
                     className={`block py-2.5 text-sm font-medium ${
                       isActive ? textColor : textColorMuted
                     }`}
@@ -263,7 +264,7 @@ export function Header() {
                   >
                     {isActive && <span className="mr-2">•</span>}
                     {item.name}
-                  </a>
+                  </Link>
                 );
               })}
             </div>
@@ -273,13 +274,13 @@ export function Header() {
               {secondaryNav.map((item) => (
                 <div key={item.name} className="py-2">
                   <div className="flex w-full items-center justify-between">
-                    <a
-                      href={item.href}
+                    <Link
+                      to={item.href}
                       className={`py-2.5 text-sm font-semibold ${textColor}`}
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       {item.name}
-                    </a>
+                    </Link>
                     <button
                       className={`p-2 ${textColorMuted}`}
                       onClick={() => setOpenDropdown(openDropdown === item.name ? null : item.name)}
@@ -291,22 +292,22 @@ export function Header() {
                     <div className="ml-4 space-y-1">
                       {item.subItems.map((subItem) => (
                         <div key={subItem.name}>
-                          <a
-                            href={subItem.href}
+                          <Link
+                            to={subItem.href}
                             className={`block py-2 text-sm ${textColorMuted}`}
                             onClick={() => setMobileMenuOpen(false)}
                           >
                             {subItem.name}
-                          </a>
+                          </Link>
                           {subItem.subItems && subItem.subItems.map((nestedItem) => (
-                            <a
+                            <Link
                               key={nestedItem.name}
-                              href={nestedItem.href}
+                              to={nestedItem.href}
                               className={`block py-1.5 pl-4 text-sm ${textColorMuted} opacity-70`}
                               onClick={() => setMobileMenuOpen(false)}
                             >
                               {nestedItem.name}
-                            </a>
+                            </Link>
                           ))}
                         </div>
                       ))}
@@ -317,27 +318,27 @@ export function Header() {
             </div>
 
             <div className={`flex flex-col gap-3 pt-4 border-t ${isKontaktPage ? 'border-white/10' : 'border-foreground/10'}`}>
-              <a 
-                href="/24-7-service" 
+              <Link 
+                to="/24-7-service" 
                 className="flex items-center justify-center gap-2 rounded-full bg-red-600 px-4 py-3 text-white font-semibold transition-colors hover:bg-red-700"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <Clock className="h-4 w-4" />
                 24/7 Notdienst
-              </a>
-              <a href="/partner-werden" onClick={() => setMobileMenuOpen(false)}>
+              </Link>
+              <Link to="/partner-werden" onClick={() => setMobileMenuOpen(false)}>
                 <Button variant="hero-white" className="w-full rounded-full">
                   Partner werden
                 </Button>
-              </a>
-              <a href="/anfrage" onClick={() => setMobileMenuOpen(false)}>
+              </Link>
+              <Link to="/anfrage" onClick={() => setMobileMenuOpen(false)}>
                 <Button 
                   variant="ghost" 
                   className={`w-full rounded-full border ${borderColor} ${textColor} ${hoverBg} hover:${textColor}`}
                 >
                   Anfrage
                 </Button>
-              </a>
+              </Link>
             </div>
           </div>
         </div>

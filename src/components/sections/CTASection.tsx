@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { AnimatedButton } from "@/components/ui/animated-button";
 
 export function CTASection() {
@@ -14,11 +15,11 @@ export function CTASection() {
 
           {/* CTA Button */}
           <div className="mt-12 flex justify-center">
-            <a href="/kontakt">
+            <Link to="/kontakt">
               <AnimatedButton className="h-14 px-10 text-base bg-foreground text-background hover:bg-background hover:text-foreground">
                 Kontakt aufnehmen
               </AnimatedButton>
-            </a>
+            </Link>
           </div>
         </div>
       </div>

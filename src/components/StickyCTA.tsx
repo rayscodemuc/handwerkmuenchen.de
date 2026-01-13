@@ -1,13 +1,14 @@
+import { Link, useLocation } from "react-router-dom";
 import { Calculator } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 
 export function StickyCTA() {
+  const location = useLocation();
   const [isVisible, setIsVisible] = useState(false);
-  const pathname = typeof window !== 'undefined' ? window.location.pathname : '/';
   
-  const isRechnerPage = pathname === "/rechner";
-  const isHomepage = pathname === "/";
+  const isRechnerPage = location.pathname === "/rechner";
+  const isHomepage = location.pathname === "/";
 
   useEffect(() => {
     if (isRechnerPage) {
@@ -45,24 +46,24 @@ export function StickyCTA() {
       transition={{ duration: 0.4 }}
       className="fixed right-0 top-1/2 -translate-y-1/2 z-50 hidden lg:block"
     >
-      <a
-        href="/rechner"
+      <Link
+        to="/rechner"
         className="flex items-center gap-3 text-white px-5 py-4 rounded-l-xl shadow-2xl transition-all hover:pr-8 group animate-pulse hover:animate-none"
         style={{ backgroundColor: '#578ea5' }}
       >
         <Calculator className="h-5 w-5 shrink-0" />
         <span className="font-semibold whitespace-nowrap">Angebot berechnen</span>
-      </a>
+      </Link>
     </motion.div>
   );
 }
 
 export function MobileStickyCTA() {
+  const location = useLocation();
   const [isVisible, setIsVisible] = useState(false);
-  const pathname = typeof window !== 'undefined' ? window.location.pathname : '/';
   
-  const isRechnerPage = pathname === "/rechner";
-  const isHomepage = pathname === "/";
+  const isRechnerPage = location.pathname === "/rechner";
+  const isHomepage = location.pathname === "/";
 
   useEffect(() => {
     if (isRechnerPage) {
@@ -98,14 +99,14 @@ export function MobileStickyCTA() {
       transition={{ duration: 0.4 }}
       className="fixed bottom-4 left-4 right-4 z-50 lg:hidden"
     >
-      <a
-        href="/rechner"
+      <Link
+        to="/rechner"
         className="flex items-center justify-center gap-2 text-white px-6 py-4 rounded-xl shadow-2xl w-full font-semibold animate-pulse hover:animate-none"
         style={{ backgroundColor: '#578ea5' }}
       >
         <Calculator className="h-5 w-5" />
         Angebot berechnen
-      </a>
+      </Link>
     </motion.div>
   );
 }
