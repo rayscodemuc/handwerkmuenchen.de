@@ -128,7 +128,11 @@ const preisfaktoren = {
       einmal_qm: 5.50,
     },
   },
-  tiefgarage: 0.45, // pro Stellplatz (Legacy, wird nicht mehr für Reinigung verwendet)
+  tiefgarage: {
+    // Berechnung: Stellplätze * 25m² (inkl. Fahrspur) * 12,50€/m²
+    qm_pro_stellplatz: 25,
+    preis_pro_qm: 12.50,
+  },
   hausmeister: {
     mfh: 180,
     gewerbe: 280,
@@ -222,14 +226,12 @@ export default function Rechner() {
           }
         }
         break;
-      case "tiefgarage":
-        if (isMonthly) {
-          price = state.parking_spaces * preisfaktoren.tiefgarage * 4;
-        } else {
-          // Einmalauftrag Tiefgarage
-          price = state.parking_spaces * preisfaktoren.tiefgarage * 1.8;
-        }
+      case "tiefgarage": {
+        // Berechnung: Stellplätze * 25m² pro Stellplatz (inkl. Fahrspur) * 12,50€/m²
+        const flaeche = state.parking_spaces * preisfaktoren.tiefgarage.qm_pro_stellplatz;
+        price = flaeche * preisfaktoren.tiefgarage.preis_pro_qm;
         break;
+      }
       case "hausmeister":
         if (state.object_type) {
           price = preisfaktoren.hausmeister[state.object_type] * 4.33;
@@ -291,7 +293,8 @@ export default function Rechner() {
           return state.service_subtype !== null && state.order_type !== null;
         }
         if (state.service_type === "tiefgarage") {
-          return state.order_type !== null;
+          // Tiefgarage ist immer Einmalauftrag, muss nur ausgewählt sein
+          return state.order_type === "einmalig";
         }
         if (state.service_type === "hausmeister") return state.object_type !== null;
         return true;
@@ -604,42 +607,34 @@ export default function Rechner() {
                                   <span>10</span>
                                   <span>500</span>
                                 </div>
+                                <p className="text-xs text-muted-foreground mt-2">
+                                  Kalkulation: {state.parking_spaces} Stellplätze × 25 m² = <span className="font-semibold">{(state.parking_spaces * 25).toLocaleString("de-DE")} m²</span> Reinigungsfläche
+                                </p>
                               </div>
 
-                              <div>
-                                <Label className="text-base mb-3 block">Art des Auftrags</Label>
-                                <div className="grid sm:grid-cols-2 gap-4">
-                                  <button
-                                    onClick={() => selectAuftragsart("einmalig")}
-                                    className={cn(
-                                      "p-5 rounded-xl border-2 text-left transition-all hover:border-primary/50 flex items-start gap-4",
-                                      state.order_type === "einmalig"
-                                        ? "border-primary bg-primary/5"
-                                        : "border-border"
-                                    )}
-                                  >
-                                    <CalendarCheck className="h-6 w-6 text-primary shrink-0 mt-0.5" />
-                                    <div>
-                                      <h3 className="font-semibold text-foreground mb-1">Einmalauftrag</h3>
-                                      <p className="text-sm text-muted-foreground">Einmalige Grundreinigung der Tiefgarage</p>
-                                    </div>
-                                  </button>
-                                  <button
-                                    onClick={() => selectAuftragsart("regelmässig")}
-                                    className={cn(
-                                      "p-5 rounded-xl border-2 text-left transition-all hover:border-primary/50 flex items-start gap-4",
-                                      state.order_type === "regelmässig"
-                                        ? "border-primary bg-primary/5"
-                                        : "border-border"
-                                    )}
-                                  >
-                                    <Repeat className="h-6 w-6 text-primary shrink-0 mt-0.5" />
-                                    <div>
-                                      <h3 className="font-semibold text-foreground mb-1">Regelmäßige Reinigung</h3>
-                                      <p className="text-sm text-muted-foreground">Vierteljährlich oder nach Bedarf</p>
-                                    </div>
-                                  </button>
+                              {/* Hinweis für Großgaragen */}
+                              {state.parking_spaces > 50 && (
+                                <div className="bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-xl">
+                                  <p className="text-sm font-medium">
+                                    Bei Großgaragen über 50 Stellplätzen ist ein individueller Vor-Ort-Check für ein verbindliches Festpreis-Angebot zwingend erforderlich.
+                                  </p>
                                 </div>
+                              )}
+
+                              {/* Tiefgaragenreinigung nur als Einmalauftrag */}
+                              <div className="bg-muted/50 p-4 rounded-xl">
+                                <p className="text-sm text-muted-foreground">
+                                  <span className="font-semibold text-foreground">Tiefgaragenreinigung (Nassreinigung)</span>{" "}
+                                  wird als Einmalauftrag angeboten. Der Preis berechnet sich mit 12,50 €/m².
+                                </p>
+                                <Button 
+                                  className="mt-3" 
+                                  onClick={() => selectAuftragsart("einmalig")}
+                                  variant={state.order_type === "einmalig" ? "default" : "outline"}
+                                >
+                                  <CalendarCheck className="h-4 w-4 mr-2" />
+                                  Als Einmalauftrag fortfahren
+                                </Button>
                               </div>
                             </div>
                           )}
@@ -773,17 +768,26 @@ export default function Rechner() {
                           )}
 
                           {state.service_type === "tiefgarage" && (
-                            <div className="bg-muted/50 p-6 rounded-xl">
-                              <h3 className="font-semibold mb-2">
-                                {state.order_type === "einmalig" ? "Einmalige Tiefgaragenreinigung" : "Regelmäßige Tiefgaragenreinigung"}
-                              </h3>
-                              <p className="text-muted-foreground">
-                                Reinigung für <span className="font-semibold text-foreground">{state.parking_spaces} Stellplätze</span>
-                                {state.order_type === "regelmässig" && " (vierteljährlich empfohlen)"}
-                              </p>
-                              <p className="text-sm text-muted-foreground mt-2">
-                                Inklusive Entfernung von Reifenabrieb, Ölflecken und Reinigung der Entwässerungsrinnen.
-                              </p>
+                            <div className="space-y-4">
+                              <div className="bg-muted/50 p-6 rounded-xl">
+                                <h3 className="font-semibold mb-2">Tiefgaragenreinigung (Nassreinigung)</h3>
+                                <p className="text-muted-foreground">
+                                  Reinigung für <span className="font-semibold text-foreground">{state.parking_spaces} Stellplätze</span>{" "}
+                                  (<span className="font-semibold text-foreground">{(state.parking_spaces * 25).toLocaleString("de-DE")} m²</span> Gesamtfläche)
+                                </p>
+                                <p className="text-sm text-muted-foreground mt-2">
+                                  Inklusive Entfernung von Reifenabrieb, Ölflecken und Reinigung der Entwässerungsrinnen.
+                                </p>
+                              </div>
+                              
+                              {/* Hinweis für Großgaragen */}
+                              {state.parking_spaces > 50 && (
+                                <div className="bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-xl">
+                                  <p className="text-sm font-medium">
+                                    Bei Großgaragen über 50 Stellplätzen ist ein individueller Vor-Ort-Check für ein verbindliches Festpreis-Angebot zwingend erforderlich.
+                                  </p>
+                                </div>
+                              )}
                             </div>
                           )}
 
