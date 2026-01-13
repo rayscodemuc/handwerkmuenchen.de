@@ -89,56 +89,10 @@ const Service247 = () => {
                 Notfälle kennen keine Öffnungszeiten. Deshalb sind wir rund um die Uhr für Sie da – 
                 an 365 Tagen im Jahr, auch an Wochenenden und Feiertagen.
               </p>
-              <div className="mt-10 relative inline-block">
-                {/* Curved arrow from left */}
-                <svg 
-                  className="absolute -left-20 top-1/2 -translate-y-1/2 w-16 h-16 text-red-500 opacity-80"
-                  viewBox="0 0 60 60" 
-                  fill="none"
-                >
-                  <path 
-                    d="M8 30 Q25 30 40 25" 
-                    stroke="currentColor" 
-                    strokeWidth="2.5" 
-                    strokeLinecap="round"
-                    fill="none"
-                  />
-                  <path 
-                    d="M36 20 L42 25 L36 30" 
-                    stroke="currentColor" 
-                    strokeWidth="2.5" 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round"
-                    fill="none"
-                  />
-                </svg>
-
-                {/* Curved arrow from right */}
-                <svg 
-                  className="absolute -right-20 top-1/2 -translate-y-1/2 w-16 h-16 text-red-500 opacity-80"
-                  viewBox="0 0 60 60" 
-                  fill="none"
-                >
-                  <path 
-                    d="M52 30 Q35 30 20 25" 
-                    stroke="currentColor" 
-                    strokeWidth="2.5" 
-                    strokeLinecap="round"
-                    fill="none"
-                  />
-                  <path 
-                    d="M24 20 L18 25 L24 30" 
-                    stroke="currentColor" 
-                    strokeWidth="2.5" 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round"
-                    fill="none"
-                  />
-                </svg>
-
+              <div className="mt-10">
                 <AnimatedButton 
                   onClick={() => setIsEmergencyDialogOpen(true)}
-                  className="bg-red-600 text-white hover:bg-red-700 hover:animate-pulse relative z-10"
+                  className="bg-red-600 text-white hover:bg-red-700 hover:animate-pulse"
                 >
                   Notfall melden
                 </AnimatedButton>
