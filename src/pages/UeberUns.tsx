@@ -221,7 +221,7 @@ export default function UeberUns() {
               </p>
               <div className="mt-8 flex flex-col gap-4 sm:flex-row">
                 <Link to="/anfrage">
-                  <Button className="w-full sm:w-auto h-14 px-8 text-base rounded-full bg-slate-800 text-white hover:bg-slate-700">
+                  <Button className="w-full sm:w-auto h-14 px-8 text-base rounded-full bg-[#578ea5] text-white hover:bg-[#4a7a8f]">
                     Jetzt persönlichen Beratungstermin buchen
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
