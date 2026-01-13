@@ -130,11 +130,11 @@ const Service247 = () => {
 
                     <div className="space-y-3">
                       <a 
-                        href="mailto:kontakt@mr-clean-services.de"
+                        href="mailto:notdienst@mr-clean-services.de"
                         className="flex items-center gap-3 rounded-lg border border-border p-3 transition-colors hover:bg-muted"
                       >
                         <Mail className="h-5 w-5 text-primary" />
-                        <span className="font-medium">kontakt@mr-clean-services.de</span>
+                        <span className="font-medium">notdienst@mr-clean-services.de</span>
                       </a>
                       
                       <div className="flex items-start gap-3 rounded-lg border border-border p-3">
