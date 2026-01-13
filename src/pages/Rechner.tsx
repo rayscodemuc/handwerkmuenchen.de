@@ -44,7 +44,7 @@ import { useFormSubmit, type CalculatorFormFields } from "@/hooks/useFormSubmit"
 const FORM_ID = "service_calculator";
 
 type ServiceType = "reinigung" | "tiefgarage" | "hausmeister" | "winterdienst" | null;
-type ReinigungType = "buero" | "glas" | "grund" | null;
+type ReinigungType = "buero" | "glas" | "grund" | "tiefgarage_nass" | "baureinigung" | null;
 type ObjektType = "mfh" | "gewerbe" | "privat" | null;
 type AuftragsartType = "einmalig" | "regelmässig" | null;
 
@@ -100,20 +100,42 @@ const standorte = [
   { value: "berlin", label: "Berlin" },
 ];
 
-// Preisfaktoren (vereinfachte Durchschnittswerte)
+// Preisfaktoren (Netto-Werte, marktgerechte Kalkulation)
 const preisfaktoren = {
   reinigung: {
-    buero: 0.85,
-    glas: 1.20,
-    grund: 2.50,
+    buero: {
+      // Unterhaltsreinigung: 33,50€/Std, 1 Std pro 200m²
+      stundensatz: 33.50,
+      flaeche_pro_stunde: 200,
+      // Einmalauftrag: 4,50€/m²
+      einmal_qm: 4.50,
+    },
+    glas: {
+      // Abo: 4,90€/m², Einmal: 5,50€/m²
+      abo_qm: 4.90,
+      einmal_qm: 5.50,
+    },
+    grund: {
+      // Nur Einmalauftrag: 7,50€/m²
+      einmal_qm: 7.50,
+    },
+    tiefgarage_nass: {
+      // Nur Einmalauftrag: 12,50€/m²
+      einmal_qm: 12.50,
+    },
+    baureinigung: {
+      // Nur Einmalauftrag: 5,50€/m²
+      einmal_qm: 5.50,
+    },
   },
-  tiefgarage: 0.45, // pro Stellplatz
+  tiefgarage: 0.45, // pro Stellplatz (Legacy, wird nicht mehr für Reinigung verwendet)
   hausmeister: {
     mfh: 180,
     gewerbe: 280,
     privat: 120,
   },
   winterdienst: 0.35, // pro m²
+  mindestauftragswert: 150, // Minimum für alle Aufträge
 };
 
 export default function Rechner() {
@@ -160,19 +182,43 @@ export default function Rechner() {
     updateStateAndAdvance({ object_type: objektType }, true);
   };
 
-  const calculatePrice = (): { price: number; isMonthly: boolean } => {
+  const calculatePrice = (): { price: number; isMonthly: boolean; belowMinimum: boolean } => {
     let price = 0;
     const isMonthly = state.order_type === "regelmässig";
 
     switch (state.service_type) {
       case "reinigung":
         if (state.service_subtype) {
-          const factor = preisfaktoren.reinigung[state.service_subtype];
-          if (isMonthly) {
-            price = state.area_sqm * factor * (state.frequency_per_week / 5) * 4.33;
-          } else {
-            // Einmalauftrag: Höherer Einzelpreis
-            price = state.area_sqm * factor * 1.5;
+          const subtype = state.service_subtype;
+          
+          if (subtype === "buero") {
+            const faktoren = preisfaktoren.reinigung.buero;
+            if (isMonthly) {
+              // Monatspreis: ((Fläche / 200) * 33,50€) * 4,33 Wochen
+              const stundenProWoche = state.area_sqm / faktoren.flaeche_pro_stunde;
+              price = stundenProWoche * faktoren.stundensatz * 4.33;
+            } else {
+              // Einmalauftrag: Fläche * 4,50€/m²
+              price = state.area_sqm * faktoren.einmal_qm;
+            }
+          } else if (subtype === "glas") {
+            const faktoren = preisfaktoren.reinigung.glas;
+            if (isMonthly) {
+              // Abo: 4,90€/m²
+              price = state.area_sqm * faktoren.abo_qm;
+            } else {
+              // Einmalauftrag: 5,50€/m²
+              price = state.area_sqm * faktoren.einmal_qm;
+            }
+          } else if (subtype === "grund") {
+            // Grundreinigung nur als Einmalauftrag: 7,50€/m²
+            price = state.area_sqm * preisfaktoren.reinigung.grund.einmal_qm;
+          } else if (subtype === "tiefgarage_nass") {
+            // Tiefgaragenreinigung Nassreinigung nur Einmal: 12,50€/m²
+            price = state.area_sqm * preisfaktoren.reinigung.tiefgarage_nass.einmal_qm;
+          } else if (subtype === "baureinigung") {
+            // Baureinigung nur Einmal: 5,50€/m²
+            price = state.area_sqm * preisfaktoren.reinigung.baureinigung.einmal_qm;
           }
         }
         break;
@@ -230,7 +276,10 @@ export default function Rechner() {
       }
     }
 
-    return { price: Math.round(price), isMonthly };
+    const roundedPrice = Math.round(price);
+    const belowMinimum = roundedPrice < preisfaktoren.mindestauftragswert && roundedPrice > 0;
+    
+    return { price: roundedPrice, isMonthly, belowMinimum };
   };
 
   const canProceed = (): boolean => {
@@ -451,11 +500,13 @@ export default function Rechner() {
 
                           {state.service_type === "reinigung" && (
                             <div className="space-y-6">
-                              <div className="grid sm:grid-cols-3 gap-4">
+                              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {[
-                                  { id: "buero", label: "Büroreinigung", desc: "Regelmäßige Unterhaltsreinigung" },
-                                  { id: "glas", label: "Glasreinigung", desc: "Fenster & Glasflächen" },
-                                  { id: "grund", label: "Grundreinigung", desc: "Intensive Tiefenreinigung" },
+                                  { id: "buero", label: "Büroreinigung", desc: "Unterhalts- oder Einmalreinigung" },
+                                  { id: "glas", label: "Glasreinigung", desc: "Fenster & Glasflächen inkl. Rahmen" },
+                                  { id: "grund", label: "Grundreinigung", desc: "Intensive Tiefenreinigung (einmalig)" },
+                                  { id: "tiefgarage_nass", label: "Tiefgaragenreinigung", desc: "Nassreinigung (einmalig)" },
+                                  { id: "baureinigung", label: "Baureinigung", desc: "Grob- & Feinreinigung (einmalig)" },
                                 ].map((type) => (
                                   <button
                                     key={type.id}
@@ -476,38 +527,60 @@ export default function Rechner() {
                               {state.service_subtype && (
                                 <div>
                                   <Label className="text-base mb-3 block">Art des Auftrags</Label>
-                                  <div className="grid sm:grid-cols-2 gap-4">
-                                    <button
-                                      onClick={() => selectAuftragsart("einmalig")}
-                                      className={cn(
-                                        "p-5 rounded-xl border-2 text-left transition-all hover:border-primary/50 flex items-start gap-4",
-                                        state.order_type === "einmalig"
-                                          ? "border-primary bg-primary/5"
-                                          : "border-border"
-                                      )}
-                                    >
-                                      <CalendarCheck className="h-6 w-6 text-primary shrink-0 mt-0.5" />
-                                      <div>
-                                        <h3 className="font-semibold text-foreground mb-1">Einmalauftrag</h3>
-                                        <p className="text-sm text-muted-foreground">Einmalige Reinigung ohne Vertragsbindung</p>
-                                      </div>
-                                    </button>
-                                    <button
-                                      onClick={() => selectAuftragsart("regelmässig")}
-                                      className={cn(
-                                        "p-5 rounded-xl border-2 text-left transition-all hover:border-primary/50 flex items-start gap-4",
-                                        state.order_type === "regelmässig"
-                                          ? "border-primary bg-primary/5"
-                                          : "border-border"
-                                      )}
-                                    >
-                                      <Repeat className="h-6 w-6 text-primary shrink-0 mt-0.5" />
-                                      <div>
-                                        <h3 className="font-semibold text-foreground mb-1">Unterhaltsreinigung</h3>
-                                        <p className="text-sm text-muted-foreground">Regelmäßige Reinigung nach Vereinbarung</p>
-                                      </div>
-                                    </button>
-                                  </div>
+                                  {/* Grundreinigung, Tiefgarage Nass und Baureinigung nur als Einmalauftrag */}
+                                  {(state.service_subtype === "grund" || state.service_subtype === "tiefgarage_nass" || state.service_subtype === "baureinigung") ? (
+                                    <div className="bg-muted/50 p-4 rounded-xl">
+                                      <p className="text-sm text-muted-foreground">
+                                        <span className="font-semibold text-foreground">
+                                          {state.service_subtype === "grund" && "Grundreinigung"}
+                                          {state.service_subtype === "tiefgarage_nass" && "Tiefgaragenreinigung (Nassreinigung)"}
+                                          {state.service_subtype === "baureinigung" && "Baureinigung"}
+                                        </span>{" "}
+                                        wird ausschließlich als Einmalauftrag angeboten.
+                                      </p>
+                                      <Button 
+                                        className="mt-3" 
+                                        onClick={() => selectAuftragsart("einmalig")}
+                                        variant={state.order_type === "einmalig" ? "default" : "outline"}
+                                      >
+                                        <CalendarCheck className="h-4 w-4 mr-2" />
+                                        Als Einmalauftrag fortfahren
+                                      </Button>
+                                    </div>
+                                  ) : (
+                                    <div className="grid sm:grid-cols-2 gap-4">
+                                      <button
+                                        onClick={() => selectAuftragsart("einmalig")}
+                                        className={cn(
+                                          "p-5 rounded-xl border-2 text-left transition-all hover:border-primary/50 flex items-start gap-4",
+                                          state.order_type === "einmalig"
+                                            ? "border-primary bg-primary/5"
+                                            : "border-border"
+                                        )}
+                                      >
+                                        <CalendarCheck className="h-6 w-6 text-primary shrink-0 mt-0.5" />
+                                        <div>
+                                          <h3 className="font-semibold text-foreground mb-1">Einmalauftrag</h3>
+                                          <p className="text-sm text-muted-foreground">Einmalige Reinigung ohne Vertragsbindung</p>
+                                        </div>
+                                      </button>
+                                      <button
+                                        onClick={() => selectAuftragsart("regelmässig")}
+                                        className={cn(
+                                          "p-5 rounded-xl border-2 text-left transition-all hover:border-primary/50 flex items-start gap-4",
+                                          state.order_type === "regelmässig"
+                                            ? "border-primary bg-primary/5"
+                                            : "border-border"
+                                        )}
+                                      >
+                                        <Repeat className="h-6 w-6 text-primary shrink-0 mt-0.5" />
+                                        <div>
+                                          <h3 className="font-semibold text-foreground mb-1">Unterhaltsreinigung</h3>
+                                          <p className="text-sm text-muted-foreground">Regelmäßige Reinigung nach Vereinbarung</p>
+                                        </div>
+                                      </button>
+                                    </div>
+                                  )}
                                 </div>
                               )}
                             </div>
@@ -795,10 +868,10 @@ export default function Rechner() {
                             initial={{ scale: 0.8, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             transition={{ duration: 0.5, type: "spring" }}
-                            className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl p-10 mb-8"
+                            className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl p-10 mb-6"
                           >
                             <p className="text-sm text-muted-foreground mb-2">
-                              {calculatePrice().isMonthly ? "Geschätzter Monatspreis" : "Geschätzter Einmalpreis"}
+                              {calculatePrice().isMonthly ? "Monatlicher Richtpreis" : "Projektpreis"}
                             </p>
                             <motion.p
                               className="text-5xl lg:text-6xl font-bold text-primary"
@@ -807,11 +880,29 @@ export default function Rechner() {
                             >
                               ab {calculatePrice().price.toLocaleString("de-DE")} €
                             </motion.p>
-                            <p className="text-sm text-muted-foreground mt-2">
-                              zzgl. MwSt. · Richtpreis zur Orientierung
+                            <p className="text-sm text-muted-foreground mt-3">
+                              zzgl. 19% MwSt.
                             </p>
                           </motion.div>
-                          <p className="text-muted-foreground max-w-md mx-auto">
+
+                          {/* Mindestauftragswert Warnung */}
+                          {calculatePrice().belowMinimum && (
+                            <div className="bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-xl mb-6 max-w-md mx-auto">
+                              <p className="text-sm font-medium">
+                                Mindestauftragswert für diesen Service beträgt 150 €
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Anfahrtspauschale Hinweis */}
+                          <div className="bg-muted/50 p-4 rounded-xl mb-6 max-w-md mx-auto">
+                            <p className="text-sm text-muted-foreground">
+                              <span className="font-semibold text-foreground">Zzgl. Anfahrtspauschale:</span>{" "}
+                              München 60 € / Umland 85 €
+                            </p>
+                          </div>
+
+                          <p className="text-muted-foreground max-w-md mx-auto text-sm">
                             Dieser Preis dient als unverbindliche Orientierung. Im nächsten Schritt erstellen wir Ihnen ein individuelles Angebot.
                           </p>
                         </div>
@@ -888,11 +979,11 @@ export default function Rechner() {
                           </div>
                           <div className="bg-muted/50 p-4 rounded-xl text-sm text-muted-foreground">
                             <strong>Zusammenfassung:</strong>{" "}
-                            {state.service_type === "reinigung" && `${state.service_subtype === "buero" ? "Büroreinigung" : state.service_subtype === "glas" ? "Glasreinigung" : "Grundreinigung"} (${state.order_type === "einmalig" ? "Einmalauftrag" : "Unterhaltsreinigung"}), ${state.area_sqm} m²${state.order_type === "regelmässig" ? `, ${state.frequency_per_week}x/Woche` : ""}`}
+                            {state.service_type === "reinigung" && `${state.service_subtype === "buero" ? "Büroreinigung" : state.service_subtype === "glas" ? "Glasreinigung" : state.service_subtype === "grund" ? "Grundreinigung" : state.service_subtype === "tiefgarage_nass" ? "Tiefgaragenreinigung" : "Baureinigung"} (${state.order_type === "einmalig" ? "Einmalauftrag" : "Unterhaltsreinigung"}), ${state.area_sqm} m²${state.order_type === "regelmässig" ? `, ${state.frequency_per_week}x/Woche` : ""}`}
                             {state.service_type === "tiefgarage" && `Tiefgaragenreinigung (${state.order_type === "einmalig" ? "Einmalauftrag" : "Regelmäßig"}), ${state.parking_spaces} Stellplätze`}
                             {state.service_type === "hausmeister" && `Hausmeisterservice für ${state.object_type === "mfh" ? "Mehrfamilienhaus" : state.object_type === "gewerbe" ? "Gewerbeobjekt" : "Privathaus"}`}
                             {state.service_type === "winterdienst" && `Winterdienst, ${state.machine_area_sqm + state.manual_area_sqm} m² (${state.machine_area_sqm} m² maschinell, ${state.manual_area_sqm} m² manuell)${state.has_streugut ? ", mit Streugut" : ""}${state.has_express ? ", Express" : ""}${state.has_liability_coverage ? ", mit Haftungsübernahme" : ""}`}
-                            {" · "}Richtpreis: ab {calculatePrice().price.toLocaleString("de-DE")} €{calculatePrice().isMonthly ? "/Monat" : " einmalig"}
+                            {" · "}{calculatePrice().isMonthly ? "Monatlicher Richtpreis" : "Projektpreis"}: ab {calculatePrice().price.toLocaleString("de-DE")} € zzgl. 19% MwSt.
                           </div>
                         </div>
                       )}
