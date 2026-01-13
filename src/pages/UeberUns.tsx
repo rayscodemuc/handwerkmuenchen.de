@@ -245,7 +245,7 @@ export default function UeberUns() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.6 }}
               >
-                <span className="text-sm font-semibold uppercase tracking-wider text-primary">
+                <span className="text-sm font-semibold uppercase tracking-wider text-slate-600">
                   Unsere Vision
                 </span>
                 <h2 className="mt-3 text-3xl font-black tracking-tight text-foreground lg:text-4xl">
