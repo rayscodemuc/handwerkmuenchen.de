@@ -60,56 +60,77 @@ const coreValues = [
   },
 ];
 
-const elektroServices = [
-  { icon: AlertTriangle, title: "24/7 Notdienst", href: "/handwerk/elektrotechnik/notdienst" },
-  { icon: Home, title: "Hauselektrik", href: "/handwerk/elektrotechnik/hauselektrik" },
-  { icon: Lightbulb, title: "Smart Home", href: "/handwerk/elektrotechnik/smart-home" },
-  { icon: Car, title: "E-Mobility", href: "/handwerk/elektrotechnik/e-mobility" },
-  { icon: Wrench, title: "Reparaturen", href: "/handwerk/elektrotechnik/reparaturen" },
-  { icon: Building, title: "Neubau", href: "/handwerk/elektrotechnik/neubau" },
-  { icon: Settings, title: "Sanierung", href: "/handwerk/elektrotechnik/sanierung" },
-  { icon: Lock, title: "Sicherheitstechnik", href: "/handwerk/elektrotechnik/sicherheitstechnik" },
-  { icon: Zap, title: "LED & Beleuchtung", href: "/handwerk/elektrotechnik/led" },
-  { icon: Bell, title: "Klingelanlagen", href: "/handwerk/elektrotechnik/klingelanlagen" },
-  { icon: Gauge, title: "Messsysteme", href: "/handwerk/elektrotechnik/messsysteme" },
-];
-
-const servicePillars = [
+const portfolioSections = [
   {
+    id: "elektrotechnik",
     icon: Zap,
     title: "Elektrotechnik",
     subtitle: "Meisterbetrieb",
     motto: "Werte erhalten",
-    description: "Von Smart Home bis Notdienst – 11 Spezialisierungen für Ihre Sicherheit und Effizienz.",
     href: "/handwerk/elektrotechnik",
     color: "bg-amber-500/10 text-amber-600",
+    borderColor: "border-amber-500/30",
+    services: [
+      { icon: AlertTriangle, title: "24/7 Notdienst", href: "/handwerk/elektrotechnik/notdienst" },
+      { icon: Home, title: "Hauselektrik", href: "/handwerk/elektrotechnik/hauselektrik" },
+      { icon: Lightbulb, title: "Smart Home", href: "/handwerk/elektrotechnik/smart-home" },
+      { icon: Car, title: "E-Mobility", href: "/handwerk/elektrotechnik/e-mobility" },
+      { icon: Wrench, title: "Reparaturen", href: "/handwerk/elektrotechnik/reparaturen" },
+      { icon: Building, title: "Neubau", href: "/handwerk/elektrotechnik/neubau" },
+      { icon: Settings, title: "Sanierung", href: "/handwerk/elektrotechnik/sanierung" },
+      { icon: Lock, title: "Sicherheitstechnik", href: "/handwerk/elektrotechnik/sicherheitstechnik" },
+      { icon: Zap, title: "LED & Beleuchtung", href: "/handwerk/elektrotechnik/led" },
+      { icon: Bell, title: "Klingelanlagen", href: "/handwerk/elektrotechnik/klingelanlagen" },
+      { icon: Gauge, title: "Messsysteme", href: "/handwerk/elektrotechnik/messsysteme" },
+    ],
   },
   {
+    id: "facility",
     icon: Wrench,
     title: "Facility Management",
-    subtitle: "Ihr Rundum-Sorglos-Paket",
+    subtitle: "Rundum-Sorglos",
     motto: "Alles aus einer Hand",
-    description: "Hausmeisterservice und Objektmanagement – damit Sie sich auf Ihr Kerngeschäft konzentrieren können.",
     href: "/facility-management",
     color: "bg-blue-500/10 text-blue-600",
+    borderColor: "border-blue-500/30",
+    services: [
+      { icon: Home, title: "Hausmeisterservice", href: "/facility-management/hausmeisterservice" },
+      { icon: Building, title: "Objektmanagement", href: "/facility-management/objektmanagement" },
+      { icon: Settings, title: "Service & Wartung", href: "/handwerk/service-wartung" },
+    ],
   },
   {
+    id: "reinigung",
     icon: Sparkles,
     title: "Reinigung",
-    subtitle: "Der glänzende erste Eindruck",
+    subtitle: "Glänzender Eindruck",
     motto: "Sauberkeit, die begeistert",
-    description: "Büroreinigung, Glasreinigung, Fassadenpflege – für Räume, in denen man sich wohlfühlt.",
     href: "/reinigung",
     color: "bg-emerald-500/10 text-emerald-600",
+    borderColor: "border-emerald-500/30",
+    services: [
+      { icon: Building, title: "Büroreinigung", href: "/reinigung/bueroreinigung" },
+      { icon: Sparkles, title: "Unterhaltsreinigung", href: "/reinigung/unterhaltsreinigung" },
+      { icon: Home, title: "Grundreinigung", href: "/reinigung/grundreinigung" },
+      { icon: Zap, title: "Glas & Fassade", href: "/reinigung/glas-fassade" },
+      { icon: Settings, title: "Sonderreinigung", href: "/reinigung/sonderreinigung" },
+      { icon: Car, title: "Tiefgaragenreinigung", href: "/reinigung/tiefgaragenreinigung" },
+    ],
   },
   {
+    id: "aussen",
     icon: TreePine,
     title: "Außenanlagen",
-    subtitle: "Die Visitenkarte des Hauses",
+    subtitle: "Visitenkarte des Hauses",
     motto: "Der erste Eindruck zählt",
-    description: "Grünpflege, Winterdienst und mehr – für Außenbereiche, die Eindruck machen.",
     href: "/aussenanlagen",
     color: "bg-green-500/10 text-green-600",
+    borderColor: "border-green-500/30",
+    services: [
+      { icon: TreePine, title: "Grünpflege", href: "/aussenanlagen/gruenpflege" },
+      { icon: TreePine, title: "Baumpflege", href: "/aussenanlagen/baumpflege" },
+      { icon: Clock, title: "Winterdienst", href: "/aussenanlagen/winterdienst" },
+    ],
   },
 ];
 
@@ -325,10 +346,10 @@ export default function UeberUns() {
           </div>
         </section>
 
-        {/* Service Pillars Section */}
-        <section className="bg-background py-20 lg:py-28">
+        {/* Portfolio Showcase - 4 Säulen als Kacheln */}
+        <section className="bg-surface py-20 lg:py-28">
           <div className="container mx-auto px-4 lg:px-8">
-            <div className="mx-auto max-w-2xl text-center">
+            <div className="mx-auto max-w-2xl text-center mb-16">
               <span className="text-sm font-semibold uppercase tracking-wider text-primary">
                 Unser Leistungs-Portfolio
               </span>
@@ -340,93 +361,75 @@ export default function UeberUns() {
               </p>
             </div>
 
-            <div className="mt-16 grid gap-8 md:grid-cols-2">
-              {servicePillars.map((pillar, index) => (
+            <div className="grid gap-8 lg:grid-cols-2">
+              {portfolioSections.map((section, sectionIndex) => (
                 <motion.div
-                  key={pillar.title}
+                  key={section.id}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  transition={{ duration: 0.5, delay: sectionIndex * 0.1 }}
+                  className={`rounded-3xl border bg-background p-6 lg:p-8 ${section.borderColor}`}
                 >
-                  <Link
-                    to={pillar.href}
-                    className="group block h-full rounded-3xl border border-border bg-background p-8 transition-all hover:border-primary/30 hover:shadow-lg"
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className={`rounded-2xl p-4 ${pillar.color}`}>
-                        <pillar.icon className="h-8 w-8" strokeWidth={1.5} />
-                      </div>
-                      <div className="flex-1">
+                  {/* Header */}
+                  <div className="flex items-start gap-4 mb-6">
+                    <div className={`rounded-2xl p-4 ${section.color}`}>
+                      <section.icon className="h-8 w-8" strokeWidth={1.5} />
+                    </div>
+                    <div className="flex-1">
+                      <Link to={section.href} className="group">
                         <div className="flex items-center gap-2">
-                          <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
-                            {pillar.title}
+                          <h3 className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors">
+                            {section.title}
                           </h3>
                           <ArrowRight className="h-5 w-5 text-muted-foreground opacity-0 -translate-x-2 transition-all group-hover:opacity-100 group-hover:translate-x-0 group-hover:text-primary" />
                         </div>
-                        <p className="text-sm font-medium text-primary mt-1">{pillar.subtitle}</p>
-                        <p className="mt-3 text-muted-foreground leading-relaxed">
-                          {pillar.description}
-                        </p>
-                        <div className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-foreground">
-                          <Shield className="h-4 w-4 text-primary" />
-                          {pillar.motto}
-                        </div>
+                      </Link>
+                      <p className="text-sm font-medium text-primary mt-1">{section.subtitle}</p>
+                      <div className="mt-2 inline-flex items-center gap-2 text-sm text-muted-foreground">
+                        <Shield className="h-4 w-4 text-primary" />
+                        {section.motto}
                       </div>
                     </div>
-                  </Link>
+                  </div>
+
+                  {/* Services Grid */}
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {section.services.map((service, serviceIndex) => (
+                      <motion.div
+                        key={service.title}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.2, delay: serviceIndex * 0.03 }}
+                      >
+                        <Link
+                          to={service.href}
+                          className="group flex items-center gap-3 rounded-xl border border-border bg-surface/50 p-3 transition-all hover:border-primary/30 hover:bg-surface hover:shadow-sm"
+                        >
+                          <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${section.color}`}>
+                            <service.icon className="h-4 w-4" strokeWidth={1.5} />
+                          </div>
+                          <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                            {service.title}
+                          </span>
+                        </Link>
+                      </motion.div>
+                    ))}
+                  </div>
+
+                  {/* Footer Link */}
+                  <div className="mt-6 pt-4 border-t border-border">
+                    <Link
+                      to={section.href}
+                      className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline"
+                    >
+                      Alle {section.title}-Leistungen
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </div>
                 </motion.div>
               ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Elektrotechnik Showcase */}
-        <section className="bg-surface py-20 lg:py-28">
-          <div className="container mx-auto px-4 lg:px-8">
-            <div className="mx-auto max-w-2xl text-center">
-              <span className="inline-flex items-center gap-2 rounded-full bg-amber-500/10 px-4 py-2 text-sm font-semibold text-amber-600">
-                <Zap className="h-4 w-4" />
-                Meisterbetrieb
-              </span>
-              <h2 className="mt-4 text-3xl font-black tracking-tight text-foreground lg:text-4xl">
-                Elektrotechnik: Werte erhalten
-              </h2>
-              <p className="mt-4 text-lg text-muted-foreground">
-                11 Spezialisierungen für maximale Sicherheit und Effizienz Ihrer Elektroinstallationen.
-              </p>
-            </div>
-
-            <div className="mt-12 grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {elektroServices.map((service, index) => (
-                <motion.div
-                  key={service.title}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.3, delay: index * 0.05 }}
-                >
-                  <Link
-                    to={service.href}
-                    className="group flex items-center gap-3 rounded-2xl border border-border bg-background p-4 transition-all hover:border-primary/30 hover:shadow-md"
-                  >
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-                      <service.icon className="h-5 w-5 text-primary" strokeWidth={1.5} />
-                    </div>
-                    <span className="font-medium text-foreground group-hover:text-primary transition-colors">
-                      {service.title}
-                    </span>
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
-
-            <div className="mt-10 text-center">
-              <Link to="/handwerk/elektrotechnik">
-                <AnimatedButton className="border-primary/30 hover:border-primary">
-                  Alle Elektro-Leistungen entdecken
-                </AnimatedButton>
-              </Link>
             </div>
           </div>
         </section>
