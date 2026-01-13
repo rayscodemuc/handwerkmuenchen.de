@@ -466,8 +466,6 @@ export default function Elektrotechnik() {
             </div>
           </div>
         </section>
-
-        <CTASection />
       </main>
       <Footer />
     </div>
