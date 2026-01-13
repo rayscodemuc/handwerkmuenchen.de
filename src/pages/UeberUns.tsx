@@ -88,6 +88,7 @@ const portfolioSections = [
     services: [
       { icon: Home, title: "Hausmeisterservice", href: "/facility-management/hausmeisterservice" },
       { icon: Building, title: "Objektmanagement", href: "/facility-management/objektmanagement" },
+      { icon: Clock, title: "Winterdienst", href: "/aussenanlagen/winterdienst" },
     ],
   },
   {
