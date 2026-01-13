@@ -1,14 +1,23 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { AnimatedButton } from "@/components/ui/animated-button";
-import { Check, Users, TrendingUp, Shield, Handshake, Clock, Award, Send } from "lucide-react";
+import { Check, Users, TrendingUp, Shield, Handshake, Clock, Award, Send, Download, Upload, FileText, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { z } from "zod";
 import { useFormSubmit, type PartnerFormFields } from "@/hooks/useFormSubmit";
+
+const requiredDocuments = [
+  { name: "Benötigte Unterlagen (Übersicht)", file: "/documents/benoetigte_Unterlagen_von_Nachunternehmer.pdf" },
+  { name: "Eigenerklärung Mindestlohn", file: "/documents/Eigenerklaerung_Mindestlohn.pdf" },
+  { name: "Eigenerklärung Steuern & Abgaben", file: "/documents/Eigenerklaerung_Steuern_Abgaben.pdf" },
+  { name: "Eigenerklärung Versicherungen", file: "/documents/Eigenerklaerung_Versicherungen.pdf" },
+  { name: "Nachunternehmervertrag", file: "/documents/Nachunternehmervertrag.pdf" },
+  { name: "Selbstauskunft", file: "/documents/Selbstauskunft.pdf" },
+];
 
 const FORM_ID = "partner_application_form";
 
@@ -94,6 +103,8 @@ const serviceCategories = [
 export default function PartnerWerden() {
   const { submitForm } = useFormSubmit();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState<PartnerFormFields>({
     company_name: "",
     contact_person: "",
@@ -104,6 +115,21 @@ export default function PartnerWerden() {
     message: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      const newFiles = Array.from(files);
+      setUploadedFiles((prev) => [...prev, ...newFiles]);
+    }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const removeFile = (index: number) => {
+    setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const handleChange = (field: keyof PartnerFormFields, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -361,6 +387,85 @@ export default function PartnerWerden() {
                     />
                     {errors.region && (
                       <p className="text-sm text-destructive">{errors.region}</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Document Downloads */}
+                <div className="mt-8 rounded-2xl bg-background p-6">
+                  <h4 className="flex items-center gap-2 text-lg font-semibold text-foreground mb-4">
+                    <Download className="h-5 w-5 text-primary" />
+                    Benötigte Unterlagen herunterladen
+                  </h4>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Bitte laden Sie die folgenden Dokumente herunter, füllen Sie diese aus und laden Sie sie anschließend wieder hoch.
+                  </p>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {requiredDocuments.map((doc) => (
+                      <a
+                        key={doc.name}
+                        href={doc.file}
+                        download
+                        className="flex items-center gap-3 rounded-lg border border-border bg-white p-3 text-sm text-foreground transition-colors hover:bg-muted hover:border-primary"
+                      >
+                        <FileText className="h-4 w-4 text-primary shrink-0" />
+                        <span className="truncate">{doc.name}</span>
+                        <Download className="h-4 w-4 text-muted-foreground ml-auto shrink-0" />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+
+                {/* File Upload */}
+                <div className="mt-6 rounded-2xl bg-background p-6">
+                  <h4 className="flex items-center gap-2 text-lg font-semibold text-foreground mb-4">
+                    <Upload className="h-5 w-5 text-primary" />
+                    Unterlagen hochladen
+                  </h4>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Laden Sie hier die ausgefüllten Dokumente sowie weitere relevante Unterlagen hoch (z.B. Gewerbeanmeldung, Versicherungsnachweis).
+                  </p>
+                  
+                  <div className="space-y-4">
+                    <div 
+                      onClick={() => fileInputRef.current?.click()}
+                      className="flex flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-border bg-white p-8 cursor-pointer transition-colors hover:border-primary hover:bg-muted/50"
+                    >
+                      <Upload className="h-8 w-8 text-muted-foreground" />
+                      <div className="text-center">
+                        <p className="font-medium text-foreground">Dateien auswählen</p>
+                        <p className="text-sm text-muted-foreground">PDF, JPG, PNG (max. 10MB pro Datei)</p>
+                      </div>
+                    </div>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      multiple
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                    />
+
+                    {uploadedFiles.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium text-foreground">Hochgeladene Dateien:</p>
+                        {uploadedFiles.map((file, index) => (
+                          <div key={index} className="flex items-center gap-3 rounded-lg border border-border bg-white p-3">
+                            <FileText className="h-4 w-4 text-primary shrink-0" />
+                            <span className="text-sm text-foreground truncate flex-1">{file.name}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {(file.size / 1024 / 1024).toFixed(2)} MB
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => removeFile(index)}
+                              className="p-1 rounded-full hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
                 </div>
