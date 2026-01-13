@@ -274,16 +274,9 @@ export default function UeberUns() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: 0.2 }}
-                className="relative"
+                className="relative flex items-center justify-center"
               >
-                <div className="aspect-[4/3] overflow-hidden rounded-3xl bg-gradient-to-br from-primary/5 to-primary/10 border border-border">
-                  <div className="flex h-full w-full flex-col items-center justify-center p-8 text-center">
-                    <Users className="h-16 w-16 text-primary/40 mb-4" />
-                    <p className="text-muted-foreground font-medium">Echtes Team-Foto</p>
-                    <p className="text-sm text-muted-foreground/70 mt-2">Keine Stock-Bilder – echte Menschen</p>
-                  </div>
-                </div>
-                <div className="absolute -bottom-6 -right-6 rounded-2xl bg-primary p-6 text-white shadow-xl">
+                <div className="rounded-2xl bg-slate-800 p-6 text-white shadow-xl">
                   <p className="text-3xl font-black">15+</p>
                   <p className="text-sm text-white/80">Jahre Erfahrung</p>
                 </div>
