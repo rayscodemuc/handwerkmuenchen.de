@@ -7,14 +7,15 @@ export function StickyCTA() {
   const location = useLocation();
   const [isVisible, setIsVisible] = useState(false);
   
-  // Button nicht auf der Rechner-Seite anzeigen
-  if (location.pathname === "/rechner") {
-    return null;
-  }
-
+  const isRechnerPage = location.pathname === "/rechner";
   const isHomepage = location.pathname === "/";
 
   useEffect(() => {
+    if (isRechnerPage) {
+      setIsVisible(false);
+      return;
+    }
+    
     if (!isHomepage) {
       // Auf anderen Seiten nach kurzer Verzögerung anzeigen
       const timer = setTimeout(() => setIsVisible(true), 1000);
@@ -31,7 +32,12 @@ export function StickyCTA() {
     handleScroll(); // Initial check
     
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [isHomepage]);
+  }, [isHomepage, isRechnerPage]);
+  
+  // Button nicht auf der Rechner-Seite anzeigen
+  if (isRechnerPage) {
+    return null;
+  }
   
   return (
     <motion.div
@@ -56,14 +62,15 @@ export function MobileStickyCTA() {
   const location = useLocation();
   const [isVisible, setIsVisible] = useState(false);
   
-  // Button nicht auf der Rechner-Seite anzeigen
-  if (location.pathname === "/rechner") {
-    return null;
-  }
-
+  const isRechnerPage = location.pathname === "/rechner";
   const isHomepage = location.pathname === "/";
 
   useEffect(() => {
+    if (isRechnerPage) {
+      setIsVisible(false);
+      return;
+    }
+    
     if (!isHomepage) {
       const timer = setTimeout(() => setIsVisible(true), 1000);
       return () => clearTimeout(timer);
@@ -78,7 +85,12 @@ export function MobileStickyCTA() {
     handleScroll();
     
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [isHomepage]);
+  }, [isHomepage, isRechnerPage]);
+  
+  // Button nicht auf der Rechner-Seite anzeigen
+  if (isRechnerPage) {
+    return null;
+  }
   
   return (
     <motion.div
