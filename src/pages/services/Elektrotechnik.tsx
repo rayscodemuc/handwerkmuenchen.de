@@ -260,9 +260,13 @@ export default function Elektrotechnik() {
                 <div className="flex flex-wrap gap-2">
                   {[
                     { label: "Alle Handwerk-Leistungen", href: "/handwerk" },
-                    { label: "Berlin", href: "/standorte/berlin" },
-                    { label: "Hamburg", href: "/standorte/hamburg" },
                     { label: "München", href: "/standorte/muenchen" },
+                    { label: "Augsburg", href: "/standorte/augsburg" },
+                    { label: "Ingolstadt", href: "/standorte/ingolstadt" },
+                    { label: "Frankfurt", href: "/standorte/frankfurt" },
+                    { label: "Nürnberg", href: "/standorte/nuernberg" },
+                    { label: "Hamburg", href: "/standorte/hamburg" },
+                    { label: "Berlin", href: "/standorte/berlin" },
                   ].map((link, i) => (
                     <Link
                       key={i}

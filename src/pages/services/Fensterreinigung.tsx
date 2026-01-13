@@ -72,9 +72,13 @@ export default function Fensterreinigung() {
         { label: "Alle Reinigungsleistungen", href: "/reinigung" },
         { label: "Glas- & Fassadenpflege", href: "/reinigung/glas-fassade" },
         { label: "Grundreinigung", href: "/reinigung/grundreinigung" },
-        { label: "Hamburg", href: "/standorte/hamburg" },
+        { label: "München", href: "/standorte/muenchen" },
+        { label: "Augsburg", href: "/standorte/augsburg" },
+        { label: "Ingolstadt", href: "/standorte/ingolstadt" },
         { label: "Frankfurt", href: "/standorte/frankfurt" },
-        { label: "München", href: "/standorte/muenchen" }
+        { label: "Nürnberg", href: "/standorte/nuernberg" },
+        { label: "Hamburg", href: "/standorte/hamburg" },
+        { label: "Berlin", href: "/standorte/berlin" }
       ]}
       keywords={[
         "Fensterreinigung Gewerbe",

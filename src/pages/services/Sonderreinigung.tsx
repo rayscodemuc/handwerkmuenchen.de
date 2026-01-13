@@ -72,9 +72,13 @@ export default function Sonderreinigung() {
         { label: "Alle Reinigungsleistungen", href: "/reinigung" },
         { label: "Grundreinigung", href: "/reinigung/grundreinigung" },
         { label: "Tiefgaragenreinigung", href: "/reinigung/tiefgaragenreinigung" },
+        { label: "München", href: "/standorte/muenchen" },
+        { label: "Augsburg", href: "/standorte/augsburg" },
+        { label: "Ingolstadt", href: "/standorte/ingolstadt" },
         { label: "Frankfurt", href: "/standorte/frankfurt" },
-        { label: "Berlin", href: "/standorte/berlin" },
-        { label: "Hamburg", href: "/standorte/hamburg" }
+        { label: "Nürnberg", href: "/standorte/nuernberg" },
+        { label: "Hamburg", href: "/standorte/hamburg" },
+        { label: "Berlin", href: "/standorte/berlin" }
       ]}
       keywords={[
         "Sonderreinigung Gewerbe",

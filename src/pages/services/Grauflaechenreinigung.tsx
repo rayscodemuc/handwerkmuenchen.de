@@ -35,7 +35,14 @@ export default function Grauflaechenreinigung() {
       relatedLinks={[
         { label: "Außenanlagen", href: "/aussenanlagen" },
         { label: "Tiefgaragenreinigung", href: "/reinigung/tiefgaragenreinigung" },
-        { label: "Winterdienst", href: "/aussenanlagen/winterdienst" }
+        { label: "Winterdienst", href: "/aussenanlagen/winterdienst" },
+        { label: "München", href: "/standorte/muenchen" },
+        { label: "Augsburg", href: "/standorte/augsburg" },
+        { label: "Ingolstadt", href: "/standorte/ingolstadt" },
+        { label: "Frankfurt", href: "/standorte/frankfurt" },
+        { label: "Nürnberg", href: "/standorte/nuernberg" },
+        { label: "Hamburg", href: "/standorte/hamburg" },
+        { label: "Berlin", href: "/standorte/berlin" }
       ]}
       keywords={["Grauflächenreinigung", "Parkplatzreinigung", "Hofreinigung Gewerbe", "Kehrmaschine"]}
       trustBadges={[{ icon: Car, label: "Moderne Technik" }, { icon: Shield, label: "Verkehrssicherheit" }, { icon: CheckCircle, label: "Dokumentiert" }]}

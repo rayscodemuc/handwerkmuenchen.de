@@ -72,9 +72,13 @@ export default function Bueroreinigung() {
         { label: "Alle Reinigungsleistungen", href: "/reinigung" },
         { label: "Unterhaltsreinigung", href: "/reinigung/unterhaltsreinigung" },
         { label: "Grundreinigung", href: "/reinigung/grundreinigung" },
+        { label: "München", href: "/standorte/muenchen" },
+        { label: "Augsburg", href: "/standorte/augsburg" },
+        { label: "Ingolstadt", href: "/standorte/ingolstadt" },
         { label: "Frankfurt", href: "/standorte/frankfurt" },
+        { label: "Nürnberg", href: "/standorte/nuernberg" },
         { label: "Hamburg", href: "/standorte/hamburg" },
-        { label: "München", href: "/standorte/muenchen" }
+        { label: "Berlin", href: "/standorte/berlin" }
       ]}
       keywords={[
         "Büroreinigung Gewerbe",

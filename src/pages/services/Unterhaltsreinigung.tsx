@@ -72,7 +72,11 @@ export default function Unterhaltsreinigung() {
         { label: "Alle Reinigungsleistungen", href: "/reinigung" },
         { label: "Büroreinigung", href: "/reinigung/bueroreinigung" },
         { label: "Grundreinigung", href: "/reinigung/grundreinigung" },
+        { label: "München", href: "/standorte/muenchen" },
+        { label: "Augsburg", href: "/standorte/augsburg" },
+        { label: "Ingolstadt", href: "/standorte/ingolstadt" },
         { label: "Frankfurt", href: "/standorte/frankfurt" },
+        { label: "Nürnberg", href: "/standorte/nuernberg" },
         { label: "Hamburg", href: "/standorte/hamburg" },
         { label: "Berlin", href: "/standorte/berlin" }
       ]}

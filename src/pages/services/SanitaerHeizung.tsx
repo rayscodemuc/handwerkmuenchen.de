@@ -74,8 +74,12 @@ export default function SanitaerHeizung() {
         { label: "Elektrotechnik & DGUV V3", href: "/handwerk/elektrotechnik" },
         { label: "Service & Wartung", href: "/handwerk/service-wartung" },
         { label: "München", href: "/standorte/muenchen" },
+        { label: "Augsburg", href: "/standorte/augsburg" },
+        { label: "Ingolstadt", href: "/standorte/ingolstadt" },
         { label: "Frankfurt", href: "/standorte/frankfurt" },
-        { label: "Hamburg", href: "/standorte/hamburg" }
+        { label: "Nürnberg", href: "/standorte/nuernberg" },
+        { label: "Hamburg", href: "/standorte/hamburg" },
+        { label: "Berlin", href: "/standorte/berlin" }
       ]}
       keywords={[
         "Heizungswartung Gewerbe",
