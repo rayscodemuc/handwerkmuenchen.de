@@ -468,44 +468,33 @@ export default function UeberUns() {
         {/* Partner Section */}
         <section className="bg-slate-800 py-20 lg:py-28">
           <div className="container mx-auto px-4 lg:px-8">
-            <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 items-center">
-              <div>
-                <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-medium text-white">
-                  <Handshake className="h-4 w-4" />
-                  Für Handwerker
-                </span>
-                <h2 className="mt-6 text-3xl font-black tracking-tight text-white lg:text-4xl">
-                  Werde Partner<br />auf Augenhöhe
-                </h2>
-                <p className="mt-6 text-lg text-white/85 leading-relaxed">
-                  Du bist stolzer Handwerker und suchst einen Partner, der deine Arbeit wertschätzt? 
-                  Bei uns bist du keine Nummer – sondern ein geschätztes Mitglied unseres Teams.
-                </p>
-                <ul className="mt-8 space-y-4">
-                  {["Faire Konditionen", "Regelmäßige Aufträge", "Kollegiales Miteinander", "Pünktliche Bezahlung"].map((item) => (
-                    <li key={item} className="flex items-center gap-3 text-white">
-                      <CheckCircle2 className="h-5 w-5 text-white" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-8">
-                  <Link to="/partner-werden">
-                    <Button className="h-14 px-8 text-base rounded-full bg-white text-slate-800 hover:bg-white/90">
-                      Jetzt Partner werden
-                      <ArrowRight className="ml-2 h-5 w-5" />
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-              <div className="relative">
-                <div className="aspect-square overflow-hidden rounded-3xl bg-white/10 border border-white/20">
-                  <div className="flex h-full w-full flex-col items-center justify-center p-8 text-center">
-                    <Handshake className="h-20 w-20 text-white/40 mb-4" />
-                    <p className="text-white/70 font-medium">Partner-Netzwerk</p>
-                    <p className="text-sm text-white/50 mt-2">Echte Bilder unserer Partner</p>
-                  </div>
-                </div>
+            <div className="max-w-2xl mx-auto text-center">
+              <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-medium text-white">
+                <Handshake className="h-4 w-4" />
+                Für Handwerker
+              </span>
+              <h2 className="mt-6 text-3xl font-black tracking-tight text-white lg:text-4xl">
+                Werde Partner<br />auf Augenhöhe
+              </h2>
+              <p className="mt-6 text-lg text-white/85 leading-relaxed">
+                Du bist stolzer Handwerker und suchst einen Partner, der deine Arbeit wertschätzt? 
+                Bei uns bist du keine Nummer – sondern ein geschätztes Mitglied unseres Teams.
+              </p>
+              <ul className="mt-8 flex flex-wrap justify-center gap-4">
+                {["Faire Konditionen", "Regelmäßige Aufträge", "Kollegiales Miteinander", "Pünktliche Bezahlung"].map((item) => (
+                  <li key={item} className="flex items-center gap-2 text-white bg-white/10 rounded-full px-4 py-2">
+                    <CheckCircle2 className="h-4 w-4 text-white" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-8">
+                <Link to="/partner-werden">
+                  <Button className="h-14 px-8 text-base rounded-full bg-white text-slate-800 hover:bg-white/90">
+                    Jetzt Partner werden
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
