@@ -342,7 +342,7 @@ export default function UeberUns() {
         <section className="bg-surface py-20 lg:py-28">
           <div className="container mx-auto px-4 lg:px-8">
             <div className="mx-auto max-w-2xl text-center mb-16">
-              <span className="text-sm font-semibold uppercase tracking-wider text-primary">
+              <span className="text-sm font-semibold uppercase tracking-wider text-slate-600">
                 Unser Leistungs-Portfolio
               </span>
               <h2 className="mt-3 text-3xl font-black tracking-tight text-foreground lg:text-4xl">
@@ -371,15 +371,15 @@ export default function UeberUns() {
                     <div className="flex-1">
                       <Link to={section.href} className="group">
                         <div className="flex items-center gap-2">
-                          <h3 className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors">
+                          <h3 className="text-2xl font-bold text-foreground group-hover:text-slate-600 transition-colors">
                             {section.title}
                           </h3>
-                          <ArrowRight className="h-5 w-5 text-muted-foreground opacity-0 -translate-x-2 transition-all group-hover:opacity-100 group-hover:translate-x-0 group-hover:text-primary" />
+                          <ArrowRight className="h-5 w-5 text-muted-foreground opacity-0 -translate-x-2 transition-all group-hover:opacity-100 group-hover:translate-x-0 group-hover:text-slate-600" />
                         </div>
                       </Link>
-                      <p className="text-sm font-medium text-primary mt-1">{section.subtitle}</p>
+                      <p className="text-sm font-medium text-slate-600 mt-1">{section.subtitle}</p>
                       <div className="mt-2 inline-flex items-center gap-2 text-sm text-muted-foreground">
-                        <Shield className="h-4 w-4 text-primary" />
+                        <Shield className="h-4 w-4 text-slate-600" />
                         {section.motto}
                       </div>
                     </div>
@@ -397,12 +397,12 @@ export default function UeberUns() {
                       >
                         <Link
                           to={service.href}
-                          className="group flex items-center gap-3 rounded-xl border border-border bg-surface/50 p-3 transition-all hover:border-primary/30 hover:bg-surface hover:shadow-sm"
+                          className="group flex items-center gap-3 rounded-xl border border-border bg-surface/50 p-3 transition-all hover:border-slate-400 hover:bg-surface hover:shadow-sm"
                         >
                           <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${section.color}`}>
                             <service.icon className="h-4 w-4" strokeWidth={1.5} />
                           </div>
-                          <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                          <span className="text-sm font-medium text-foreground group-hover:text-slate-700 transition-colors">
                             {service.title}
                           </span>
                         </Link>
@@ -414,7 +414,7 @@ export default function UeberUns() {
                   <div className="mt-6 pt-4 border-t border-border">
                     <Link
                       to={section.href}
-                      className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline"
+                      className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700 hover:underline"
                     >
                       Alle {section.title}-Leistungen
                       <ArrowRight className="h-4 w-4" />
