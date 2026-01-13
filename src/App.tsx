@@ -27,6 +27,19 @@ import Elektrotechnik from "./pages/services/Elektrotechnik";
 import SanitaerHeizung from "./pages/services/SanitaerHeizung";
 import ServiceWartung from "./pages/services/ServiceWartung";
 
+// Elektrotechnik Sub-Pages
+import ElektroNotdienst from "./pages/services/elektrotechnik/ElektroNotdienst";
+import Hauselektrik from "./pages/services/elektrotechnik/Hauselektrik";
+import SmartHome from "./pages/services/elektrotechnik/SmartHome";
+import EMobility from "./pages/services/elektrotechnik/EMobility";
+import Reparaturen from "./pages/services/elektrotechnik/Reparaturen";
+import Neubau from "./pages/services/elektrotechnik/Neubau";
+import Sanierung from "./pages/services/elektrotechnik/Sanierung";
+import Sicherheitstechnik from "./pages/services/elektrotechnik/Sicherheitstechnik";
+import LED from "./pages/services/elektrotechnik/LED";
+import Klingelanlagen from "./pages/services/elektrotechnik/Klingelanlagen";
+import Messsysteme from "./pages/services/elektrotechnik/Messsysteme";
+
 // Facility Management Service Pages
 import Hausmeisterservice from "./pages/services/Hausmeisterservice";
 import Winterdienst from "./pages/services/Winterdienst";
@@ -85,6 +98,17 @@ const App = () => (
           
           {/* Handwerk */}
           <Route path="/handwerk/elektrotechnik" element={<Elektrotechnik />} />
+          <Route path="/handwerk/elektrotechnik/notdienst" element={<ElektroNotdienst />} />
+          <Route path="/handwerk/elektrotechnik/hauselektrik" element={<Hauselektrik />} />
+          <Route path="/handwerk/elektrotechnik/smart-home" element={<SmartHome />} />
+          <Route path="/handwerk/elektrotechnik/e-mobility" element={<EMobility />} />
+          <Route path="/handwerk/elektrotechnik/reparaturen" element={<Reparaturen />} />
+          <Route path="/handwerk/elektrotechnik/neubau" element={<Neubau />} />
+          <Route path="/handwerk/elektrotechnik/sanierung" element={<Sanierung />} />
+          <Route path="/handwerk/elektrotechnik/sicherheitstechnik" element={<Sicherheitstechnik />} />
+          <Route path="/handwerk/elektrotechnik/led" element={<LED />} />
+          <Route path="/handwerk/elektrotechnik/klingelanlagen" element={<Klingelanlagen />} />
+          <Route path="/handwerk/elektrotechnik/messsysteme" element={<Messsysteme />} />
           <Route path="/handwerk/sanitaer-heizung" element={<SanitaerHeizung />} />
           <Route path="/handwerk/service-wartung" element={<ServiceWartung />} />
           
