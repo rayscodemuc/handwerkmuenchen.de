@@ -628,7 +628,7 @@ export default function Rechner() {
                               <div className="bg-muted/50 p-4 rounded-xl">
                                 <p className="text-sm text-muted-foreground">
                                   <span className="font-semibold text-foreground">Tiefgaragenreinigung (Nassreinigung)</span>{" "}
-                                  wird als Einmalauftrag angeboten. Der Preis berechnet sich mit 12,50 €/m².
+                                  wird als Einmalauftrag angeboten.
                                 </p>
                                 <Button 
                                   className="mt-3" 
