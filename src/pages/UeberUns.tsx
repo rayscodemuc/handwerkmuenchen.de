@@ -221,12 +221,12 @@ export default function UeberUns() {
               </p>
               <div className="mt-8 flex flex-col gap-4 sm:flex-row">
                 <Link to="/anfrage">
-                  <Button className="w-full sm:w-auto h-14 px-8 text-base rounded-full bg-foreground text-primary-foreground hover:bg-foreground/90">
+                  <Button className="w-full sm:w-auto h-14 px-8 text-base rounded-full bg-slate-800 text-white hover:bg-slate-700">
                     Jetzt persönlichen Beratungstermin buchen
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
-                <a href="tel:+498912345678" className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-foreground/30 bg-foreground/10 px-6 py-3 font-semibold text-foreground backdrop-blur-sm transition-all hover:bg-foreground/20">
+                <a href="tel:+498912345678" className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-slate-800/40 bg-slate-800/10 px-6 py-3 font-semibold text-slate-800 backdrop-blur-sm transition-all hover:bg-slate-800/20">
                   <Phone className="h-5 w-5" />
                   Direkt anrufen
                 </a>
