@@ -72,9 +72,13 @@ export default function Grundreinigung() {
         { label: "Alle Reinigungsleistungen", href: "/reinigung" },
         { label: "Unterhaltsreinigung", href: "/reinigung/unterhaltsreinigung" },
         { label: "Sonderreinigung", href: "/reinigung/sonderreinigung" },
+        { label: "München", href: "/standorte/muenchen" },
+        { label: "Augsburg", href: "/standorte/augsburg" },
+        { label: "Ingolstadt", href: "/standorte/ingolstadt" },
         { label: "Frankfurt", href: "/standorte/frankfurt" },
-        { label: "Berlin", href: "/standorte/berlin" },
-        { label: "München", href: "/standorte/muenchen" }
+        { label: "Nürnberg", href: "/standorte/nuernberg" },
+        { label: "Hamburg", href: "/standorte/hamburg" },
+        { label: "Berlin", href: "/standorte/berlin" }
       ]}
       keywords={[
         "Grundreinigung Gewerbe",

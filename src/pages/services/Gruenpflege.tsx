@@ -39,7 +39,13 @@ export default function Gruenpflege() {
         { label: "Außenanlagen", href: "/aussenanlagen" },
         { label: "Baumpflege", href: "/aussenanlagen/baumpflege" },
         { label: "Winterdienst", href: "/aussenanlagen/winterdienst" },
-        { label: "München", href: "/standorte/muenchen" }
+        { label: "München", href: "/standorte/muenchen" },
+        { label: "Augsburg", href: "/standorte/augsburg" },
+        { label: "Ingolstadt", href: "/standorte/ingolstadt" },
+        { label: "Frankfurt", href: "/standorte/frankfurt" },
+        { label: "Nürnberg", href: "/standorte/nuernberg" },
+        { label: "Hamburg", href: "/standorte/hamburg" },
+        { label: "Berlin", href: "/standorte/berlin" }
       ]}
       keywords={["Grünpflege Gewerbe", "Rasenpflege", "Außenanlagenpflege", "Gartenpflege Gewerbeimmobilien"]}
       trustBadges={[{ icon: Calendar, label: "Jahresplan" }, { icon: Shield, label: "Haftungssicherheit" }, { icon: CheckCircle, label: "Dokumentiert" }]}

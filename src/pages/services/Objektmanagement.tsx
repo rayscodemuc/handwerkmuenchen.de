@@ -72,9 +72,13 @@ export default function Objektmanagement() {
         { label: "Alle Facility-Management-Leistungen", href: "/facility-management" },
         { label: "Hausmeisterservice", href: "/facility-management/hausmeisterservice" },
         { label: "Service & Wartung", href: "/handwerk/service-wartung" },
+        { label: "München", href: "/standorte/muenchen" },
+        { label: "Augsburg", href: "/standorte/augsburg" },
+        { label: "Ingolstadt", href: "/standorte/ingolstadt" },
         { label: "Frankfurt", href: "/standorte/frankfurt" },
+        { label: "Nürnberg", href: "/standorte/nuernberg" },
         { label: "Hamburg", href: "/standorte/hamburg" },
-        { label: "München", href: "/standorte/muenchen" }
+        { label: "Berlin", href: "/standorte/berlin" }
       ]}
       keywords={[
         "Objektmanagement Gewerbe",

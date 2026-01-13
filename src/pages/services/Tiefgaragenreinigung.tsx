@@ -73,8 +73,12 @@ export default function Tiefgaragenreinigung() {
         { label: "Grauflächenreinigung", href: "/aussenanlagen/grauflaechenreinigung" },
         { label: "Grundreinigung", href: "/reinigung/grundreinigung" },
         { label: "München", href: "/standorte/muenchen" },
+        { label: "Augsburg", href: "/standorte/augsburg" },
+        { label: "Ingolstadt", href: "/standorte/ingolstadt" },
         { label: "Frankfurt", href: "/standorte/frankfurt" },
-        { label: "Hamburg", href: "/standorte/hamburg" }
+        { label: "Nürnberg", href: "/standorte/nuernberg" },
+        { label: "Hamburg", href: "/standorte/hamburg" },
+        { label: "Berlin", href: "/standorte/berlin" }
       ]}
       keywords={[
         "Tiefgaragenreinigung",

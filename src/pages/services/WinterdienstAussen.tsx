@@ -35,7 +35,14 @@ export default function WinterdienstAussen() {
       relatedLinks={[
         { label: "Außenanlagen", href: "/aussenanlagen" },
         { label: "Winterdienst FM", href: "/facility-management/winterdienst" },
-        { label: "Grauflächenreinigung", href: "/aussenanlagen/grauflaechenreinigung" }
+        { label: "Grauflächenreinigung", href: "/aussenanlagen/grauflaechenreinigung" },
+        { label: "München", href: "/standorte/muenchen" },
+        { label: "Augsburg", href: "/standorte/augsburg" },
+        { label: "Ingolstadt", href: "/standorte/ingolstadt" },
+        { label: "Frankfurt", href: "/standorte/frankfurt" },
+        { label: "Nürnberg", href: "/standorte/nuernberg" },
+        { label: "Hamburg", href: "/standorte/hamburg" },
+        { label: "Berlin", href: "/standorte/berlin" }
       ]}
       keywords={["Winterdienst Parkplatz", "Großflächenräumung", "Parkplatzräumung", "Streudienst Gewerbe"]}
       trustBadges={[{ icon: Shield, label: "Haftungsübernahme" }, { icon: Clock, label: "24/7 Bereitschaft" }, { icon: MapPin, label: "GPS-dokumentiert" }]}

@@ -73,9 +73,13 @@ export default function ServiceWartung() {
         { label: "Alle Handwerk-Leistungen", href: "/handwerk" },
         { label: "Elektrotechnik & DGUV V3", href: "/handwerk/elektrotechnik" },
         { label: "Sanitär- & Heizungstechnik", href: "/handwerk/sanitaer-heizung" },
+        { label: "München", href: "/standorte/muenchen" },
+        { label: "Augsburg", href: "/standorte/augsburg" },
+        { label: "Ingolstadt", href: "/standorte/ingolstadt" },
         { label: "Frankfurt", href: "/standorte/frankfurt" },
+        { label: "Nürnberg", href: "/standorte/nuernberg" },
         { label: "Hamburg", href: "/standorte/hamburg" },
-        { label: "München", href: "/standorte/muenchen" }
+        { label: "Berlin", href: "/standorte/berlin" }
       ]}
       keywords={[
         "Wartungsvertrag Gewerbe",

@@ -37,7 +37,13 @@ export default function Winterdienst() {
       relatedLinks={[
         { label: "Facility Management", href: "/facility-management" },
         { label: "Winterdienst Außen", href: "/aussenanlagen/winterdienst" },
-        { label: "Hamburg", href: "/standorte/hamburg" }
+        { label: "München", href: "/standorte/muenchen" },
+        { label: "Augsburg", href: "/standorte/augsburg" },
+        { label: "Ingolstadt", href: "/standorte/ingolstadt" },
+        { label: "Frankfurt", href: "/standorte/frankfurt" },
+        { label: "Nürnberg", href: "/standorte/nuernberg" },
+        { label: "Hamburg", href: "/standorte/hamburg" },
+        { label: "Berlin", href: "/standorte/berlin" }
       ]}
       keywords={["Winterdienst Gewerbe", "Schneeräumung", "Streudienst", "Haftungsübernahme", "GPS Winterdienst"]}
       trustBadges={[{ icon: Shield, label: "Haftungsübernahme" }, { icon: Clock, label: "24/7 Bereitschaft" }, { icon: MapPin, label: "GPS-dokumentiert" }]}
