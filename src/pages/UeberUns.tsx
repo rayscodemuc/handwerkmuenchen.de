@@ -62,31 +62,23 @@ const coreValues = [
 
 const portfolioSections = [
   {
-    id: "elektrotechnik",
-    icon: Zap,
-    title: "Elektrotechnik",
+    id: "handwerk",
+    icon: Wrench,
+    title: "Handwerk",
     subtitle: "Meisterbetrieb",
     motto: "Werte erhalten",
-    href: "/handwerk/elektrotechnik",
+    href: "/handwerk",
     color: "bg-amber-500/10 text-amber-600",
     borderColor: "border-amber-500/30",
     services: [
-      { icon: AlertTriangle, title: "24/7 Notdienst", href: "/handwerk/elektrotechnik/notdienst" },
-      { icon: Home, title: "Hauselektrik", href: "/handwerk/elektrotechnik/hauselektrik" },
-      { icon: Lightbulb, title: "Smart Home", href: "/handwerk/elektrotechnik/smart-home" },
-      { icon: Car, title: "E-Mobility", href: "/handwerk/elektrotechnik/e-mobility" },
-      { icon: Wrench, title: "Reparaturen", href: "/handwerk/elektrotechnik/reparaturen" },
-      { icon: Building, title: "Neubau", href: "/handwerk/elektrotechnik/neubau" },
-      { icon: Settings, title: "Sanierung", href: "/handwerk/elektrotechnik/sanierung" },
-      { icon: Lock, title: "Sicherheitstechnik", href: "/handwerk/elektrotechnik/sicherheitstechnik" },
-      { icon: Zap, title: "LED & Beleuchtung", href: "/handwerk/elektrotechnik/led" },
-      { icon: Bell, title: "Klingelanlagen", href: "/handwerk/elektrotechnik/klingelanlagen" },
-      { icon: Gauge, title: "Messsysteme", href: "/handwerk/elektrotechnik/messsysteme" },
+      { icon: Zap, title: "Elektrotechnik", href: "/handwerk/elektrotechnik" },
+      { icon: Gauge, title: "Sanitär & Heizung", href: "/handwerk/sanitaer-heizung" },
+      { icon: Settings, title: "Service & Wartung", href: "/handwerk/service-wartung" },
     ],
   },
   {
     id: "facility",
-    icon: Wrench,
+    icon: Building,
     title: "Facility Management",
     subtitle: "Rundum-Sorglos",
     motto: "Alles aus einer Hand",
@@ -96,7 +88,6 @@ const portfolioSections = [
     services: [
       { icon: Home, title: "Hausmeisterservice", href: "/facility-management/hausmeisterservice" },
       { icon: Building, title: "Objektmanagement", href: "/facility-management/objektmanagement" },
-      { icon: Settings, title: "Service & Wartung", href: "/handwerk/service-wartung" },
     ],
   },
   {
