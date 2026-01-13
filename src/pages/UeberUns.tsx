@@ -197,8 +197,8 @@ export default function UeberUns() {
       <Header />
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative flex min-h-[600px] items-center bg-slate-800 lg:min-h-[700px]">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-slate-700/50 via-transparent to-transparent" />
+        <section className="relative flex min-h-[600px] items-center bg-gradient-to-br from-primary via-primary to-primary/95 lg:min-h-[700px]">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/5 via-transparent to-transparent" />
           <div className="container relative mx-auto px-4 py-20 lg:px-8">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -206,27 +206,27 @@ export default function UeberUns() {
               transition={{ duration: 0.6 }}
               className="max-w-3xl"
             >
-              <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-medium text-white backdrop-blur-sm">
+              <span className="inline-flex items-center gap-2 rounded-full bg-foreground/10 px-4 py-2 text-sm font-medium text-foreground backdrop-blur-sm">
                 <Users className="h-4 w-4" />
                 Gesichter statt Nummern
               </span>
-              <h1 className="mt-6 text-4xl font-black tracking-tight text-white md:text-5xl lg:text-6xl">
+              <h1 className="mt-6 text-4xl font-black tracking-tight text-foreground md:text-5xl lg:text-6xl">
                 Facility Management,<br />
-                <span className="text-white/95">aber persönlich.</span>
+                <span className="text-foreground/90">aber persönlich.</span>
               </h1>
-              <p className="mt-6 text-lg text-white/85 md:text-xl lg:max-w-2xl">
+              <p className="mt-6 text-lg text-foreground/75 md:text-xl lg:max-w-2xl">
                 Schluss mit Anonymität und Dienstleistung nach Schema F. 
                 Wir verbinden professionelles Handwerk mit echten Werten – 
                 und Sie bekommen immer einen Menschen, keinen Algorithmus.
               </p>
               <div className="mt-8 flex flex-col gap-4 sm:flex-row">
                 <Link to="/anfrage">
-                  <Button className="w-full sm:w-auto h-14 px-8 text-base rounded-full bg-white text-slate-800 hover:bg-white/90">
+                  <Button className="w-full sm:w-auto h-14 px-8 text-base rounded-full bg-foreground text-primary-foreground hover:bg-foreground/90">
                     Jetzt persönlichen Beratungstermin buchen
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
-                <a href="tel:+498912345678" className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-white/40 bg-white/15 px-6 py-3 font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/25">
+                <a href="tel:+498912345678" className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-foreground/30 bg-foreground/10 px-6 py-3 font-semibold text-foreground backdrop-blur-sm transition-all hover:bg-foreground/20">
                   <Phone className="h-5 w-5" />
                   Direkt anrufen
                 </a>
