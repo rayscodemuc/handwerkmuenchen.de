@@ -555,7 +555,7 @@ export default function UeberUns() {
         <section className="bg-surface py-16 lg:py-20">
           <div className="container mx-auto px-4 lg:px-8">
             <div className="flex flex-col items-center text-center">
-              <MapPin className="h-8 w-8 text-primary mb-4" />
+              <MapPin className="h-8 w-8 text-slate-700 mb-4" />
               <h2 className="text-2xl font-bold text-foreground">
                 Unsere Standorte
               </h2>
@@ -567,17 +567,17 @@ export default function UeberUns() {
                   <Link
                     key={location.name}
                     to={location.href}
-                    className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm font-medium text-foreground transition-all hover:border-primary hover:text-primary"
+                    className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm font-medium text-foreground transition-all hover:border-slate-600 hover:text-slate-700"
                   >
                     <MapPin className="h-4 w-4" />
                     {location.name}
                   </Link>
                 ))}
               </div>
-              <div className="mt-10 flex items-center gap-3 rounded-2xl bg-primary/10 px-6 py-4">
-                <Phone className="h-6 w-6 text-primary" />
+              <div className="mt-10 flex items-center gap-3 rounded-2xl bg-slate-800/10 px-6 py-4">
+                <Phone className="h-6 w-6 text-slate-700" />
                 <div className="text-left">
-                  <a href="tel:+498912345678" className="text-lg font-bold text-foreground hover:text-primary transition-colors">
+                  <a href="tel:+498912345678" className="text-lg font-bold text-foreground hover:text-slate-600 transition-colors">
                     +49 89 123 456 78
                   </a>
                   <p className="text-sm text-muted-foreground">
