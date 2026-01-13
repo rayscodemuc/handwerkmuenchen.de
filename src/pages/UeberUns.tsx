@@ -1,133 +1,597 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { CTASection } from "@/components/sections/CTASection";
-import { Users, Target, Award, Heart } from "lucide-react";
+import { SEOHead } from "@/components/SEOHead";
+import { Link } from "react-router-dom";
+import { AnimatedButton } from "@/components/ui/animated-button";
+import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
+import {
+  Users,
+  Award,
+  Handshake,
+  Heart,
+  Zap,
+  Wrench,
+  Sparkles,
+  TreePine,
+  Phone,
+  MapPin,
+  ArrowRight,
+  Star,
+  Shield,
+  Clock,
+  Home,
+  Lightbulb,
+  Car,
+  AlertTriangle,
+  Settings,
+  Building,
+  Lock,
+  Gauge,
+  Bell,
+  CheckCircle2,
+  Quote,
+} from "lucide-react";
 
-const values = [
-  {
-    icon: Target,
-    title: "Zuverlässigkeit",
-    description: "Wir halten, was wir versprechen. Pünktlichkeit und Verbindlichkeit sind für uns selbstverständlich.",
-  },
+const coreValues = [
   {
     icon: Award,
-    title: "Qualität",
-    description: "Höchste Standards bei jeder Dienstleistung durch geschultes Fachpersonal und moderne Technik.",
+    title: "Klasse statt Masse",
+    description: "Qualität durch fair bezahlte, motivierte Profis. Wir setzen auf Können, nicht auf Quantität.",
+    highlight: "Faire Löhne = Beste Arbeit",
   },
   {
     icon: Users,
-    title: "Partnerschaft",
-    description: "Langfristige Kundenbeziehungen auf Augenhöhe sind die Basis unseres Erfolgs.",
+    title: "Ein Gesicht zu jedem Projekt",
+    description: "Feste Objektleiter statt anonymer Callcenter. Sie kennen Ihren Ansprechpartner persönlich.",
+    highlight: "Ihr persönlicher Ansprechpartner",
+  },
+  {
+    icon: Handshake,
+    title: "Handschlagqualität",
+    description: "Ehrliche Kommunikation und sofortige Problemlösung. Was wir zusagen, halten wir.",
+    highlight: "Versprochen ist versprochen",
   },
   {
     icon: Heart,
-    title: "Verantwortung",
-    description: "Nachhaltiges Handeln und Respekt gegenüber Mensch und Umwelt leiten unser Tun.",
+    title: "Technik trifft Herz",
+    description: "Modernste Effizienz gepaart mit persönlichem Blick für Details, die anderen entgehen.",
+    highlight: "Innovation mit Menschlichkeit",
   },
 ];
 
-const stats = [
-  { value: "15+", label: "Jahre Erfahrung" },
-  { value: "500+", label: "Zufriedene Kunden" },
-  { value: "50+", label: "Mitarbeiter" },
-  { value: "24/7", label: "Erreichbarkeit" },
+const elektroServices = [
+  { icon: AlertTriangle, title: "24/7 Notdienst", href: "/handwerk/elektrotechnik/notdienst" },
+  { icon: Home, title: "Hauselektrik", href: "/handwerk/elektrotechnik/hauselektrik" },
+  { icon: Lightbulb, title: "Smart Home", href: "/handwerk/elektrotechnik/smart-home" },
+  { icon: Car, title: "E-Mobility", href: "/handwerk/elektrotechnik/e-mobility" },
+  { icon: Wrench, title: "Reparaturen", href: "/handwerk/elektrotechnik/reparaturen" },
+  { icon: Building, title: "Neubau", href: "/handwerk/elektrotechnik/neubau" },
+  { icon: Settings, title: "Sanierung", href: "/handwerk/elektrotechnik/sanierung" },
+  { icon: Lock, title: "Sicherheitstechnik", href: "/handwerk/elektrotechnik/sicherheitstechnik" },
+  { icon: Zap, title: "LED & Beleuchtung", href: "/handwerk/elektrotechnik/led" },
+  { icon: Bell, title: "Klingelanlagen", href: "/handwerk/elektrotechnik/klingelanlagen" },
+  { icon: Gauge, title: "Messsysteme", href: "/handwerk/elektrotechnik/messsysteme" },
 ];
+
+const servicePillars = [
+  {
+    icon: Zap,
+    title: "Elektrotechnik",
+    subtitle: "Meisterbetrieb",
+    motto: "Werte erhalten",
+    description: "Von Smart Home bis Notdienst – 11 Spezialisierungen für Ihre Sicherheit und Effizienz.",
+    href: "/handwerk/elektrotechnik",
+    color: "bg-amber-500/10 text-amber-600",
+  },
+  {
+    icon: Wrench,
+    title: "Facility Management",
+    subtitle: "Ihr Rundum-Sorglos-Paket",
+    motto: "Alles aus einer Hand",
+    description: "Hausmeisterservice und Objektmanagement – damit Sie sich auf Ihr Kerngeschäft konzentrieren können.",
+    href: "/facility-management",
+    color: "bg-blue-500/10 text-blue-600",
+  },
+  {
+    icon: Sparkles,
+    title: "Reinigung",
+    subtitle: "Der glänzende erste Eindruck",
+    motto: "Sauberkeit, die begeistert",
+    description: "Büroreinigung, Glasreinigung, Fassadenpflege – für Räume, in denen man sich wohlfühlt.",
+    href: "/reinigung",
+    color: "bg-emerald-500/10 text-emerald-600",
+  },
+  {
+    icon: TreePine,
+    title: "Außenanlagen",
+    subtitle: "Die Visitenkarte des Hauses",
+    motto: "Der erste Eindruck zählt",
+    description: "Grünpflege, Winterdienst und mehr – für Außenbereiche, die Eindruck machen.",
+    href: "/aussenanlagen",
+    color: "bg-green-500/10 text-green-600",
+  },
+];
+
+const testimonials = [
+  {
+    quote: "Endlich ein Dienstleister, bei dem ich meinen Ansprechpartner persönlich kenne. Das macht den Unterschied.",
+    author: "Michael K.",
+    role: "Hausverwaltung München",
+    rating: 5,
+  },
+  {
+    quote: "Bei Problemen wird nicht diskutiert, sondern gelöst. Das nenne ich Handschlagqualität.",
+    author: "Sandra M.",
+    role: "Objektleiterin Frankfurt",
+    rating: 5,
+  },
+  {
+    quote: "Seit 3 Jahren unser Partner – und immer noch derselbe Objektleiter. Das gibt es sonst nirgends.",
+    author: "Thomas B.",
+    role: "Gewerbeimmobilien Hamburg",
+    rating: 5,
+  },
+];
+
+const locations = [
+  { name: "München", href: "/standorte/muenchen" },
+  { name: "Augsburg", href: "/standorte/augsburg" },
+  { name: "Ingolstadt", href: "/standorte/ingolstadt" },
+  { name: "Nürnberg", href: "/standorte/nuernberg" },
+  { name: "Frankfurt", href: "/standorte/frankfurt" },
+  { name: "Hamburg", href: "/standorte/hamburg" },
+  { name: "Berlin", href: "/standorte/berlin" },
+];
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Mr.Clean Services",
+  description: "Persönliches Facility Management mit echten Werten. Elektrotechnik, Reinigung, Hausmeisterservice und Außenanlagen aus einer Hand.",
+  url: "https://mrclean-services.de/ueber-uns",
+  areaServed: [
+    { "@type": "City", name: "München" },
+    { "@type": "City", name: "Augsburg" },
+    { "@type": "City", name: "Ingolstadt" },
+    { "@type": "City", name: "Nürnberg" },
+    { "@type": "City", name: "Frankfurt" },
+    { "@type": "City", name: "Hamburg" },
+    { "@type": "City", name: "Berlin" },
+  ],
+  hasOfferCatalog: {
+    "@type": "OfferCatalog",
+    name: "Facility Management Leistungen",
+    itemListElement: [
+      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Elektrotechnik" } },
+      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Facility Management" } },
+      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Reinigung" } },
+      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Außenanlagen" } },
+    ],
+  },
+};
 
 export default function UeberUns() {
   return (
     <div className="theme-about flex min-h-screen flex-col">
+      <SEOHead
+        title="Über uns – Facility Management, aber persönlich | Mr.Clean Services"
+        description="Schluss mit Anonymität. Wir verbinden professionelles Handwerk mit echten Werten. Feste Ansprechpartner, Handschlagqualität und Qualität vor Profit."
+        keywords={["Facility Management persönlich", "Handwerk mit Werten", "Objektleiter", "Hausmeisterservice München", "Elektrotechnik Meisterbetrieb"]}
+        canonicalUrl="https://mrclean-services.de/ueber-uns"
+        structuredData={structuredData}
+      />
       <Header />
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative flex min-h-[540px] items-center bg-primary lg:min-h-[650px]">
-          <div className="container mx-auto px-4 lg:px-8">
-            <p className="text-sm font-medium uppercase tracking-wider text-primary-foreground/70">
-              Über uns
-            </p>
-            <h1 className="mt-3 text-4xl font-black tracking-tight text-primary-foreground lg:text-6xl">
-              Ihr Partner für<br />Facility Management
-            </h1>
+        <section className="relative flex min-h-[600px] items-center bg-gradient-to-br from-primary via-primary to-primary/95 lg:min-h-[700px]">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/5 via-transparent to-transparent" />
+          <div className="container relative mx-auto px-4 py-20 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="max-w-3xl"
+            >
+              <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white/90 backdrop-blur-sm">
+                <Users className="h-4 w-4" />
+                Gesichter statt Nummern
+              </span>
+              <h1 className="mt-6 text-4xl font-black tracking-tight text-white md:text-5xl lg:text-6xl">
+                Facility Management,<br />
+                <span className="text-white/90">aber persönlich.</span>
+              </h1>
+              <p className="mt-6 text-lg text-white/80 md:text-xl lg:max-w-2xl">
+                Schluss mit Anonymität und Dienstleistung nach Schema F. 
+                Wir verbinden professionelles Handwerk mit echten Werten – 
+                und Sie bekommen immer einen Menschen, keinen Algorithmus.
+              </p>
+              <div className="mt-8 flex flex-col gap-4 sm:flex-row">
+                <Link to="/anfrage">
+                  <Button className="w-full sm:w-auto h-14 px-8 text-base rounded-full bg-white text-primary hover:bg-white/90">
+                    Jetzt persönlichen Beratungstermin buchen
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+                <a href="tel:+498912345678" className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-white/30 bg-white/10 px-6 py-3 font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/20">
+                  <Phone className="h-5 w-5" />
+                  Direkt anrufen
+                </a>
+              </div>
+            </motion.div>
           </div>
         </section>
 
-        {/* Story Section */}
+        {/* Vision Section */}
         <section className="bg-background py-20 lg:py-28">
           <div className="container mx-auto px-4 lg:px-8">
             <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 items-center">
-              <div>
-                <h2 className="text-3xl font-black tracking-tight text-foreground lg:text-4xl">
-                  Unsere Geschichte
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+              >
+                <span className="text-sm font-semibold uppercase tracking-wider text-primary">
+                  Unsere Vision
+                </span>
+                <h2 className="mt-3 text-3xl font-black tracking-tight text-foreground lg:text-4xl">
+                  Warum wir die Branche<br />neu denken.
                 </h2>
-                <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
-                  Seit über 15 Jahren steht Mr.Clean Services für professionelles Facility Management 
-                  und erstklassige Gebäudereinigung. Was als kleines Familienunternehmen begann, 
-                  ist heute ein etablierter Partner für Gewerbe- und Privatkunden in der gesamten Region.
-                </p>
-                <p className="mt-4 text-lg text-muted-foreground leading-relaxed">
-                  Unser Erfolg basiert auf einem einfachen Prinzip: Wir behandeln jedes Objekt so, 
-                  als wäre es unser eigenes. Mit über 50 engagierten Mitarbeitern und modernster 
-                  Ausstattung bieten wir ein Rundum-sorglos-Paket für Ihre Immobilien.
-                </p>
-              </div>
-              <div className="relative">
-                <div className="aspect-[4/3] overflow-hidden rounded-3xl bg-muted">
-                  <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-                    Team Bild
+                <div className="mt-8 space-y-6 text-lg text-muted-foreground leading-relaxed">
+                  <p>
+                    <strong className="text-foreground">Wir sind kein anonymer Riese.</strong> Bei uns 
+                    kennt Ihr Objektleiter Ihre Immobilie besser als seine eigene Wohnung. Er weiß, 
+                    wo der Hausmeister den Ersatzschlüssel versteckt und welche Tür im Winter klemmt.
+                  </p>
+                  <p>
+                    <strong className="text-foreground">Bei uns ist Qualität wichtiger als Profit.</strong> Wir 
+                    bezahlen unsere Mitarbeiter fair – nicht weil wir müssen, sondern weil motivierte Profis 
+                    bessere Arbeit leisten. Das merken Sie an jedem Detail.
+                  </p>
+                  <p>
+                    <strong className="text-foreground">Wir sind Ihr greifbarer Partner vor Ort.</strong> Kein 
+                    Callcenter in einer anderen Stadt, kein Bot, der Ihre E-Mail beantwortet. Sondern echte 
+                    Menschen, die echte Verantwortung übernehmen.
+                  </p>
+                </div>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="relative"
+              >
+                <div className="aspect-[4/3] overflow-hidden rounded-3xl bg-gradient-to-br from-primary/5 to-primary/10 border border-border">
+                  <div className="flex h-full w-full flex-col items-center justify-center p-8 text-center">
+                    <Users className="h-16 w-16 text-primary/40 mb-4" />
+                    <p className="text-muted-foreground font-medium">Echtes Team-Foto</p>
+                    <p className="text-sm text-muted-foreground/70 mt-2">Keine Stock-Bilder – echte Menschen</p>
                   </div>
                 </div>
-              </div>
+                <div className="absolute -bottom-6 -right-6 rounded-2xl bg-primary p-6 text-white shadow-xl">
+                  <p className="text-3xl font-black">15+</p>
+                  <p className="text-sm text-white/80">Jahre Erfahrung</p>
+                </div>
+              </motion.div>
             </div>
           </div>
         </section>
 
-        {/* Stats Section */}
-        <section className="bg-surface py-16 lg:py-20">
+        {/* Core Values Section */}
+        <section className="bg-surface py-20 lg:py-28">
           <div className="container mx-auto px-4 lg:px-8">
-            <div className="grid grid-cols-2 gap-8 lg:grid-cols-4">
-              {stats.map((stat) => (
-                <div key={stat.label} className="text-center">
-                  <div className="text-4xl font-black text-primary lg:text-5xl">
-                    {stat.value}
-                  </div>
-                  <p className="mt-2 text-muted-foreground">{stat.label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Values Section */}
-        <section className="bg-background py-20 lg:py-28">
-          <div className="container mx-auto px-4 lg:px-8">
-            <div className="mx-auto max-w-xl text-center">
-              <h2 className="text-3xl font-black tracking-tight text-foreground lg:text-4xl">
+            <div className="mx-auto max-w-2xl text-center">
+              <span className="text-sm font-semibold uppercase tracking-wider text-primary">
                 Unsere Werte
+              </span>
+              <h2 className="mt-3 text-3xl font-black tracking-tight text-foreground lg:text-4xl">
+                Was uns antreibt
               </h2>
               <p className="mt-4 text-lg text-muted-foreground">
-                Die Grundpfeiler unserer täglichen Arbeit.
+                Vier Prinzipien, die jeden Tag unser Handeln bestimmen.
               </p>
             </div>
 
-            <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-              {values.map((value) => (
-                <div
+            <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {coreValues.map((value, index) => (
+                <motion.div
                   key={value.title}
-                  className="rounded-3xl bg-surface p-8 text-center"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  whileHover={{ y: -8, transition: { duration: 0.2 } }}
+                  className="group relative overflow-hidden rounded-3xl bg-background p-8 shadow-sm border border-border transition-shadow hover:shadow-lg"
                 >
-                  <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
-                    <value.icon className="h-7 w-7 text-primary" strokeWidth={1.5} />
+                  <div className="absolute top-0 right-0 h-32 w-32 translate-x-8 -translate-y-8 rounded-full bg-primary/5 transition-transform group-hover:scale-150" />
+                  <div className="relative">
+                    <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
+                      <value.icon className="h-7 w-7 text-primary" strokeWidth={1.5} />
+                    </div>
+                    <h3 className="text-xl font-bold text-foreground">{value.title}</h3>
+                    <p className="mt-3 text-muted-foreground leading-relaxed">
+                      {value.description}
+                    </p>
+                    <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
+                      <CheckCircle2 className="h-4 w-4" />
+                      {value.highlight}
+                    </div>
                   </div>
-                  <h3 className="text-xl font-bold text-foreground">{value.title}</h3>
-                  <p className="mt-3 text-muted-foreground leading-relaxed">
-                    {value.description}
-                  </p>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
         </section>
 
-        <CTASection />
+        {/* Service Pillars Section */}
+        <section className="bg-background py-20 lg:py-28">
+          <div className="container mx-auto px-4 lg:px-8">
+            <div className="mx-auto max-w-2xl text-center">
+              <span className="text-sm font-semibold uppercase tracking-wider text-primary">
+                Unser Leistungs-Portfolio
+              </span>
+              <h2 className="mt-3 text-3xl font-black tracking-tight text-foreground lg:text-4xl">
+                Vier Säulen für Ihren Erfolg
+              </h2>
+              <p className="mt-4 text-lg text-muted-foreground">
+                Alles aus einer Hand – mit persönlichem Ansprechpartner für jeden Bereich.
+              </p>
+            </div>
+
+            <div className="mt-16 grid gap-8 md:grid-cols-2">
+              {servicePillars.map((pillar, index) => (
+                <motion.div
+                  key={pillar.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                >
+                  <Link
+                    to={pillar.href}
+                    className="group block h-full rounded-3xl border border-border bg-background p-8 transition-all hover:border-primary/30 hover:shadow-lg"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className={`rounded-2xl p-4 ${pillar.color}`}>
+                        <pillar.icon className="h-8 w-8" strokeWidth={1.5} />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
+                            {pillar.title}
+                          </h3>
+                          <ArrowRight className="h-5 w-5 text-muted-foreground opacity-0 -translate-x-2 transition-all group-hover:opacity-100 group-hover:translate-x-0 group-hover:text-primary" />
+                        </div>
+                        <p className="text-sm font-medium text-primary mt-1">{pillar.subtitle}</p>
+                        <p className="mt-3 text-muted-foreground leading-relaxed">
+                          {pillar.description}
+                        </p>
+                        <div className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-foreground">
+                          <Shield className="h-4 w-4 text-primary" />
+                          {pillar.motto}
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Elektrotechnik Showcase */}
+        <section className="bg-surface py-20 lg:py-28">
+          <div className="container mx-auto px-4 lg:px-8">
+            <div className="mx-auto max-w-2xl text-center">
+              <span className="inline-flex items-center gap-2 rounded-full bg-amber-500/10 px-4 py-2 text-sm font-semibold text-amber-600">
+                <Zap className="h-4 w-4" />
+                Meisterbetrieb
+              </span>
+              <h2 className="mt-4 text-3xl font-black tracking-tight text-foreground lg:text-4xl">
+                Elektrotechnik: Werte erhalten
+              </h2>
+              <p className="mt-4 text-lg text-muted-foreground">
+                11 Spezialisierungen für maximale Sicherheit und Effizienz Ihrer Elektroinstallationen.
+              </p>
+            </div>
+
+            <div className="mt-12 grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+              {elektroServices.map((service, index) => (
+                <motion.div
+                  key={service.title}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                >
+                  <Link
+                    to={service.href}
+                    className="group flex items-center gap-3 rounded-2xl border border-border bg-background p-4 transition-all hover:border-primary/30 hover:shadow-md"
+                  >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+                      <service.icon className="h-5 w-5 text-primary" strokeWidth={1.5} />
+                    </div>
+                    <span className="font-medium text-foreground group-hover:text-primary transition-colors">
+                      {service.title}
+                    </span>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+
+            <div className="mt-10 text-center">
+              <Link to="/handwerk/elektrotechnik">
+                <AnimatedButton className="border-primary/30 hover:border-primary">
+                  Alle Elektro-Leistungen entdecken
+                </AnimatedButton>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Testimonials Section */}
+        <section className="bg-background py-20 lg:py-28">
+          <div className="container mx-auto px-4 lg:px-8">
+            <div className="mx-auto max-w-2xl text-center">
+              <span className="text-sm font-semibold uppercase tracking-wider text-primary">
+                Stimmen unserer Partner
+              </span>
+              <h2 className="mt-3 text-3xl font-black tracking-tight text-foreground lg:text-4xl">
+                Was Kunden über uns sagen
+              </h2>
+            </div>
+
+            <div className="mt-16 grid gap-8 md:grid-cols-3">
+              {testimonials.map((testimonial, index) => (
+                <motion.div
+                  key={testimonial.author}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="relative rounded-3xl bg-surface p-8 border border-border"
+                >
+                  <Quote className="absolute top-6 right-6 h-8 w-8 text-primary/20" />
+                  <div className="flex gap-1 mb-4">
+                    {Array.from({ length: testimonial.rating }).map((_, i) => (
+                      <Star key={i} className="h-5 w-5 fill-amber-400 text-amber-400" />
+                    ))}
+                  </div>
+                  <p className="text-foreground leading-relaxed italic">
+                    "{testimonial.quote}"
+                  </p>
+                  <div className="mt-6 flex items-center gap-4">
+                    <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Users className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-foreground">{testimonial.author}</p>
+                      <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Partner Section */}
+        <section className="bg-primary py-20 lg:py-28">
+          <div className="container mx-auto px-4 lg:px-8">
+            <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 items-center">
+              <div>
+                <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white/90">
+                  <Handshake className="h-4 w-4" />
+                  Für Handwerker
+                </span>
+                <h2 className="mt-6 text-3xl font-black tracking-tight text-white lg:text-4xl">
+                  Werde Partner<br />auf Augenhöhe
+                </h2>
+                <p className="mt-6 text-lg text-white/80 leading-relaxed">
+                  Du bist stolzer Handwerker und suchst einen Partner, der deine Arbeit wertschätzt? 
+                  Bei uns bist du keine Nummer – sondern ein geschätztes Mitglied unseres Teams.
+                </p>
+                <ul className="mt-8 space-y-4">
+                  {["Faire Konditionen", "Regelmäßige Aufträge", "Kollegiales Miteinander", "Pünktliche Bezahlung"].map((item) => (
+                    <li key={item} className="flex items-center gap-3 text-white">
+                      <CheckCircle2 className="h-5 w-5 text-white/80" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-8">
+                  <Link to="/partner-werden">
+                    <Button className="h-14 px-8 text-base rounded-full bg-white text-primary hover:bg-white/90">
+                      Jetzt Partner werden
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+              <div className="relative">
+                <div className="aspect-square overflow-hidden rounded-3xl bg-white/10 border border-white/20">
+                  <div className="flex h-full w-full flex-col items-center justify-center p-8 text-center">
+                    <Handshake className="h-20 w-20 text-white/40 mb-4" />
+                    <p className="text-white/70 font-medium">Partner-Netzwerk</p>
+                    <p className="text-sm text-white/50 mt-2">Echte Bilder unserer Partner</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Lead Magnet CTA */}
+        <section className="bg-background py-20 lg:py-28">
+          <div className="container mx-auto px-4 lg:px-8">
+            <div className="mx-auto max-w-3xl text-center">
+              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-semibold text-primary mb-6">
+                <Shield className="h-4 w-4" />
+                Kostenlos & unverbindlich
+              </div>
+              <h2 className="text-3xl font-black tracking-tight text-foreground lg:text-4xl">
+                Kostenloser Objekt-Check
+              </h2>
+              <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
+                Unsere Experten analysieren Ihr Objekt vor Ort und erstellen ein individuelles 
+                Konzept – ohne versteckte Kosten, ohne Verpflichtung.
+              </p>
+              <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:justify-center">
+                <Link to="/anfrage">
+                  <Button className="w-full sm:w-auto h-14 px-8 text-base rounded-full">
+                    Objekt-Check anfordern
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+                <Link to="/rechner">
+                  <AnimatedButton className="w-full sm:w-auto">
+                    Kosten berechnen
+                  </AnimatedButton>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Locations Section */}
+        <section className="bg-surface py-16 lg:py-20">
+          <div className="container mx-auto px-4 lg:px-8">
+            <div className="flex flex-col items-center text-center">
+              <MapPin className="h-8 w-8 text-primary mb-4" />
+              <h2 className="text-2xl font-bold text-foreground">
+                Unsere Standorte
+              </h2>
+              <p className="mt-2 text-muted-foreground">
+                Von München bis Berlin – immer in Ihrer Nähe.
+              </p>
+              <div className="mt-8 flex flex-wrap justify-center gap-3">
+                {locations.map((location) => (
+                  <Link
+                    key={location.name}
+                    to={location.href}
+                    className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm font-medium text-foreground transition-all hover:border-primary hover:text-primary"
+                  >
+                    <MapPin className="h-4 w-4" />
+                    {location.name}
+                  </Link>
+                ))}
+              </div>
+              <div className="mt-10 flex items-center gap-3 rounded-2xl bg-primary/10 px-6 py-4">
+                <Phone className="h-6 w-6 text-primary" />
+                <div className="text-left">
+                  <a href="tel:+498912345678" className="text-lg font-bold text-foreground hover:text-primary transition-colors">
+                    +49 89 123 456 78
+                  </a>
+                  <p className="text-sm text-muted-foreground">
+                    Hier gehen echte Menschen ans Telefon
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
       <Footer />
     </div>
