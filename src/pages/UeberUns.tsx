@@ -296,7 +296,7 @@ export default function UeberUns() {
         <section className="bg-surface py-20 lg:py-28">
           <div className="container mx-auto px-4 lg:px-8">
             <div className="mx-auto max-w-2xl text-center">
-              <span className="text-sm font-semibold uppercase tracking-wider text-primary">
+              <span className="text-sm font-semibold uppercase tracking-wider text-slate-600">
                 Unsere Werte
               </span>
               <h2 className="mt-3 text-3xl font-black tracking-tight text-foreground lg:text-4xl">
@@ -320,14 +320,14 @@ export default function UeberUns() {
                 >
                   <div className="absolute top-0 right-0 h-32 w-32 translate-x-8 -translate-y-8 rounded-full bg-primary/5 transition-transform group-hover:scale-150" />
                   <div className="relative">
-                    <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
-                      <value.icon className="h-7 w-7 text-primary" strokeWidth={1.5} />
+                    <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-800/10">
+                      <value.icon className="h-7 w-7 text-slate-700" strokeWidth={1.5} />
                     </div>
                     <h3 className="text-xl font-bold text-foreground">{value.title}</h3>
                     <p className="mt-3 text-muted-foreground leading-relaxed">
                       {value.description}
                     </p>
-                    <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
+                    <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-slate-800/10 px-3 py-1 text-sm font-medium text-slate-700">
                       <CheckCircle2 className="h-4 w-4" />
                       {value.highlight}
                     </div>
