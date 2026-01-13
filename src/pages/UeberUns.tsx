@@ -522,7 +522,7 @@ export default function UeberUns() {
         <section className="bg-background py-20 lg:py-28">
           <div className="container mx-auto px-4 lg:px-8">
             <div className="mx-auto max-w-3xl text-center">
-              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-semibold text-primary mb-6">
+              <div className="inline-flex items-center gap-2 rounded-full bg-slate-800/10 px-4 py-2 text-sm font-semibold text-slate-700 mb-6">
                 <Shield className="h-4 w-4" />
                 Kostenlos & unverbindlich
               </div>
@@ -535,15 +535,16 @@ export default function UeberUns() {
               </p>
               <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:justify-center">
                 <Link to="/anfrage">
-                  <Button className="w-full sm:w-auto h-14 px-8 text-base rounded-full">
+                  <Button className="w-full sm:w-auto h-14 px-8 text-base rounded-full bg-slate-800 text-white hover:bg-slate-700">
                     Objekt-Check anfordern
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
                 <Link to="/rechner">
-                  <AnimatedButton className="w-full sm:w-auto">
+                  <Button variant="outline" className="w-full sm:w-auto h-14 px-8 text-base rounded-full border-slate-800/30 text-slate-800 hover:bg-slate-800/10">
                     Kosten berechnen
-                  </AnimatedButton>
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
                 </Link>
               </div>
             </div>
