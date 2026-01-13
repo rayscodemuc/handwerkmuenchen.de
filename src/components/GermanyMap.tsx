@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Link } from "react-router-dom";
 import germanyMapSvg from "@/assets/germany-map.svg";
 
 interface Location {
@@ -50,7 +49,7 @@ export function GermanyMap({ className }: { className?: string }) {
             onMouseEnter={() => setActiveLocation(location.name)}
             onMouseLeave={() => setActiveLocation(null)}
           >
-            <Link to={location.href}>
+            <a href={location.href}>
               {/* Pulse animation ring */}
               <circle
                 cx={location.x}
@@ -114,7 +113,7 @@ export function GermanyMap({ className }: { className?: string }) {
               >
                 {location.name}
               </text>
-            </Link>
+            </a>
           </g>
         ))}
       </svg>

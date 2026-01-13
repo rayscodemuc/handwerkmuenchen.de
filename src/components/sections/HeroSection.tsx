@@ -1,5 +1,4 @@
 import { AnimatedButton } from "@/components/ui/animated-button";
-import { Link } from "react-router-dom";
 import heroImageDesktop from "@/assets/hero-facility-desktop.webp";
 import heroImageMobile from "@/assets/hero-facility-mobile.webp";
 import { CheckCircle2, Calculator } from "lucide-react";
@@ -9,6 +8,8 @@ import { motion } from "framer-motion";
 export function HeroSection() {
   // Preload hero image for LCP optimization
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const link = document.createElement('link');
     link.rel = 'preload';
     link.as = 'image';
@@ -19,7 +20,9 @@ export function HeroSection() {
     document.head.appendChild(link);
     
     return () => {
-      document.head.removeChild(link);
+      if (document.head.contains(link)) {
+        document.head.removeChild(link);
+      }
     };
   }, []);
 
@@ -99,19 +102,19 @@ export function HeroSection() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.5, ease: "easeOut" }}
             >
-              <Link to="/anfrage" className="w-full sm:w-auto">
+              <a href="/anfrage" className="w-full sm:w-auto">
                 <AnimatedButton className="w-full sm:w-auto bg-foreground text-white hover:bg-foreground/90 shadow-lg shadow-foreground/20 text-base px-8 py-5 sm:py-6">
                   Angebot anfragen
                 </AnimatedButton>
-              </Link>
-              <Link to="/rechner" className="w-full sm:w-auto">
+              </a>
+              <a href="/rechner" className="w-full sm:w-auto">
                 <AnimatedButton 
                   className="w-full sm:w-auto border-foreground/30 bg-white/50 sm:bg-transparent text-foreground hover:bg-foreground/10 text-base px-8 py-5 sm:py-6"
                 >
                   <Calculator className="w-5 h-5" />
                   Preis berechnen
                 </AnimatedButton>
-              </Link>
+              </a>
             </motion.div>
 
             {/* Trust Badge with delayed fade-in */}

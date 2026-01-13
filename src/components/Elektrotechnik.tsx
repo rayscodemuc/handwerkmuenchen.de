@@ -3,24 +3,13 @@ import { Footer } from "@/components/layout/Footer";
 import { CTASection } from "@/components/sections/CTASection";
 import { AnimatedButton } from "@/components/ui/animated-button";
 import { SEOHead } from "@/components/SEOHead";
-import { Link, useLocation } from "react-router-dom";
-import { Check, ChevronRight, Clock, Shield, Award, Phone, Zap, FileCheck, Thermometer, FileText, ArrowRight } from "lucide-react";
-import { useEffect } from "react";
+import { ChevronRight, Clock, Shield, Award, Phone, Zap, FileCheck, Thermometer, FileText, ArrowRight } from "lucide-react";
 import elektrotechnikImage from "@/assets/elektrotechnik-schaltschrank-dguv-v3-pruefung.jpg";
 
 export default function Elektrotechnik() {
-  const location = useLocation();
-  const canonicalUrl = `https://mrclean-services.de${location.pathname}`;
-
-  useEffect(() => {
-    const existingCanonical = document.querySelector('link[rel="canonical"]');
-    if (existingCanonical) existingCanonical.remove();
-    const link = document.createElement('link');
-    link.rel = 'canonical';
-    link.href = canonicalUrl;
-    document.head.appendChild(link);
-    return () => { link.remove(); };
-  }, [canonicalUrl]);
+  const canonicalUrl = typeof window !== 'undefined' 
+    ? `https://mrclean-services.de${window.location.pathname}`
+    : 'https://mrclean-services.de/handwerk/elektrotechnik';
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -69,9 +58,9 @@ export default function Elektrotechnik() {
         <nav className="bg-primary py-4" aria-label="Breadcrumb">
           <div className="container mx-auto px-4 lg:px-8">
             <ol className="flex items-center gap-2 text-sm">
-              <li><Link to="/" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">Startseite</Link></li>
+              <li><a href="/" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">Startseite</a></li>
               <ChevronRight className="h-4 w-4 text-primary-foreground/50" aria-hidden="true" />
-              <li><Link to="/handwerk" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">Handwerk</Link></li>
+              <li><a href="/handwerk" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">Handwerk</a></li>
               <ChevronRight className="h-4 w-4 text-primary-foreground/50" aria-hidden="true" />
               <li><span className="font-medium text-primary-foreground">Elektrotechnik</span></li>
             </ol>
@@ -92,11 +81,11 @@ export default function Elektrotechnik() {
                 Rechtssichere Elektroprüfung für komplexe Immobilienportfolios. Maximale Haftungssicherheit nach DIN VDE.
               </p>
               <div className="mt-8 flex flex-wrap gap-4">
-                <Link to="/anfrage">
+                <a href="/anfrage">
                   <AnimatedButton className="bg-white text-foreground hover:bg-foreground hover:text-white">
                     Kostenloses Angebot
                   </AnimatedButton>
-                </Link>
+                </a>
                 <a href="tel:+491234567890">
                   <AnimatedButton className="border-2 border-primary-foreground bg-transparent text-primary-foreground hover:bg-primary-foreground hover:text-primary">
                     <Phone className="mr-2 h-4 w-4" aria-hidden="true" />
@@ -268,25 +257,25 @@ export default function Elektrotechnik() {
                     { label: "Hamburg", href: "/standorte/hamburg" },
                     { label: "Berlin", href: "/standorte/berlin" },
                   ].map((link, i) => (
-                    <Link
+                    <a
                       key={i}
-                      to={link.href}
+                      href={link.href}
                       className="inline-flex items-center gap-1 rounded-full bg-background px-4 py-2 text-sm font-medium text-foreground border border-border hover:border-primary hover:text-primary transition-colors"
                     >
                       {link.label}
                       <ArrowRight className="h-3 w-3" aria-hidden="true" />
-                    </Link>
+                    </a>
                   ))}
                 </div>
               </div>
 
               {/* CTA */}
               <div className="mt-16 text-center">
-                <Link to="/anfrage">
+                <a href="/anfrage">
                   <AnimatedButton className="h-14 px-10 text-base">
                     Jetzt kostenlos anfragen
                   </AnimatedButton>
-                </Link>
+                </a>
               </div>
 
             </div>

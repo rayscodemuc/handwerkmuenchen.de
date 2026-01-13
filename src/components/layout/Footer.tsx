@@ -1,5 +1,4 @@
 import { Phone, Mail, MapPin, Download } from "lucide-react";
-import { Link } from "react-router-dom";
 import logo from "@/assets/logo.png";
 
 const footerLinks = {
@@ -36,9 +35,9 @@ export function Footer() {
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-7 lg:gap-8">
           {/* Logo & Contact Info */}
           <div className="lg:col-span-2">
-            <Link to="/" className="inline-block">
+            <a href="/" className="inline-block">
               <img src={logo} alt="Mr.Clean Services – Facility Management und Gebäudereinigung" className="h-12 w-auto" />
-            </Link>
+            </a>
             <p className="mt-6 max-w-sm text-muted-foreground leading-relaxed">
               Ihr Partner für professionelles Facility Management und Gebäudereinigung in der Region.
             </p>
@@ -66,12 +65,12 @@ export function Footer() {
             <ul className="mt-6 space-y-4">
               {footerLinks.leistungen.map((link) => (
                 <li key={link.name}>
-                  <Link
-                    to={link.href}
+                  <a
+                    href={link.href}
                     className="text-muted-foreground transition-colors hover:text-foreground"
                   >
                     {link.name}
-                  </Link>
+                  </a>
                 </li>
               ))}
             </ul>
@@ -85,12 +84,12 @@ export function Footer() {
             <ul className="mt-6 space-y-4">
               {footerLinks.unternehmen.map((link) => (
                 <li key={link.name}>
-                  <Link
-                    to={link.href}
+                  <a
+                    href={link.href}
                     className="text-muted-foreground transition-colors hover:text-foreground"
                   >
                     {link.name}
-                  </Link>
+                  </a>
                 </li>
               ))}
             </ul>
@@ -104,12 +103,12 @@ export function Footer() {
             <ul className="mt-6 space-y-4">
               {footerLinks.rechtliches.map((link) => (
                 <li key={link.name}>
-                  <Link
-                    to={link.href}
+                  <a
+                    href={link.href}
                     className="text-muted-foreground transition-colors hover:text-foreground"
                   >
                     {link.name}
-                  </Link>
+                  </a>
                 </li>
               ))}
             </ul>
@@ -158,12 +157,12 @@ export function Footer() {
                 { name: "Berlin", href: "/standorte/berlin" },
               ].map((city) => (
                 <li key={city.name}>
-                  <Link
-                    to={city.href}
+                  <a
+                    href={city.href}
                     className="text-muted-foreground transition-colors hover:text-foreground"
                   >
                     {city.name}
-                  </Link>
+                  </a>
                 </li>
               ))}
             </ul>

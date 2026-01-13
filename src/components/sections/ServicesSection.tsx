@@ -1,5 +1,4 @@
 import { AnimatedButton } from "@/components/ui/animated-button";
-import { Link } from "react-router-dom";
 import { Wrench, Building2, Sparkles, TreeDeciduous, ArrowRight } from "lucide-react";
 
 const services = [
@@ -52,9 +51,9 @@ export function ServicesSection() {
           {services.map((service) => {
             const Icon = service.icon;
             return (
-              <Link
+              <a
                 key={service.id}
-                to={service.href}
+                href={service.href}
                 className="group flex flex-col rounded-3xl border border-border bg-card p-8 transition-all duration-300 hover:border-primary/30 hover:shadow-xl lg:p-10"
               >
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
@@ -70,16 +69,16 @@ export function ServicesSection() {
                   Mehr erfahren
                   <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
                 </div>
-              </Link>
+              </a>
             );
           })}
         </div>
 
         {/* Bottom CTA */}
         <div className="mt-16 flex justify-center">
-          <Link to="/anfrage">
+          <a href="/anfrage">
             <AnimatedButton className="h-14 px-10 text-base">Angebot anfragen</AnimatedButton>
-          </Link>
+          </a>
         </div>
       </div>
     </section>

@@ -6,7 +6,6 @@ import {
 } from "@/components/ui/dialog";
 import { MapPin, Phone, Mail } from "lucide-react";
 import { GermanyMap } from "@/components/GermanyMap";
-import { Link } from "react-router-dom";
 
 interface LocationMapDialogProps {
   open: boolean;
@@ -43,9 +42,9 @@ export function LocationMapDialog({ open, onOpenChange }: LocationMapDialogProps
           {/* Locations Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             {locations.map((location) => (
-              <Link
+              <a
                 key={location.name}
-                to={location.href}
+                href={location.href}
                 onClick={() => onOpenChange(false)}
                 className="flex items-center gap-2 rounded-lg bg-primary/10 p-3 transition-colors hover:bg-primary/20"
               >
@@ -56,7 +55,7 @@ export function LocationMapDialog({ open, onOpenChange }: LocationMapDialogProps
                   <p className="font-semibold text-sm text-foreground">{location.name}</p>
                   <p className="text-xs text-muted-foreground">{location.description}</p>
                 </div>
-              </Link>
+              </a>
             ))}
           </div>
 

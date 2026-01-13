@@ -3,7 +3,6 @@ import { Footer } from "@/components/layout/Footer";
 import { ContactForm } from "@/components/ContactForm";
 import { GermanyMap } from "@/components/GermanyMap";
 import { Phone, Mail, MapPin, Clock } from "lucide-react";
-import { Link } from "react-router-dom";
 
 const contactInfo = [
   {
@@ -135,14 +134,14 @@ export default function Kontakt() {
 
             <div className="mt-12 grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7">
               {locations.map((location) => (
-                <Link
+                <a
                   key={location.name}
-                  to={location.href}
+                  href={location.href}
                   className="flex items-center justify-center gap-2 rounded-2xl border border-border bg-card p-6 text-center transition-all hover:border-primary hover:shadow-lg"
                 >
                   <MapPin className="h-5 w-5 text-primary" />
                   <span className="font-medium text-foreground">{location.name}</span>
-                </Link>
+                </a>
               ))}
             </div>
           </div>
