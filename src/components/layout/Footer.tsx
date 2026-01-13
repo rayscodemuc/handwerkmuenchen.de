@@ -21,12 +21,14 @@ const footerLinks = {
   ],
 };
 
-// Downloads - füge hier deine Dokumente hinzu
-// Lege die PDFs im Ordner public/documents/ ab
+// Partner-Unterlagen Downloads
 const downloads = [
-  { name: "Preisliste 2025", href: "/documents/preisliste-2025.pdf" },
-  { name: "AGB", href: "/documents/agb.pdf" },
-  { name: "Zertifikate", href: "/documents/zertifikate.pdf" },
+  { name: "Benötigte Unterlagen (Übersicht)", href: "/documents/benoetigte_Unterlagen_von_Nachunternehmer.pdf" },
+  { name: "Eigenerklärung Mindestlohn", href: "/documents/Eigenerklaerung_Mindestlohn.pdf" },
+  { name: "Eigenerklärung Steuern & Abgaben", href: "/documents/Eigenerklaerung_Steuern_Abgaben.pdf" },
+  { name: "Eigenerklärung Versicherungen", href: "/documents/Eigenerklaerung_Versicherungen.pdf" },
+  { name: "Nachunternehmervertrag", href: "/documents/Nachunternehmervertrag.pdf" },
+  { name: "Selbstauskunft", href: "/documents/Selbstauskunft.pdf" },
 ];
 
 export function Footer() {
