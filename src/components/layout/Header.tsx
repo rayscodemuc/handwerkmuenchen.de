@@ -317,6 +317,32 @@ export function Header() {
               ))}
             </div>
 
+            {/* Standorte Links */}
+            <div className={`pt-4 border-t ${isKontaktPage ? 'border-white/10' : 'border-foreground/10'}`}>
+              <p className={`text-xs font-semibold uppercase tracking-wider ${textColorMuted} mb-2`}>Standorte</p>
+              <div className="grid grid-cols-2 gap-1">
+                {[
+                  { name: "München", href: "/standorte/muenchen" },
+                  { name: "Augsburg", href: "/standorte/augsburg" },
+                  { name: "Ingolstadt", href: "/standorte/ingolstadt" },
+                  { name: "Frankfurt", href: "/standorte/frankfurt" },
+                  { name: "Nürnberg", href: "/standorte/nuernberg" },
+                  { name: "Hamburg", href: "/standorte/hamburg" },
+                  { name: "Berlin", href: "/standorte/berlin" },
+                ].map((city) => (
+                  <Link
+                    key={city.name}
+                    to={city.href}
+                    className={`flex items-center gap-1.5 py-2 text-sm ${textColorMuted}`}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <MapPin className="h-3 w-3" />
+                    {city.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
             <div className={`flex flex-col gap-3 pt-4 border-t ${isKontaktPage ? 'border-white/10' : 'border-foreground/10'}`}>
               <Link 
                 to="/24-7-service" 
@@ -326,16 +352,6 @@ export function Header() {
                 <Clock className="h-4 w-4" />
                 24/7 Notdienst
               </Link>
-              <button
-                onClick={() => {
-                  setLocationDialogOpen(true);
-                  setMobileMenuOpen(false);
-                }}
-                className={`flex items-center justify-center gap-2 rounded-full border ${borderColor} ${textColor} px-4 py-3 font-medium transition-colors ${hoverBg}`}
-              >
-                <MapPin className="h-4 w-4" />
-                Standorte
-              </button>
               <Link to="/partner-werden" onClick={() => setMobileMenuOpen(false)}>
                 <Button variant="hero-white" className="w-full rounded-full">
                   Partner werden
