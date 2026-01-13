@@ -535,7 +535,7 @@ export default function PartnerWerden() {
                 href="mailto:partner@mr-clean-services.de"
                 className="inline-flex h-14 items-center justify-center rounded-full border border-white/30 px-10 text-base font-medium text-primary-foreground transition-colors hover:bg-white/10"
               >
-                kontakt@mr-clean-services.de
+                partner@mr-clean-services.de
               </a>
             </div>
           </div>
