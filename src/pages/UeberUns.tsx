@@ -98,8 +98,8 @@ const portfolioSections = [
     subtitle: "Glänzender Eindruck",
     motto: "Sauberkeit, die begeistert",
     href: "/reinigung",
-    color: "bg-emerald-500/10 text-emerald-600",
-    borderColor: "border-emerald-500/30",
+    color: "bg-cyan-500/10 text-cyan-600",
+    borderColor: "border-cyan-500/30",
     services: [
       { icon: Building, title: "Büroreinigung", href: "/reinigung/bueroreinigung" },
       { icon: Sparkles, title: "Unterhaltsreinigung", href: "/reinigung/unterhaltsreinigung" },
