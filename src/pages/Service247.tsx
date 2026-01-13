@@ -94,6 +94,7 @@ const Service247 = () => {
                   onClick={() => setIsEmergencyDialogOpen(true)}
                   className="bg-red-600 text-white hover:bg-red-700 hover:animate-pulse"
                 >
+                  <Phone className="h-5 w-5" />
                   Notfall melden
                 </AnimatedButton>
               </div>
