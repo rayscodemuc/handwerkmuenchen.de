@@ -89,7 +89,7 @@ const Service247 = () => {
                 Notfälle kennen keine Öffnungszeiten. Deshalb sind wir rund um die Uhr für Sie da – 
                 an 365 Tagen im Jahr, auch an Wochenenden und Feiertagen.
               </p>
-              <div className="mt-10">
+              <div className="mt-10 flex items-center gap-4">
                 <AnimatedButton 
                   onClick={() => setIsEmergencyDialogOpen(true)}
                   className="bg-red-600 text-white hover:bg-red-700 hover:animate-pulse"
@@ -97,6 +97,10 @@ const Service247 = () => {
                   <Phone className="h-5 w-5" />
                   Notfall melden
                 </AnimatedButton>
+                <span className="relative flex h-4 w-4">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-4 w-4 bg-red-600"></span>
+                </span>
               </div>
 
               {/* Emergency Contact Dialog */}
