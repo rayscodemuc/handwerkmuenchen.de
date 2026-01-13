@@ -318,6 +318,24 @@ export function Header() {
             </div>
 
             <div className={`flex flex-col gap-3 pt-4 border-t ${isKontaktPage ? 'border-white/10' : 'border-foreground/10'}`}>
+              <Link 
+                to="/24-7-service" 
+                className="flex items-center justify-center gap-2 rounded-full bg-red-600 px-4 py-3 text-white font-semibold transition-colors hover:bg-red-700"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Clock className="h-4 w-4" />
+                24/7 Notdienst
+              </Link>
+              <button
+                onClick={() => {
+                  setLocationDialogOpen(true);
+                  setMobileMenuOpen(false);
+                }}
+                className={`flex items-center justify-center gap-2 rounded-full border ${borderColor} ${textColor} px-4 py-3 font-medium transition-colors ${hoverBg}`}
+              >
+                <MapPin className="h-4 w-4" />
+                Standorte
+              </button>
               <Link to="/partner-werden" onClick={() => setMobileMenuOpen(false)}>
                 <Button variant="hero-white" className="w-full rounded-full">
                   Partner werden
