@@ -198,9 +198,12 @@ export default function Rechner() {
           if (subtype === "buero") {
             const faktoren = preisfaktoren.reinigung.buero;
             if (isMonthly) {
-              // Monatspreis: ((Fläche / 200) * 33,50€) * 4,33 Wochen
-              const stundenProWoche = state.area_sqm / faktoren.flaeche_pro_stunde;
-              price = stundenProWoche * faktoren.stundensatz * 4.33;
+              // Monatspreis: ((Fläche / 200) * Frequenz pro Woche) * 33,50€ * 4,33 Wochen
+              // Beispiel: 500m², 3x/Woche = (500/200) * 3 = 7,5 Std/Woche
+              // 7,5 * 33,50 * 4,33 = 1.087,91€
+              const stundenProReinigung = state.area_sqm / faktoren.flaeche_pro_stunde;
+              const wochenstunden = stundenProReinigung * state.frequency_per_week;
+              price = wochenstunden * faktoren.stundensatz * 4.33;
             } else {
               // Einmalauftrag: Fläche * 4,50€/m²
               price = state.area_sqm * faktoren.einmal_qm;
