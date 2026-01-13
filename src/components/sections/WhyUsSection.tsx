@@ -1,4 +1,5 @@
-import { Shield, Clock, Award, Users } from "lucide-react";
+import { Shield, Clock, Award, Users, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const reasons = [
   {
@@ -38,6 +39,13 @@ export function WhyUsSection() {
           <p className="mt-6 text-lg text-muted-foreground">
             Was uns von anderen unterscheidet und warum Kunden uns vertrauen.
           </p>
+          <Link 
+            to="/ueber-uns" 
+            className="mt-6 inline-flex items-center gap-2 text-primary font-medium hover:underline"
+          >
+            Mehr über uns erfahren
+            <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
 
         {/* Reasons Grid */}
