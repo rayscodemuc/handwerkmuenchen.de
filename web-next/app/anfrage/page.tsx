@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -119,9 +117,7 @@ export default function Anfrage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <Header />
-      <main className="flex-1">
+    <>
         {/* Hero Section */}
         <section className="bg-primary py-20 lg:py-28">
           <div className="container mx-auto px-4 lg:px-8">
@@ -336,8 +332,6 @@ export default function Anfrage() {
             </div>
           </div>
         </section>
-      </main>
-      <Footer />
-    </div>
+    </>
   );
 }

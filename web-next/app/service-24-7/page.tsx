@@ -67,11 +67,11 @@ const benefits = [
   "Direkte Kommunikation mit Ihnen",
 ];
 
-const Service247 = () => {
+export default function Service247() {
   const [isEmergencyDialogOpen, setIsEmergencyDialogOpen] = useState(false);
 
   return (
-    <div className="flex-1">
+    <>
         {/* Hero Section */}
         <section className="bg-primary py-24 lg:py-32">
           <div className="container mx-auto px-4 lg:px-8">
@@ -250,8 +250,6 @@ const Service247 = () => {
         </section>
 
         <CTASection />
-    </div>
+    </>
   );
-};
-
-export default Service247;
+}

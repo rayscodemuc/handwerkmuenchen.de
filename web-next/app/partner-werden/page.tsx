@@ -174,8 +174,8 @@ export default function PartnerWerden() {
   };
 
   return (
-    <div className="flex-1">
-        {/* Hero Section */}
+    <>
+      {/* Hero Section */}
         <section className="bg-primary py-20 lg:py-28">
           <div className="container mx-auto px-4 lg:px-8">
             <p className="text-sm font-medium uppercase tracking-wider text-primary-foreground/70">
@@ -207,7 +207,7 @@ export default function PartnerWerden() {
               {benefits.map((benefit) => (
                 <div
                   key={benefit.title}
-                  className="rounded-3xl bg-card p-8 transition-all duration-300 hover:shadow-lg"
+                  className="rounded-3xl bg-surface p-8 transition-all duration-300 hover:shadow-lg"
                 >
                   <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
                     <benefit.icon className="h-7 w-7 text-primary" />
@@ -225,7 +225,7 @@ export default function PartnerWerden() {
         </section>
 
         {/* Partner Types Section */}
-        <section className="bg-card py-20 lg:py-28">
+        <section className="bg-surface py-20 lg:py-28">
           <div className="container mx-auto px-4 lg:px-8">
             <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 items-center">
               <div>
@@ -286,7 +286,7 @@ export default function PartnerWerden() {
                 </p>
               </div>
 
-              <form onSubmit={handleSubmit} className="rounded-3xl bg-card p-8 lg:p-10">
+              <form onSubmit={handleSubmit} className="rounded-3xl bg-surface p-8 lg:p-10">
                 <div className="grid gap-6 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="company_name">Firmenname *</Label>
@@ -538,6 +538,6 @@ export default function PartnerWerden() {
             </div>
           </div>
         </section>
-    </div>
+    </>
   );
 }

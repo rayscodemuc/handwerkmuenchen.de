@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import { CTASection } from "@/components/sections/CTASection";
 import { AnimatedButton } from "@/components/ui/animated-button";
 import { ChevronRight, Phone, Leaf, Scissors, Flower, TreeDeciduous, Droplets, Calendar, Shield, CheckCircle, BarChart, Check, ArrowRight } from "lucide-react";
@@ -63,10 +61,10 @@ const trustBadges = [
 
 export default function Gruenpflege() {
   return (
-    <div className="flex min-h-screen flex-col">
-      <Header />
+    <>
+      
 
-      <main className="flex-1">
+      
         {/* Breadcrumb */}
         <nav className="bg-primary py-4" aria-label="Breadcrumb">
           <div className="container mx-auto px-4 lg:px-8">
@@ -186,7 +184,7 @@ export default function Gruenpflege() {
               <div className="space-y-4">
                 {services.map((service, i) => {
                   const Icon = service.icon || Check;
-                  return (
+                    return (
                     <div
                       key={i}
                       className="flex items-start gap-4 rounded-xl border border-border p-5 transition-colors hover:border-primary/30 hover:bg-muted/50"
@@ -257,9 +255,8 @@ export default function Gruenpflege() {
           </div>
         </article>
 
+
         <CTASection />
-      </main>
-      <Footer />
-    </div>
+    </>
   );
 }

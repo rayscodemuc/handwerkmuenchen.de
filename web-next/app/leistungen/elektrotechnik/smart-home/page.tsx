@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import { CTASection } from "@/components/sections/CTASection";
 import { AnimatedButton } from "@/components/ui/animated-button";
 import { ChevronRight, Phone, Clock, Shield, Award, Cpu, ArrowRight, Lightbulb, Thermometer, Lock, Blinds } from "lucide-react";
@@ -23,10 +21,10 @@ const features = [
 
 export default function SmartHome() {
   return (
-    <div className="flex min-h-screen flex-col">
-      <Header />
+    <>
       
-      <main className="flex-1">
+      
+      
         <nav className="bg-primary py-4" aria-label="Breadcrumb">
           <div className="container mx-auto px-4 lg:px-8">
             <ol className="flex items-center gap-2 text-sm flex-wrap">
@@ -162,9 +160,8 @@ export default function SmartHome() {
           </div>
         </article>
 
+
         <CTASection />
-      </main>
-      <Footer />
-    </div>
+    </>
   );
 }

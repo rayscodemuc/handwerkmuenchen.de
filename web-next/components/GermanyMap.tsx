@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import germanyMapSvg from "@/assets/germany-map.svg";
+import Image from "next/image";
 
 interface Location {
   name: string;
@@ -32,7 +32,7 @@ export function GermanyMap({ className }: { className?: string }) {
       {/* Germany Map as background with brand colors */}
       <div className="absolute inset-0 flex items-center justify-center">
         <img 
-          src={germanyMapSvg} 
+          src="/assets/germany-map.svg"
           alt="Deutschlandkarte mit Standorten" 
           className="w-full h-full object-contain"
         />

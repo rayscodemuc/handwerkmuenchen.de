@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import { CTASection } from "@/components/sections/CTASection";
 import { AnimatedButton } from "@/components/ui/animated-button";
 import { ChevronRight, Phone, Building2, Clock, Sparkles, Coffee, Trash2, Users, Shield, CheckCircle, BarChart, Leaf, Check, ArrowRight } from "lucide-react";
@@ -88,10 +86,10 @@ const trustBadges = [
 
 export default function Bueroreinigung() {
   return (
-    <div className="flex min-h-screen flex-col">
-      <Header />
+    <>
+      
 
-      <main className="flex-1">
+      
         {/* Breadcrumb */}
         <nav className="bg-primary py-4" aria-label="Breadcrumb">
           <div className="container mx-auto px-4 lg:px-8">
@@ -282,9 +280,8 @@ export default function Bueroreinigung() {
           </div>
         </article>
 
+
         <CTASection />
-      </main>
-      <Footer />
-    </div>
+    </>
   );
 }

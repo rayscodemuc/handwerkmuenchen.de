@@ -1,8 +1,6 @@
 "use client";
 
 import type { Metadata } from "next";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import Link from "next/link";
 import { AnimatedButton } from "@/components/ui/animated-button";
 import { Button } from "@/components/ui/button";
@@ -161,9 +159,7 @@ const locations = [
 
 export default function UeberUns() {
   return (
-    <div className="theme-about flex min-h-screen flex-col">
-      <Header />
-      <main className="flex-1">
+    <>
         {/* Hero Section */}
         <section className="relative flex min-h-[600px] items-center bg-gradient-to-br from-primary via-primary to-primary/95 lg:min-h-[700px]">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/5 via-transparent to-transparent" />
@@ -538,8 +534,6 @@ export default function UeberUns() {
             </div>
           </div>
         </section>
-      </main>
-      <Footer />
-    </div>
+    </>
   );
 }

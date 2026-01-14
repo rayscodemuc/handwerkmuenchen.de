@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import { ContactForm } from "@/components/ContactForm";
 import { GermanyMap } from "@/components/GermanyMap";
 import { Phone, Mail, MapPin, Clock } from "lucide-react";
@@ -56,9 +54,7 @@ const locations = [
 
 export default function Kontakt() {
   return (
-    <div className="theme-contact flex min-h-screen flex-col">
-      <Header />
-      <main className="flex-1">
+    <>
         {/* Hero Section */}
         <section className="relative flex min-h-[540px] items-center bg-primary lg:min-h-[650px]">
           <div className="container mx-auto px-4 lg:px-8">
@@ -98,7 +94,7 @@ export default function Kontakt() {
                   {contactInfo.map((info) => (
                     <div
                       key={info.title}
-                      className="flex items-start gap-4 rounded-2xl bg-card p-6"
+                      className="flex items-start gap-4 rounded-2xl bg-surface p-6"
                     >
                       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10">
                         <info.icon className="h-6 w-6 text-primary" strokeWidth={1.5} />
@@ -156,8 +152,6 @@ export default function Kontakt() {
             </div>
           </div>
         </section>
-      </main>
-      <Footer />
-    </div>
+    </>
   );
 }

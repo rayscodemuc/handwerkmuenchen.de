@@ -41,118 +41,141 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${baseUrl}/service-24-7`,
       lastModified,
     },
+    // Kategorie-Landingpages
     {
-      url: `${baseUrl}/leistungen/elektrotechnik`,
+      url: `${baseUrl}/handwerk`,
       lastModified,
     },
     {
-      url: `${baseUrl}/leistungen/elektrotechnik/e-mobility`,
+      url: `${baseUrl}/reinigung`,
       lastModified,
     },
     {
-      url: `${baseUrl}/leistungen/elektrotechnik/elektro-notdienst`,
+      url: `${baseUrl}/facility-management`,
       lastModified,
     },
     {
-      url: `${baseUrl}/leistungen/elektrotechnik/hauselektrik`,
+      url: `${baseUrl}/aussenanlagen`,
+      lastModified,
+    },
+    // Handwerk: Elektrotechnik
+    {
+      url: `${baseUrl}/handwerk/elektrotechnik`,
       lastModified,
     },
     {
-      url: `${baseUrl}/leistungen/elektrotechnik/klingelanlagen`,
+      url: `${baseUrl}/handwerk/elektrotechnik/e-mobility`,
       lastModified,
     },
     {
-      url: `${baseUrl}/leistungen/elektrotechnik/led`,
+      url: `${baseUrl}/handwerk/elektrotechnik/elektro-notdienst`,
       lastModified,
     },
     {
-      url: `${baseUrl}/leistungen/elektrotechnik/messsysteme`,
+      url: `${baseUrl}/handwerk/elektrotechnik/hauselektrik`,
       lastModified,
     },
     {
-      url: `${baseUrl}/leistungen/elektrotechnik/neubau`,
+      url: `${baseUrl}/handwerk/elektrotechnik/klingelanlagen`,
       lastModified,
     },
     {
-      url: `${baseUrl}/leistungen/elektrotechnik/reparaturen`,
+      url: `${baseUrl}/handwerk/elektrotechnik/led`,
       lastModified,
     },
     {
-      url: `${baseUrl}/leistungen/elektrotechnik/sanierung`,
+      url: `${baseUrl}/handwerk/elektrotechnik/messsysteme`,
       lastModified,
     },
     {
-      url: `${baseUrl}/leistungen/elektrotechnik/sicherheitstechnik`,
+      url: `${baseUrl}/handwerk/elektrotechnik/neubau`,
       lastModified,
     },
     {
-      url: `${baseUrl}/leistungen/elektrotechnik/smart-home`,
+      url: `${baseUrl}/handwerk/elektrotechnik/reparaturen`,
       lastModified,
     },
     {
-      url: `${baseUrl}/leistungen/winterdienst`,
+      url: `${baseUrl}/handwerk/elektrotechnik/sanierung`,
       lastModified,
     },
     {
-      url: `${baseUrl}/leistungen/unterhaltsreinigung`,
+      url: `${baseUrl}/handwerk/elektrotechnik/sicherheitstechnik`,
       lastModified,
     },
     {
-      url: `${baseUrl}/leistungen/grundreinigung`,
+      url: `${baseUrl}/handwerk/elektrotechnik/smart-home`,
+      lastModified,
+    },
+    // Handwerk: Weitere Services
+    {
+      url: `${baseUrl}/handwerk/sanitaer-heizung`,
       lastModified,
     },
     {
-      url: `${baseUrl}/leistungen/fensterreinigung`,
+      url: `${baseUrl}/handwerk/service-wartung`,
+      lastModified,
+    },
+    // Reinigung
+    {
+      url: `${baseUrl}/reinigung/unterhaltsreinigung`,
       lastModified,
     },
     {
-      url: `${baseUrl}/leistungen/glas-fassade`,
+      url: `${baseUrl}/reinigung/grundreinigung`,
       lastModified,
     },
     {
-      url: `${baseUrl}/leistungen/sonderreinigung`,
+      url: `${baseUrl}/reinigung/fensterreinigung`,
       lastModified,
     },
     {
-      url: `${baseUrl}/leistungen/grauflaechenreinigung`,
+      url: `${baseUrl}/reinigung/glas-fassade`,
       lastModified,
     },
     {
-      url: `${baseUrl}/leistungen/tiefgaragenreinigung`,
+      url: `${baseUrl}/reinigung/sonderreinigung`,
       lastModified,
     },
     {
-      url: `${baseUrl}/leistungen/gruenpflege`,
+      url: `${baseUrl}/reinigung/grauflaechenreinigung`,
       lastModified,
     },
     {
-      url: `${baseUrl}/leistungen/baumpflege`,
+      url: `${baseUrl}/reinigung/tiefgaragenreinigung`,
       lastModified,
     },
     {
-      url: `${baseUrl}/leistungen/hausmeisterservice`,
+      url: `${baseUrl}/reinigung/bueroreinigung`,
+      lastModified,
+    },
+    // Facility Management
+    {
+      url: `${baseUrl}/facility-management/hausmeisterservice`,
       lastModified,
     },
     {
-      url: `${baseUrl}/leistungen/objektmanagement`,
+      url: `${baseUrl}/facility-management/objektmanagement`,
       lastModified,
     },
     {
-      url: `${baseUrl}/leistungen/service-wartung`,
+      url: `${baseUrl}/facility-management/winterdienst`,
+      lastModified,
+    },
+    // Außenanlagen
+    {
+      url: `${baseUrl}/aussenanlagen/gruenpflege`,
       lastModified,
     },
     {
-      url: `${baseUrl}/leistungen/sanitaer-heizung`,
+      url: `${baseUrl}/aussenanlagen/baumpflege`,
       lastModified,
     },
     {
-      url: `${baseUrl}/leistungen/winterdienst-aussen`,
+      url: `${baseUrl}/aussenanlagen/winterdienst-aussen`,
       lastModified,
     },
-    {
-      url: `${baseUrl}/leistungen/bueroreinigung`,
-      lastModified,
-    },
+    // Standorte
     {
       url: `${baseUrl}/standorte/muenchen`,
       lastModified,
@@ -179,22 +202,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${baseUrl}/standorte/frankfurt`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/handwerk`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/reinigung`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/facility-management`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/aussenanlagen`,
       lastModified,
     },
   ]

@@ -1,6 +1,14 @@
 import type { Metadata } from "next";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { StickyCTA, MobileStickyCTA } from "@/components/StickyCTA";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { CookieConsent } from "@/components/CookieConsent";
+import ScrollToTop from "@/components/ScrollToTop";
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryProvider } from "@/components/providers/QueryProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -39,13 +47,25 @@ export default function RootLayout({
   return (
     <html lang="de">
       <body className="antialiased">
-        <div className="flex min-h-screen flex-col">
-          <Header />
-          <main className="flex-1">
-            {children}
-          </main>
-          <Footer />
-        </div>
+        <QueryProvider>
+          <ThemeProvider>
+            <TooltipProvider>
+              <ScrollToTop />
+              <div className="flex min-h-screen flex-col">
+                <Header />
+                <main className="flex-1">
+                  {children}
+                </main>
+                <Footer />
+              </div>
+              <StickyCTA />
+              <MobileStickyCTA />
+              <CookieConsent />
+              <Toaster />
+              <Sonner />
+            </TooltipProvider>
+          </ThemeProvider>
+        </QueryProvider>
       </body>
     </html>
   );

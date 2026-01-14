@@ -1,7 +1,4 @@
 "use client";
-
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import { CTASection } from "@/components/sections/CTASection";
 import { AnimatedButton } from "@/components/ui/animated-button";
 import { 
@@ -122,12 +119,9 @@ export default function Elektrotechnik() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <Header />
-      
-      <main className="flex-1">
-        {/* Breadcrumb */}
-        <nav className="bg-primary py-4" aria-label="Breadcrumb">
+    <>
+      {/* Breadcrumb */}
+      <nav className="bg-primary py-4" aria-label="Breadcrumb">
           <div className="container mx-auto px-4 lg:px-8">
             <ol className="flex items-center gap-2 text-sm">
               <li><Link href="/" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">Startseite</Link></li>
@@ -391,8 +385,6 @@ export default function Elektrotechnik() {
             </div>
           </div>
         </section>
-      </main>
-      <Footer />
-    </div>
+    </>
   );
 }

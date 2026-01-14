@@ -1,5 +1,3 @@
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import { CTASection } from "@/components/sections/CTASection";
 import { CategoryTrustSection } from "@/components/sections/CategoryTrustSection";
 import { AnimatedButton } from "@/components/ui/animated-button";
@@ -67,9 +65,7 @@ const reasons = [
 
 export default function AussenanlagenCategory() {
   return (
-    <div className="flex min-h-screen flex-col">
-      <Header />
-      <main className="flex-1">
+    <>
         <nav className="bg-primary py-4" aria-label="Breadcrumb">
           <div className="container mx-auto px-4 lg:px-8">
             <ol className="flex items-center gap-2 text-sm">
@@ -151,8 +147,6 @@ export default function AussenanlagenCategory() {
 
         <CategoryTrustSection />
         <CTASection />
-      </main>
-      <Footer />
-    </div>
+    </>
   );
 }

@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import { AnimatedButton } from "@/components/ui/animated-button";
 import { ContactForm } from "@/components/ContactForm";
 import { ChevronRight, Wrench, Building2, Sparkles, TreePine, ArrowRight, MapPin } from "lucide-react";
@@ -51,9 +49,7 @@ const locationSlug = "hamburg";
 
 export default function Hamburg() {
   return (
-    <div className="flex min-h-screen flex-col">
-      <Header />
-      <main className="flex-1">
+    <>
         <section className="relative flex min-h-[540px] items-center overflow-hidden bg-background lg:min-h-[650px]">
           <div className="absolute inset-0">
             <img
@@ -206,8 +202,6 @@ export default function Hamburg() {
             </div>
           </div>
         </section>
-      </main>
-      <Footer />
-    </div>
+    </>
   );
 }

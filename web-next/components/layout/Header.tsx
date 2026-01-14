@@ -161,9 +161,9 @@ export function Header() {
             </Link>
             <button 
               onClick={() => setLocationDialogOpen(true)}
-              className={`flex h-12 w-12 items-center justify-center rounded-full border ${borderColor} ${textColor} transition-colors ${hoverBg}`}
+              className={`flex h-12 w-12 items-center justify-center rounded-full border ${borderColor} transition-colors ${hoverBg}`}
             >
-              <MapPin className="h-5 w-5" />
+              <MapPin className={`h-5 w-5 ${textColor}`} />
             </button>
 
             {/* CTA Button */}

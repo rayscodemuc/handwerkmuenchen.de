@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -13,9 +11,7 @@ export const metadata: Metadata = {
 
 export default function Impressum() {
   return (
-    <div className="flex min-h-screen flex-col">
-      <Header />
-      <main className="flex-1">
+    <>
         {/* Hero Section */}
         <section className="bg-primary py-16 lg:py-20">
           <div className="container mx-auto px-4 lg:px-8">
@@ -116,8 +112,6 @@ export default function Impressum() {
             </div>
           </div>
         </section>
-      </main>
-      <Footer />
-    </div>
+    </>
   );
 }
