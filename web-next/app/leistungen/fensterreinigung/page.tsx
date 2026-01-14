@@ -103,7 +103,7 @@ export default function Fensterreinigung() {
               </li>
               <ChevronRight className="h-4 w-4 text-primary-foreground/50" aria-hidden="true" />
               <li>
-                <Link href="/leistungen/unterhaltsreinigung" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">
+                <Link href="/reinigung" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">
                   Reinigung
                 </Link>
               </li>

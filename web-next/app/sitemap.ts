@@ -181,5 +181,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${baseUrl}/standorte/frankfurt`,
       lastModified,
     },
+    {
+      url: `${baseUrl}/handwerk`,
+      lastModified,
+    },
+    {
+      url: `${baseUrl}/reinigung`,
+      lastModified,
+    },
+    {
+      url: `${baseUrl}/facility-management`,
+      lastModified,
+    },
+    {
+      url: `${baseUrl}/aussenanlagen`,
+      lastModified,
+    },
   ]
 }

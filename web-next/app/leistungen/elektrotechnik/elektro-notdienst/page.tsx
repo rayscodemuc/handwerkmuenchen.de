@@ -25,9 +25,9 @@ export default function ElektroNotdienst() {
             <ol className="flex items-center gap-2 text-sm flex-wrap">
               <li><Link href="/" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">Startseite</Link></li>
               <ChevronRight className="h-4 w-4 text-primary-foreground/50" />
-              <li><Link href="/leistungen/elektrotechnik" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">Handwerk</Link></li>
+              <li><Link href="/handwerk" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">Handwerk</Link></li>
               <ChevronRight className="h-4 w-4 text-primary-foreground/50" />
-              <li><Link href="/leistungen/elektrotechnik" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">Elektrotechnik</Link></li>
+              <li><Link href="/handwerk" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">Elektrotechnik</Link></li>
               <ChevronRight className="h-4 w-4 text-primary-foreground/50" />
               <li><span className="font-medium text-primary-foreground">Notdienst</span></li>
             </ol>

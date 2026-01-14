@@ -103,7 +103,7 @@ export default function Objektmanagement() {
               </li>
               <ChevronRight className="h-4 w-4 text-primary-foreground/50" aria-hidden="true" />
               <li>
-                <Link href="/leistungen/objektmanagement" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">
+                <Link href="/facility-management" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">
                   Facility Management
                 </Link>
               </li>

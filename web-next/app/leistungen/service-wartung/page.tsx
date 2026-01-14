@@ -103,7 +103,7 @@ export default function ServiceWartung() {
               </li>
               <ChevronRight className="h-4 w-4 text-primary-foreground/50" aria-hidden="true" />
               <li>
-                <Link href="/leistungen/elektrotechnik" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">
+                <Link href="/handwerk" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">
                   Handwerk
                 </Link>
               </li>
