@@ -10,7 +10,7 @@ const features = [
 
 export function SplitSection() {
   return (
-    <section id="about" className="bg-surface py-28 lg:py-36">
+    <section id="about" className="bg-card py-28 lg:py-36">
       <div className="container mx-auto px-4 lg:px-8">
         <div className="grid items-center gap-16 lg:grid-cols-2 lg:gap-24">
           {/* Image Placeholder */}

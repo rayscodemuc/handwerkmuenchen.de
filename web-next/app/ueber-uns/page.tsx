@@ -502,7 +502,7 @@ export default function UeberUns() {
         </section>
 
         {/* Locations Section */}
-        <section className="bg-surface py-16 lg:py-20">
+        <section className="bg-card py-16 lg:py-20">
           <div className="container mx-auto px-4 lg:px-8">
             <div className="flex flex-col items-center text-center">
               <MapPin className="h-8 w-8 text-slate-700 mb-4" />

@@ -28,7 +28,7 @@ const reasons = [
 
 export function WhyUsSection() {
   return (
-    <section className="bg-surface py-28 lg:py-36">
+    <section className="bg-card py-28 lg:py-36">
       <div className="container mx-auto px-4 lg:px-8">
         {/* Section Header */}
         <div className="mx-auto max-w-xl text-center">
