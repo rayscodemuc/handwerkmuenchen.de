@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import { CTASection } from "@/components/sections/CTASection";
 import { AnimatedButton } from "@/components/ui/animated-button";
 import Link from "next/link";
@@ -73,9 +71,7 @@ const Service247 = () => {
   const [isEmergencyDialogOpen, setIsEmergencyDialogOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <Header />
-      <main className="flex-1">
+    <div className="flex-1">
         {/* Hero Section */}
         <section className="bg-primary py-24 lg:py-32">
           <div className="container mx-auto px-4 lg:px-8">
@@ -254,8 +250,6 @@ const Service247 = () => {
         </section>
 
         <CTASection />
-      </main>
-      <Footer />
     </div>
   );
 };

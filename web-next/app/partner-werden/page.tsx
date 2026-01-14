@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import { AnimatedButton } from "@/components/ui/animated-button";
 import { Check, Users, TrendingUp, Shield, Handshake, Clock, Award, Send, Download, Upload, FileText, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -176,9 +174,7 @@ export default function PartnerWerden() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <Header />
-      <main className="flex-1">
+    <div className="flex-1">
         {/* Hero Section */}
         <section className="bg-primary py-20 lg:py-28">
           <div className="container mx-auto px-4 lg:px-8">
@@ -542,8 +538,6 @@ export default function PartnerWerden() {
             </div>
           </div>
         </section>
-      </main>
-      <Footer />
     </div>
   );
 }
