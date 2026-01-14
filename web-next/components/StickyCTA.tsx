@@ -1,14 +1,17 @@
-import { Link, useLocation } from "react-router-dom";
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Calculator } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 
 export function StickyCTA() {
-  const location = useLocation();
+  const pathname = usePathname();
   const [isVisible, setIsVisible] = useState(false);
   
-  const isRechnerPage = location.pathname === "/rechner";
-  const isHomepage = location.pathname === "/";
+  const isRechnerPage = pathname === "/rechner";
+  const isHomepage = pathname === "/";
 
   useEffect(() => {
     if (isRechnerPage) {
@@ -47,7 +50,7 @@ export function StickyCTA() {
       className="fixed right-0 top-1/2 -translate-y-1/2 z-50 hidden lg:block"
     >
       <Link
-        to="/rechner"
+        href="/rechner"
         className="flex items-center gap-3 text-white px-5 py-4 rounded-l-xl shadow-2xl transition-all hover:pr-8 group animate-pulse hover:animate-none"
         style={{ backgroundColor: '#578ea5' }}
       >
@@ -59,11 +62,11 @@ export function StickyCTA() {
 }
 
 export function MobileStickyCTA() {
-  const location = useLocation();
+  const pathname = usePathname();
   const [isVisible, setIsVisible] = useState(false);
   
-  const isRechnerPage = location.pathname === "/rechner";
-  const isHomepage = location.pathname === "/";
+  const isRechnerPage = pathname === "/rechner";
+  const isHomepage = pathname === "/";
 
   useEffect(() => {
     if (isRechnerPage) {
@@ -100,7 +103,7 @@ export function MobileStickyCTA() {
       className="fixed bottom-4 left-4 right-4 z-50 lg:hidden"
     >
       <Link
-        to="/rechner"
+        href="/rechner"
         className="flex items-center justify-center gap-2 text-white px-6 py-4 rounded-xl shadow-2xl w-full font-semibold animate-pulse hover:animate-none"
         style={{ backgroundColor: '#578ea5' }}
       >

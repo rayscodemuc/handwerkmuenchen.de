@@ -90,7 +90,7 @@ export default function Anfrage() {
     const result = anfrageSchema.safeParse(formData);
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};
-      result.error.errors.forEach((err) => {
+      result.error.issues.forEach((err) => {
         if (err.path[0]) {
           fieldErrors[err.path[0] as string] = err.message;
         }

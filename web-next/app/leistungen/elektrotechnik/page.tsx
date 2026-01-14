@@ -132,7 +132,7 @@ export default function Elektrotechnik() {
             <ol className="flex items-center gap-2 text-sm">
               <li><Link href="/" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">Startseite</Link></li>
               <ChevronRight className="h-4 w-4 text-primary-foreground/50" aria-hidden="true" />
-              <li><Link href="/handwerk" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">Handwerk</Link></li>
+              <li><Link href="/leistungen/elektrotechnik" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">Handwerk</Link></li>
               <ChevronRight className="h-4 w-4 text-primary-foreground/50" aria-hidden="true" />
               <li><span className="font-medium text-primary-foreground">Elektrotechnik</span></li>
             </ol>

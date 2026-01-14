@@ -57,7 +57,7 @@ export default function Ingolstadt() {
         <section className="relative flex min-h-[540px] items-center overflow-hidden bg-background lg:min-h-[650px]">
           <div className="absolute inset-0">
             <img
-              src={heroImage}
+              src={typeof heroImage === 'string' ? heroImage : heroImage.src}
               alt={heroAltText}
               className="h-full w-full object-cover"
             />
