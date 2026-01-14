@@ -175,7 +175,7 @@ export function ContactForm({
   // Success State
   if (isSuccess) {
     return (
-      <div className={cn("rounded-3xl p-8 lg:p-10", isDark ? "bg-primary-foreground/10" : "bg-surface", className)}>
+      <div className={cn("rounded-3xl p-8 lg:p-10", isDark ? "bg-primary-foreground/10" : "bg-card", className)}>
         <div className="flex flex-col items-center text-center py-8">
           <div className={cn(
             "flex h-20 w-20 items-center justify-center rounded-full mb-6",
@@ -219,7 +219,7 @@ export function ContactForm({
   const labelClasses = isDark ? "text-primary-foreground" : "";
 
   return (
-    <div className={cn("rounded-3xl p-8 lg:p-10", isDark ? "" : "bg-surface", className)}>
+    <div className={cn("rounded-3xl p-8 lg:p-10", isDark ? "" : "bg-card", className)}>
       {showTitle && (
         <>
           <h2 className={cn("text-2xl font-bold", isDark ? "text-primary-foreground" : "text-foreground")}>

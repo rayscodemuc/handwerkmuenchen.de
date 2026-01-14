@@ -187,7 +187,7 @@ export default function Anfrage() {
 
               {/* Form */}
               <div className="lg:col-span-2">
-                <form onSubmit={handleSubmit} className="rounded-3xl bg-surface p-8 lg:p-10">
+                <form onSubmit={handleSubmit} className="rounded-3xl bg-card p-8 lg:p-10">
                   <h3 className="text-xl font-bold text-foreground mb-8">
                     Ihre Anfrage
                   </h3>

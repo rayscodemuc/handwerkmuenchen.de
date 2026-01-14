@@ -98,7 +98,7 @@ export default function Kontakt() {
                   {contactInfo.map((info) => (
                     <div
                       key={info.title}
-                      className="flex items-start gap-4 rounded-2xl bg-surface p-6"
+                      className="flex items-start gap-4 rounded-2xl bg-card p-6"
                     >
                       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10">
                         <info.icon className="h-6 w-6 text-primary" strokeWidth={1.5} />
