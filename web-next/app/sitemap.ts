@@ -150,6 +150,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified,
     },
     {
+      url: `${baseUrl}/leistungen/bueroreinigung`,
+      lastModified,
+    },
+    {
       url: `${baseUrl}/standorte/muenchen`,
       lastModified,
     },
