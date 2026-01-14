@@ -1,26 +1,24 @@
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
+import type { Metadata } from "next";
 import { HeroSection } from "@/components/sections/HeroSection";
 import { ServicesSection } from "@/components/sections/ServicesSection";
 import { WhyUsSection } from "@/components/sections/WhyUsSection";
 import { CTASection } from "@/components/sections/CTASection";
-import { SEOHead } from "@/components/SEOHead";
+
+export const metadata: Metadata = {
+  title: "Facility Management, Handwerk & Reinigung in München, Hamburg, Berlin & bundesweit",
+  description: "Mr. Clean Services: Ihr zentraler Partner für Handwerk, Facility Management und Reinigung. Ein Ansprechpartner, volle Koordination & geprüfte Fachqualität aus einer Hand.",
+  alternates: {
+    canonical: "/",
+  },
+};
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col">
-      <SEOHead
-        title="Facility Management, Handwerk & Reinigung in München, Hamburg, Berlin & bundesweit"
-        description="Mr. Clean Services: Ihr zentraler Partner für Handwerk, Facility Management und Reinigung. Ein Ansprechpartner, volle Koordination & geprüfte Fachqualität aus einer Hand."
-      />
-      <Header />
-      <main className="flex-1">
-        <HeroSection />
-        <ServicesSection />
-        <WhyUsSection />
-        <CTASection />
-      </main>
-      <Footer />
-    </div>
+    <>
+      <HeroSection />
+      <ServicesSection />
+      <WhyUsSection />
+      <CTASection />
+    </>
   );
 }
