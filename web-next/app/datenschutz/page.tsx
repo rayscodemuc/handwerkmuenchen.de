@@ -43,13 +43,13 @@ export default function Datenschutz() {
               </p>
               <p className="text-foreground mb-6">
                 Mr. Clean Services GmbH<br />
-                Landsbergerstraße<br />
-                81241 München<br />
+                Landsbergerstr. 456 RGB<br />
+                DE-81241 München<br />
                 Deutschland
               </p>
               <p className="text-foreground mb-6">
-                Telefon: +49 (0)89 25006354<br />
-                E-Mail: kontakt@mr-clean-services.de<br />
+                Telefon: +49 (0)89 25006355<br />
+                E-Mail: kontakt@mr-clean.services<br />
                 Website: www.mr-clean-services.de
               </p>
 

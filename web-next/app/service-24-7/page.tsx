@@ -116,28 +116,28 @@ export default function Service247() {
                     </p>
                     
                     <a 
-                      href="tel:+498925006354"
+                      href="tel:+498925006356"
                       className="flex items-center gap-4 rounded-xl bg-primary p-4 text-primary-foreground transition-colors hover:bg-primary/90"
                     >
                       <Phone className="h-8 w-8" />
                       <div>
                         <p className="text-sm font-medium opacity-80">24/7 Notfall-Hotline</p>
-                        <p className="text-xl font-bold">+49 (0)89 25006354</p>
+                        <p className="text-xl font-bold">+49 (0)89 25006356</p>
                       </div>
                     </a>
 
                     <div className="space-y-3">
                       <a 
-                        href="mailto:notdienst@mr-clean-services.de"
+                        href="mailto:notdienst@mr-clean.services"
                         className="flex items-center gap-3 rounded-lg border border-border p-3 transition-colors hover:bg-muted"
                       >
                         <Mail className="h-5 w-5 text-primary" />
-                        <span className="font-medium">notdienst@mr-clean-services.de</span>
+                        <span className="font-medium">notdienst@mr-clean.services</span>
                       </a>
                       
                       <div className="flex items-start gap-3 rounded-lg border border-border p-3">
                         <MapPin className="h-5 w-5 flex-shrink-0 text-primary" />
-                        <span className="text-foreground/70">Agnes-Bernauer-Str. 11, 80687 München</span>
+                        <span className="text-foreground/70">Landsbergerstr. 456 RGB<br />DE-81241 München</span>
                       </div>
                     </div>
 
@@ -238,11 +238,11 @@ export default function Service247() {
               </p>
               <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
                 <a 
-                  href="tel:+498925006354"
+                  href="tel:+498925006355"
                   className="inline-flex items-center gap-2 text-xl font-bold text-primary hover:underline"
                 >
                   <Phone className="h-6 w-6" />
-                  +49 (0)89 25006354
+                  +49 (0)89 25006355
                 </a>
               </div>
             </div>

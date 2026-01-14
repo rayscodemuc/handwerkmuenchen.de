@@ -128,8 +128,8 @@ const preisfaktoren = {
     },
   },
   tiefgarage: {
-    // Berechnung: Stellplätze * 25m² (inkl. Fahrspur) * 12,50€/m²
-    qm_pro_stellplatz: 25,
+    // Berechnung: Stellplätze * 9m² (inkl. Fahrspur) * 12,50€/m²
+    qm_pro_stellplatz: 9,
     preis_pro_qm: 12.50,
   },
   hausmeister: {
@@ -229,7 +229,7 @@ export default function Rechner() {
         }
         break;
       case "tiefgarage": {
-        // Berechnung: Stellplätze * 25m² pro Stellplatz (inkl. Fahrspur) * 12,50€/m²
+        // Berechnung: Stellplätze * 9m² pro Stellplatz (inkl. Fahrspur) * 12,50€/m²
         const flaeche = state.parking_spaces * preisfaktoren.tiefgarage.qm_pro_stellplatz;
         price = flaeche * preisfaktoren.tiefgarage.preis_pro_qm;
         break;
@@ -604,7 +604,7 @@ export default function Rechner() {
                                   <span>500</span>
                                 </div>
                                 <p className="text-xs text-muted-foreground mt-2">
-                                  Kalkulation: {state.parking_spaces} Stellplätze × 25 m² = <span className="font-semibold">{(state.parking_spaces * 25).toLocaleString("de-DE")} m²</span> Reinigungsfläche
+                                  Kalkulation: {state.parking_spaces} Stellplätze × 9 m² = <span className="font-semibold">{(state.parking_spaces * 9).toLocaleString("de-DE")} m²</span> Reinigungsfläche
                                 </p>
                               </div>
 
@@ -769,7 +769,7 @@ export default function Rechner() {
                                 <h3 className="font-semibold mb-2">Tiefgaragenreinigung (Nassreinigung)</h3>
                                 <p className="text-muted-foreground">
                                   Reinigung für <span className="font-semibold text-foreground">{state.parking_spaces} Stellplätze</span>{" "}
-                                  (<span className="font-semibold text-foreground">{(state.parking_spaces * 25).toLocaleString("de-DE")} m²</span> Gesamtfläche)
+                                  (<span className="font-semibold text-foreground">{(state.parking_spaces * 9).toLocaleString("de-DE")} m²</span> Gesamtfläche)
                                 </p>
                                 <p className="text-sm text-muted-foreground mt-2">
                                   Inklusive Entfernung von Reifenabrieb, Ölflecken und Reinigung der Entwässerungsrinnen.

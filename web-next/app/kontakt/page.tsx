@@ -23,15 +23,15 @@ const contactInfo = [
   {
     icon: Mail,
     title: "E-Mail",
-    content: "info@mrclean-services.de",
+    content: "kontakt@mr-clean.services",
     subContent: "Antwort innerhalb 24h",
-    href: "mailto:info@mrclean-services.de",
+    href: "mailto:kontakt@mr-clean.services",
   },
   {
     icon: MapPin,
     title: "Adresse",
-    content: "Musterstraße 123",
-    subContent: "12345 Berlin",
+    content: "Landsbergerstr. 456 RGB",
+    subContent: "DE-81241 München",
   },
   {
     icon: Clock,

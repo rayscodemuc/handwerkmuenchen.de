@@ -37,19 +37,19 @@ const contactInfo = [
   {
     icon: Phone,
     title: "Telefon",
-    content: "+49 (0)89 25006354",
-    href: "tel:+498925006354",
+    content: "+49 (0)89 25006355",
+    href: "tel:+498925006355",
   },
   {
     icon: Mail,
     title: "E-Mail",
-    content: "kontakt@mr-clean-services.de",
-    href: "mailto:kontakt@mr-clean-services.de",
+    content: "kontakt@mr-clean.services",
+    href: "mailto:kontakt@mr-clean.services",
   },
   {
     icon: MapPin,
     title: "Adresse",
-    content: "Agnes-Bernauer-Str. 11, 80687 München",
+    content: "Landsbergerstr. 456 RGB, DE-81241 München",
     href: null,
   },
   {

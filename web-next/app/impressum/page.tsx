@@ -29,8 +29,8 @@ export default function Impressum() {
               <h2 className="text-2xl font-bold mt-10 mb-4">Angaben gemäß § 5 DDG</h2>
               <p className="text-foreground mb-6">
                 Mr Clean Services GmbH<br />
-                Landsbergerstraße<br />
-                81241 München
+                Landsbergerstr. 456 RGB<br />
+                DE-81241 München
               </p>
 
               <h2 className="text-2xl font-bold mt-10 mb-4">Vertreten durch</h2>
@@ -40,8 +40,8 @@ export default function Impressum() {
 
               <h2 className="text-2xl font-bold mt-10 mb-4">Kontakt</h2>
               <p className="text-foreground mb-6">
-                Telefon: +49 (0)89 25006354<br />
-                E-Mail: kontakt@mr-clean-services.de
+                Telefon: +49 (0)89 25006355<br />
+                E-Mail: kontakt@mr-clean.services
               </p>
 
               <h2 className="text-2xl font-bold mt-10 mb-4">Registereintrag</h2>

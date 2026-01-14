@@ -524,16 +524,16 @@ export default function PartnerWerden() {
             </p>
             <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
               <a 
-                href="tel:+498925006354"
+                href="tel:+498925006355"
                 className="inline-flex h-14 items-center justify-center rounded-full bg-white px-10 text-base font-medium text-primary transition-colors hover:bg-foreground hover:text-background"
               >
-                +49 (0)89 25006354
+                +49 (0)89 25006355
               </a>
               <a 
-                href="mailto:partner@mr-clean-services.de"
+                href="mailto:partner@mr-clean.services"
                 className="inline-flex h-14 items-center justify-center rounded-full border border-white/30 px-10 text-base font-medium text-primary-foreground transition-colors hover:bg-white/10"
               >
-                partner@mr-clean-services.de
+                partner@mr-clean.services
               </a>
             </div>
           </div>
