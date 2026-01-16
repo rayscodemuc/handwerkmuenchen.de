@@ -11,8 +11,17 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import "./globals.css";
 
+// Base URL aus Environment Variable, Fallback zu Production Domain
+const getBaseUrl = (): string => {
+  return (
+    process.env.SITE_URL ||
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    'https://www.mr-clean.services'
+  )
+}
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://DEINE-DOMAIN.DE"),
+  metadataBase: new URL(getBaseUrl()),
   title: {
     default: "Calm Design Foundation",
     template: "%s | Calm Design Foundation",
