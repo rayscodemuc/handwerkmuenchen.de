@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import {
   Breadcrumb,
@@ -174,17 +174,37 @@ export default function Rechner() {
   const [state, setState] = useState<CalculatorState>(initialState);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const stepsContainerRef = useRef<HTMLDivElement>(null);
 
   const updateState = (updates: Partial<CalculatorState>) => {
     setState((prev) => ({ ...prev, ...updates }));
+  };
+
+  // Scroll-Funktion zum Zentrieren des Viewports
+  const scrollToCenter = () => {
+    setTimeout(() => {
+      if (stepsContainerRef.current) {
+        stepsContainerRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+          inline: "nearest",
+        });
+      }
+    }, 100);
   };
 
   const updateStateAndAdvance = (updates: Partial<CalculatorState>, shouldAdvance = false) => {
     setState((prev) => ({ ...prev, ...updates }));
     if (shouldAdvance) {
       setTimeout(() => setStep((s) => s + 1), 300);
+      scrollToCenter();
     }
   };
+
+  // Scroll beim Step-Wechsel
+  useEffect(() => {
+    scrollToCenter();
+  }, [step]);
 
   // Auto-advance für Step 1: Service auswählen
   const selectService = (service: ServiceType) => {
@@ -216,6 +236,7 @@ export default function Rechner() {
 
   // Auto-advance für Step 2: Auftragsart (bei Reinigung/Tiefgarage)
   const selectAuftragsart = (auftragsart: AuftragsartType) => {
+    scrollToCenter();
       // Wenn nicht mehr Büroreinigung, Add-ons zurücksetzen
       const resetAddons = state.service_subtype !== "buero" ? {
         has_glass_addon: false,
@@ -615,7 +636,7 @@ export default function Rechner() {
           </div>
 
           {/* Steps Container */}
-          <div className="max-w-4xl mx-auto">
+          <div ref={stepsContainerRef} className="max-w-4xl mx-auto">
             <AnimatePresence mode="wait">
               {isSuccess ? (
                 <motion.div
@@ -1927,7 +1948,10 @@ export default function Rechner() {
                       <div className="flex justify-between mt-10 pt-6 border-t">
                         <Button
                           variant="outline"
-                          onClick={() => setStep((s) => s - 1)}
+                          onClick={() => {
+                            setStep((s) => s - 1);
+                            scrollToCenter();
+                          }}
                           disabled={step === 1}
                           className="gap-2"
                         >
@@ -1937,7 +1961,10 @@ export default function Rechner() {
 
                         {step < 5 ? (
                           <Button
-                            onClick={() => setStep((s) => s + 1)}
+                            onClick={() => {
+                              setStep((s) => s + 1);
+                              scrollToCenter();
+                            }}
                             disabled={!canProceed()}
                             className="gap-2"
                           >
