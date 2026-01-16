@@ -190,7 +190,7 @@ export default function UeberUns() {
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
-                <a href="tel:+498912345678" className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-slate-800/40 bg-slate-800/10 px-6 py-3 font-semibold text-slate-800 backdrop-blur-sm transition-all hover:bg-slate-800/20">
+                <a href="tel:+498925006355" className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-slate-800/40 bg-slate-800/10 px-6 py-3 font-semibold text-slate-800 backdrop-blur-sm transition-all hover:bg-slate-800/20">
                   <Phone className="h-5 w-5" />
                   Direkt anrufen
                 </a>
@@ -523,8 +523,8 @@ export default function UeberUns() {
               <div className="mt-10 flex items-center gap-3 rounded-2xl bg-slate-800/10 px-6 py-4">
                 <Phone className="h-6 w-6 text-slate-700" />
                 <div className="text-left">
-                  <a href="tel:+498912345678" className="text-lg font-bold text-foreground hover:text-slate-600 transition-colors">
-                    +49 89 123 456 78
+                  <a href="tel:+498925006355" className="text-lg font-bold text-foreground hover:text-slate-600 transition-colors">
+                    +49 (0)89 25006355
                   </a>
                   <p className="text-sm text-muted-foreground">
                     Hier gehen echte Menschen ans Telefon

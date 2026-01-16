@@ -54,7 +54,7 @@ export default function Sanierung() {
                 <Link href="/anfrage">
                   <AnimatedButton className="bg-white text-foreground hover:bg-foreground hover:text-white">Bestandscheck anfragen</AnimatedButton>
                 </Link>
-                <a href="tel:+491234567890">
+                <a href="tel:+498925006355">
                   <AnimatedButton className="border-2 border-primary-foreground bg-transparent text-primary-foreground hover:bg-primary-foreground hover:text-primary">
                     <Phone className="mr-2 h-4 w-4" />Beratung anrufen
                   </AnimatedButton>

@@ -3,6 +3,7 @@ import { ContactForm } from "@/components/ContactForm";
 import { GermanyMap } from "@/components/GermanyMap";
 import { Phone, Mail, MapPin, Clock } from "lucide-react";
 import Link from "next/link";
+import { BUSINESS } from "@/lib/business";
 
 export const metadata: Metadata = {
   title: "Kontakt",
@@ -16,29 +17,29 @@ const contactInfo = [
   {
     icon: Phone,
     title: "Telefon",
-    content: "+49 123 456 789",
+    content: BUSINESS.phoneDisplay || BUSINESS.phone,
     subContent: "Mo-Fr 8:00-18:00 Uhr",
-    href: "tel:+49123456789",
+    href: `tel:${BUSINESS.phone}`,
   },
   {
     icon: Mail,
     title: "E-Mail",
-    content: "kontakt@mr-clean.services",
+    content: BUSINESS.email || "kontakt@mr-clean.services",
     subContent: "Antwort innerhalb 24h",
-    href: "mailto:kontakt@mr-clean.services",
+    href: `mailto:${BUSINESS.email || "kontakt@mr-clean.services"}`,
   },
   {
     icon: MapPin,
     title: "Adresse",
-    content: "Landsbergerstr. 456 RGB",
-    subContent: "DE-81241 München",
+    content: BUSINESS.address?.street || "Landsbergerstr. 456 RGB",
+    subContent: `DE-${BUSINESS.address?.zip || "81241"} ${BUSINESS.address?.city || "München"}`,
   },
   {
     icon: Clock,
-    title: "Notdienst",
-    content: "24/7 erreichbar",
-    subContent: "+49 123 456 000",
-    href: "tel:+49123456000",
+    title: "24/7 Notfall-Hotline",
+    content: BUSINESS.hotlinePhoneDisplay || BUSINESS.hotlinePhone || BUSINESS.phoneDisplay || BUSINESS.phone,
+    subContent: "Rund um die Uhr erreichbar",
+    href: `tel:${BUSINESS.hotlinePhone || BUSINESS.phone}`,
   },
 ];
 

@@ -100,7 +100,10 @@ export default function AussenanlagenCategory() {
 
                 <p className="mt-8 sm:mt-10 mx-auto max-w-[600px] text-base sm:text-lg leading-relaxed text-foreground/70">
                     Verwilderte Flächen kosten Geld und Image. Wir steuern Ihre Außenanlagen mit <span className="text-foreground font-bold underline decoration-primary">ökologischer Härte</span>. 
-                    Vom Sommerschnitt bis zur Winterhaftung – wir zähmen das Umfeld Ihrer Immobilie.
+                    Vom Sommerschnitt bis zur Winterhaftung – wir zähmen das Umfeld Ihrer Immobilie.{" "}
+                    <Link href="/standorte/muenchen" className="text-primary hover:underline font-medium">
+                      Standort München
+                    </Link>
                 </p>
 
                 <div className="mt-10 sm:mt-12 flex justify-center">

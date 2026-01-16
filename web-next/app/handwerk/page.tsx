@@ -112,7 +112,10 @@ export default function HandwerkCategory() {
                   Wir beherrschen die Technik von morgen, um die Werte von heute zu erhalten. 
                   <span className="text-foreground font-medium"> Modernste Sensorik und digitale Präzision </span> 
                   als Werkzeug – aber niemals als Ersatz für den Menschen. 
-                  <span className="text-foreground font-medium"> Technisches Maximum trifft echte Handschlagqualität</span>.
+                  <span className="text-foreground font-medium"> Technisches Maximum trifft echte Handschlagqualität</span>.{" "}
+                  <Link href="/standorte/muenchen" className="text-primary hover:underline font-medium">
+                    Standort München
+                  </Link>
                 </p>
 
                 {/* CTA Button - Centered */}

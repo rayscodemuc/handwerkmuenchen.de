@@ -3,6 +3,7 @@
 import { Phone, Mail, MapPin, Download } from "lucide-react";
 import Link from "next/link";
 import logo from "@/assets/logo.png";
+import { BUSINESS } from "@/lib/business";
 
 const footerLinks = {
   leistungen: [
@@ -41,7 +42,7 @@ export function Footer() {
           {/* Logo & Contact Info */}
           <div className="lg:col-span-2">
             <Link href="/" className="inline-block">
-              <img src={typeof logo === 'string' ? logo : logo.src} alt="Mr.Clean Services – Facility Management und Gebäudereinigung" className="h-12 w-auto" />
+              <img src={typeof logo === 'string' ? logo : logo.src} alt="Mr. Clean Services GmbH – Facility Management und Gebäudereinigung" className="h-12 w-auto" />
             </Link>
             <p className="mt-6 max-w-sm text-muted-foreground leading-relaxed">
               Ihr Partner für professionelles Facility Management und Gebäudereinigung in der Region.
@@ -49,15 +50,23 @@ export function Footer() {
             <div className="mt-8 space-y-4">
               <div className="flex items-center gap-3 text-muted-foreground">
                 <Phone className="h-5 w-5 text-primary" strokeWidth={1.5} />
-                <a href="tel:+498925006355" className="hover:text-foreground transition-colors">+49 (0)89 25006355</a>
+                <a href={`tel:${BUSINESS.phone}`} className="hover:text-foreground transition-colors">
+                  {BUSINESS.phoneDisplay || BUSINESS.phone}
+                </a>
               </div>
               <div className="flex items-center gap-3 text-muted-foreground">
                 <Mail className="h-5 w-5 text-primary" strokeWidth={1.5} />
-                <a href="mailto:kontakt@mr-clean.services" className="hover:text-foreground transition-colors">kontakt@mr-clean.services</a>
+                <a href={`mailto:${BUSINESS.email}`} className="hover:text-foreground transition-colors">
+                  {BUSINESS.email}
+                </a>
               </div>
               <div className="flex items-start gap-3 text-muted-foreground">
                 <MapPin className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" strokeWidth={1.5} />
-                <span>Landsbergerstr. 456 RGB<br />DE-81241 München</span>
+                <span>
+                  {BUSINESS.address?.street || "Landsbergerstr. 456 RGB"}
+                  <br />
+                  DE-{BUSINESS.address?.zip || "81241"} {BUSINESS.address?.city || "München"}
+                </span>
               </div>
             </div>
           </div>
@@ -176,13 +185,13 @@ export function Footer() {
 
         {/* SEO Text */}
         <p className="mt-12 text-sm text-muted-foreground leading-relaxed max-w-4xl">
-          Mr. Clean Services ist Ihr überregionaler Partner für professionelles Facility Management, Handwerk und Reinigung in den Metropolregionen Deutschlands.
+          Mr. Clean Services GmbH ist Ihr überregionaler Partner für professionelles Facility Management, Handwerk und Reinigung in den Metropolregionen Deutschlands.
         </p>
 
         {/* Bottom Section */}
         <div className="mt-16 flex flex-col items-center justify-between gap-6 border-t border-border pt-10 md:flex-row">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Mr.Clean Services. Alle Rechte vorbehalten.
+            © {new Date().getFullYear()} Mr. Clean Services GmbH. Alle Rechte vorbehalten.
           </p>
           <p className="text-sm text-muted-foreground">
             Mit Sorgfalt für Ihr Objekt.

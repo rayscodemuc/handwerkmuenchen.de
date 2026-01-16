@@ -16,11 +16,14 @@ export function CTASection() {
           </p>
 
           {/* CTA Button */}
-          <div className="mt-12 flex justify-center">
+          <div className="mt-12 flex flex-col sm:flex-row justify-center items-center gap-4">
             <Link href="/kontakt">
               <AnimatedButton className="h-14 px-10 text-base bg-foreground text-background hover:bg-background hover:text-foreground">
                 Kontakt aufnehmen
               </AnimatedButton>
+            </Link>
+            <Link href="/standorte/muenchen" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors text-sm font-medium">
+              Standort München
             </Link>
           </div>
         </div>

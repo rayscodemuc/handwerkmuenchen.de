@@ -11,68 +11,19 @@ const nextConfig: NextConfig = {
         destination: "/service-24-7",
         permanent: true,
       },
+      // Haupt-Redirect: /leistungen (mit und ohne Slash) -> /reinigung
+      // Diese müssen GANZ OBEN stehen, damit sie nicht von anderen Regeln überschrieben werden
+      {
+        source: "/leistungen",
+        destination: "/reinigung",
+        permanent: true,
+      },
+      {
+        source: "/leistungen/",
+        destination: "/reinigung",
+        permanent: true,
+      },
       // Handwerk Redirects
-      {
-        source: "/leistungen/elektrotechnik",
-        destination: "/handwerk/elektrotechnik",
-        permanent: true,
-      },
-      // Elektrotechnik Unterseiten Redirects
-      {
-        source: "/leistungen/elektrotechnik/e-mobility",
-        destination: "/handwerk/elektrotechnik/e-mobility",
-        permanent: true,
-      },
-      {
-        source: "/leistungen/elektrotechnik/elektro-notdienst",
-        destination: "/handwerk/elektrotechnik/elektro-notdienst",
-        permanent: true,
-      },
-      {
-        source: "/leistungen/elektrotechnik/hauselektrik",
-        destination: "/handwerk/elektrotechnik/hauselektrik",
-        permanent: true,
-      },
-      {
-        source: "/leistungen/elektrotechnik/klingelanlagen",
-        destination: "/handwerk/elektrotechnik/klingelanlagen",
-        permanent: true,
-      },
-      {
-        source: "/leistungen/elektrotechnik/led",
-        destination: "/handwerk/elektrotechnik/led",
-        permanent: true,
-      },
-      {
-        source: "/leistungen/elektrotechnik/messsysteme",
-        destination: "/handwerk/elektrotechnik/messsysteme",
-        permanent: true,
-      },
-      {
-        source: "/leistungen/elektrotechnik/neubau",
-        destination: "/handwerk/elektrotechnik/neubau",
-        permanent: true,
-      },
-      {
-        source: "/leistungen/elektrotechnik/reparaturen",
-        destination: "/handwerk/elektrotechnik/reparaturen",
-        permanent: true,
-      },
-      {
-        source: "/leistungen/elektrotechnik/sanierung",
-        destination: "/handwerk/elektrotechnik/sanierung",
-        permanent: true,
-      },
-      {
-        source: "/leistungen/elektrotechnik/sicherheitstechnik",
-        destination: "/handwerk/elektrotechnik/sicherheitstechnik",
-        permanent: true,
-      },
-      {
-        source: "/leistungen/elektrotechnik/smart-home",
-        destination: "/handwerk/elektrotechnik/smart-home",
-        permanent: true,
-      },
       {
         source: "/leistungen/sanitaer-heizung",
         destination: "/handwerk/sanitaer-heizung",
@@ -83,60 +34,10 @@ const nextConfig: NextConfig = {
         destination: "/handwerk/service-wartung",
         permanent: true,
       },
-      // Elektrotechnik Unterseiten Redirects
+      // Elektrotechnik: Catch-all für alle Unterseiten (muss vor spezifischen Redirects stehen)
       {
-        source: "/leistungen/elektrotechnik/e-mobility",
-        destination: "/handwerk/elektrotechnik/e-mobility",
-        permanent: true,
-      },
-      {
-        source: "/leistungen/elektrotechnik/elektro-notdienst",
-        destination: "/handwerk/elektrotechnik/elektro-notdienst",
-        permanent: true,
-      },
-      {
-        source: "/leistungen/elektrotechnik/hauselektrik",
-        destination: "/handwerk/elektrotechnik/hauselektrik",
-        permanent: true,
-      },
-      {
-        source: "/leistungen/elektrotechnik/klingelanlagen",
-        destination: "/handwerk/elektrotechnik/klingelanlagen",
-        permanent: true,
-      },
-      {
-        source: "/leistungen/elektrotechnik/led",
-        destination: "/handwerk/elektrotechnik/led",
-        permanent: true,
-      },
-      {
-        source: "/leistungen/elektrotechnik/messsysteme",
-        destination: "/handwerk/elektrotechnik/messsysteme",
-        permanent: true,
-      },
-      {
-        source: "/leistungen/elektrotechnik/neubau",
-        destination: "/handwerk/elektrotechnik/neubau",
-        permanent: true,
-      },
-      {
-        source: "/leistungen/elektrotechnik/reparaturen",
-        destination: "/handwerk/elektrotechnik/reparaturen",
-        permanent: true,
-      },
-      {
-        source: "/leistungen/elektrotechnik/sanierung",
-        destination: "/handwerk/elektrotechnik/sanierung",
-        permanent: true,
-      },
-      {
-        source: "/leistungen/elektrotechnik/sicherheitstechnik",
-        destination: "/handwerk/elektrotechnik/sicherheitstechnik",
-        permanent: true,
-      },
-      {
-        source: "/leistungen/elektrotechnik/smart-home",
-        destination: "/handwerk/elektrotechnik/smart-home",
+        source: "/leistungen/elektrotechnik/:path*",
+        destination: "/handwerk/elektrotechnik/:path*",
         permanent: true,
       },
       // Reinigung Redirects

@@ -43,7 +43,7 @@ export default function ElektroNotdienst() {
                 Stromausfall? Kurzschluss? Brandgeruch aus der Steckdose? Unser Notdienst ist rund um die Uhr für Sie da – schnell, sicher und professionell.
               </p>
               <div className="mt-8 flex flex-wrap gap-4">
-                <a href="tel:+491234567890">
+                <a href="tel:+498925006355">
                   <AnimatedButton className="bg-red-500 text-white hover:bg-red-600">
                     <Phone className="mr-2 h-4 w-4" />
                     Jetzt Notdienst rufen
@@ -147,7 +147,7 @@ export default function ElektroNotdienst() {
               </div>
 
               <div className="mt-16 text-center">
-                <a href="tel:+491234567890">
+                <a href="tel:+498925006355">
                   <AnimatedButton className="h-14 px-10 text-base bg-red-500 hover:bg-red-600">
                     <Phone className="mr-2 h-5 w-5" />
                     Jetzt Notdienst rufen

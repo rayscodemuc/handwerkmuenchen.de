@@ -104,7 +104,10 @@ export default function ReinigungCategory() {
                 {/* Subheadline */}
                 <p className="mt-8 sm:mt-10 mx-auto max-w-[600px] text-base sm:text-lg leading-relaxed text-foreground/70">
                     Hygiene ist kein Zufall, sondern das Ergebnis höchster Disziplin. Wir schützen die Substanz Ihrer Immobilien durch <span className="text-foreground font-bold underline decoration-primary">systematische Reinheit</span>. 
-                    Wo andere nur oberflächlich wischen, sichern wir langfristig die Qualität und Gesundheit Ihres Arbeitsumfelds.
+                    Wo andere nur oberflächlich wischen, sichern wir langfristig die Qualität und Gesundheit Ihres Arbeitsumfelds.{" "}
+                    <Link href="/standorte/muenchen" className="text-primary hover:underline font-medium">
+                      Standort München
+                    </Link>
                 </p>
 
                 {/* CTA Button - Centered */}

@@ -132,7 +132,7 @@ export default function Objektmanagement() {
                     Kostenloses Angebot
                   </AnimatedButton>
                 </Link>
-                <a href="tel:+491234567890">
+                <a href="tel:+498925006355">
                   <AnimatedButton className="border-2 border-primary-foreground bg-transparent text-primary-foreground hover:bg-primary-foreground hover:text-primary">
                     <Phone className="mr-2 h-4 w-4" aria-hidden="true" />
                     Jetzt anrufen

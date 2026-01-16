@@ -22,7 +22,7 @@ const services = [
   {
     title: "Handwerk & Technik",
     description: "Elektrotechnik, Sanitär & Heizung sowie regelmäßige Wartung für Ihre Immobilien.",
-    href: "/leistungen/elektrotechnik",
+    href: "/handwerk",
     icon: Wrench,
   },
   {
@@ -180,6 +180,30 @@ export default function Muenchen() {
                   </div>
                 </Link>
               ))}
+            </div>
+            
+            {/* Interne Verlinkung zu Hub-Seiten */}
+            <div className="mt-12 text-center">
+              <p className="text-sm text-muted-foreground mb-4">
+                Unsere Leistungen in München:
+              </p>
+              <div className="flex flex-wrap justify-center gap-4">
+                <Link href="/reinigung" className="text-sm text-primary hover:underline">
+                  Reinigung in München
+                </Link>
+                <span className="text-muted-foreground">·</span>
+                <Link href="/facility-management" className="text-sm text-primary hover:underline">
+                  Facility Management in München
+                </Link>
+                <span className="text-muted-foreground">·</span>
+                <Link href="/aussenanlagen" className="text-sm text-primary hover:underline">
+                  Außenanlagen in München
+                </Link>
+                <span className="text-muted-foreground">·</span>
+                <Link href="/handwerk" className="text-sm text-primary hover:underline">
+                  Handwerk in München
+                </Link>
+              </div>
             </div>
           </div>
         </section>

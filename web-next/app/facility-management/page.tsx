@@ -110,7 +110,10 @@ export default function FacilityManagementCategory() {
                 {/* Subheadline */}
                 <p className="mt-8 sm:mt-10 mx-auto max-w-[600px] text-base sm:text-lg leading-relaxed text-foreground/70">
                     Wir beenden das Zeitalter der passiven Verwaltung. Während andere nur auf Schäden reagieren, steuern wir Ihre Immobilien mit <span className="text-foreground font-bold underline decoration-primary">proaktiver Intelligenz</span>. 
-                    Wir sichern nicht nur den Bestand, wir steigern die Performance.
+                    Wir sichern nicht nur den Bestand, wir steigern die Performance.{" "}
+                    <Link href="/standorte/muenchen" className="text-primary hover:underline font-medium">
+                      Standort München
+                    </Link>
                 </p>
 
                 {/* CTA Button - Centered */}

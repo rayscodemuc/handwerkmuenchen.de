@@ -180,17 +180,28 @@ export default function Rechner() {
     setState((prev) => ({ ...prev, ...updates }));
   };
 
-  // Scroll-Funktion zum Zentrieren des Viewports
+  // Scroll-Funktion zum Zentrieren des Viewports (Mobile-optimiert)
   const scrollToCenter = () => {
     setTimeout(() => {
       if (stepsContainerRef.current) {
+        // Auf Mobile: zum Start scrollen, auf Desktop: zentrieren
+        const isMobile = window.innerWidth < 768;
         stepsContainerRef.current.scrollIntoView({
           behavior: "smooth",
-          block: "center",
+          block: isMobile ? "start" : "center",
           inline: "nearest",
         });
+        // Zusätzlicher Offset für Mobile, um Header zu berücksichtigen
+        if (isMobile) {
+          setTimeout(() => {
+            window.scrollBy({
+              top: -20,
+              behavior: "smooth",
+            });
+          }, 100);
+        }
       }
-    }, 100);
+    }, 150);
   };
 
   const updateStateAndAdvance = (updates: Partial<CalculatorState>, shouldAdvance = false) => {
@@ -583,42 +594,42 @@ export default function Rechner() {
           </div>
         </div>
 
-        <div className="container mx-auto px-4 py-12 lg:py-20">
+        <div className="container mx-auto px-4 py-6 sm:py-12 lg:py-20">
           {/* Header */}
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-4">
-              <Calculator className="h-4 w-4" />
+          <div className="text-center mb-6 sm:mb-12">
+            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-medium mb-3 sm:mb-4">
+              <Calculator className="h-3 w-3 sm:h-4 sm:w-4" />
               Kostenlos & Unverbindlich
             </div>
-            <h1 className="text-3xl lg:text-5xl font-bold text-foreground mb-4">
+            <h1 className="text-2xl sm:text-3xl lg:text-5xl font-bold text-foreground mb-3 sm:mb-4">
               Service-Konfigurator
             </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-sm sm:text-lg text-muted-foreground max-w-2xl mx-auto px-2">
               In nur 5 Schritten zu Ihrem individuellen Richtpreis. Wählen Sie Ihre Leistung und erhalten Sie sofort eine Orientierung.
             </p>
           </div>
 
           {/* Progress Bar */}
-          <div className="max-w-3xl mx-auto mb-12">
+          <div className="max-w-3xl mx-auto mb-6 sm:mb-12 px-2">
             <div className="flex items-center justify-between">
               {[1, 2, 3, 4, 5].map((s) => (
                 <div key={s} className="flex items-center">
                   <div
                     className={cn(
-                      "w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-colors",
+                      "w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold transition-colors",
                       step > s
                         ? "bg-primary text-primary-foreground"
                         : step === s
-                        ? "bg-primary text-primary-foreground ring-4 ring-primary/20"
+                        ? "bg-primary text-primary-foreground ring-2 sm:ring-4 ring-primary/20"
                         : "bg-muted text-muted-foreground"
                     )}
                   >
-                    {step > s ? <Check className="h-5 w-5" /> : s}
+                    {step > s ? <Check className="h-4 w-4 sm:h-5 sm:w-5" /> : s}
                   </div>
                   {s < 5 && (
                     <div
                       className={cn(
-                        "h-1 w-12 sm:w-20 lg:w-28",
+                        "h-1 w-6 sm:w-12 md:w-20 lg:w-28",
                         step > s ? "bg-primary" : "bg-muted"
                       )}
                     />
@@ -626,12 +637,12 @@ export default function Rechner() {
                 </div>
               ))}
             </div>
-            <div className="flex justify-between mt-2 text-xs sm:text-sm text-muted-foreground">
-              <span>Leistung</span>
-              <span>Details</span>
-              <span>Parameter</span>
+            <div className="flex justify-between mt-2 text-[10px] sm:text-xs md:text-sm text-muted-foreground px-1">
+              <span className="hidden xs:inline">Leistung</span>
+              <span className="hidden sm:inline">Details</span>
+              <span className="hidden md:inline">Parameter</span>
               <span>Preis</span>
-              <span>Kontakt</span>
+              <span className="hidden sm:inline">Kontakt</span>
             </div>
           </div>
 
@@ -667,11 +678,11 @@ export default function Rechner() {
                   transition={{ duration: 0.3 }}
                 >
                   <Card className="border-0 shadow-xl">
-                    <CardContent className="p-8 lg:p-12">
+                    <CardContent className="p-4 sm:p-6 md:p-8 lg:p-12">
                       {/* Step 1: Leistung wählen */}
                       {step === 1 && (
                         <div>
-                          <h2 className="text-xl font-semibold mb-6">
+                          <h2 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6">
                             Welche Leistung benötigen Sie?
                           </h2>
                           <div className="grid sm:grid-cols-2 gap-4">
@@ -680,7 +691,7 @@ export default function Rechner() {
                                 key={option.id}
                                 onClick={() => selectService(option.id as ServiceType)}
                                 className={cn(
-                                  "p-6 rounded-xl border-2 text-left transition-all hover:border-primary/50",
+                                  "p-4 sm:p-6 rounded-xl border-2 text-left transition-all hover:border-primary/50 active:scale-95",
                                   state.service_type === option.id
                                     ? "border-primary bg-primary/5"
                                     : "border-border"
@@ -698,7 +709,7 @@ export default function Rechner() {
                       {/* Step 2: Details */}
                       {step === 2 && (
                         <div>
-                          <h2 className="text-xl font-semibold mb-6">
+                          <h2 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6">
                             {state.service_type === "reinigung" && "Welche Art der Reinigung?"}
                             {state.service_type === "tiefgarage" && "Wie viele Stellplätze?"}
                             {state.service_type === "hausmeister" && "Welche Art von Objekt?"}
@@ -984,8 +995,8 @@ export default function Rechner() {
 
                       {/* Step 3: Parameter */}
                       {step === 3 && (
-                        <div className="space-y-8">
-                          <h2 className="text-xl font-semibold">
+                        <div className="space-y-6 sm:space-y-8">
+                          <h2 className="text-lg sm:text-xl font-semibold">
                             Weitere Angaben
                           </h2>
 
@@ -1560,8 +1571,8 @@ export default function Rechner() {
 
                       {/* Step 4: Kalkulation */}
                       {step === 4 && (
-                        <div className="text-center py-8">
-                          <h2 className="text-xl font-semibold mb-8">
+                        <div className="text-center py-6 sm:py-8">
+                          <h2 className="text-lg sm:text-xl font-semibold mb-6 sm:mb-8">
                             Ihr unverbindlicher Richtpreis
                           </h2>
                           <motion.div
@@ -1735,8 +1746,8 @@ export default function Rechner() {
 
                       {/* Step 5: Kontakt */}
                       {step === 5 && (
-                        <div className="space-y-6">
-                          <h2 className="text-xl font-semibold">
+                        <div className="space-y-4 sm:space-y-6">
+                          <h2 className="text-lg sm:text-xl font-semibold">
                             Ihre Kontaktdaten
                           </h2>
                           <div className="grid sm:grid-cols-2 gap-4">
@@ -1945,7 +1956,7 @@ export default function Rechner() {
                       )}
 
                       {/* Navigation */}
-                      <div className="flex justify-between mt-10 pt-6 border-t">
+                      <div className="flex justify-between mt-6 sm:mt-10 pt-4 sm:pt-6 border-t gap-3">
                         <Button
                           variant="outline"
                           onClick={() => {
@@ -1953,10 +1964,10 @@ export default function Rechner() {
                             scrollToCenter();
                           }}
                           disabled={step === 1}
-                          className="gap-2"
+                          className="gap-2 text-sm sm:text-base h-10 sm:h-11 flex-1 sm:flex-initial"
                         >
                           <ChevronLeft className="h-4 w-4" />
-                          Zurück
+                          <span className="hidden sm:inline">Zurück</span>
                         </Button>
 
                         {step < 5 ? (
@@ -1966,9 +1977,9 @@ export default function Rechner() {
                               scrollToCenter();
                             }}
                             disabled={!canProceed()}
-                            className="gap-2"
+                            className="gap-2 text-sm sm:text-base h-10 sm:h-11 flex-1 sm:flex-initial"
                           >
-                            Weiter
+                            <span>Weiter</span>
                             <ChevronRight className="h-4 w-4" />
                           </Button>
                         ) : (

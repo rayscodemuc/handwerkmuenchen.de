@@ -9,6 +9,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryProvider } from "@/components/providers/QueryProvider";
+import { generateAllSchemas } from "@/lib/schema";
 import "./globals.css";
 
 // Base URL aus Environment Variable, Fallback zu Production Domain
@@ -53,9 +54,20 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Generiere Schema.org JSON-LD für SEO
+  const schemas = generateAllSchemas();
+
   return (
     <html lang="de">
       <body className="antialiased">
+        {/* Schema.org JSON-LD für LocalBusiness */}
+        {schemas.map((schema, index) => (
+          <script
+            key={index}
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+          />
+        ))}
         <QueryProvider>
           <ThemeProvider>
             <TooltipProvider>
