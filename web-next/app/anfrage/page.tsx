@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -61,7 +61,7 @@ const contactInfo = [
   },
 ];
 
-export default function Anfrage() {
+function AnfrageInner() {
   const searchParams = useSearchParams();
   const { submitForm } = useFormSubmit();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -343,5 +343,13 @@ export default function Anfrage() {
           </div>
         </section>
     </>
+  );
+}
+
+export default function AnfragePage() {
+  return (
+    <Suspense fallback={null}>
+      <AnfrageInner />
+    </Suspense>
   );
 }
