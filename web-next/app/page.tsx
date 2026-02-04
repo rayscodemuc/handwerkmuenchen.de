@@ -5,8 +5,8 @@ import { WhyUsSection } from "@/components/sections/WhyUsSection";
 import { CTASection } from "@/components/sections/CTASection";
 
 export const metadata: Metadata = {
-  title: "Facility Management, Handwerk & Reinigung in München, Hamburg, Berlin & bundesweit",
-  description: "Mr. Clean Services: Ihr zentraler Partner für Handwerk, Facility Management und Reinigung. Ein Ansprechpartner, volle Koordination & geprüfte Fachqualität aus einer Hand.",
+  title: "Facility Management, Handwerk & Reinigung in München",
+  description: "Generalunternehmer für Facility Management, Handwerk und Reinigung: ein Vertrag, ein Ansprechpartner. Pro Gewerk ein verantwortlicher Meister – keine Plattform, keine anonymen Subunternehmer.",
   alternates: {
     canonical: "/",
   },

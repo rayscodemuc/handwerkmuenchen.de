@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     default: "Calm Design Foundation",
     template: "%s | Calm Design Foundation",
   },
-  description: "Professionelle Lösungen für Facility Management, Handwerk und Reinigung mit echter Partnerschaft und Handschlagqualität.",
+  description: "Generalunternehmer für Facility Management, Handwerk und Reinigung: ein Vertrag, ein Ansprechpartner. Meister pro Gewerk – keine anonymen Subunternehmer.",
   openGraph: {
     type: "website",
     siteName: "Calm Design Foundation",
@@ -36,17 +36,6 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
-  icons: {
-    icon: [
-      { url: "/favicon.svg", type: "image/svg+xml" },
-      { url: "/favicon-96x96.png", sizes: "96x96", type: "image/png" },
-      { url: "/favicon.ico", sizes: "any" },
-    ],
-    apple: [
-      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
-    ],
-  },
-  manifest: "/site.webmanifest",
 };
 
 export default function RootLayout({

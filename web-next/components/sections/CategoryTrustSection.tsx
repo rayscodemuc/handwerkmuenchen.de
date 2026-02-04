@@ -17,9 +17,9 @@ export function CategoryTrustSection() {
 
           {/* Text */}
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-            Sparen Sie Zeit und Nerven. Wir koordinieren unser eigenes Fachpersonal und ein 
-            Netzwerk aus geprüften Partnerbetrieben für Sie. Sie erhalten höchste Qualität 
-            und volle Transparenz aus einer Hand.
+            Generalunternehmer-Modell: ein Vertrag, ein Ansprechpartner. Pro Gewerk ein verantwortlicher 
+            Meister als Qualitätsinstanz – keine Plattform, keine anonymen Subunternehmer. 
+            Volle Haftung, volle Transparenz.
           </p>
         </div>
       </div>

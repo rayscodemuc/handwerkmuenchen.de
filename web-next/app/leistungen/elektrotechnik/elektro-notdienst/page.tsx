@@ -119,7 +119,7 @@ export default function ElektroNotdienst() {
                 {[
                   { q: "Was kostet der Elektro-Notdienst?", a: "Wir arbeiten mit transparenten Festpreisen. Die Kosten hängen von Art und Umfang des Problems ab – Sie erhalten vor Arbeitsbeginn ein verbindliches Angebot." },
                   { q: "Kommen Sie auch nachts und am Wochenende?", a: "Ja, unser Notdienst ist 24 Stunden am Tag, 7 Tage die Woche erreichbar – auch an Feiertagen." },
-                  { q: "In welchen Städten sind Sie verfügbar?", a: "Wir sind in München, Augsburg, Ingolstadt, Nürnberg, Frankfurt, Hamburg und Berlin sowie im Umland aktiv." },
+                  { q: "In welchen Gebieten sind Sie verfügbar?", a: "Wir sind in München und der Metropolregion für Sie im Einsatz." },
                 ].map((faq, i) => (
                   <details key={i} className="group rounded-xl border border-border bg-card">
                     <summary className="cursor-pointer p-5 font-medium text-foreground list-none flex items-center justify-between">

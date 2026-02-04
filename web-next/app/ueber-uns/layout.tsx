@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Über uns",
-  description: "Schluss mit Anonymität – wir verbinden professionelles Facility Management mit echten Werten, festen Ansprechpartnern und Handschlagqualität.",
+  description: "Generalunternehmer für Facility Management, Handwerk und Reinigung: ein Vertrag, ein Ansprechpartner. Meister pro Gewerk – keine Plattform, keine anonymen Subunternehmer.",
   alternates: {
     canonical: "/ueber-uns",
   },

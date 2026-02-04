@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
 const BASE_URL = "https://mrclean-services.de";
-const DEFAULT_OG_IMAGE = "/assets/logo.png";
 
 interface SEOHeadProps {
   title: string;
@@ -26,7 +25,7 @@ export function SEOHead({
   const location = useLocation();
   const fullTitle = `${title} | Mr.Clean Services GmbH`;
   const currentUrl = canonicalUrl || `${BASE_URL}${location.pathname}`;
-  const imageUrl = ogImage ? `${BASE_URL}${ogImage}` : `${BASE_URL}${DEFAULT_OG_IMAGE}`;
+  const imageUrl = ogImage ? `${BASE_URL}${ogImage}` : null;
 
   useEffect(() => {
     // Update document title
@@ -55,7 +54,7 @@ export function SEOHead({
     setMetaTag("og:description", description, true);
     setMetaTag("og:type", ogType, true);
     setMetaTag("og:url", currentUrl, true);
-    setMetaTag("og:image", imageUrl, true);
+    if (imageUrl) setMetaTag("og:image", imageUrl, true);
     setMetaTag("og:site_name", "Mr.Clean Services GmbH", true);
     setMetaTag("og:locale", "de_DE", true);
 
@@ -63,7 +62,7 @@ export function SEOHead({
     setMetaTag("twitter:card", "summary_large_image");
     setMetaTag("twitter:title", fullTitle);
     setMetaTag("twitter:description", description);
-    setMetaTag("twitter:image", imageUrl);
+    if (imageUrl) setMetaTag("twitter:image", imageUrl);
 
     // Canonical URL
     let linkCanonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;

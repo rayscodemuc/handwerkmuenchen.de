@@ -70,12 +70,6 @@ const relatedLinks = [
   { label: "Elektrotechnik & DGUV V3", href: "/leistungen/elektrotechnik" },
   { label: "Sanitär- & Heizungstechnik", href: "/leistungen/sanitaer-heizung" },
   { label: "München", href: "/standorte/muenchen" },
-  { label: "Augsburg", href: "/standorte/augsburg" },
-  { label: "Ingolstadt", href: "/standorte/ingolstadt" },
-  { label: "Frankfurt", href: "/standorte/frankfurt" },
-  { label: "Nürnberg", href: "/standorte/nuernberg" },
-  { label: "Hamburg", href: "/standorte/hamburg" },
-  { label: "Berlin", href: "/standorte/berlin" }
 ];
 
 const trustBadges = [

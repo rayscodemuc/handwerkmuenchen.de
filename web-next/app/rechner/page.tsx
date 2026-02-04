@@ -117,12 +117,6 @@ const initialState: CalculatorState = {
 
 const standorte = [
   { value: "muenchen", label: "München" },
-  { value: "augsburg", label: "Augsburg" },
-  { value: "ingolstadt", label: "Ingolstadt" },
-  { value: "nuernberg", label: "Nürnberg" },
-  { value: "frankfurt", label: "Frankfurt" },
-  { value: "hamburg", label: "Hamburg" },
-  { value: "berlin", label: "Berlin" },
 ];
 
 // Preisfaktoren (Netto-Werte, marktgerechte Kalkulation)
@@ -144,7 +138,7 @@ const preisfaktoren = {
       // Nur Einmalauftrag: 7,50€/m²
       einmal_qm: 7.50,
     },
-    tiefgarage_nass: {
+    tiefgarage_nass: {  
       // Nur Einmalauftrag: 12,50€/m²
       einmal_qm: 12.50,
     },
@@ -559,7 +553,7 @@ export default function Rechner() {
 
     await submitForm(FORM_ID, formData, {
       successTitle: "Anfrage erfolgreich gesendet",
-      successDescription: "Wir melden uns innerhalb von 24 Stunden mit einem individuellen Angebot bei Ihnen.",
+      successDescription: "Wir melden uns innerhalb von 24 Stunden bei Ihnen.",
     });
     
     setIsSubmitting(false);
@@ -587,7 +581,7 @@ export default function Rechner() {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>Service-Konfigurator</BreadcrumbPage>
+                  <BreadcrumbPage>Richtpreis (Facility)</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
@@ -602,11 +596,16 @@ export default function Rechner() {
               Kostenlos & Unverbindlich
             </div>
             <h1 className="text-2xl sm:text-3xl lg:text-5xl font-bold text-foreground mb-3 sm:mb-4">
-              Service-Konfigurator
+              Richtpreis berechnen (Facility)
             </h1>
             <p className="text-sm sm:text-lg text-muted-foreground max-w-2xl mx-auto px-2">
-              In nur 5 Schritten zu Ihrem individuellen Richtpreis. Wählen Sie Ihre Leistung und erhalten Sie sofort eine Orientierung.
+              In nur 5 Schritten zu Ihrem Richtpreis für wiederkehrende Facility-Leistungen. Orientierung, kein verbindliches Angebot.
             </p>
+            <div className="mt-4 mx-auto max-w-2xl rounded-xl bg-amber-50 border border-amber-200 p-4 text-left">
+              <p className="text-sm text-foreground">
+                <strong>Hinweis:</strong> Der Richtpreis dient zur Orientierung für wiederkehrende Facility-Leistungen. Für Elektro, Sanitär oder Maler &amp; Boden erstellen wir ein Angebot nach kurzem Check oder Vor-Ort-Termin.
+              </p>
+            </div>
           </div>
 
           {/* Progress Bar */}
@@ -663,7 +662,7 @@ export default function Rechner() {
                     Vielen Dank für Ihre Anfrage!
                   </h2>
                   <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-                    Wir haben Ihre Daten erhalten und melden uns innerhalb von 24 Stunden mit einem individuellen Angebot bei Ihnen.
+                    Wir haben Ihre Richtpreis-Anfrage erhalten und melden uns innerhalb von 24 Stunden bei Ihnen.
                   </p>
                   <Button asChild>
                     <Link href="/">Zurück zur Startseite</Link>
@@ -1739,7 +1738,7 @@ export default function Rechner() {
                           </div>
 
                           <p className="text-muted-foreground max-w-md mx-auto text-sm">
-                            Dieser Preis dient als unverbindliche Orientierung. Im nächsten Schritt erstellen wir Ihnen ein individuelles Angebot.
+                            Unverbindliche Orientierung für Facility-Leistungen. Für ein festes Angebot: Projekt-Check anfordern.
                           </p>
                         </div>
                       )}
@@ -1812,6 +1811,14 @@ export default function Rechner() {
                               value={state.additional_message}
                               onChange={(e) => updateState({ additional_message: e.target.value })}
                             />
+                          </div>
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-2">
+                            <Button asChild className="w-full sm:w-auto">
+                              <Link href="/anfrage?bereich=facility">
+                                Projekt-Check anfordern
+                              </Link>
+                            </Button>
+                            <span className="text-sm text-muted-foreground text-center sm:text-left">Optional: Kontaktdaten ausfüllen und unten „Richtpreis-Anfrage senden“ wählen.</span>
                           </div>
                           <div className="bg-muted/50 p-4 rounded-xl text-sm text-muted-foreground">
                             <strong>Zusammenfassung:</strong>{" "}
@@ -1996,7 +2003,7 @@ export default function Rechner() {
                             ) : (
                               <>
                                 <Send className="h-4 w-4" />
-                                Angebot anfordern
+                                Richtpreis-Anfrage senden
                               </>
                             )}
                           </Button>

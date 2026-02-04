@@ -45,12 +45,6 @@ const contactInfo = [
 
 const locations = [
   { name: "München", href: "/standorte/muenchen" },
-  { name: "Augsburg", href: "/standorte/augsburg" },
-  { name: "Ingolstadt", href: "/standorte/ingolstadt" },
-  { name: "Nürnberg", href: "/standorte/nuernberg" },
-  { name: "Frankfurt", href: "/standorte/frankfurt" },
-  { name: "Hamburg", href: "/standorte/hamburg" },
-  { name: "Berlin", href: "/standorte/berlin" },
 ];
 
 export default function Kontakt() {
@@ -129,13 +123,13 @@ export default function Kontakt() {
           <div className="container mx-auto px-4 lg:px-8">
             <div className="text-center">
               <p className="text-sm font-semibold uppercase tracking-wider text-primary">
-                Bundesweiter Service
+                Einsatzgebiet
               </p>
               <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground lg:text-4xl">
-                Unsere Einsatzgebiete
+                Unser Standort München
               </h2>
               <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-                Von der Metropolregion München bis nach Hamburg – wir sind dort, wo Sie uns brauchen.
+                Wir sind in München und der Metropolregion für Sie da.
               </p>
             </div>
 

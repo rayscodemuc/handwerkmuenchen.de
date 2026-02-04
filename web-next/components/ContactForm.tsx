@@ -12,12 +12,6 @@ import { cn } from "@/lib/utils";
 
 export const locationOptions = [
   { value: "muenchen", label: "München" },
-  { value: "augsburg", label: "Augsburg" },
-  { value: "ingolstadt", label: "Ingolstadt" },
-  { value: "nuernberg", label: "Nürnberg" },
-  { value: "frankfurt", label: "Frankfurt" },
-  { value: "hamburg", label: "Hamburg" },
-  { value: "berlin", label: "Berlin" },
 ];
 
 export const serviceOptions = [

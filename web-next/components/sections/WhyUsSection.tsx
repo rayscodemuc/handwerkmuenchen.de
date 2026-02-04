@@ -16,13 +16,13 @@ const reasons = [
   },
   {
     icon: Award,
-    title: "Zertifizierte Qualität",
-    description: "Geschultes Fachpersonal mit regelmäßigen Weiterbildungen und Qualitätskontrollen.",
+    title: "Meister pro Gewerk",
+    description: "Jedes Gewerk hat einen verantwortlichen Meister als Qualitätsinstanz – keine anonymen Subunternehmer.",
   },
   {
     icon: Users,
-    title: "Feste Ansprechpartner",
-    description: "Persönliche Betreuung durch dedizierte Objektleiter für Ihr Projekt.",
+    title: "Ein Vertrag, ein Ansprechpartner",
+    description: "Generalunternehmer-Modell: Sie haben einen festen Ansprechpartner, wir koordinieren den Rest.",
   },
 ];
 

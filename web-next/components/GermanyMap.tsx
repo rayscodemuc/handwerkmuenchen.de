@@ -16,12 +16,6 @@ interface Location {
 // Coordinates mapped to the 1000x1000 viewBox of the real Germany SVG
 const locations: Location[] = [
   { name: "München", x: 595, y: 780, description: "Hauptsitz", href: "/standorte/muenchen" },
-  { name: "Augsburg", x: 545, y: 735, description: "Servicebereich", href: "/standorte/augsburg" },
-  { name: "Ingolstadt", x: 570, y: 680, description: "Servicebereich", href: "/standorte/ingolstadt" },
-  { name: "Nürnberg", x: 560, y: 600, description: "Servicebereich", href: "/standorte/nuernberg" },
-  { name: "Frankfurt", x: 410, y: 520, description: "Servicebereich", href: "/standorte/frankfurt" },
-  { name: "Hamburg", x: 485, y: 195, description: "Servicebereich", href: "/standorte/hamburg" },
-  { name: "Berlin", x: 680, y: 305, description: "Servicebereich", href: "/standorte/berlin" },
 ];
 
 export function GermanyMap({ className }: { className?: string }) {

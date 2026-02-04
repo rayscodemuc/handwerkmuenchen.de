@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LocationMapDialog } from "@/components/LocationMapDialog";
-import logo from "@/assets/logo.png";
+import { LogoPlaceholder } from "@/components/LogoPlaceholder";
 
 const primaryNav = [
   { name: "Startseite", href: "/" },
@@ -14,23 +14,29 @@ const primaryNav = [
   { name: "Kontakt", href: "/kontakt" },
 ];
 
+// 5 Gewerke: Elektrotechnik, Sanitär & Heizung, Maler & Boden, Reinigung, Facility (Außenanlagen unter Facility)
 const secondaryNav = [
   {
-    name: "Handwerk",
-    href: "/handwerk",
+    name: "Elektrotechnik",
+    href: "/handwerk/elektrotechnik",
     subItems: [
       { name: "Elektrotechnik", href: "/handwerk/elektrotechnik" },
-      { name: "Sanitär & Heizung", href: "/handwerk/sanitaer-heizung" },
+      { name: "Elektro-Notdienst", href: "/handwerk/elektrotechnik/elektro-notdienst" },
       { name: "Service & Wartung", href: "/handwerk/service-wartung" },
     ],
   },
   {
-    name: "Facility Management",
-    href: "/facility-management",
+    name: "Sanitär & Heizung",
+    href: "/handwerk/sanitaer-heizung",
     subItems: [
-      { name: "Hausmeisterservice", href: "/facility-management/hausmeisterservice" },
-      { name: "Winterdienst", href: "/facility-management/winterdienst" },
-      { name: "Objektmanagement", href: "/facility-management/objektmanagement" },
+      { name: "Sanitär & Heizung", href: "/handwerk/sanitaer-heizung" },
+    ],
+  },
+  {
+    name: "Maler & Boden",
+    href: "/maler-boden",
+    subItems: [
+      { name: "Maler & Boden", href: "/maler-boden" },
     ],
   },
   {
@@ -41,24 +47,24 @@ const secondaryNav = [
       { name: "Büroreinigung", href: "/reinigung/bueroreinigung" },
       { name: "Fensterreinigung", href: "/reinigung/fensterreinigung" },
       { name: "Glas- & Fassadenpflege", href: "/reinigung/glas-fassade" },
-      { 
-        name: "Sonderreinigung", 
+      {
+        name: "Sonderreinigung",
         href: "/reinigung/sonderreinigung",
         subItems: [
           { name: "Tiefgaragenreinigung", href: "/reinigung/tiefgaragenreinigung" },
           { name: "Grundreinigung", href: "/reinigung/grundreinigung" },
-        ]
+        ],
       },
     ],
   },
   {
-    name: "Außenanlagen",
-    href: "/aussenanlagen",
+    name: "Facility",
+    href: "/facility-management",
     subItems: [
-      { name: "Grünpflege", href: "/aussenanlagen/gruenpflege" },
-      { name: "Baumpflege", href: "/aussenanlagen/baumpflege" },
-      { name: "Grauflächenreinigung", href: "/aussenanlagen/grauflaechenreinigung" },
-      { name: "Winterdienst", href: "/aussenanlagen/winterdienst" },
+      { name: "Hausmeisterservice", href: "/facility-management/hausmeisterservice" },
+      { name: "Winterdienst", href: "/facility-management/winterdienst" },
+      { name: "Objektmanagement", href: "/facility-management/objektmanagement" },
+      { name: "Außenanlagen", href: "/aussenanlagen" },
     ],
   },
 ];
@@ -118,13 +124,10 @@ export function Header() {
       <div className={`border-b ${isKontaktPage ? 'border-white/10' : 'border-foreground/10'}`}>
         <nav className={`container mx-auto flex items-center px-4 lg:px-8 transition-[height] duration-300 ease-out ${isScrolled ? 'h-14' : 'h-20'}`}>
           {/* Logo */}
-          <Link href="/" className="flex items-center">
-            <img 
-              src={typeof logo === 'string' ? logo : logo.src} 
-              alt="Mr.Clean Services – Ihr Partner für Facility Management, Handwerk und Reinigung" 
-              className={`w-auto transition-all duration-300 ${isScrolled ? 'h-8 lg:h-9' : 'h-10 lg:h-12'}`}
-            />
-          </Link>
+          <LogoPlaceholder
+            variant="header"
+            className={`transition-all duration-300 ${isScrolled ? "h-8 lg:h-9 text-sm" : "h-10 lg:h-12 text-base"}`}
+          />
 
           {/* Primary Nav - Desktop */}
           <div className="hidden md:flex md:items-center md:gap-8 md:ml-20">

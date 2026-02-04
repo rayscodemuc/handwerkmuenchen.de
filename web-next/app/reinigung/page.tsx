@@ -1,9 +1,12 @@
 import { CTASection } from "@/components/sections/CTASection";
 import { CategoryTrustSection } from "@/components/sections/CategoryTrustSection";
+import { BadgeRow } from "@/components/BadgeRow";
 import { AnimatedButton } from "@/components/ui/animated-button";
 import Link from "next/link";
 import { Building2, ShieldCheck, BarChart3, Settings, Users, ChevronRight, CheckCircle2, Cpu, Zap, LineChart } from "lucide-react";
 import type { Metadata } from "next";
+
+const REINIGUNG_FACILITY_BADGES = ["Fachbetrieb", "GU-Abwicklung", "Dokumentierte Abnahme"];
 
 export const metadata: Metadata = {
   title: "Reinigung",
@@ -119,8 +122,12 @@ export default function ReinigungCategory() {
                   </Link>
                 </div>
 
+                <div className="mt-6">
+                  <BadgeRow items={REINIGUNG_FACILITY_BADGES} theme="light" />
+                </div>
+
                 {/* Trust Badge - Centered */}
-                <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row justify-center sm:items-center gap-3 sm:gap-8 text-sm text-foreground/60">
+                <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row justify-center sm:items-center gap-3 sm:gap-8 text-sm text-foreground/60">
                   <span className="flex items-center justify-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
                     Feste Reinigungsteams

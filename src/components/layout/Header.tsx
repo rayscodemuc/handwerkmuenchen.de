@@ -3,7 +3,7 @@ import { Menu, X, ChevronDown, Clock, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
 import { LocationMapDialog } from "@/components/LocationMapDialog";
-import logo from "@/assets/logo.png";
+import { LogoPlaceholder } from "@/components/LogoPlaceholder";
 
 const primaryNav = [
   { name: "Startseite", href: "/" },
@@ -115,13 +115,10 @@ export function Header() {
       <div className={`border-b ${isKontaktPage ? 'border-white/10' : 'border-foreground/10'}`}>
         <nav className={`container mx-auto flex items-center px-4 lg:px-8 transition-[height] duration-300 ease-out ${isScrolled ? 'h-14' : 'h-20'}`}>
           {/* Logo */}
-          <Link to="/" className="flex items-center">
-            <img 
-              src={logo} 
-              alt="Mr.Clean Services – Ihr Partner für Facility Management, Handwerk und Reinigung" 
-              className={`w-auto transition-all duration-300 ${isScrolled ? 'h-8 lg:h-9' : 'h-10 lg:h-12'}`}
-            />
-          </Link>
+          <LogoPlaceholder
+            variant="header"
+            className={`transition-all duration-300 ${isScrolled ? "h-8 lg:h-9 text-sm" : "h-10 lg:h-12 text-base"}`}
+          />
 
           {/* Primary Nav - Desktop */}
           <div className="hidden md:flex md:items-center md:gap-8 md:ml-20">

@@ -4,10 +4,6 @@ import { useToast } from "@/hooks/use-toast";
 
 export const locationOptions = [
   { value: "muenchen", label: "München" },
-  { value: "nuernberg", label: "Nürnberg" },
-  { value: "augsburg", label: "Augsburg" },
-  { value: "ingolstadt", label: "Ingolstadt" },
-  { value: "frankfurt", label: "Frankfurt" },
   { value: "andere", label: "Andere" }
 ];
 

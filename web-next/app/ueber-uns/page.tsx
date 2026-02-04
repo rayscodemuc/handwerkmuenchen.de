@@ -31,6 +31,8 @@ import {
   Bell,
   CheckCircle2,
   Quote,
+  Paintbrush,
+  Droplets,
 } from "lucide-react";
 
 const coreValues = [
@@ -42,8 +44,8 @@ const coreValues = [
   },
   {
     icon: Users,
-    title: "Ein Gesicht zu jedem Projekt",
-    description: "Feste Objektleiter statt anonymer Callcenter. Sie kennen Ihren Ansprechpartner persönlich.",
+    title: "Ein Vertrag, ein Ansprechpartner",
+    description: "Generalunternehmer-Modell: Sie haben einen festen Ansprechpartner. Keine Plattform, keine anonymen Subunternehmer.",
     highlight: "Ihr persönlicher Ansprechpartner",
   },
   {
@@ -60,35 +62,46 @@ const coreValues = [
   },
 ];
 
+// 5 Gewerke: Elektromeister, Sanitär & Heizung, Maler & Boden, Reinigung, Facility (Außenanlagen unter Facility)
 const portfolioSections = [
   {
-    id: "handwerk",
-    icon: Wrench,
-    title: "Handwerk",
+    id: "elektromeister",
+    icon: Zap,
+    title: "Elektromeister",
     subtitle: "Meisterbetrieb",
-    motto: "Werte erhalten",
-    href: "/handwerk",
+    motto: "Ein Ansprechpartner",
+    href: "/handwerk/elektrotechnik",
     color: "bg-amber-500/10 text-amber-600",
     borderColor: "border-amber-500/30",
     services: [
       { icon: Zap, title: "Elektrotechnik", href: "/handwerk/elektrotechnik" },
-      { icon: Gauge, title: "Sanitär & Heizung", href: "/handwerk/sanitaer-heizung" },
       { icon: Settings, title: "Service & Wartung", href: "/handwerk/service-wartung" },
     ],
   },
   {
-    id: "facility",
-    icon: Building,
-    title: "Facility Management",
-    subtitle: "Rundum-Sorglos",
-    motto: "Alles aus einer Hand",
-    href: "/facility-management",
-    color: "bg-blue-500/10 text-blue-600",
-    borderColor: "border-blue-500/30",
+    id: "sanitaer-heizung",
+    icon: Droplets,
+    title: "Sanitär & Heizung",
+    subtitle: "Meisterbetrieb",
+    motto: "HLK aus einer Hand",
+    href: "/handwerk/sanitaer-heizung",
+    color: "bg-sky-500/10 text-sky-600",
+    borderColor: "border-sky-500/30",
     services: [
-      { icon: Home, title: "Hausmeisterservice", href: "/facility-management/hausmeisterservice" },
-      { icon: Building, title: "Objektmanagement", href: "/facility-management/objektmanagement" },
-      { icon: Clock, title: "Winterdienst", href: "/aussenanlagen/winterdienst" },
+      { icon: Gauge, title: "Sanitär & Heizung", href: "/handwerk/sanitaer-heizung" },
+    ],
+  },
+  {
+    id: "maler-boden",
+    icon: Paintbrush,
+    title: "Maler & Boden",
+    subtitle: "Oberflächen",
+    motto: "Malerei & Bodenbeläge",
+    href: "/maler-boden",
+    color: "bg-violet-500/10 text-violet-600",
+    borderColor: "border-violet-500/30",
+    services: [
+      { icon: Paintbrush, title: "Maler & Boden", href: "/maler-boden" },
     ],
   },
   {
@@ -110,18 +123,19 @@ const portfolioSections = [
     ],
   },
   {
-    id: "aussen",
-    icon: TreePine,
-    title: "Außenanlagen",
-    subtitle: "Visitenkarte des Hauses",
-    motto: "Der erste Eindruck zählt",
-    href: "/aussenanlagen",
-    color: "bg-green-500/10 text-green-600",
-    borderColor: "border-green-500/30",
+    id: "facility",
+    icon: Building,
+    title: "Facility",
+    subtitle: "Rundum-Sorglos",
+    motto: "Inkl. Außenanlagen",
+    href: "/facility-management",
+    color: "bg-blue-500/10 text-blue-600",
+    borderColor: "border-blue-500/30",
     services: [
-      { icon: TreePine, title: "Grünpflege", href: "/aussenanlagen/gruenpflege" },
-      { icon: TreePine, title: "Baumpflege", href: "/aussenanlagen/baumpflege" },
-      { icon: Clock, title: "Winterdienst", href: "/aussenanlagen/winterdienst" },
+      { icon: Home, title: "Hausmeisterservice", href: "/facility-management/hausmeisterservice" },
+      { icon: Building, title: "Objektmanagement", href: "/facility-management/objektmanagement" },
+      { icon: Clock, title: "Winterdienst", href: "/facility-management/winterdienst" },
+      { icon: TreePine, title: "Außenanlagen", href: "/aussenanlagen" },
     ],
   },
 ];
@@ -149,12 +163,6 @@ const testimonials = [
 
 const locations = [
   { name: "München", href: "/standorte/muenchen" },
-  { name: "Augsburg", href: "/standorte/augsburg" },
-  { name: "Ingolstadt", href: "/standorte/ingolstadt" },
-  { name: "Nürnberg", href: "/standorte/nuernberg" },
-  { name: "Frankfurt", href: "/standorte/frankfurt" },
-  { name: "Hamburg", href: "/standorte/hamburg" },
-  { name: "Berlin", href: "/standorte/berlin" },
 ];
 
 export default function UeberUns() {
@@ -303,10 +311,10 @@ export default function UeberUns() {
                 Unser Leistungs-Portfolio
               </span>
               <h2 className="mt-3 text-3xl font-black tracking-tight text-foreground lg:text-4xl">
-                Vier Säulen für Ihren Erfolg
+                Fünf Gewerke für Ihren Erfolg
               </h2>
               <p className="mt-4 text-lg text-muted-foreground">
-                Alles aus einer Hand – mit persönlichem Ansprechpartner für jeden Bereich.
+                Generalunternehmer: ein Vertrag, ein Ansprechpartner. Pro Gewerk ein Meister – keine anonymen Subunternehmer.
               </p>
             </div>
 
@@ -429,23 +437,23 @@ export default function UeberUns() {
           </div>
         </section>
 
-        {/* Partner Section */}
+        {/* Meisterbetrieb-Netzwerk Section */}
         <section className="bg-slate-800 py-20 lg:py-28">
           <div className="container mx-auto px-4 lg:px-8">
             <div className="max-w-2xl mx-auto text-center">
               <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-medium text-white">
                 <Handshake className="h-4 w-4" />
-                Für Handwerker
+                Handwerker-Netzwerk
               </span>
               <h2 className="mt-6 text-3xl font-black tracking-tight text-white lg:text-4xl">
-                Werde Partner<br />auf Augenhöhe
+                Meisterbetriebe auf Augenhöhe
               </h2>
               <p className="mt-6 text-lg text-white/85 leading-relaxed">
-                Du bist stolzer Handwerker und suchst einen Partner, der deine Arbeit wertschätzt? 
-                Bei uns bist du keine Nummer – sondern ein geschätztes Mitglied unseres Teams.
+                Wir arbeiten mit Meisterbetrieben zusammen – kein Plattform-Modell, keine anonymen Subunternehmer. 
+                Ein Vertrag, klare Verantwortung, ein Ansprechpartner für Sie.
               </p>
               <ul className="mt-8 flex flex-wrap justify-center gap-4">
-                {["Faire Konditionen", "Regelmäßige Aufträge", "Kollegiales Miteinander", "Pünktliche Bezahlung"].map((item) => (
+                {["Faire Konditionen", "Klare Verantwortung pro Gewerk", "Ein Ansprechpartner", "Pünktliche Abwicklung"].map((item) => (
                   <li key={item} className="flex items-center gap-2 text-white bg-white/10 rounded-full px-4 py-2">
                     <CheckCircle2 className="h-4 w-4 text-white" />
                     {item}
@@ -455,7 +463,7 @@ export default function UeberUns() {
               <div className="mt-8">
                 <Link href="/partner-werden">
                   <Button className="h-14 px-8 text-base rounded-full bg-white text-slate-800 hover:bg-white/90">
-                    Jetzt Partner werden
+                    Für Meisterbetriebe
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
@@ -488,7 +496,7 @@ export default function UeberUns() {
                 </Link>
                 <Link href="/rechner">
                   <Button variant="outline" className="w-full sm:w-auto h-14 px-8 text-base rounded-full border-slate-800/30 text-slate-800 hover:bg-slate-800/10">
-                    Kosten berechnen
+                    Richtpreis berechnen (Facility)
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
@@ -506,7 +514,7 @@ export default function UeberUns() {
                 Unsere Standorte
               </h2>
               <p className="mt-2 text-muted-foreground">
-                Von München bis Berlin – immer in Ihrer Nähe.
+                Ihr Partner in München und der Metropolregion.
               </p>
               <div className="mt-8 flex flex-wrap justify-center gap-3">
                 {locations.map((location) => (

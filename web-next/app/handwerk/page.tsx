@@ -7,7 +7,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Handwerk",
-  description: "Maximum Tech trifft menschliche Verantwortung. Wir sind die Rebellen im Handwerk: Modernste Sensorik, digitale Präzision und Experten, bei denen ein Wort noch zählt.",
+  description: "Generalunternehmer für Elektro, Sanitär & Heizung: ein Vertrag, ein Ansprechpartner. Pro Gewerk ein Meister als Qualitätsinstanz – kein Plattform-Modell, keine anonymen Subunternehmer.",
   alternates: {
     canonical: "/handwerk",
   },
@@ -155,14 +155,14 @@ export default function HandwerkCategory() {
           Beratung auf Augenhöhe.
         </h2>
         <p className="text-white/70 text-lg mb-8">
-          Wir investieren massiv in modernste Messtechnik und digitale Tools, um Fehler zu finden, bevor sie teuer werden. Aber wir investieren genauso viel in unsere Leute. Denn am Ende ist es nicht der Algorithmus, der Ihre Heizung repariert oder die Elektrik sichert – sondern ein Mensch mit Ehre und Verstand.
+          Als Generalunternehmer steuern wir Elektro, Sanitär und Heizung aus einer Hand. Pro Gewerk ein verantwortlicher Meister als Qualitätsinstanz – kein Plattform-Modell, keine anonymen Subunternehmer. Modernste Messtechnik und digitale Dokumentation, aber die finale Verantwortung liegt beim Menschen.
         </p>
         <ul className="space-y-4">
           {[
-            "Keine KI-Bots in der Beratung",
-            "Modernste thermografische Analyse",
-            "Digitale Dokumentation in Echtzeit",
-            "Direkter Draht zum Meister"
+            "Ein Vertrag, ein Ansprechpartner",
+            "Pro Gewerk ein verantwortlicher Meister",
+            "Keine anonymen Subunternehmer",
+            "Digitale Dokumentation in Echtzeit"
           ].map((item) => (
             <li key={item} className="flex items-center gap-3">
               <CheckCircle2 className="h-5 w-5 text-primary" />
@@ -190,7 +190,7 @@ export default function HandwerkCategory() {
                 Unsere Leistungen im Bereich Handwerk & Technik
               </h2>
               <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-                Elektro, Sanitär und Heizung – koordiniert aus einer Hand.
+                Generalunternehmer: Elektro, Sanitär und Heizung – ein Vertrag, Meister pro Gewerk.
               </p>
             </div>
 
@@ -224,8 +224,11 @@ export default function HandwerkCategory() {
                 Ihre Vorteile
               </p>
               <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground lg:text-4xl">
-                Warum Mr.Clean Handwerk?
+                Warum Handwerk bei uns?
               </h2>
+              <p className="mt-2 text-muted-foreground max-w-xl mx-auto">
+                Generalunternehmer-Modell: ein Vertrag, ein Ansprechpartner. Pro Gewerk ein verantwortlicher Meister – keine Plattform, keine Subunternehmer-Lotto.
+              </p>
             </div>
 
             <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">

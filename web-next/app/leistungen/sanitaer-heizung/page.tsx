@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import { CTASection } from "@/components/sections/CTASection";
+import { BadgeRow } from "@/components/BadgeRow";
 import { AnimatedButton } from "@/components/ui/animated-button";
 import { ChevronRight, Phone, Droplets, Gauge, ShieldCheck, Activity, Thermometer, Clock, FileText, AlertTriangle, Check, ArrowRight } from "lucide-react";
 import Link from "next/link";
+
+const HANDWERK_BADGES = ["Meisterbetrieb", "GU-Abwicklung", "Dokumentierte Abnahme"];
 
 export const metadata: Metadata = {
   title: "Sanitär- & Heizungstechnik",
@@ -70,12 +73,6 @@ const relatedLinks = [
   { label: "Elektrotechnik & DGUV V3", href: "/leistungen/elektrotechnik" },
   { label: "Service & Wartung", href: "/leistungen/service-wartung" },
   { label: "München", href: "/standorte/muenchen" },
-  { label: "Augsburg", href: "/standorte/augsburg" },
-  { label: "Ingolstadt", href: "/standorte/ingolstadt" },
-  { label: "Frankfurt", href: "/standorte/frankfurt" },
-  { label: "Nürnberg", href: "/standorte/nuernberg" },
-  { label: "Hamburg", href: "/standorte/hamburg" },
-  { label: "Berlin", href: "/standorte/berlin" }
 ];
 
 const trustBadges = [
@@ -138,6 +135,9 @@ export default function SanitaerHeizung() {
                     Jetzt anrufen
                   </AnimatedButton>
                 </a>
+              </div>
+              <div className="mt-6">
+                <BadgeRow items={HANDWERK_BADGES} theme="dark" />
               </div>
             </div>
           </div>

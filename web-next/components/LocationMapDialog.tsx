@@ -17,12 +17,6 @@ interface LocationMapDialogProps {
 
 const locations = [
   { name: "München", description: "Hauptsitz", href: "/standorte/muenchen" },
-  { name: "Augsburg", description: "Servicebereich", href: "/standorte/augsburg" },
-  { name: "Ingolstadt", description: "Servicebereich", href: "/standorte/ingolstadt" },
-  { name: "Nürnberg", description: "Servicebereich", href: "/standorte/nuernberg" },
-  { name: "Frankfurt", description: "Servicebereich", href: "/standorte/frankfurt" },
-  { name: "Hamburg", description: "Servicebereich", href: "/standorte/hamburg" },
-  { name: "Berlin", description: "Servicebereich", href: "/standorte/berlin" },
 ];
 
 export function LocationMapDialog({ open, onOpenChange }: LocationMapDialogProps) {
@@ -32,7 +26,7 @@ export function LocationMapDialog({ open, onOpenChange }: LocationMapDialogProps
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-2xl">
             <MapPin className="h-6 w-6 text-primary" />
-            Unsere Standorte in Deutschland
+            Unser Standort München
           </DialogTitle>
         </DialogHeader>
 

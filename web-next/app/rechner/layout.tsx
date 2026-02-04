@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Service-Konfigurator",
-  description: "Berechnen Sie Ihren individuellen Richtpreis für Gebäudereinigung, Tiefgaragenreinigung, Hausmeisterservice oder Winterdienst. Unverbindlich und kostenlos.",
+  title: "Richtpreis berechnen (Facility)",
+  description: "Richtpreis zur Orientierung für wiederkehrende Facility-Leistungen: Reinigung, Tiefgarage, Hausmeisterservice, Winterdienst. Für Elektro, Sanitär, Maler: Angebot nach Check oder Vor-Ort-Termin.",
   alternates: {
     canonical: "/rechner",
   },

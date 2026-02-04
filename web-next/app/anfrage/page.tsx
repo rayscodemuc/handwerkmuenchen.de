@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -61,6 +62,7 @@ const contactInfo = [
 ];
 
 export default function Anfrage() {
+  const searchParams = useSearchParams();
   const { submitForm } = useFormSubmit();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<InquiryFormFields>({
@@ -73,6 +75,14 @@ export default function Anfrage() {
     privacy_accepted: false,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Vorauswahl aus URL z. B. /anfrage?bereich=facility
+  useEffect(() => {
+    const bereich = searchParams.get("bereich");
+    if (bereich && serviceOptions.some((o) => o.value === bereich)) {
+      setFormData((prev) => ({ ...prev, service_type: bereich }));
+    }
+  }, [searchParams]);
 
   const handleChange = (field: keyof InquiryFormFields, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));

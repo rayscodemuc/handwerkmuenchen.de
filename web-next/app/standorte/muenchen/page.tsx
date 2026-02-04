@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { AnimatedButton } from "@/components/ui/animated-button";
 import { ContactForm } from "@/components/ContactForm";
-import { ChevronRight, Wrench, Building2, Sparkles, TreePine, ArrowRight, MapPin } from "lucide-react";
+import { ChevronRight, Zap, Droplets, Paintbrush, Sparkles, Building2, ArrowRight, MapPin } from "lucide-react";
 import Link from "next/link";
 import heroImage from "@/assets/hero-facility.png";
 
@@ -20,28 +20,34 @@ const heroAltText = "Professionelle Gebäudereinigung und Facility Management in
 
 const services = [
   {
-    title: "Handwerk & Technik",
-    description: "Elektrotechnik, Sanitär & Heizung sowie regelmäßige Wartung für Ihre Immobilien.",
-    href: "/handwerk",
-    icon: Wrench,
+    title: "Elektromeister",
+    description: "Elektrotechnik und Elektro-Notdienst für München und Umland.",
+    href: "/handwerk/elektrotechnik",
+    icon: Zap,
   },
   {
-    title: "Facility Management",
-    description: "Hausmeisterservice, Winterdienst und operatives Objektmanagement aus einer Hand.",
-    href: "/facility-management",
-    icon: Building2,
+    title: "Sanitär & Heizung",
+    description: "Sanitär, Heizung und HLK aus einer Hand.",
+    href: "/handwerk/sanitaer-heizung",
+    icon: Droplets,
   },
   {
-    title: "Gebäudereinigung",
-    description: "Unterhaltsreinigung, Fensterreinigung und Sonderreinigung für jeden Bedarf.",
+    title: "Maler & Boden",
+    description: "Malerei, Fassade und Bodenbeläge.",
+    href: "/maler-boden",
+    icon: Paintbrush,
+  },
+  {
+    title: "Reinigung",
+    description: "Unterhaltsreinigung, Fensterreinigung und Sonderreinigung.",
     href: "/reinigung",
     icon: Sparkles,
   },
   {
-    title: "Außenanlagen",
-    description: "Grünpflege, Baumpflege und Grauflächenreinigung für gepflegte Außenbereiche.",
-    href: "/aussenanlagen",
-    icon: TreePine,
+    title: "Facility",
+    description: "Hausmeisterservice, Winterdienst, Objektmanagement und Außenanlagen.",
+    href: "/facility-management",
+    icon: Building2,
   },
 ];
 
@@ -158,7 +164,7 @@ export default function Muenchen() {
               </p>
             </div>
 
-            <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {services.map((service) => (
                 <Link
                   key={service.title}
@@ -188,20 +194,24 @@ export default function Muenchen() {
                 Unsere Leistungen in München:
               </p>
               <div className="flex flex-wrap justify-center gap-4">
+                <Link href="/handwerk/elektrotechnik" className="text-sm text-primary hover:underline">
+                  Elektromeister
+                </Link>
+                <span className="text-muted-foreground">·</span>
+                <Link href="/handwerk/sanitaer-heizung" className="text-sm text-primary hover:underline">
+                  Sanitär & Heizung
+                </Link>
+                <span className="text-muted-foreground">·</span>
+                <Link href="/maler-boden" className="text-sm text-primary hover:underline">
+                  Maler & Boden
+                </Link>
+                <span className="text-muted-foreground">·</span>
                 <Link href="/reinigung" className="text-sm text-primary hover:underline">
-                  Reinigung in München
+                  Reinigung
                 </Link>
                 <span className="text-muted-foreground">·</span>
                 <Link href="/facility-management" className="text-sm text-primary hover:underline">
-                  Facility Management in München
-                </Link>
-                <span className="text-muted-foreground">·</span>
-                <Link href="/aussenanlagen" className="text-sm text-primary hover:underline">
-                  Außenanlagen in München
-                </Link>
-                <span className="text-muted-foreground">·</span>
-                <Link href="/handwerk" className="text-sm text-primary hover:underline">
-                  Handwerk in München
+                  Facility
                 </Link>
               </div>
             </div>

@@ -380,7 +380,7 @@ export default function PartnerWerden() {
                       name="region"
                       value={formData.region}
                       onChange={(e) => handleChange("region", e.target.value)}
-                      placeholder="z.B. Berlin, Brandenburg"
+                      placeholder="z.B. München, Umland"
                       className={errors.region ? "border-destructive" : ""}
                     />
                     {errors.region && (

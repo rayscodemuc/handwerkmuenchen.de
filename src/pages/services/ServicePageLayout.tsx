@@ -91,7 +91,6 @@ export function ServicePageLayout({
       "@type": "Organization",
       name: "Mr.Clean Services GmbH",
       url: "https://mrclean-services.de",
-      logo: "https://mrclean-services.de/logo.png",
       contactPoint: {
         "@type": "ContactPoint",
         telephone: "+49-123-4567890",

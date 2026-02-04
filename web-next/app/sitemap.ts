@@ -64,6 +64,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified,
     },
     {
+      url: `${baseUrl}/maler-boden`,
+      lastModified,
+    },
+    {
       url: `${baseUrl}/aussenanlagen`,
       lastModified,
     },
@@ -184,33 +188,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${baseUrl}/aussenanlagen/winterdienst-aussen`,
       lastModified,
     },
-    // Standorte
+    // Standort
     {
       url: `${baseUrl}/standorte/muenchen`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/standorte/augsburg`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/standorte/nuernberg`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/standorte/ingolstadt`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/standorte/hamburg`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/standorte/berlin`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/standorte/frankfurt`,
       lastModified,
     },
   ]

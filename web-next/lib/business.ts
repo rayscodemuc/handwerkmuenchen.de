@@ -74,17 +74,8 @@ export const BUSINESS: BusinessConfig = {
   },
   hasPublicAddress: true,
   
-  // Service-Gebiete (Städte/Regionen)
-  areasServed: [
-    "München",
-    "Hamburg",
-    "Berlin",
-    "Augsburg",
-    "Nürnberg",
-    "Ingolstadt",
-    "Frankfurt",
-    // TODO: Weitere Service-Gebiete hinzufügen falls nötig
-  ],
+  // Service-Gebiet
+  areasServed: ["München"],
   
   // Öffnungszeiten (optional)
   // TODO: Öffnungszeiten eintragen falls verfügbar

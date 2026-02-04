@@ -2,22 +2,30 @@
 
 import { AnimatedButton } from "@/components/ui/animated-button";
 import Link from "next/link";
-import { Wrench, Building2, Sparkles, TreeDeciduous, ArrowRight } from "lucide-react";
+import { Zap, Droplets, Paintbrush, Sparkles, Building2, ArrowRight } from "lucide-react";
 
+// 5 Gewerke: Elektromeister, Sanitär & Heizung, Maler & Boden, Reinigung, Facility
 const services = [
   {
-    id: "handwerk",
-    title: "Handwerk & Technik",
-    description: "Elektrotechnik, Sanitär & Heizung sowie Service & Wartung – fachgerecht koordiniert durch unser Team und geprüfte Partner.",
-    href: "/handwerk",
-    icon: Wrench,
+    id: "elektromeister",
+    title: "Elektromeister",
+    description: "Elektrotechnik und Elektro-Notdienst – ein Vertrag, ein Ansprechpartner. Meisterbetrieb als Qualitätsinstanz.",
+    href: "/handwerk/elektrotechnik",
+    icon: Zap,
   },
   {
-    id: "facility",
-    title: "Facility Management",
-    description: "Hausmeisterservice, Winterdienst und Objektmanagement für den zuverlässigen Betrieb und Werterhalt Ihrer Immobilie.",
-    href: "/facility-management",
-    icon: Building2,
+    id: "sanitaer-heizung",
+    title: "Sanitär & Heizung",
+    description: "Sanitär, Heizung und HLK aus einer Hand. Generalunternehmer-Modell mit verantwortlichem Meister.",
+    href: "/handwerk/sanitaer-heizung",
+    icon: Droplets,
+  },
+  {
+    id: "maler-boden",
+    title: "Maler & Boden",
+    description: "Malerei, Fassade und Bodenbeläge. Innen- und Außenanstrich, Bodenbeschichtungen, Oberflächenschutz.",
+    href: "/maler-boden",
+    icon: Paintbrush,
   },
   {
     id: "reinigung",
@@ -27,11 +35,11 @@ const services = [
     icon: Sparkles,
   },
   {
-    id: "aussenanlagen",
-    title: "Außenanlagen",
-    description: "Grünpflege, Baumpflege, Grauflächenreinigung und Winterdienst für gepflegte Außenbereiche das ganze Jahr.",
-    href: "/aussenanlagen",
-    icon: TreeDeciduous,
+    id: "facility",
+    title: "Facility",
+    description: "Hausmeisterservice, Winterdienst, Objektmanagement und Außenanlagen – Betrieb und Werterhalt aus einer Hand.",
+    href: "/facility-management",
+    icon: Building2,
   },
 ];
 
@@ -45,12 +53,12 @@ export function ServicesSection() {
             Leistungen, die über den Standard hinausgehen
           </h2>
           <p className="mt-6 text-lg text-muted-foreground lg:text-xl">
-            Haben Sie genug von Standard-Lösungen, die Ihre Bedürfnisse ignorieren? Wir rollen die Branche neu auf und ersetzen starre Abläufe durch echtes Fachwissen und menschliche Werte. Erleben Sie Facility Management, das mit Leidenschaft geführt wird – für alle, die eine Partnerschaft mit Substanz suchen.
+            Ein Vertrag, ein Ansprechpartner – kein Subunternehmer-Lotto. Wir steuern als Generalunternehmer alle Gewerke: feste Meister pro Fachbereich, volle Haftungsübernahme, beweisbare Qualität.
           </p>
         </div>
 
-        {/* Service Cards Grid */}
-        <div className="mt-16 grid gap-8 md:grid-cols-2">
+        {/* Service Cards Grid - 5 Gewerke */}
+        <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {services.map((service) => {
             const Icon = service.icon;
             return (

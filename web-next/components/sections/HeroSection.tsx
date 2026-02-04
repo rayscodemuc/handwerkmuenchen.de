@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatedButton } from "@/components/ui/animated-button";
+import { BadgeRow } from "@/components/BadgeRow";
 import Link from "next/link";
 import heroImageDesktop from "@/assets/hero-facility-desktop.webp";
 import heroImageMobile from "@/assets/hero-facility-mobile.webp";
@@ -8,20 +9,22 @@ import { CheckCircle2, Calculator } from "lucide-react";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 
+const HERO_BADGES = ["Meistergeführt", "GU-Abwicklung", "Dokumentation & Übergabe"];
+
 export function HeroSection() {
   // Preload hero image for LCP optimization
   useEffect(() => {
-    const link = document.createElement('link');
-    link.rel = 'preload';
-    link.as = 'image';
-    link.type = 'image/webp';
+    const link = document.createElement("link");
+    link.rel = "preload";
+    link.as = "image";
+    link.type = "image/webp";
     // Use desktop image for preload on larger screens
-    const desktopSrc = typeof heroImageDesktop === 'string' ? heroImageDesktop : heroImageDesktop.src;
-    const mobileSrc = typeof heroImageMobile === 'string' ? heroImageMobile : heroImageMobile.src;
+    const desktopSrc = typeof heroImageDesktop === "string" ? heroImageDesktop : heroImageDesktop.src;
+    const mobileSrc = typeof heroImageMobile === "string" ? heroImageMobile : heroImageMobile.src;
     link.href = window.innerWidth >= 768 ? desktopSrc : mobileSrc;
-    link.fetchPriority = 'high';
+    link.fetchPriority = "high";
     document.head.appendChild(link);
-    
+
     return () => {
       document.head.removeChild(link);
     };
@@ -31,103 +34,115 @@ export function HeroSection() {
     <section className="relative overflow-hidden bg-primary -mt-[1px]">
       {/* Main Container - responsive height for large screens */}
       <div className="relative min-h-[480px] md:min-h-[520px] lg:min-h-[70vh] lg:max-h-[800px]">
-      {/* Full Background Image with Art Direction */}
-      <div className="absolute inset-0">
-        <picture>
-          {/* Mobile: Portrait crop optimized for smaller screens */}
-          <source 
-            media="(max-width: 767px)" 
-            srcSet={typeof heroImageMobile === 'string' ? heroImageMobile : heroImageMobile.src}
-            type="image/webp"
-          />
-          {/* Desktop: Wide 16:9 format */}
-          <source 
-            media="(min-width: 768px)" 
-            srcSet={typeof heroImageDesktop === 'string' ? heroImageDesktop : heroImageDesktop.src}
-            type="image/webp"
-          />
-          <img
-            src={typeof heroImageDesktop === 'string' ? heroImageDesktop : heroImageDesktop.src}
-            alt="Partnerschaft und Vertrauen - Händeschütteln zwischen Geschäftspartnern"
-            className="h-full w-full object-cover pointer-events-none"
-            loading="eager"
-            fetchPriority="high"
-            decoding="async"
-            style={{
-              objectPosition: "center center",
-            }}
-          />
-        </picture>
-        {/* Gradient overlay - blend top with header */}
-        <div className="absolute inset-0 bg-gradient-to-b from-primary via-primary/90 via-30% to-primary/85 lg:from-primary lg:via-primary/85 lg:via-25% lg:to-primary/80" />
-      </div>
+        {/* Full Background Image with Art Direction */}
+        <div className="absolute inset-0">
+          <picture>
+            {/* Mobile: Portrait crop optimized for smaller screens */}
+            <source
+              media="(max-width: 767px)"
+              srcSet={typeof heroImageMobile === "string" ? heroImageMobile : heroImageMobile.src}
+              type="image/webp"
+            />
+            {/* Desktop: Wide 16:9 format */}
+            <source
+              media="(min-width: 768px)"
+              srcSet={typeof heroImageDesktop === "string" ? heroImageDesktop : heroImageDesktop.src}
+              type="image/webp"
+            />
+            <img
+              src={typeof heroImageDesktop === "string" ? heroImageDesktop : heroImageDesktop.src}
+              alt="Partnerschaft und Vertrauen - Händeschütteln zwischen Geschäftspartnern"
+              className="h-full w-full object-cover pointer-events-none"
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
+              style={{
+                objectPosition: "center center",
+              }}
+            />
+          </picture>
+          {/* Gradient overlay - blend top with header */}
+          <div className="absolute inset-0 bg-gradient-to-b from-primary via-primary/90 via-30% to-primary/85 lg:from-primary lg:via-primary/85 lg:via-25% lg:to-primary/80" />
+        </div>
 
         {/* Content Container - Centered */}
         <div className="container relative mx-auto flex min-h-[560px] sm:min-h-[500px] items-center justify-center px-4 lg:min-h-[70vh] lg:max-h-[800px] lg:px-8">
           {/* Centered Content with Fade-in Animation */}
-          <motion.div 
+          <motion.div
             className="relative z-10 w-full max-w-3xl py-12 sm:py-16 lg:py-24 text-center"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
           >
             {/* Main Headline with staggered animation */}
-            <motion.h1 
+            <motion.h1
               className="font-bold leading-[0.9] tracking-tight text-foreground"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
             >
-              <span className="block text-[2.5rem] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[5.5rem] xl:text-[6.5rem]">
-                Partnerschaft
+              <span className="block text-[2.3rem] sm:text-[3.3rem] md:text-[4.3rem] lg:text-[5.3rem] xl:text-[6rem]">
+                Die Meisterrunde.
               </span>
-              <span className="block text-[2.5rem] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[5.5rem] xl:text-[6.5rem]">
-                statt nur Vertrag
+              <span className="mt-1 block text-[2.1rem] sm:text-[3.1rem] md:text-[4.1rem] lg:text-[5.1rem] xl:text-[5.8rem]">
+                Ein Tisch.
+              </span>
+              <span className="mt-1 block text-[2.1rem] sm:text-[3.1rem] md:text-[4.1rem] lg:text-[5.1rem] xl:text-[5.8rem]">
+                Ein Vertrag.
               </span>
             </motion.h1>
 
             {/* Subheadline with delayed fade-in */}
-            <motion.p 
-              className="mt-6 sm:mt-8 mx-auto max-w-[480px] text-sm sm:text-base leading-relaxed text-foreground/80 lg:text-lg lg:text-foreground/70"
+            <motion.p
+              className="mt-6 sm:mt-8 mx-auto max-w-[580px] text-sm sm:text-base leading-relaxed text-foreground/85 lg:text-lg lg:text-foreground/75"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
             >
-              Professionelles Facility Management mit echter Handschlagqualität – persönlich, zuverlässig, partnerschaftlich.
+              Elektro, Sanitär &amp; Heizung, Maler &amp; Boden – gemeinsam geplant und meistergeführt umgesetzt. Reinigung &amp; Facility als
+              Fachbetrieb. Als Generalunternehmer koordinieren wir alles aus einer Hand – ohne Subunternehmer-Kette.
             </motion.p>
 
+            {/* Badges with delayed fade-in */}
+            <motion.div
+              className="mt-6 sm:mt-7 flex justify-center"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.45, ease: "easeOut" }}
+            >
+              <BadgeRow items={HERO_BADGES} theme="dark" />
+            </motion.div>
+
             {/* CTA Buttons with delayed fade-in */}
-            <motion.div 
+            <motion.div
               className="mt-8 sm:mt-10 flex flex-col sm:flex-row justify-center gap-3 sm:gap-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.5, ease: "easeOut" }}
+              transition={{ duration: 0.6, delay: 0.6, ease: "easeOut" }}
             >
               <Link href="/anfrage" className="w-full sm:w-auto">
                 <AnimatedButton className="w-full sm:w-auto bg-foreground text-white hover:bg-foreground/90 shadow-lg shadow-foreground/20 text-base px-8 py-5 sm:py-6">
-                  Angebot anfragen
+                  Projekt anfragen
                 </AnimatedButton>
               </Link>
               <Link href="/rechner" className="w-full sm:w-auto">
-                <AnimatedButton 
-                  className="w-full sm:w-auto border-foreground/30 bg-white/50 sm:bg-transparent text-foreground hover:bg-foreground/10 text-base px-8 py-5 sm:py-6"
-                >
+                <AnimatedButton className="w-full sm:w-auto border-foreground/30 bg-white/50 sm:bg-transparent text-foreground hover:bg-foreground/10 text-base px-8 py-5 sm:py-6">
                   <Calculator className="w-5 h-5" />
-                  Preis berechnen
+                  Kostencheck Reinigung/Facility
                 </AnimatedButton>
               </Link>
             </motion.div>
 
             {/* Trust Badge with delayed fade-in */}
-            <motion.div 
+            <motion.div
               className="mt-5 sm:mt-6 flex flex-col sm:flex-row justify-center sm:items-center gap-2 sm:gap-6 text-sm text-foreground/70 sm:text-foreground/60"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.7, ease: "easeOut" }}
+              transition={{ duration: 0.6, delay: 0.8, ease: "easeOut" }}
             >
               <span className="flex items-center justify-center gap-1.5">
                 <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
-                Kostenlos & unverbindlich
+                Kostenlos &amp; unverbindlich
               </span>
               <span className="flex items-center justify-center gap-1.5">
                 <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />

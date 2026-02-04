@@ -55,7 +55,7 @@ export function StickyCTA() {
         style={{ backgroundColor: '#578ea5' }}
       >
         <Calculator className="h-5 w-5 shrink-0" />
-        <span className="font-semibold whitespace-nowrap">Angebot berechnen</span>
+        <span className="font-semibold whitespace-nowrap">Richtpreis berechnen (Facility)</span>
       </Link>
     </motion.div>
   );
@@ -108,7 +108,7 @@ export function MobileStickyCTA() {
         style={{ backgroundColor: '#578ea5' }}
       >
         <Calculator className="h-5 w-5" />
-        Angebot berechnen
+        Richtpreis berechnen (Facility)
       </Link>
     </motion.div>
   );

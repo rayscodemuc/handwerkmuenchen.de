@@ -2,15 +2,16 @@
 
 import { Phone, Mail, MapPin, Download } from "lucide-react";
 import Link from "next/link";
-import logo from "@/assets/logo.png";
+import { LogoPlaceholder } from "@/components/LogoPlaceholder";
 import { BUSINESS } from "@/lib/business";
 
 const footerLinks = {
   leistungen: [
-    { name: "Handwerk", href: "/handwerk" },
-    { name: "Facility Management", href: "/facility-management" },
+    { name: "Elektrotechnik", href: "/handwerk/elektrotechnik" },
+    { name: "Sanitär & Heizung", href: "/handwerk/sanitaer-heizung" },
+    { name: "Maler & Boden", href: "/maler-boden" },
     { name: "Reinigung", href: "/reinigung" },
-    { name: "Außenanlagen", href: "/aussenanlagen" },
+    { name: "Facility", href: "/facility-management" },
   ],
   unternehmen: [
     { name: "Über uns", href: "/ueber-uns" },
@@ -41,9 +42,7 @@ export function Footer() {
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-7 lg:gap-8">
           {/* Logo & Contact Info */}
           <div className="lg:col-span-2">
-            <Link href="/" className="inline-block">
-              <img src={typeof logo === 'string' ? logo : logo.src} alt="Mr. Clean Services GmbH – Facility Management und Gebäudereinigung" className="h-12 w-auto" />
-            </Link>
+            <LogoPlaceholder variant="footer" className="h-12 px-4 py-2 text-lg" />
             <p className="mt-6 max-w-sm text-muted-foreground leading-relaxed">
               Ihr Partner für professionelles Facility Management und Gebäudereinigung in der Region.
             </p>
@@ -163,12 +162,6 @@ export function Footer() {
             <ul className="mt-6 space-y-3">
               {[
                 { name: "München", href: "/standorte/muenchen" },
-                { name: "Augsburg", href: "/standorte/augsburg" },
-                { name: "Ingolstadt", href: "/standorte/ingolstadt" },
-                { name: "Nürnberg", href: "/standorte/nuernberg" },
-                { name: "Frankfurt", href: "/standorte/frankfurt" },
-                { name: "Hamburg", href: "/standorte/hamburg" },
-                { name: "Berlin", href: "/standorte/berlin" },
               ].map((city) => (
                 <li key={city.name}>
                   <Link
@@ -185,7 +178,7 @@ export function Footer() {
 
         {/* SEO Text */}
         <p className="mt-12 text-sm text-muted-foreground leading-relaxed max-w-4xl">
-          Mr. Clean Services GmbH ist Ihr überregionaler Partner für professionelles Facility Management, Handwerk und Reinigung in den Metropolregionen Deutschlands.
+          Mr. Clean Services GmbH: Generalunternehmer für Facility Management, Handwerk und Reinigung. Ein Vertrag, ein Ansprechpartner – Meister pro Gewerk, keine anonymen Subunternehmer.
         </p>
 
         {/* Bottom Section */}

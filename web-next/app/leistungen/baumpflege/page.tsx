@@ -43,12 +43,6 @@ const relatedLinks = [
   { label: "Außenanlagen", href: "/aussenanlagen" },
   { label: "Grünpflege", href: "/leistungen/gruenpflege" },
   { label: "München", href: "/standorte/muenchen" },
-  { label: "Augsburg", href: "/standorte/augsburg" },
-  { label: "Ingolstadt", href: "/standorte/ingolstadt" },
-  { label: "Frankfurt", href: "/standorte/frankfurt" },
-  { label: "Nürnberg", href: "/standorte/nuernberg" },
-  { label: "Hamburg", href: "/standorte/hamburg" },
-  { label: "Berlin", href: "/standorte/berlin" }
 ];
 
 const trustBadges = [

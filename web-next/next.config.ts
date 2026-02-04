@@ -113,6 +113,13 @@ const nextConfig: NextConfig = {
         destination: "/aussenanlagen/winterdienst-aussen",
         permanent: true,
       },
+      // Entfernte Standorte → München
+      { source: "/standorte/augsburg", destination: "/standorte/muenchen", permanent: true },
+      { source: "/standorte/berlin", destination: "/standorte/muenchen", permanent: true },
+      { source: "/standorte/frankfurt", destination: "/standorte/muenchen", permanent: true },
+      { source: "/standorte/hamburg", destination: "/standorte/muenchen", permanent: true },
+      { source: "/standorte/ingolstadt", destination: "/standorte/muenchen", permanent: true },
+      { source: "/standorte/nuernberg", destination: "/standorte/muenchen", permanent: true },
     ];
   },
 };

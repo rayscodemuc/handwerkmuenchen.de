@@ -1,5 +1,6 @@
 "use client";
 import { CTASection } from "@/components/sections/CTASection";
+import { BadgeRow } from "@/components/BadgeRow";
 import { AnimatedButton } from "@/components/ui/animated-button";
 import { 
   ChevronRight, Clock, Shield, Award, Phone, ArrowRight,
@@ -8,6 +9,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import elektrotechnikImage from "@/assets/elektrotechnik-schaltschrank-dguv-v3-pruefung.jpg";
+
+const HANDWERK_BADGES = ["Meisterbetrieb", "GU-Abwicklung", "Dokumentierte Abnahme"];
 
 // Service Data für die 11 Leistungen
 const services = [
@@ -158,6 +161,9 @@ export default function Elektrotechnik() {
                     Jetzt anrufen
                   </AnimatedButton>
                 </a>
+              </div>
+              <div className="mt-6">
+                <BadgeRow items={HANDWERK_BADGES} theme="dark" />
               </div>
             </div>
           </div>
@@ -324,12 +330,6 @@ export default function Elektrotechnik() {
                     { label: "Alle Handwerk-Leistungen", href: "/handwerk" },
                     { label: "Service & Wartung", href: "/facility-management/service-wartung" },
                     { label: "München", href: "/standorte/muenchen" },
-                    { label: "Augsburg", href: "/standorte/augsburg" },
-                    { label: "Ingolstadt", href: "/standorte/ingolstadt" },
-                    { label: "Frankfurt", href: "/standorte/frankfurt" },
-                    { label: "Nürnberg", href: "/standorte/nuernberg" },
-                    { label: "Hamburg", href: "/standorte/hamburg" },
-                    { label: "Berlin", href: "/standorte/berlin" },
                   ].map((link, i) => (
                     <Link
                       key={i}
