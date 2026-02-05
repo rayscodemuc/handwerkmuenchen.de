@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Partner werden",
-  description: "Werden Sie Teil unseres Partnernetzwerks und profitieren Sie von stabilen Aufträgen, fairen Konditionen und einer partnerschaftlichen Zusammenarbeit.",
+  title: "Für Meisterbetriebe",
+  description: "Aufnahme als Meisterbetrieb in unser kuratiertes Netzwerk im GU-System (Standards, Audits, klare Zuständigkeiten).",
   alternates: {
     canonical: "/partner-werden",
+  },
+  robots: {
+    index: false,
+    follow: true,
   },
 };
 

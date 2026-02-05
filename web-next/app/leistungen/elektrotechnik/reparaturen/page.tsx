@@ -30,9 +30,9 @@ export default function Reparaturen() {
             <ol className="flex items-center gap-2 text-sm flex-wrap">
               <li><Link href="/" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">Startseite</Link></li>
               <ChevronRight className="h-4 w-4 text-primary-foreground/50" />
-              <li><Link href="/handwerk" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">Handwerk</Link></li>
+              <li><Link href="/handwerk/elektrotechnik" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">Handwerk</Link></li>
               <ChevronRight className="h-4 w-4 text-primary-foreground/50" />
-              <li><Link href="/handwerk" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">Elektrotechnik</Link></li>
+              <li><Link href="/handwerk/elektrotechnik" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">Elektrotechnik</Link></li>
               <ChevronRight className="h-4 w-4 text-primary-foreground/50" />
               <li><span className="font-medium text-primary-foreground">Reparaturen</span></li>
             </ol>
@@ -51,9 +51,9 @@ export default function Reparaturen() {
               </p>
               <div className="mt-8 flex flex-wrap gap-4">
                 <Link href="/anfrage">
-                  <AnimatedButton className="bg-white text-foreground hover:bg-foreground hover:text-white">Reparatur anfragen</AnimatedButton>
+                  <AnimatedButton>Reparatur anfragen</AnimatedButton>
                 </Link>
-                <a href="tel:+498925006355">
+                <a href="tel:+491234567890">
                   <AnimatedButton className="border-2 border-primary-foreground bg-transparent text-primary-foreground hover:bg-primary-foreground hover:text-primary">
                     <Phone className="mr-2 h-4 w-4" />Jetzt anrufen
                   </AnimatedButton>
@@ -108,7 +108,7 @@ export default function Reparaturen() {
                 {[
                   { q: "Was kostet eine Steckdosen-Reparatur?", a: "Je nach Schadensumfang zwischen 60€ und 150€. Bei Austausch der Steckdose ist das Material inklusive." },
                   { q: "Warum fliegt meine Sicherung immer wieder raus?", a: "Häufige Ursachen sind defekte Geräte, überlastete Stromkreise oder beschädigte Leitungen. Wir finden die Ursache." },
-                  { q: "Wie schnell können Sie kommen?", a: "Für nicht-dringende Reparaturen bieten wir Termine innerhalb von 2-3 Werktagen. Bei Notfällen nutzen Sie unseren 24/7-Service." },
+                  { q: "Wie schnell können Sie kommen?", a: "Wir bieten Termine in der Regel innerhalb von 2-3 Werktagen. Für dringende Fälle versuchen wir, zeitnah einen Termin zu finden." },
                 ].map((faq, i) => (
                   <details key={i} className="group rounded-xl border border-border bg-card">
                     <summary className="cursor-pointer p-5 font-medium text-foreground list-none flex items-center justify-between">
@@ -125,7 +125,6 @@ export default function Reparaturen() {
                 <div className="flex flex-wrap gap-2">
                   {[
                     { label: "Alle Elektro-Leistungen", href: "/leistungen/elektrotechnik" },
-                    { label: "Elektro-Notdienst", href: "/leistungen/elektrotechnik/elektro-notdienst" },
                     { label: "Elektrosanierung", href: "/leistungen/elektrotechnik/sanierung" },
                   ].map((link, i) => (
                     <Link key={i} href={link.href} className="inline-flex items-center gap-1 rounded-full bg-background px-4 py-2 text-sm font-medium text-foreground border border-border hover:border-primary hover:text-primary transition-colors">

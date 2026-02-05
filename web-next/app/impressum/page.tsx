@@ -28,33 +28,33 @@ export default function Impressum() {
               
               <h2 className="text-2xl font-bold mt-10 mb-4">Angaben gemäß § 5 DDG</h2>
               <p className="text-foreground mb-6">
-                Mr Clean Services GmbH<br />
-                Landsbergerstr. 456 RGB<br />
-                DE-81241 München
+                Musterfirma GmbH<br />
+                Musterstraße 1<br />
+                DE-80331 München
               </p>
 
               <h2 className="text-2xl font-bold mt-10 mb-4">Vertreten durch</h2>
               <p className="text-foreground mb-6">
-                Firat Emre Mutluer
+                Max Mustermann
               </p>
 
               <h2 className="text-2xl font-bold mt-10 mb-4">Kontakt</h2>
               <p className="text-foreground mb-6">
-                Telefon: +49 (0)89 25006355<br />
-                E-Mail: kontakt@mr-clean.services
+                Telefon: +49 (0)123 4567890<br />
+                E-Mail: kontakt@example.com
               </p>
 
               <h2 className="text-2xl font-bold mt-10 mb-4">Registereintrag</h2>
               <p className="text-foreground mb-6">
                 Eintragung im Handelsregister<br />
                 Registergericht: München<br />
-                Registernummer: HRB260913
+                Registernummer: HRB123456
               </p>
 
               <h2 className="text-2xl font-bold mt-10 mb-4">Umsatzsteuer-ID</h2>
               <p className="text-foreground mb-6">
                 Umsatzsteuer-Identifikationsnummer gemäß § 27a Umsatzsteuergesetz:<br />
-                DE336495598
+                DE123456789
               </p>
 
               <h2 className="text-2xl font-bold mt-10 mb-4">Verbraucherstreitbeilegung / Universalschlichtungsstelle</h2>

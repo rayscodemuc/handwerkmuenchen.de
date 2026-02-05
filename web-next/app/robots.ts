@@ -5,7 +5,7 @@ const getBaseUrl = (): string => {
   return (
     process.env.SITE_URL ||
     process.env.NEXT_PUBLIC_SITE_URL ||
-    'https://www.mr-clean.services'
+    'https://www.example.com'
   )
 }
 

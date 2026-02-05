@@ -1,6 +1,6 @@
 "use client";
 
-import { Phone, Mail, MapPin, Download } from "lucide-react";
+import { Phone, Mail, MapPin } from "lucide-react";
 import Link from "next/link";
 import { LogoPlaceholder } from "@/components/LogoPlaceholder";
 import { BUSINESS } from "@/lib/business";
@@ -9,13 +9,12 @@ const footerLinks = {
   leistungen: [
     { name: "Elektrotechnik", href: "/handwerk/elektrotechnik" },
     { name: "Sanitär & Heizung", href: "/handwerk/sanitaer-heizung" },
-    { name: "Maler & Boden", href: "/maler-boden" },
+    { name: "Innenausbau", href: "/maler-boden" },
     { name: "Reinigung", href: "/reinigung" },
     { name: "Facility", href: "/facility-management" },
   ],
   unternehmen: [
     { name: "Über uns", href: "/ueber-uns" },
-    { name: "Partner werden", href: "/partner-werden" },
     { name: "Kontakt", href: "/kontakt" },
     { name: "Anfrage", href: "/anfrage" },
   ],
@@ -25,26 +24,16 @@ const footerLinks = {
   ],
 };
 
-// Partner-Unterlagen Downloads
-const downloads = [
-  { name: "Benötigte Unterlagen (Übersicht)", href: "/documents/benoetigte_Unterlagen_von_Nachunternehmer.pdf" },
-  { name: "Eigenerklärung Mindestlohn", href: "/documents/Eigenerklaerung_Mindestlohn.pdf" },
-  { name: "Eigenerklärung Steuern & Abgaben", href: "/documents/Eigenerklaerung_Steuern_Abgaben.pdf" },
-  { name: "Eigenerklärung Versicherungen", href: "/documents/Eigenerklaerung_Versicherungen.pdf" },
-  { name: "Nachunternehmervertrag", href: "/documents/Nachunternehmervertrag.pdf" },
-  { name: "Selbstauskunft", href: "/documents/Selbstauskunft.pdf" },
-];
-
 export function Footer() {
   return (
-    <footer className="border-t border-border bg-background">
+    <footer id="site-footer" className="border-t border-border bg-background">
       <div className="container mx-auto px-4 py-16 lg:px-8 lg:py-20">
-        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-7 lg:gap-8">
+        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-6 lg:gap-8">
           {/* Logo & Contact Info */}
           <div className="lg:col-span-2">
             <LogoPlaceholder variant="footer" className="h-12 px-4 py-2 text-lg" />
             <p className="mt-6 max-w-sm text-muted-foreground leading-relaxed">
-              Ihr Partner für professionelles Facility Management und Gebäudereinigung in der Region.
+              Generalunternehmer in München – Meistergewerke unter einem Dach, Reinigung &amp; Facility als Fachbetrieb.
             </p>
             <div className="mt-8 space-y-4">
               <div className="flex items-center gap-3 text-muted-foreground">
@@ -62,15 +51,15 @@ export function Footer() {
               <div className="flex items-start gap-3 text-muted-foreground">
                 <MapPin className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" strokeWidth={1.5} />
                 <span>
-                  {BUSINESS.address?.street || "Landsbergerstr. 456 RGB"}
+                  {BUSINESS.address?.street || "Musterstraße 1"}
                   <br />
-                  DE-{BUSINESS.address?.zip || "81241"} {BUSINESS.address?.city || "München"}
+                  DE-{BUSINESS.address?.zip || "80331"} {BUSINESS.address?.city || "München"}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Leistungen */}
+          {/* Link-Spalten: Leistungen, Unternehmen, Rechtliches, Für Betriebe – ein Block mit einheitlichen Abständen */}
           <div>
             <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground">
               Leistungen
@@ -127,64 +116,36 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Downloads */}
+          {/* Für Betriebe */}
           <div>
             <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground">
-              Downloads
+              Für Betriebe
             </h3>
             <ul className="mt-6 space-y-4">
-              {downloads.length > 0 ? (
-                downloads.map((download) => (
-                  <li key={download.name}>
-                    <a
-                      href={download.href}
-                      download
-                      className="inline-flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
-                    >
-                      <Download className="h-4 w-4" />
-                      {download.name}
-                    </a>
-                  </li>
-                ))
-              ) : (
-                <li className="text-muted-foreground/50 text-sm italic">
-                  Demnächst verfügbar
-                </li>
-              )}
-            </ul>
-          </div>
-
-          {/* Standorte */}
-          <div>
-            <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground">
-              Unsere Standorte
-            </h3>
-            <ul className="mt-6 space-y-3">
-              {[
-                { name: "München", href: "/standorte/muenchen" },
-              ].map((city) => (
-                <li key={city.name}>
-                  <Link
-                    href={city.href}
-                    className="text-muted-foreground transition-colors hover:text-foreground"
-                  >
-                    {city.name}
-                  </Link>
-                </li>
-              ))}
+              <li>
+                <Link
+                  href="/partner-werden"
+                  className="text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  Für Meisterbetriebe
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
 
-        {/* SEO Text */}
-        <p className="mt-12 text-sm text-muted-foreground leading-relaxed max-w-4xl">
-          Mr. Clean Services GmbH: Generalunternehmer für Facility Management, Handwerk und Reinigung. Ein Vertrag, ein Ansprechpartner – Meister pro Gewerk, keine anonymen Subunternehmer.
+        {/* Service-Area & Footer Claim */}
+        <p className="mt-12 text-sm text-muted-foreground">
+          Für München &amp; Umgebung.
+        </p>
+        <p className="mt-2 text-sm text-muted-foreground leading-relaxed max-w-4xl">
+          Generalunternehmer für Handwerk, Reinigung &amp; Facility. Ein Vertrag, ein Ansprechpartner – meistergeführt koordiniert.
         </p>
 
         {/* Bottom Section */}
         <div className="mt-16 flex flex-col items-center justify-between gap-6 border-t border-border pt-10 md:flex-row">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Mr. Clean Services GmbH. Alle Rechte vorbehalten.
+            © {new Date().getFullYear()} Musterfirma GmbH. Alle Rechte vorbehalten.
           </p>
           <p className="text-sm text-muted-foreground">
             Mit Sorgfalt für Ihr Objekt.

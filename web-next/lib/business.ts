@@ -29,7 +29,7 @@ export interface BusinessConfig {
   legalName?: string;
   url: string;
   phone: string; // E.164 format preferred
-  phoneDisplay?: string; // Human-readable format (e.g. "+49 (0)89 25006355")
+  phoneDisplay?: string; // Human-readable format (e.g. "+49 (0)123 4567890")
   hotlinePhone?: string; // E.164 format for 24/7 hotline
   hotlinePhoneDisplay?: string; // Human-readable format for hotline
   email?: string;
@@ -52,22 +52,22 @@ export interface BusinessConfig {
  * - sameAs: Google Business Profile URL und Social Media Links
  */
 export const BUSINESS: BusinessConfig = {
-  name: "MR Clean Services",
+  name: "Musterfirma",
   // TODO: Rechtlichen Firmennamen eintragen, falls abweichend
-  // legalName: "MR Clean Services GmbH",
+  // legalName: "Musterfirma GmbH",
   
-  url: "https://www.mr-clean.services",
+  url: "https://www.example.com",
   
-  phone: "+498925006355", // E.164 format
-  phoneDisplay: "+49 (0)89 25006355", // Human-readable format
-  hotlinePhone: "+498925006356", // E.164 format for 24/7 hotline
-  hotlinePhoneDisplay: "+49 (0)89 25006356", // Human-readable format for hotline
-  email: "kontakt@mr-clean.services",
+  phone: "+491234567890", // E.164 format (Dummy)
+  phoneDisplay: "+49 (0)123 4567890", // Human-readable format
+  hotlinePhone: "+491234567891", // E.164 format for 24/7 hotline
+  hotlinePhoneDisplay: "+49 (0)123 4567891", // Human-readable format for hotline
+  email: "kontakt@example.com",
   
   // Adresse (öffentlich)
   address: {
-    street: "Landsbergerstr. 456 RGB",
-    zip: "81241",
+    street: "Musterstraße 1",
+    zip: "80331",
     city: "München",
     region: "Bayern",
     country: "DE",

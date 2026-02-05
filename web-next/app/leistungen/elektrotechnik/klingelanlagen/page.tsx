@@ -30,9 +30,9 @@ export default function Klingelanlagen() {
             <ol className="flex items-center gap-2 text-sm flex-wrap">
               <li><Link href="/" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">Startseite</Link></li>
               <ChevronRight className="h-4 w-4 text-primary-foreground/50" />
-              <li><Link href="/handwerk" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">Handwerk</Link></li>
+              <li><Link href="/handwerk/elektrotechnik" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">Handwerk</Link></li>
               <ChevronRight className="h-4 w-4 text-primary-foreground/50" />
-              <li><Link href="/handwerk" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">Elektrotechnik</Link></li>
+              <li><Link href="/handwerk/elektrotechnik" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">Elektrotechnik</Link></li>
               <ChevronRight className="h-4 w-4 text-primary-foreground/50" />
               <li><span className="font-medium text-primary-foreground">Klingelanlagen</span></li>
             </ol>
@@ -51,9 +51,9 @@ export default function Klingelanlagen() {
               </p>
               <div className="mt-8 flex flex-wrap gap-4">
                 <Link href="/anfrage">
-                  <AnimatedButton className="bg-white text-foreground hover:bg-foreground hover:text-white">Angebot anfragen</AnimatedButton>
+                  <AnimatedButton>Angebot anfragen</AnimatedButton>
                 </Link>
-                <a href="tel:+498925006355">
+                <a href="tel:+491234567890">
                   <AnimatedButton className="border-2 border-primary-foreground bg-transparent text-primary-foreground hover:bg-primary-foreground hover:text-primary">
                     <Phone className="mr-2 h-4 w-4" />Beratung anrufen
                   </AnimatedButton>

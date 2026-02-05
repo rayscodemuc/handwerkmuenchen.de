@@ -108,7 +108,7 @@ export default function AussenanlagenCategory() {
 
                 <div className="mt-10 sm:mt-12 flex justify-center">
                   <Link href="/anfrage" className="w-full sm:w-auto">
-                    <AnimatedButton className="w-full sm:w-auto bg-foreground text-white hover:bg-foreground/90 shadow-lg shadow-foreground/20 text-base px-10 py-5 sm:py-6 font-semibold">
+                    <AnimatedButton className="w-full sm:w-auto text-base px-10 py-5 sm:py-6 font-semibold">
                       Gelände-Check anfordern
                     </AnimatedButton>
                   </Link>

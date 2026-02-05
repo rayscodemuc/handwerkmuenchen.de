@@ -3,14 +3,14 @@ import { CategoryTrustSection } from "@/components/sections/CategoryTrustSection
 import { BadgeRow } from "@/components/BadgeRow";
 import { AnimatedButton } from "@/components/ui/animated-button";
 import Link from "next/link";
-import { Paintbrush, ChevronRight, CheckCircle2 } from "lucide-react";
+import { Paintbrush, ChevronRight, Phone } from "lucide-react";
 import type { Metadata } from "next";
 
 const HANDWERK_BADGES = ["Meisterbetrieb", "GU-Abwicklung", "Dokumentierte Abnahme"];
 
 export const metadata: Metadata = {
-  title: "Maler & Boden",
-  description: "Malerei und Bodenbeläge aus einer Hand: Innen- und Fassadenanstrich, Bodenbeschichtungen und Oberflächenschutz. Ein Vertrag, ein Ansprechpartner.",
+  title: "Innenausbau",
+  description: "Innenausbau aus einer Hand: Malerarbeiten, Fassade, Bodenbeläge, Fliesen, Estrich. Ein Vertrag, ein Ansprechpartner.",
   alternates: {
     canonical: "/maler-boden",
   },
@@ -19,60 +19,37 @@ export const metadata: Metadata = {
 export default function MalerBodenCategory() {
   return (
     <>
-      <nav className="bg-primary py-4" aria-label="Breadcrumb">
-        <div className="container mx-auto px-4 lg:px-8">
-          <ol className="flex items-center gap-2 text-sm">
-            <li>
-              <Link href="/" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">
-                Startseite
+      {/* Hero – gleicher Aufbau wie Elektrotechnik */}
+      <section className="relative flex min-h-[520px] items-center bg-[#26413C] py-16 lg:min-h-[640px] lg:py-20">
+        <div className="container relative mx-auto px-4 lg:px-8">
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="text-sm font-medium uppercase tracking-wider text-white/70">
+              Malerarbeiten, Fassade & Boden
+            </p>
+            <h1 className="mt-3 text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-6xl">
+              Innenausbau
+            </h1>
+            <p className="mt-7 max-w-2xl mx-auto text-base md:text-lg text-white leading-relaxed">
+              Werterhalt durch Oberflächen. Malerei, Fassade und Bodenbeläge aus einer Hand – ein Vertrag, ein Ansprechpartner.
+              <Link href="/standorte/muenchen" className="text-white/90 hover:underline font-medium ml-1">
+                Standort München
               </Link>
-            </li>
-            <ChevronRight className="h-4 w-4 text-primary-foreground/50" />
-            <li>
-              <span className="font-medium text-primary-foreground">Maler & Boden</span>
-            </li>
-          </ol>
-        </div>
-      </nav>
-
-      <section className="relative overflow-hidden bg-[hsl(198,29%,76%)]">
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,hsl(var(--foreground))/0.08,transparent_50%),radial-gradient(circle_at_80%_20%,hsl(var(--foreground))/0.05,transparent_50%)]" />
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--foreground))/0.03_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--foreground))/0.03_1px,transparent_1px)] bg-[size:60px_60px]" />
-        </div>
-        <div className="relative min-h-[480px] lg:min-h-[560px] pt-4 lg:pt-6">
-          <div className="container relative mx-auto flex min-h-[480px] items-center justify-center px-4 lg:px-8">
-            <div className="relative z-10 w-full max-w-4xl py-8 sm:py-12 lg:py-16 text-center">
-              <h1 className="font-bold leading-[0.95] tracking-tight text-foreground">
-                <span className="block text-[2.5rem] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[5.5rem] xl:text-[6rem]">
-                  Maler & Boden
-                </span>
-                <span className="block mt-2 sm:mt-3 text-[1.75rem] sm:text-[2rem] md:text-[2.5rem] lg:text-[3rem] text-foreground/80">
-                  Werterhalt durch Oberflächen
-                </span>
-              </h1>
-              <p className="mt-8 mx-auto max-w-[600px] text-base sm:text-lg leading-relaxed text-foreground/70">
-                Malerei, Fassade und Bodenbeläge aus einer Hand. Generalunternehmer-Modell: ein Vertrag, ein Ansprechpartner.
-                <Link href="/standorte/muenchen" className="text-primary hover:underline font-medium ml-1">
-                  Standort München
-                </Link>
-              </p>
-              <div className="mt-10 flex justify-center">
-                <Link href="/anfrage" className="w-full sm:w-auto">
-                  <AnimatedButton className="w-full sm:w-auto bg-foreground text-white hover:bg-foreground/90 shadow-lg text-base px-10 py-5 sm:py-6 font-semibold">
-                    Beratung anfragen
-                  </AnimatedButton>
-                </Link>
-              </div>
-              <div className="mt-6">
-                <BadgeRow items={HANDWERK_BADGES} theme="light" />
-              </div>
-              <div className="mt-4 flex flex-col sm:flex-row justify-center gap-3 sm:gap-8 text-sm text-foreground/60">
-                <span className="flex items-center justify-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
-                  Ein Ansprechpartner
-                </span>
-              </div>
+            </p>
+            <div className="mt-8 flex flex-wrap justify-center gap-4">
+              <Link href="/anfrage">
+                <AnimatedButton>
+                  Beratung anfragen
+                </AnimatedButton>
+              </Link>
+              <a href="tel:+491234567890">
+                <AnimatedButton className="border-2 border-primary-foreground bg-transparent text-primary-foreground hover:bg-primary-foreground hover:text-primary">
+                  <Phone className="mr-2 h-4 w-4" aria-hidden="true" />
+                  Jetzt anrufen
+                </AnimatedButton>
+              </a>
+            </div>
+            <div className="mt-6 flex justify-center">
+              <BadgeRow items={HANDWERK_BADGES} theme="dark" />
             </div>
           </div>
         </div>

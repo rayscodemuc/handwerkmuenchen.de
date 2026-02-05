@@ -9,121 +9,161 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ========== MEISTERRUNDE PALETTE (HEX → HSL für shadcn/Tailwind) ==========
+   Primary (Graphit): #0F172A | Accent (Petrol): #1F7A7A
+   Background (Warm White): #FBF8F3 | Surface: #FFFFFF | Muted Surface: #F2F4F7
+   Border: #E5E7EB | Text: #0B1220 | Muted Text: #475569
+   ========== */
+
 @layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 220 20% 10%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 220 20% 10%;
-
+  /* Default theme = :root (data-theme="default" optional) */
+  :root,
+  [data-theme="default"] {
+    --background: 40 33% 97%;        /* #FBF8F3 Warm White */
+    --foreground: 216 37% 9%;        /* #0B1220 Text */
+    --card: 0 0% 100%;              /* #FFFFFF Surface */
+    --card-foreground: 216 37% 9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 10%;
-
-    --primary: 198 29% 76%;
-    --primary-foreground: 220 20% 10%;
-
-    --secondary: 210 20% 97%;
-    --secondary-foreground: 220 20% 10%;
-
-    --muted: 210 15% 97%;
-    --muted-foreground: 220 10% 45%;
-
-    --accent: 198 29% 76%;
-    --accent-foreground: 220 20% 10%;
-
+    --popover-foreground: 216 37% 9%;
+    --primary: 222 47% 11%;         /* #0F172A Graphit */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 20% 96%;       /* Muted Surface */
+    --secondary-foreground: 216 37% 9%;
+    --muted: 220 20% 96%;          /* #F2F4F7 Muted Surface */
+    --muted-foreground: 215 16% 37%; /* #475569 Muted Text */
+    --accent: 180 60% 30%;          /* #1F7A7A Petrol */
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-
-    --border: 220 15% 92%;
-    --input: 220 15% 92%;
-    --ring: 198 29% 76%;
-
+    --border: 220 14% 92%;          /* #E5E7EB */
+    --input: 220 14% 92%;
+    --ring: 180 60% 30%;            /* Accent Petrol */
     --radius: 0.75rem;
-
-    /* Hero colors */
-    --hero-bg: 198 29% 76%;
-    --hero-foreground: 220 20% 10%;
-
-    /* Surface colors */
-    --surface: 210 20% 98%;
+    --surface: 0 0% 100%;
     --surface-elevated: 0 0% 100%;
-
-    /* Shadows - very subtle */
-    --shadow-sm: 0 1px 2px 0 hsl(220 20% 10% / 0.02);
-    --shadow-md: 0 4px 12px -2px hsl(220 20% 10% / 0.04);
-    --shadow-lg: 0 12px 24px -4px hsl(220 20% 10% / 0.06);
-
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --shadow-sm: 0 1px 2px 0 hsl(216 37% 9% / 0.04);
+    --shadow-md: 0 4px 12px -2px hsl(216 37% 9% / 0.06);
+    --shadow-lg: 0 12px 24px -4px hsl(216 37% 9% / 0.08);
+    --sidebar-background: 40 33% 98%;
+    --sidebar-foreground: 216 37% 9%;
+    --sidebar-primary: 222 47% 11%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 20% 96%;
+    --sidebar-accent-foreground: 216 37% 9%;
+    --sidebar-border: 220 14% 92%;
+    --sidebar-ring: 180 60% 30%;
+    --deep: 197 43% 18%;           /* optional, für Footer/Dark */
   }
 
-  /* Theme: Über uns - Light Grey/Off-White #e0e1dd */
-  .theme-about {
-    --primary: 75 6% 87%;
-    --primary-foreground: 220 20% 10%;
-    --accent: 75 6% 87%;
-    --accent-foreground: 220 20% 10%;
-    --ring: 75 6% 87%;
-    --surface: 75 6% 94%;
+  /* Lightpage: /ueber-uns, /kontakt – cleaner white, Brand unverändert */
+  [data-theme="lightpage"] {
+    --background: 0 0% 100%;
+    --muted: 220 20% 96%;
+    --card: 0 0% 100%;
+    /* primary, accent, ring bleiben wie :root */
   }
 
-  /* Theme: Kontakt - Blue Grey #415a77 */
-  .theme-contact {
-    --primary: 212 29% 36%;
-    --primary-foreground: 210 15% 95%;
-    --accent: 212 29% 36%;
-    --accent-foreground: 210 15% 95%;
-    --ring: 212 29% 36%;
-    --surface: 212 20% 94%;
+  /* Hero (Startseite, nur wenn nicht data-theme=home): warm Off-White */
+  [data-theme="hero"] {
+    --background: 40 33% 97%;
+  }
+
+  /* ========== NEUE PALETTE NUR FÜR STARTSEITE (data-theme="home") ==========
+     #EAEAEA, #CBC5EA, #73628A, #313D5A, #183642
+     Navy dominiert, Lavendel nur als Akzent
+  ========== */
+  [data-theme="home"] {
+    --background: 0 0% 92%;           /* #EAEAEA */
+    --foreground: 221 30% 27%;       /* #313D5A Navy */
+    --card: 0 0% 100%;
+    --card-foreground: 221 30% 27%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 221 30% 27%;
+    --primary: 221 30% 27%;         /* #313D5A Navy */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 248 40% 92%;       /* soft lavendel tint */
+    --secondary-foreground: 221 30% 27%;
+    --muted: 221 30% 97%;           /* rgba(49,61,90,0.06) ≈ sehr heller Navy-Ton */
+    --muted-foreground: 263 16% 46%; /* #73628A */
+    --accent: 248 42% 88%;          /* #CBC5EA Lavendel */
+    --accent-foreground: 221 30% 27%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 221 20% 91%;          /* rgba(49,61,90,0.12) ≈ */
+    --input: 221 20% 91%;
+    --ring: 248 42% 88%;            /* #CBC5EA */
+    --surface: 0 0% 100%;
+    --surface-elevated: 0 0% 100%;
+    --deep: 197 43% 18%;            /* #183642 sparsam Footer/Dark-Section */
+    --shadow-sm: 0 1px 2px 0 hsl(221 30% 27% / 0.06);
+    --shadow-md: 0 4px 12px -2px hsl(221 30% 27% / 0.08);
+    --shadow-lg: 0 12px 24px -4px hsl(221 30% 27% / 0.1);
+    --sidebar-background: 0 0% 96%;
+    --sidebar-foreground: 221 30% 27%;
+    --sidebar-primary: 221 30% 27%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 248 40% 92%;
+    --sidebar-accent-foreground: 221 30% 27%;
+    --sidebar-border: 221 20% 91%;
+    --sidebar-ring: 248 42% 88%;
+  }
+
+  /* Gewerk-Hover auf Startseite: Header + Hero wechseln Akzentfarbe */
+  [data-theme="home"][data-gewerk-hover="elektro"] {
+    --accent: 48 93% 47%;           /* #EAB308 Elektrotechnik */
+    --accent-foreground: 221 30% 27%;
+    --ring: 48 93% 47%;
+    --secondary: 48 80% 92%;
+  }
+  [data-theme="home"][data-gewerk-hover="sanitaer"] {
+    --accent: 217 91% 60%;          /* #2563EB Sanitär & Heizung */
+    --accent-foreground: 0 0% 100%;
+    --ring: 217 91% 60%;
+    --secondary: 217 70% 92%;
+  }
+  [data-theme="home"][data-gewerk-hover="innenausbau"] {
+    --accent: 25 6% 46%;            /* #78716C Innenausbau */
+    --accent-foreground: 0 0% 100%;
+    --ring: 25 6% 46%;
+    --secondary: 25 10% 90%;
+  }
+  [data-theme="home"][data-gewerk-hover="reinigung-facility"] {
+    --accent: 176 77% 26%;          /* #0F766E Reinigung & Facility */
+    --accent-foreground: 0 0% 100%;
+    --ring: 176 77% 26%;
+    --secondary: 176 40% 90%;
   }
 
   .dark {
-    --background: 220 20% 6%;
-    --foreground: 210 15% 95%;
-
-    --card: 220 20% 8%;
-    --card-foreground: 210 15% 95%;
-
-    --popover: 220 20% 8%;
-    --popover-foreground: 210 15% 95%;
-
-    --primary: 197 31% 55%;
-    --primary-foreground: 220 20% 6%;
-
-    --secondary: 220 15% 12%;
-    --secondary-foreground: 210 15% 95%;
-
-    --muted: 220 15% 12%;
-    --muted-foreground: 210 10% 60%;
-
-    --accent: 197 31% 55%;
-    --accent-foreground: 220 20% 6%;
-
+    --background: 222 47% 8%;
+    --foreground: 210 20% 96%;
+    --card: 222 47% 10%;
+    --card-foreground: 210 20% 96%;
+    --popover: 222 47% 10%;
+    --popover-foreground: 210 20% 96%;
+    --primary: 180 60% 35%;
+    --primary-foreground: 222 47% 6%;
+    --secondary: 220 15% 14%;
+    --secondary-foreground: 210 20% 96%;
+    --muted: 220 15% 14%;
+    --muted-foreground: 215 16% 55%;
+    --accent: 180 50% 35%;
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-
     --border: 220 15% 18%;
     --input: 220 15% 18%;
-    --ring: 197 31% 55%;
-
-    --surface: 220 20% 5%;
-    --surface-elevated: 220 20% 10%;
-
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --ring: 180 50% 35%;
+    --surface: 222 47% 6%;
+    --surface-elevated: 222 47% 12%;
+    --sidebar-background: 222 47% 8%;
+    --sidebar-foreground: 210 20% 96%;
+    --sidebar-primary: 180 50% 40%;
+    --sidebar-primary-foreground: 222 47% 6%;
+    --sidebar-accent: 220 15% 14%;
+    --sidebar-accent-foreground: 210 20% 96%;
+    --sidebar-border: 220 15% 18%;
+    --sidebar-ring: 180 50% 35%;
   }
 }
 

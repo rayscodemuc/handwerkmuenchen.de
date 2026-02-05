@@ -3,7 +3,7 @@ import { CategoryTrustSection } from "@/components/sections/CategoryTrustSection
 import { BadgeRow } from "@/components/BadgeRow";
 import { AnimatedButton } from "@/components/ui/animated-button";
 import Link from "next/link";
-import { Building2, ShieldCheck, BarChart3, Settings, Users, ChevronRight, CheckCircle2, Cpu, Zap, LineChart } from "lucide-react";
+import { Building2, ShieldCheck, BarChart3, Settings, Users, ChevronRight, CheckCircle2, Cpu, Zap, LineChart, Phone } from "lucide-react";
 import type { Metadata } from "next";
 
 const REINIGUNG_FACILITY_BADGES = ["Fachbetrieb", "GU-Abwicklung", "Dokumentierte Abnahme"];
@@ -63,87 +63,44 @@ const reasons = [
 export default function ReinigungCategory() {
   return (
     <>
-        {/* Breadcrumb */}
-        <nav className="bg-primary py-4" aria-label="Breadcrumb">
-          <div className="container mx-auto px-4 lg:px-8">
-            <ol className="flex items-center gap-2 text-sm">
-              <li>
-                <Link href="/" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">
-                  Startseite
+        {/* Hero – gleicher Aufbau wie Elektrotechnik */}
+        <section className="relative flex min-h-[520px] items-center bg-[#26413C] py-16 lg:min-h-[640px] lg:py-20">
+          <div className="container relative mx-auto px-4 lg:px-8">
+            <div className="mx-auto max-w-3xl text-center">
+              <p className="text-sm font-medium uppercase tracking-wider text-white/70">
+                Hygiene & Werterhalt
+              </p>
+              <h1 className="mt-3 text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-6xl">
+                Sauberkeit schafft Werte.
+              </h1>
+              <p className="mt-7 max-w-2xl mx-auto text-base md:text-lg text-white leading-relaxed">
+                Wir schützen die Substanz Ihrer Immobilien durch systematische Reinheit. Wo andere nur oberflächlich wischen, sichern wir langfristig Qualität und Gesundheit Ihres Arbeitsumfelds.{" "}
+                <Link href="/standorte/muenchen" className="text-white/90 hover:underline font-medium">
+                  Standort München
                 </Link>
-              </li>
-              <ChevronRight className="h-4 w-4 text-primary-foreground/50" />
-              <li>
-                <span className="font-medium text-primary-foreground">Reinigung</span>
-              </li>
-            </ol>
-          </div>
-        </nav>
-
-        {/* Hero Section */}
-        <section className="relative overflow-hidden bg-[hsl(198,29%,76%)]">
-          {/* Background Pattern & Gradient */}
-          <div className="absolute inset-0">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,hsl(var(--foreground))/0.08,transparent_50%),radial-gradient(circle_at_80%_20%,hsl(var(--foreground))/0.05,transparent_50%)]" />
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--foreground))/0.03_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--foreground))/0.03_1px,transparent_1px)] bg-[size:60px_60px]" />
-            <div className="absolute -top-1/2 -right-1/4 w-[800px] h-[800px] rounded-full bg-gradient-to-br from-white/30 via-white/10 to-transparent blur-3xl" />
-            <div className="absolute -bottom-1/4 -left-1/4 w-[600px] h-[600px] rounded-full bg-gradient-to-tr from-foreground/10 via-transparent to-transparent blur-3xl" />
-          </div>
-
-           <div className="relative min-h-[580px] lg:min-h-[680px] pt-4 lg:pt-6">
-             <div className="container relative mx-auto flex min-h-[580px] sm:min-h-[520px] items-center justify-center px-4 lg:min-h-[640px] lg:px-8">
-               <div className="relative z-10 w-full max-w-4xl py-8 sm:py-12 lg:py-16 text-center">
-
-                {/* Main Headline */}
-               <h1 className="font-bold leading-[0.95] tracking-tight text-foreground">
-                   <span className="block text-[2.5rem] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[5.5rem] xl:text-[6rem]">
-                     Sauberkeit
-                   </span>
-                   <span className="block mt-2 sm:mt-3 md:mt-4 text-[2.5rem] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[5.5rem] xl:text-[6rem]">
-                     schafft Werte.
-                   </span>
-                 </h1>
-
-                {/* Subheadline */}
-                <p className="mt-8 sm:mt-10 mx-auto max-w-[600px] text-base sm:text-lg leading-relaxed text-foreground/70">
-                    Hygiene ist kein Zufall, sondern das Ergebnis höchster Disziplin. Wir schützen die Substanz Ihrer Immobilien durch <span className="text-foreground font-bold underline decoration-primary">systematische Reinheit</span>. 
-                    Wo andere nur oberflächlich wischen, sichern wir langfristig die Qualität und Gesundheit Ihres Arbeitsumfelds.{" "}
-                    <Link href="/standorte/muenchen" className="text-primary hover:underline font-medium">
-                      Standort München
-                    </Link>
-                </p>
-
-                {/* CTA Button - Centered */}
-                <div className="mt-10 sm:mt-12 flex justify-center">
-                  <Link href="/anfrage" className="w-full sm:w-auto">
-                    <AnimatedButton className="w-full sm:w-auto bg-foreground text-white hover:bg-foreground/90 shadow-lg shadow-foreground/20 text-base px-10 py-5 sm:py-6 font-semibold">
-                      Reinheits-Check anfordern
-                    </AnimatedButton>
-                  </Link>
-                </div>
-
-                <div className="mt-6">
-                  <BadgeRow items={REINIGUNG_FACILITY_BADGES} theme="light" />
-                </div>
-
-                {/* Trust Badge - Centered */}
-                <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row justify-center sm:items-center gap-3 sm:gap-8 text-sm text-foreground/60">
-                  <span className="flex items-center justify-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
-                    Feste Reinigungsteams
-                  </span>
-                  <span className="flex items-center justify-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
-                    Digitale Leistungsnachweise
-                  </span>
-                </div>
+              </p>
+              <div className="mt-8 flex flex-wrap justify-center gap-4">
+                <Link href="/anfrage">
+                  <AnimatedButton>
+                    Reinheits-Check anfordern
+                  </AnimatedButton>
+                </Link>
+                <a href="tel:+491234567890">
+                  <AnimatedButton className="border-2 border-primary-foreground bg-transparent text-primary-foreground hover:bg-primary-foreground hover:text-primary">
+                    <Phone className="mr-2 h-4 w-4" aria-hidden="true" />
+                    Jetzt anrufen
+                  </AnimatedButton>
+                </a>
+              </div>
+              <div className="mt-6 flex justify-center">
+                <BadgeRow items={REINIGUNG_FACILITY_BADGES} theme="dark" />
               </div>
             </div>
           </div>
         </section>
 
         {/* Tech & Human Connection Section */}
-        <section className="bg-foreground text-white py-24">
+        <section className="bg-primary text-primary-foreground py-24">
           <div className="container mx-auto px-4 lg:px-8">
             <div className="grid gap-16 lg:grid-cols-2 items-center">
               <div>
@@ -151,7 +108,7 @@ export default function ReinigungCategory() {
                   Hygienische Intelligenz. <br />
                   Sichtbare Verantwortung.
                 </h2>
-                <p className="text-white/70 text-lg mb-8">
+                <p className="text-primary-foreground/80 text-lg mb-8">
                   Echte Reinigung ist kein Handwerk von der Stange, sondern eine Frage der Einstellung. Wir kombinieren moderne Systematik mit geschultem Personal, das Verantwortung noch persönlich nimmt. Bei uns gibt es kein „schnell drüberwischen", sondern nur Ergebnisse, die einer kritischen Prüfung standhalten.
                 </p>
                 <ul className="space-y-4">
@@ -218,7 +175,7 @@ export default function ReinigungCategory() {
                 Ihre Vorteile
               </p>
               <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground lg:text-4xl">
-                Warum Mr.Clean Reinigung?
+                Ihre Vorteile
               </h2>
             </div>
 

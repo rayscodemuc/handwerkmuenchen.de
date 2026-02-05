@@ -45,7 +45,7 @@ const benefits = [
   {
     icon: Users,
     title: "Starkes Netzwerk",
-    description: "Werden Sie Teil eines professionellen Partnernetzwerks mit regelmäßigem Erfahrungsaustausch.",
+    description: "Aufnahme als Meisterbetrieb in unser kuratiertes Netzwerk im GU-System (Standards, Audits, klare Zuständigkeiten).",
   },
   {
     icon: Clock,
@@ -182,11 +182,10 @@ export default function PartnerWerden() {
               Partnerschaft
             </p>
             <h1 className="mt-3 text-4xl font-black tracking-tight text-primary-foreground lg:text-6xl">
-              Partner werden
+              Für Meisterbetriebe
             </h1>
             <p className="mt-6 max-w-2xl text-lg text-primary-foreground/80">
-              Werden Sie Teil unseres Partnernetzwerks und profitieren Sie von stabilen Aufträgen, 
-              fairen Konditionen und einer partnerschaftlichen Zusammenarbeit.
+              Aufnahme als Meisterbetrieb in unser kuratiertes Netzwerk im GU-System: Standards, Audits und klare Zuständigkeiten.
             </p>
           </div>
         </section>
@@ -196,10 +195,10 @@ export default function PartnerWerden() {
           <div className="container mx-auto px-4 lg:px-8">
             <div className="text-center">
               <h2 className="text-3xl font-bold text-foreground lg:text-4xl">
-                Ihre Vorteile als Partner
+                Ihre Vorteile
               </h2>
               <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-                Als Partner von Mr.Clean Services profitieren Sie von zahlreichen Vorteilen
+                Als Meisterbetrieb im GU-System profitieren Sie von Standards, Audits und klaren Zuständigkeiten.
               </p>
             </div>
 
@@ -233,7 +232,7 @@ export default function PartnerWerden() {
                   Wen wir suchen
                 </h2>
                 <p className="mt-4 text-lg text-muted-foreground">
-                  Wir sind stets auf der Suche nach zuverlässigen Partnern in verschiedenen Bereichen.
+                  Wir sind stets auf der Suche nach qualifizierten Meisterbetrieben in verschiedenen Bereichen.
                 </p>
 
                 <div className="mt-10 space-y-6">
@@ -256,7 +255,7 @@ export default function PartnerWerden() {
                   Voraussetzungen
                 </h3>
                 <p className="mt-3 text-muted-foreground">
-                  Für eine erfolgreiche Partnerschaft erwarten wir:
+                  Für die Aufnahme in unser GU-Netzwerk erwarten wir:
                 </p>
                 <ul className="mt-8 space-y-4">
                   {requirements.map((req) => (
@@ -517,23 +516,23 @@ export default function PartnerWerden() {
         <section className="bg-primary py-20 lg:py-28">
           <div className="container mx-auto px-4 lg:px-8 text-center">
             <h2 className="text-3xl font-bold text-primary-foreground lg:text-4xl">
-              Fragen zur Partnerschaft?
+              Fragen zur Aufnahme?
             </h2>
             <p className="mt-4 text-lg text-primary-foreground/80 max-w-2xl mx-auto">
               Rufen Sie uns an oder schreiben Sie uns – wir beraten Sie gerne persönlich.
             </p>
             <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
               <a 
-                href="tel:+498925006355"
+                href="tel:+491234567890"
                 className="inline-flex h-14 items-center justify-center rounded-full bg-white px-10 text-base font-medium text-primary transition-colors hover:bg-foreground hover:text-background"
               >
-                +49 (0)89 25006355
+                +49 (0)123 4567890
               </a>
               <a 
-                href="mailto:partner@mr-clean.services"
+                href="mailto:partner@example.com"
                 className="inline-flex h-14 items-center justify-center rounded-full border border-white/30 px-10 text-base font-medium text-primary-foreground transition-colors hover:bg-white/10"
               >
-                partner@mr-clean.services
+                partner@example.com
               </a>
             </div>
           </div>

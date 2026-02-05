@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { ThemeLayout } from "@/components/ThemeLayout";
+import { ThemeMain } from "@/components/ThemeMain";
+import { GewerkHoverProvider } from "@/components/providers/GewerkHoverContext";
 import { StickyCTA, MobileStickyCTA } from "@/components/StickyCTA";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { CookieConsent } from "@/components/CookieConsent";
@@ -17,7 +20,7 @@ const getBaseUrl = (): string => {
   return (
     process.env.SITE_URL ||
     process.env.NEXT_PUBLIC_SITE_URL ||
-    'https://www.mr-clean.services'
+    'https://www.example.com'
   )
 }
 
@@ -62,10 +65,12 @@ export default function RootLayout({
             <TooltipProvider>
               <ScrollToTop />
               <div className="flex min-h-screen flex-col">
-                <Header />
-                <main className="flex-1">
-                  {children}
-                </main>
+                <GewerkHoverProvider>
+                  <ThemeLayout>
+                    <Header />
+                    <ThemeMain>{children}</ThemeMain>
+                  </ThemeLayout>
+                </GewerkHoverProvider>
                 <Footer />
               </div>
               <StickyCTA />

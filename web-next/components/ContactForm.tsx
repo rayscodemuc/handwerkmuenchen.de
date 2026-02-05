@@ -136,6 +136,7 @@ interface ContactFormProps {
   presetLocation?: string;
   presetService?: string;
   variant?: "light" | "dark";
+  accent?: "brand";
   showTitle?: boolean;
   title?: string;
   subtitle?: string;
@@ -147,6 +148,7 @@ export function ContactForm({
   presetLocation,
   presetService,
   variant = "light",
+  accent,
   showTitle = true,
   title = "Nachricht senden",
   subtitle = "Füllen Sie das Formular aus und wir melden uns schnellstmöglich.",
@@ -165,6 +167,7 @@ export function ContactForm({
   } = useContactForm({ pageName, presetLocation, presetService });
 
   const isDark = variant === "dark";
+  const isBrand = accent === "brand";
 
   // Success State
   if (isSuccess) {
@@ -208,18 +211,38 @@ export function ContactForm({
 
   const inputClasses = isDark
     ? "bg-white border-white/20 text-foreground placeholder:text-muted-foreground"
-    : "bg-white";
+    : isBrand
+      ? "bg-white border-[#3E505B]/30 text-[#3E505B] placeholder:text-[#3E505B]/50"
+      : "bg-white";
 
-  const labelClasses = isDark ? "text-primary-foreground" : "";
+  const labelClasses = isDark ? "text-primary-foreground" : isBrand ? "text-[#3E505B]" : "";
 
   return (
     <div className={cn("rounded-3xl p-8 lg:p-10", isDark ? "" : "bg-card", className)}>
       {showTitle && (
         <>
-          <h2 className={cn("text-2xl font-bold", isDark ? "text-primary-foreground" : "text-foreground")}>
+          <h2
+            className={cn(
+              "text-2xl font-bold",
+              isBrand
+                ? "text-[#3E505B]"
+                : isDark
+                  ? "text-primary-foreground"
+                  : "text-foreground",
+            )}
+          >
             {title}
           </h2>
-          <p className={cn("mt-2", isDark ? "text-primary-foreground/80" : "text-muted-foreground")}>
+          <p
+            className={cn(
+              "mt-2",
+              isBrand
+                ? "text-[#3E505B]"
+                : isDark
+                  ? "text-primary-foreground/80"
+                  : "text-muted-foreground",
+            )}
+          >
             {subtitle}
           </p>
         </>
@@ -353,7 +376,9 @@ export function ContactForm({
             "group relative flex h-14 w-full items-center justify-center gap-3 overflow-hidden rounded-full text-base font-semibold transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed",
             isDark
               ? "bg-foreground text-background hover:bg-background hover:text-foreground"
-              : "bg-primary text-primary-foreground hover:bg-foreground hover:text-background"
+              : isBrand
+                ? "bg-[#4C626C] text-white hover:bg-[#8AB0AB] hover:text-[#3E505B]"
+                : "bg-primary text-primary-foreground hover:bg-foreground hover:text-background",
           )}
         >
           {isSubmitting ? (

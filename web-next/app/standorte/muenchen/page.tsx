@@ -7,7 +7,7 @@ import heroImage from "@/assets/hero-facility.png";
 
 export const metadata: Metadata = {
   title: "Standort München",
-  description: "Professionelles Facility Management, Handwerk, Reinigung und Außenanlagenpflege für München & Umland. Schnelle Reaktionszeit, 24/7 Service, ein Ansprechpartner für alle Gewerke.",
+  description: "Professionelles Facility Management, Handwerk, Reinigung und Außenanlagenpflege für München & Umland. Schnelle Reaktionszeit, ein Ansprechpartner für alle Gewerke.",
   alternates: {
     canonical: "/standorte/muenchen",
   },
@@ -20,8 +20,8 @@ const heroAltText = "Professionelle Gebäudereinigung und Facility Management in
 
 const services = [
   {
-    title: "Elektromeister",
-    description: "Elektrotechnik und Elektro-Notdienst für München und Umland.",
+    title: "Elektrotechnik",
+    description: "Elektrotechnik für München und Umland.",
     href: "/handwerk/elektrotechnik",
     icon: Zap,
   },
@@ -32,7 +32,7 @@ const services = [
     icon: Droplets,
   },
   {
-    title: "Maler & Boden",
+    title: "Innenausbau",
     description: "Malerei, Fassade und Bodenbeläge.",
     href: "/maler-boden",
     icon: Paintbrush,
@@ -131,11 +131,7 @@ export default function Muenchen() {
                 </div>
               )}
 
-              <div className="mt-12 grid gap-4 sm:grid-cols-3">
-                <div className="rounded-2xl border border-border bg-card p-6 text-center">
-                  <div className="text-3xl font-black text-primary">24/7</div>
-                  <div className="mt-2 text-sm text-muted-foreground">Notdienst verfügbar</div>
-                </div>
+              <div className="mt-12 grid gap-4 sm:grid-cols-2">
                 <div className="rounded-2xl border border-border bg-card p-6 text-center">
                   <div className="text-3xl font-black text-primary">&lt; 2h</div>
                   <div className="mt-2 text-sm text-muted-foreground">Reaktionszeit in {city}</div>
@@ -195,7 +191,7 @@ export default function Muenchen() {
               </p>
               <div className="flex flex-wrap justify-center gap-4">
                 <Link href="/handwerk/elektrotechnik" className="text-sm text-primary hover:underline">
-                  Elektromeister
+                  Elektrotechnik
                 </Link>
                 <span className="text-muted-foreground">·</span>
                 <Link href="/handwerk/sanitaer-heizung" className="text-sm text-primary hover:underline">
@@ -203,7 +199,7 @@ export default function Muenchen() {
                 </Link>
                 <span className="text-muted-foreground">·</span>
                 <Link href="/maler-boden" className="text-sm text-primary hover:underline">
-                  Maler & Boden
+                  Innenausbau
                 </Link>
                 <span className="text-muted-foreground">·</span>
                 <Link href="/reinigung" className="text-sm text-primary hover:underline">

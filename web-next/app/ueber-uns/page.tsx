@@ -1,547 +1,350 @@
 "use client";
 
-import type { Metadata } from "next";
+import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { AnimatedButton } from "@/components/ui/animated-button";
-import { Button } from "@/components/ui/button";
+import { BadgeRow } from "@/components/BadgeRow";
+import { Card, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { guLead, meisterrunde } from "@/lib/team";
 import { motion } from "framer-motion";
-import {
-  Users,
-  Award,
-  Handshake,
-  Heart,
-  Zap,
-  Wrench,
-  Sparkles,
-  TreePine,
-  Phone,
-  MapPin,
-  ArrowRight,
-  Star,
-  Shield,
-  Clock,
-  Home,
-  Lightbulb,
-  Car,
-  AlertTriangle,
-  Settings,
-  Building,
-  Lock,
-  Gauge,
-  Bell,
-  CheckCircle2,
-  Quote,
-  Paintbrush,
-  Droplets,
-} from "lucide-react";
+import { ArrowRight, Building2, Briefcase, Home, Shield } from "lucide-react";
+import { CTASection } from "@/components/sections/CTASection";
 
-const coreValues = [
-  {
-    icon: Award,
-    title: "Klasse statt Masse",
-    description: "Qualität durch fair bezahlte, motivierte Profis. Wir setzen auf Können, nicht auf Quantität.",
-    highlight: "Faire Löhne = Beste Arbeit",
-  },
-  {
-    icon: Users,
-    title: "Ein Vertrag, ein Ansprechpartner",
-    description: "Generalunternehmer-Modell: Sie haben einen festen Ansprechpartner. Keine Plattform, keine anonymen Subunternehmer.",
-    highlight: "Ihr persönlicher Ansprechpartner",
-  },
-  {
-    icon: Handshake,
-    title: "Handschlagqualität",
-    description: "Ehrliche Kommunikation und sofortige Problemlösung. Was wir zusagen, halten wir.",
-    highlight: "Versprochen ist versprochen",
-  },
-  {
-    icon: Heart,
-    title: "Technik trifft Herz",
-    description: "Modernste Effizienz gepaart mit persönlichem Blick für Details, die anderen entgehen.",
-    highlight: "Innovation mit Menschlichkeit",
-  },
+function getInitials(name: string) {
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+}
+
+/** Zeigt Porträt-Bild oder bei Fehler Avatar (kein Überlagern). */
+function PersonPortrait({
+  src,
+  name,
+  size = "medium",
+  className,
+}: {
+  src: string;
+  name: string;
+  size?: "large" | "medium";
+  className?: string;
+}) {
+  const [failed, setFailed] = useState(false);
+  const avatarSize = size === "large" ? "h-32 w-32 md:h-40 md:w-40" : "h-24 w-24 sm:h-28 sm:w-28";
+  const fallbackText = size === "large" ? "text-3xl md:text-4xl" : "text-2xl";
+  return (
+    <div className={`relative bg-muted shrink-0 ${className ?? ""}`}>
+      {!failed && (
+        <Image
+          src={src}
+          alt={name}
+          fill
+          className="object-cover"
+          sizes={size === "large" ? "(max-width: 768px) 100vw, 320px" : "(max-width: 640px) 100vw, 224px"}
+          unoptimized
+          onError={() => setFailed(true)}
+        />
+      )}
+      {failed && (
+        <div className="absolute inset-0 flex items-center justify-center bg-muted">
+          <Avatar className={`${avatarSize} border-4 border-background shadow-lg`}>
+            <AvatarFallback className={`bg-primary/10 text-primary ${fallbackText}`}>{getInitials(name)}</AvatarFallback>
+          </Avatar>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const PROOF_STRIP = ["GU-Vertrag", "Meistergewerke unter einem Dach", "Dokumentation & Übergabe"];
+
+const WARUM_ANDERS = [
+  { title: "Alle Meister am Tisch", text: "Entscheidungen sofort, keine Schnittstellenprobleme." },
+  { title: "Ein Vertrag (GU)", text: "Ein Ansprechpartner, klare Zuständigkeit, saubere Gewährleistung." },
+  { title: "Dokumentierte Übergabe", text: "Protokoll, Fotos, Transparenz – damit es am Ende passt." },
 ];
 
-// 5 Gewerke: Elektromeister, Sanitär & Heizung, Maler & Boden, Reinigung, Facility (Außenanlagen unter Facility)
-const portfolioSections = [
-  {
-    id: "elektromeister",
-    icon: Zap,
-    title: "Elektromeister",
-    subtitle: "Meisterbetrieb",
-    motto: "Ein Ansprechpartner",
-    href: "/handwerk/elektrotechnik",
-    color: "bg-amber-500/10 text-amber-600",
-    borderColor: "border-amber-500/30",
-    services: [
-      { icon: Zap, title: "Elektrotechnik", href: "/handwerk/elektrotechnik" },
-      { icon: Settings, title: "Service & Wartung", href: "/handwerk/service-wartung" },
-    ],
-  },
-  {
-    id: "sanitaer-heizung",
-    icon: Droplets,
-    title: "Sanitär & Heizung",
-    subtitle: "Meisterbetrieb",
-    motto: "HLK aus einer Hand",
-    href: "/handwerk/sanitaer-heizung",
-    color: "bg-sky-500/10 text-sky-600",
-    borderColor: "border-sky-500/30",
-    services: [
-      { icon: Gauge, title: "Sanitär & Heizung", href: "/handwerk/sanitaer-heizung" },
-    ],
-  },
-  {
-    id: "maler-boden",
-    icon: Paintbrush,
-    title: "Maler & Boden",
-    subtitle: "Oberflächen",
-    motto: "Malerei & Bodenbeläge",
-    href: "/maler-boden",
-    color: "bg-violet-500/10 text-violet-600",
-    borderColor: "border-violet-500/30",
-    services: [
-      { icon: Paintbrush, title: "Maler & Boden", href: "/maler-boden" },
-    ],
-  },
-  {
-    id: "reinigung",
-    icon: Sparkles,
-    title: "Reinigung",
-    subtitle: "Glänzender Eindruck",
-    motto: "Sauberkeit, die begeistert",
-    href: "/reinigung",
-    color: "bg-cyan-500/10 text-cyan-600",
-    borderColor: "border-cyan-500/30",
-    services: [
-      { icon: Building, title: "Büroreinigung", href: "/reinigung/bueroreinigung" },
-      { icon: Sparkles, title: "Unterhaltsreinigung", href: "/reinigung/unterhaltsreinigung" },
-      { icon: Home, title: "Grundreinigung", href: "/reinigung/grundreinigung" },
-      { icon: Zap, title: "Glas & Fassade", href: "/reinigung/glas-fassade" },
-      { icon: Settings, title: "Sonderreinigung", href: "/reinigung/sonderreinigung" },
-      { icon: Car, title: "Tiefgaragenreinigung", href: "/reinigung/tiefgaragenreinigung" },
-    ],
-  },
-  {
-    id: "facility",
-    icon: Building,
-    title: "Facility",
-    subtitle: "Rundum-Sorglos",
-    motto: "Inkl. Außenanlagen",
-    href: "/facility-management",
-    color: "bg-blue-500/10 text-blue-600",
-    borderColor: "border-blue-500/30",
-    services: [
-      { icon: Home, title: "Hausmeisterservice", href: "/facility-management/hausmeisterservice" },
-      { icon: Building, title: "Objektmanagement", href: "/facility-management/objektmanagement" },
-      { icon: Clock, title: "Winterdienst", href: "/facility-management/winterdienst" },
-      { icon: TreePine, title: "Außenanlagen", href: "/aussenanlagen" },
-    ],
-  },
+const SO_ARBEITEN_WIR = [
+  { step: "Anfrage", detail: "Sie schildern Ihr Vorhaben – wir antworten zeitnah." },
+  { step: "Kurzklärung", detail: "Termin oder Call: wir klären Umfang und Rahmen." },
+  { step: "Planung", detail: "Meisterrunde plant gemeinsam, ein Projektplan entsteht." },
+  { step: "Ausführung", detail: "Gewerke greifen ineinander, ein GU koordiniert." },
+  { step: "Übergabe", detail: "Dokumentiert und abgenommen – damit Sie Sicherheit haben." },
 ];
 
-const testimonials = [
-  {
-    quote: "Endlich ein Dienstleister, bei dem ich meinen Ansprechpartner persönlich kenne. Das macht den Unterschied.",
-    author: "Michael K.",
-    role: "Hausverwaltung München",
-    rating: 5,
-  },
-  {
-    quote: "Bei Problemen wird nicht diskutiert, sondern gelöst. Das nenne ich Handschlagqualität.",
-    author: "Sandra M.",
-    role: "Objektleiterin Frankfurt",
-    rating: 5,
-  },
-  {
-    quote: "Seit 3 Jahren unser Partner – und immer noch derselbe Objektleiter. Das gibt es sonst nirgends.",
-    author: "Thomas B.",
-    role: "Gewerbeimmobilien Hamburg",
-    rating: 5,
-  },
+const WOFUER_WIR_STEHEN = [
+  "Verantwortung statt Weiterreichen.",
+  "Gemeinsame Planung statt Schnittstellen-Chaos.",
+  "Dokumentation, damit Übergaben eindeutig sind.",
 ];
 
-const locations = [
-  { name: "München", href: "/standorte/muenchen" },
+const FUER_WEN = [
+  { label: "Hausverwaltungen", sentence: "Ein Ansprechpartner für Handwerk, Reinigung und Facility – dokumentiert und abnahmesicher.", icon: Building2 },
+  { label: "Gewerbe", sentence: "Von der Elektrik bis zur Reinigung: koordiniert aus einer Hand.", icon: Briefcase },
+  { label: "Privat", sentence: "Sanierung, Ausbau oder laufende Betreuung – mit klarer Verantwortung.", icon: Home },
 ];
 
-export default function UeberUns() {
+export default function UeberUnsPage() {
   return (
     <>
-        {/* Hero Section */}
-        <section className="relative flex min-h-[600px] items-center bg-gradient-to-br from-primary via-primary to-primary/95 lg:min-h-[700px]">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/5 via-transparent to-transparent" />
-          <div className="container relative mx-auto px-4 py-20 lg:px-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="max-w-3xl"
-            >
-              <span className="inline-flex items-center gap-2 rounded-full bg-foreground/10 px-4 py-2 text-sm font-medium text-foreground backdrop-blur-sm">
-                <Users className="h-4 w-4" />
-                Gesichter statt Nummern
-              </span>
-              <h1 className="mt-6 text-4xl font-black tracking-tight text-foreground md:text-5xl lg:text-6xl">
-                Facility Management,<br />
-                <span className="text-foreground/90">aber persönlich.</span>
-              </h1>
-              <p className="mt-6 text-lg text-foreground/75 md:text-xl lg:max-w-2xl">
-                Schluss mit Anonymität und Dienstleistung nach Schema F. 
-                Wir verbinden professionelles Handwerk mit echten Werten – 
-                und Sie bekommen immer einen Menschen, keinen Algorithmus.
-              </p>
-              <div className="mt-8 flex flex-col gap-4 sm:flex-row">
-                <Link href="/anfrage">
-                  <Button className="w-full sm:w-auto h-14 px-8 text-base rounded-full bg-[#578ea5] text-white hover:bg-[#4a7a8f]">
-                    Jetzt persönlichen Beratungstermin buchen
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </Link>
-                <a href="tel:+498925006355" className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-slate-800/40 bg-slate-800/10 px-6 py-3 font-semibold text-slate-800 backdrop-blur-sm transition-all hover:bg-slate-800/20">
-                  <Phone className="h-5 w-5" />
-                  Direkt anrufen
-                </a>
-              </div>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* Vision Section */}
-        <section className="bg-background py-20 lg:py-28">
-          <div className="container mx-auto px-4 lg:px-8">
-            <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 items-center">
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6 }}
-              >
-                <span className="text-sm font-semibold uppercase tracking-wider text-slate-600">
-                  Unsere Vision
-                </span>
-                <h2 className="mt-3 text-3xl font-black tracking-tight text-foreground lg:text-4xl">
-                  Warum wir die Branche<br />neu denken.
-                </h2>
-                <div className="mt-8 space-y-6 text-lg text-muted-foreground leading-relaxed">
-                  <p>
-                    <strong className="text-foreground">Wir sind kein anonymer Riese.</strong> Bei uns 
-                    kennt Ihr Objektleiter Ihre Immobilie besser als seine eigene Wohnung. Er weiß, 
-                    wo der Hausmeister den Ersatzschlüssel versteckt und welche Tür im Winter klemmt.
-                  </p>
-                  <p>
-                    <strong className="text-foreground">Bei uns ist Qualität wichtiger als Profit.</strong> Wir 
-                    bezahlen unsere Mitarbeiter fair – nicht weil wir müssen, sondern weil motivierte Profis 
-                    bessere Arbeit leisten. Das merken Sie an jedem Detail.
-                  </p>
-                  <p>
-                    <strong className="text-foreground">Wir sind Ihr greifbarer Partner vor Ort.</strong> Kein 
-                    Callcenter in einer anderen Stadt, kein Bot, der Ihre E-Mail beantwortet. Sondern echte 
-                    Menschen, die echte Verantwortung übernehmen.
-                  </p>
-                </div>
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="relative flex items-center justify-center"
-              >
-                <div className="rounded-2xl bg-slate-800 p-6 text-white shadow-xl">
-                  <p className="text-3xl font-black">15+</p>
-                  <p className="text-sm text-white/80">Jahre Erfahrung</p>
-                </div>
-              </motion.div>
-            </div>
-          </div>
-        </section>
-
-        {/* Core Values Section */}
-        <section className="bg-surface py-20 lg:py-28">
-          <div className="container mx-auto px-4 lg:px-8">
-            <div className="mx-auto max-w-2xl text-center">
-              <span className="text-sm font-semibold uppercase tracking-wider text-slate-600">
-                Unsere Werte
-              </span>
-              <h2 className="mt-3 text-3xl font-black tracking-tight text-foreground lg:text-4xl">
-                Was uns antreibt
-              </h2>
-              <p className="mt-4 text-lg text-muted-foreground">
-                Vier Prinzipien, die jeden Tag unser Handeln bestimmen.
-              </p>
-            </div>
-
-            <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {coreValues.map((value, index) => (
-                <motion.div
-                  key={value.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  whileHover={{ y: -8, transition: { duration: 0.2 } }}
-                  className="group relative overflow-hidden rounded-3xl bg-background p-8 shadow-sm border border-border transition-shadow hover:shadow-lg"
-                >
-                  <div className="absolute top-0 right-0 h-32 w-32 translate-x-8 -translate-y-8 rounded-full bg-primary/5 transition-transform group-hover:scale-150" />
-                  <div className="relative">
-                    <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-800/10">
-                      <value.icon className="h-7 w-7 text-slate-700" strokeWidth={1.5} />
-                    </div>
-                    <h3 className="text-xl font-bold text-foreground">{value.title}</h3>
-                    <p className="mt-3 text-muted-foreground leading-relaxed">
-                      {value.description}
-                    </p>
-                    <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-slate-800/10 px-3 py-1 text-sm font-medium text-slate-700">
-                      <CheckCircle2 className="h-4 w-4" />
-                      {value.highlight}
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Portfolio Showcase - 4 Säulen als Kacheln */}
-        <section className="bg-surface py-20 lg:py-28">
-          <div className="container mx-auto px-4 lg:px-8">
-            <div className="mx-auto max-w-2xl text-center mb-16">
-              <span className="text-sm font-semibold uppercase tracking-wider text-slate-600">
-                Unser Leistungs-Portfolio
-              </span>
-              <h2 className="mt-3 text-3xl font-black tracking-tight text-foreground lg:text-4xl">
-                Fünf Gewerke für Ihren Erfolg
-              </h2>
-              <p className="mt-4 text-lg text-muted-foreground">
-                Generalunternehmer: ein Vertrag, ein Ansprechpartner. Pro Gewerk ein Meister – keine anonymen Subunternehmer.
-              </p>
-            </div>
-
-            <div className="grid gap-8 lg:grid-cols-2">
-              {portfolioSections.map((section, sectionIndex) => (
-                <motion.div
-                  key={section.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: sectionIndex * 0.1 }}
-                  className={`rounded-3xl border bg-background p-6 lg:p-8 ${section.borderColor}`}
-                >
-                  {/* Header */}
-                  <div className="flex items-start gap-4 mb-6">
-                    <div className={`rounded-2xl p-4 ${section.color}`}>
-                      <section.icon className="h-8 w-8" strokeWidth={1.5} />
-                    </div>
-                    <div className="flex-1">
-                      <Link href={section.href} className="group">
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-2xl font-bold text-foreground group-hover:text-slate-600 transition-colors">
-                            {section.title}
-                          </h3>
-                          <ArrowRight className="h-5 w-5 text-muted-foreground opacity-0 -translate-x-2 transition-all group-hover:opacity-100 group-hover:translate-x-0 group-hover:text-slate-600" />
-                        </div>
-                      </Link>
-                      <p className="text-sm font-medium text-slate-600 mt-1">{section.subtitle}</p>
-                      <div className="mt-2 inline-flex items-center gap-2 text-sm text-muted-foreground">
-                        <Shield className="h-4 w-4 text-slate-600" />
-                        {section.motto}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Services Grid */}
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    {section.services.map((service, serviceIndex) => (
-                      <motion.div
-                        key={service.title}
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.2, delay: serviceIndex * 0.03 }}
-                      >
-                        <Link
-                          href={service.href}
-                          className="group flex items-center gap-3 rounded-xl border border-border bg-surface/50 p-3 transition-all hover:border-slate-400 hover:bg-surface hover:shadow-sm"
-                        >
-                          <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${section.color}`}>
-                            <service.icon className="h-4 w-4" strokeWidth={1.5} />
-                          </div>
-                          <span className="text-sm font-medium text-foreground group-hover:text-slate-700 transition-colors">
-                            {service.title}
-                          </span>
-                        </Link>
-                      </motion.div>
-                    ))}
-                  </div>
-
-                  {/* Footer Link */}
-                  <div className="mt-6 pt-4 border-t border-border">
-                    <Link
-                      href={section.href}
-                      className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700 hover:underline"
-                    >
-                      Alle {section.title}-Leistungen
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Testimonials Section */}
-        <section className="bg-background py-20 lg:py-28">
-          <div className="container mx-auto px-4 lg:px-8">
-            <div className="mx-auto max-w-2xl text-center">
-              <span className="text-sm font-semibold uppercase tracking-wider text-slate-600">
-                Stimmen unserer Partner
-              </span>
-              <h2 className="mt-3 text-3xl font-black tracking-tight text-foreground lg:text-4xl">
-                Was Kunden über uns sagen
-              </h2>
-            </div>
-
-            <div className="mt-16 grid gap-8 md:grid-cols-3">
-              {testimonials.map((testimonial, index) => (
-                <motion.div
-                  key={testimonial.author}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className="relative rounded-3xl bg-surface p-8 border border-border"
-                >
-                  <Quote className="absolute top-6 right-6 h-8 w-8 text-slate-400/40" />
-                  <div className="flex gap-1 mb-4">
-                    {Array.from({ length: testimonial.rating }).map((_, i) => (
-                      <Star key={i} className="h-5 w-5 fill-amber-400 text-amber-400" />
-                    ))}
-                  </div>
-                  <p className="text-foreground leading-relaxed italic">
-                    "{testimonial.quote}"
-                  </p>
-                  <div className="mt-6 flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-full bg-slate-800/10 flex items-center justify-center">
-                      <Users className="h-6 w-6 text-slate-700" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-foreground">{testimonial.author}</p>
-                      <p className="text-sm text-muted-foreground">{testimonial.role}</p>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Meisterbetrieb-Netzwerk Section */}
-        <section className="bg-slate-800 py-20 lg:py-28">
-          <div className="container mx-auto px-4 lg:px-8">
-            <div className="max-w-2xl mx-auto text-center">
-              <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-medium text-white">
-                <Handshake className="h-4 w-4" />
-                Handwerker-Netzwerk
-              </span>
-              <h2 className="mt-6 text-3xl font-black tracking-tight text-white lg:text-4xl">
-                Meisterbetriebe auf Augenhöhe
-              </h2>
-              <p className="mt-6 text-lg text-white/85 leading-relaxed">
-                Wir arbeiten mit Meisterbetrieben zusammen – kein Plattform-Modell, keine anonymen Subunternehmer. 
-                Ein Vertrag, klare Verantwortung, ein Ansprechpartner für Sie.
-              </p>
-              <ul className="mt-8 flex flex-wrap justify-center gap-4">
-                {["Faire Konditionen", "Klare Verantwortung pro Gewerk", "Ein Ansprechpartner", "Pünktliche Abwicklung"].map((item) => (
-                  <li key={item} className="flex items-center gap-2 text-white bg-white/10 rounded-full px-4 py-2">
-                    <CheckCircle2 className="h-4 w-4 text-white" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-8">
-                <Link href="/partner-werden">
-                  <Button className="h-14 px-8 text-base rounded-full bg-white text-slate-800 hover:bg-white/90">
-                    Für Meisterbetriebe
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Lead Magnet CTA */}
-        <section className="bg-background py-20 lg:py-28">
-          <div className="container mx-auto px-4 lg:px-8">
-            <div className="mx-auto max-w-3xl text-center">
-              <div className="inline-flex items-center gap-2 rounded-full bg-slate-800/10 px-4 py-2 text-sm font-semibold text-slate-700 mb-6">
-                <Shield className="h-4 w-4" />
-                Kostenlos & unverbindlich
-              </div>
-              <h2 className="text-3xl font-black tracking-tight text-foreground lg:text-4xl">
-                Kostenloser Objekt-Check
-              </h2>
-              <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
-                Unsere Experten analysieren Ihr Objekt vor Ort und erstellen ein individuelles 
-                Konzept – ohne versteckte Kosten, ohne Verpflichtung.
-              </p>
-              <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:justify-center">
-                <Link href="/anfrage">
-                  <Button className="w-full sm:w-auto h-14 px-8 text-base rounded-full bg-slate-800 text-white hover:bg-slate-700">
-                    Objekt-Check anfordern
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </Link>
-                <Link href="/rechner">
-                  <Button variant="outline" className="w-full sm:w-auto h-14 px-8 text-base rounded-full border-slate-800/30 text-slate-800 hover:bg-slate-800/10">
-                    Richtpreis berechnen (Facility)
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Locations Section */}
-        <section className="bg-card py-16 lg:py-20">
-          <div className="container mx-auto px-4 lg:px-8">
-            <div className="flex flex-col items-center text-center">
-              <MapPin className="h-8 w-8 text-slate-700 mb-4" />
-              <h2 className="text-2xl font-bold text-foreground">
-                Unsere Standorte
-              </h2>
-              <p className="mt-2 text-muted-foreground">
-                Ihr Partner in München und der Metropolregion.
-              </p>
-              <div className="mt-8 flex flex-wrap justify-center gap-3">
-                {locations.map((location) => (
-                  <Link
-                    key={location.name}
-                    href={location.href}
-                    className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm font-medium text-foreground transition-all hover:border-slate-600 hover:text-slate-700"
+      {/* 1) HERO */}
+      <section className="relative flex min-h-[420px] items-center bg-[#26413C] py-16 lg:min-h-[480px] lg:py-20">
+        <div className="container relative mx-auto px-4 lg:px-8">
+          <motion.div
+            className="mx-auto max-w-3xl text-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <h1 className="text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-6xl">
+              Über die Meisterrunde
+            </h1>
+            <p className="mt-7 max-w-2xl mx-auto text-base md:text-lg text-white leading-relaxed">
+              Bei uns sitzen die Meister an einem Tisch. Sie planen gemeinsam und tragen Verantwortung – als Generalunternehmer mit einem Vertrag und dokumentierter Übergabe.
+            </p>
+            <div className="mt-6 flex justify-center">
+              <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
+                {PROOF_STRIP.map((label) => (
+                  <span
+                    key={label}
+                    className="inline-flex items-center rounded-full border border-transparent bg-[#8AB0AB] px-3 py-1 text-xs font-medium text-[#26413C]"
                   >
-                    <MapPin className="h-4 w-4" />
-                    {location.name}
-                  </Link>
+                    {label}
+                  </span>
                 ))}
               </div>
-              <div className="mt-10 flex items-center gap-3 rounded-2xl bg-slate-800/10 px-6 py-4">
-                <Phone className="h-6 w-6 text-slate-700" />
-                <div className="text-left">
-                  <a href="tel:+498925006355" className="text-lg font-bold text-foreground hover:text-slate-600 transition-colors">
-                    +49 (0)89 25006355
-                  </a>
-                  <p className="text-sm text-muted-foreground">
-                    Hier gehen echte Menschen ans Telefon
-                  </p>
-                </div>
-              </div>
             </div>
+            <div className="mt-8 flex justify-center">
+              <Link href="/anfrage">
+                <AnimatedButton className="px-8 py-6 text-base bg-[#4C626C] text-white hover:bg-[#4C626C]/90">
+                  Projekt anfragen
+                </AnimatedButton>
+              </Link>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* 2) WARUM ANDERS – 3 Cards */}
+      <section className="bg-background py-16 lg:py-24" aria-labelledby="warum-anders">
+        <div className="container mx-auto px-4 lg:px-8">
+          <h2 id="warum-anders" className="text-center text-2xl font-bold tracking-tight text-[#3E505B] md:text-3xl">
+            Warum anders
+          </h2>
+          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {WARUM_ANDERS.map((item, i) => (
+              <motion.div
+                key={item.title}
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.08 }}
+              >
+                <Card className="h-full border-border bg-card">
+                  <CardContent className="p-6">
+                    <h3 className="text-lg font-semibold text-[#3E505B]">{item.title}</h3>
+                    <p className="mt-2 text-sm text-[#3E505B] leading-relaxed">{item.text}</p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
           </div>
-        </section>
+        </div>
+      </section>
+
+      {/* 3) GESAMTVERANTWORTUNG – GU mit Gesicht */}
+      <section className="bg-background py-20 lg:py-28" aria-labelledby="gesamtverantwortung">
+        <div className="container mx-auto px-4 lg:px-8">
+          <h2 id="gesamtverantwortung" className="text-center text-3xl font-bold tracking-tight text-[#3E505B] md:text-4xl">
+            Gesamtverantwortung
+          </h2>
+          <p className="mx-auto mt-5 max-w-2xl text-center text-[#3E505B] text-base md:text-lg">
+            Ein Vertrag, ein Projektplan, eine Übergabe – als Generalunternehmer bin ich euer zentraler Ansprechpartner und sorge dafür, dass die Gewerke sauber ineinandergreifen.
+          </p>
+          <motion.div
+            className="mx-auto mt-14 max-w-3xl"
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4 }}
+          >
+            <Card className="overflow-hidden border-border bg-card shadow-lg">
+              <CardContent className="p-0 flex flex-col md:flex-row">
+                <PersonPortrait
+                  src={guLead.image}
+                  name={guLead.name}
+                  size="large"
+                  className="w-full md:w-80 md:min-h-[340px] aspect-[4/5] md:aspect-auto"
+                />
+                <div className="flex-1 p-6 md:p-8 flex flex-col justify-center">
+                  <p className="text-xl font-semibold text-[#3E505B]">{guLead.name}</p>
+                  <p className="text-sm md:text-base text-[#3E505B] mt-0.5">{guLead.role}</p>
+                  <p className="mt-4 text-[#3E505B] leading-relaxed">{guLead.claim}</p>
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    {guLead.tags.map((tag) => (
+                      <span key={tag} className="rounded-full border border-border bg-muted/60 px-3 py-1.5 text-sm text-[#3E505B]">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* 4) DIE MEISTERRUNDE – 4 Cards, präsenter mit großen Bildern */}
+      <section className="bg-muted/40 py-20 lg:py-28" aria-labelledby="meisterrunde">
+        <div className="container mx-auto px-4 lg:px-8">
+          <h2 id="meisterrunde" className="text-center text-3xl font-bold tracking-tight text-[#3E505B] md:text-4xl">
+            Die Meisterrunde
+          </h2>
+          <p className="mx-auto mt-4 max-w-xl text-center text-[#3E505B] md:text-base">
+            Klare Zuständigkeit pro Bereich – das sind die Verantwortlichen hinter der Meisterrunde.
+          </p>
+          <div className="mt-14 grid gap-8 sm:grid-cols-2 lg:gap-10">
+            {meisterrunde.map((person, i) => (
+              <motion.div
+                key={person.slug}
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.06 }}
+              >
+                <Card className="h-full border-border bg-card overflow-hidden shadow-md">
+                  <CardContent className="p-0 flex flex-col sm:flex-row">
+                    <PersonPortrait
+                      src={person.image}
+                      name={person.name}
+                      size="medium"
+                      className="w-full sm:w-56 sm:min-h-[260px] aspect-[4/5] sm:aspect-auto"
+                    />
+                    <div className="flex-1 p-5 sm:p-6 flex flex-col">
+                      <p className="text-lg font-semibold text-[#3E505B]">{person.name}</p>
+                      <p className="text-sm text-[#3E505B] mt-0.5">{person.role}</p>
+                      <p className="mt-3 text-sm text-[#3E505B] leading-relaxed">{person.claim}</p>
+                      <div className="mt-4">
+                        <BadgeRow items={[...person.badges]} theme="light" className="justify-start flex-wrap gap-1.5" />
+                      </div>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {person.tags.map((tag) => (
+                          <span key={tag} className="rounded-full border border-border bg-muted/50 px-2.5 py-1 text-xs text-[#3E505B]">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                      {"note" in person && person.note && (
+                        <p className="mt-3 text-xs text-[#3E505B] italic">{person.note}</p>
+                      )}
+                      <Link
+                        href={person.href}
+                        className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-[#3E505B] hover:underline"
+                      >
+                        Mehr
+                        <ArrowRight className="h-4 w-4" />
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 5) WOFÜR WIR STEHEN – 3 Prinzipien (präsent) */}
+      <section className="bg-background py-20 lg:py-24" aria-labelledby="wofuer">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#3E505B]/80">
+              Werte & Prinzipien
+            </p>
+            <h2
+              id="wofuer"
+              className="mt-3 text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-[#3E505B]"
+            >
+              Wofür wir stehen
+            </h2>
+            <p className="mt-4 text-sm md:text-base text-[#3E505B]/90">
+              Klar definierte Verantwortung, gemeinsame Planung und dokumentierte Übergaben –
+              damit Projekte nicht im Schnittstellen-Chaos enden.
+            </p>
+          </div>
+
+          <div className="mt-10 grid gap-6 md:grid-cols-3">
+            {WOFUER_WIR_STEHEN.map((line, index) => (
+              <div
+                key={line}
+                className="relative overflow-hidden rounded-3xl bg-white shadow-xl border border-[#3E505B]/10 p-6 md:p-7 flex flex-col gap-4"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#3E505B] text-xs font-bold text-white">
+                    {index + 1}
+                  </span>
+                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#3E505B]/10 text-[#3E505B]">
+                    <Shield className="h-5 w-5" strokeWidth={1.7} />
+                  </span>
+                </div>
+                <p className="text-sm md:text-base leading-relaxed text-[#3E505B]">
+                  {line}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 7) FÜR WEN WIR GEBAUT SIND – 3 Zielgruppen, präsenter */}
+      <section className="bg-background py-20 lg:py-24" aria-labelledby="fuer-wen">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#3E505B]/80">
+              Zielgruppen
+            </p>
+            <h2
+              id="fuer-wen"
+              className="mt-3 text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-[#3E505B]"
+            >
+              Für wen wir gebaut sind
+            </h2>
+            <p className="mt-4 text-sm md:text-base text-[#3E505B]/90">
+              Für Verwaltungen, Gewerbe und private Auftraggeber, die Verlässlichkeit und eine
+              dokumentierte Übergabe erwarten – statt Subunternehmer-Lotto.
+            </p>
+          </div>
+
+          <div className="mt-12 grid gap-8 sm:grid-cols-3">
+            {FUER_WEN.map((item) => (
+              <Card
+                key={item.label}
+                className="relative h-full overflow-hidden rounded-3xl border border-[#3E505B]/15 bg-white shadow-lg"
+              >
+                <CardContent className="p-6 flex flex-col gap-4">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#3E505B]/10 text-[#3E505B]">
+                      <item.icon className="h-6 w-6" strokeWidth={1.6} />
+                    </span>
+                    <h3 className="text-lg font-semibold text-[#3E505B]">
+                      {item.label}
+                    </h3>
+                  </div>
+                  <p className="text-sm md:text-base text-[#3E505B] leading-relaxed">
+                    {item.sentence}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 8) FINAL CTA – wie Startseite */}
+      <CTASection />
     </>
   );
 }

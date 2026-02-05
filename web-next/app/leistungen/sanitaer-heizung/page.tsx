@@ -69,7 +69,7 @@ const faqs = [
 ];
 
 const relatedLinks = [
-  { label: "Alle Handwerk-Leistungen", href: "/handwerk" },
+  { label: "Alle Handwerk-Leistungen", href: "/handwerk/elektrotechnik" },
   { label: "Elektrotechnik & DGUV V3", href: "/leistungen/elektrotechnik" },
   { label: "Service & Wartung", href: "/leistungen/service-wartung" },
   { label: "München", href: "/standorte/muenchen" },
@@ -87,56 +87,33 @@ export default function SanitaerHeizung() {
       
 
       
-        {/* Breadcrumb */}
-        <nav className="bg-primary py-4" aria-label="Breadcrumb">
-          <div className="container mx-auto px-4 lg:px-8">
-            <ol className="flex items-center gap-2 text-sm">
-              <li>
-                <Link href="/" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">
-                  Startseite
-                </Link>
-              </li>
-              <ChevronRight className="h-4 w-4 text-primary-foreground/50" aria-hidden="true" />
-              <li>
-                <Link href="/handwerk" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">
-                  Handwerk
-                </Link>
-              </li>
-              <ChevronRight className="h-4 w-4 text-primary-foreground/50" aria-hidden="true" />
-              <li>
-                <span className="font-medium text-primary-foreground">Sanitär- & Heizungstechnik</span>
-              </li>
-            </ol>
-          </div>
-        </nav>
-
-        {/* Hero */}
-        <section className="bg-primary py-16 lg:py-24">
-          <div className="container mx-auto px-4 lg:px-8">
-            <div className="max-w-3xl">
-              <p className="text-sm font-medium uppercase tracking-wider text-primary-foreground/70">
+        {/* Hero – gleicher Aufbau wie Elektrotechnik */}
+        <section className="relative flex min-h-[520px] items-center bg-[#26413C] py-16 lg:min-h-[640px] lg:py-20">
+          <div className="container relative mx-auto px-4 lg:px-8">
+            <div className="mx-auto max-w-3xl text-center">
+              <p className="text-sm font-medium uppercase tracking-wider text-white/70">
                 Versorgungssicherheit & Asset-Schutz
               </p>
-              <h1 className="mt-3 text-4xl font-black tracking-tight text-primary-foreground lg:text-5xl">
+              <h1 className="mt-3 text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-6xl">
                 Sanitär- & Heizungstechnik
               </h1>
-              <p className="mt-6 text-lg text-primary-foreground/80 leading-relaxed">
+              <p className="mt-7 max-w-2xl mx-auto text-base md:text-lg text-white leading-relaxed">
                 Zertifizierte Wartung und Instandhaltung technischer Gebäudeanlagen. Wir schützen Ihre Assets gegen Systemausfälle und Wasserschäden.
               </p>
-              <div className="mt-8 flex flex-wrap gap-4">
+              <div className="mt-8 flex flex-wrap justify-center gap-4">
                 <Link href="/anfrage">
-                  <AnimatedButton className="bg-white text-foreground hover:bg-foreground hover:text-white">
+                  <AnimatedButton>
                     Kostenloses Angebot
                   </AnimatedButton>
                 </Link>
-                <a href="tel:+498925006355">
+                <a href="tel:+491234567890">
                   <AnimatedButton className="border-2 border-primary-foreground bg-transparent text-primary-foreground hover:bg-primary-foreground hover:text-primary">
                     <Phone className="mr-2 h-4 w-4" aria-hidden="true" />
                     Jetzt anrufen
                   </AnimatedButton>
                 </a>
               </div>
-              <div className="mt-6">
+              <div className="mt-6 flex justify-center">
                 <BadgeRow items={HANDWERK_BADGES} theme="dark" />
               </div>
             </div>

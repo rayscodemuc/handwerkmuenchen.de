@@ -603,7 +603,7 @@ export default function Rechner() {
             </p>
             <div className="mt-4 mx-auto max-w-2xl rounded-xl bg-amber-50 border border-amber-200 p-4 text-left">
               <p className="text-sm text-foreground">
-                <strong>Hinweis:</strong> Der Richtpreis dient zur Orientierung für wiederkehrende Facility-Leistungen. Für Elektro, Sanitär oder Maler &amp; Boden erstellen wir ein Angebot nach kurzem Check oder Vor-Ort-Termin.
+                <strong>Hinweis:</strong> Der Richtpreis dient zur Orientierung für wiederkehrende Facility-Leistungen. Für Elektro, Sanitär oder Innenausbau erstellen wir ein Angebot nach kurzem Check oder Vor-Ort-Termin.
               </p>
             </div>
           </div>

@@ -5,7 +5,7 @@ const getBaseUrl = (): string => {
   return (
     process.env.SITE_URL ||
     process.env.NEXT_PUBLIC_SITE_URL ||
-    'https://www.mr-clean.services'
+    'https://www.example.com'
   )
 }
 
@@ -46,15 +46,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${baseUrl}/partner-werden`,
       lastModified,
     },
-    {
-      url: `${baseUrl}/service-24-7`,
-      lastModified,
-    },
     // Kategorie-Landingpages
-    {
-      url: `${baseUrl}/handwerk`,
-      lastModified,
-    },
     {
       url: `${baseUrl}/reinigung`,
       lastModified,
@@ -78,10 +70,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${baseUrl}/handwerk/elektrotechnik/e-mobility`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/handwerk/elektrotechnik/elektro-notdienst`,
       lastModified,
     },
     {

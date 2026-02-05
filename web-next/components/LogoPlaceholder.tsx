@@ -2,20 +2,20 @@ import Link from "next/link";
 
 type LogoPlaceholderProps = {
   className?: string;
-  /** Use "footer" for dark text on light background, "header" for light on primary */
-  variant?: "header" | "footer";
+  /** "header" = light on primary (Navy), "headerLight" = dark on light (z. B. Startseite), "footer" = dark on light */
+  variant?: "header" | "headerLight" | "footer";
 };
 
 export function LogoPlaceholder({ className = "", variant = "header" }: LogoPlaceholderProps) {
-  const isHeader = variant === "header";
-  const textColor = isHeader ? "text-white" : "text-foreground";
-  const borderColor = isHeader ? "border-white/40" : "border-border";
+  const isHeaderDark = variant === "header";
+  const textColor = isHeaderDark ? "text-primary-foreground" : "text-foreground";
+  const borderColor = isHeaderDark ? "border-primary-foreground/40" : "border-border";
 
   return (
     <Link
       href="/"
       className={`inline-flex items-center gap-2 rounded-lg border-2 ${borderColor} bg-transparent px-3 py-1.5 font-semibold ${textColor} no-underline transition-opacity hover:opacity-90 ${className}`}
-      aria-label="Mr. Clean Services – Startseite"
+      aria-label="Musterfirma – Startseite"
     >
       <span className="text-[0.95em] tracking-tight">Logo</span>
     </Link>

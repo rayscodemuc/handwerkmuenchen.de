@@ -1,4 +1,3 @@
-import { ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface AnimatedButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -11,16 +10,15 @@ export function AnimatedButton({ children, className, ...props }: AnimatedButton
     <button
       {...props}
       className={cn(
-        "group relative flex h-12 items-center justify-center gap-2 overflow-hidden rounded-full border border-foreground/20 bg-background px-6 text-foreground transition-all duration-300",
-        // Hover effects only on devices with hover capability (no touch)
-        "@media(hover:hover){hover:bg-foreground hover:text-background}",
+        "inline-flex h-11 items-center justify-center gap-2 rounded-lg px-6 text-sm font-medium transition-all duration-200",
+        "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 active:scale-[0.98]",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+        "disabled:pointer-events-none disabled:opacity-50",
+        "w-auto [&_svg]:size-4 [&_svg]:shrink-0",
         className
       )}
     >
-      <span className="relative z-10 flex items-center gap-2 transition-transform duration-300 [@media(hover:hover)]:group-hover:-translate-x-2">
-        {children}
-      </span>
-      <ArrowRight className="relative z-10 h-5 w-5 opacity-0 transition-all duration-300 [@media(hover:hover)]:group-hover:opacity-100" />
+      {children}
     </button>
   );
 }

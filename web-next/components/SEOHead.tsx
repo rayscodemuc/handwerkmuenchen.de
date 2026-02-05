@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 
-const BASE_URL = "https://mrclean-services.de";
+const BASE_URL = "https://www.example.com";
 
 interface SEOHeadProps {
   title: string;
@@ -25,7 +25,7 @@ export function SEOHead({
   ogType = "website",
 }: SEOHeadProps) {
   const pathname = usePathname();
-  const fullTitle = `${title} | Mr.Clean Services GmbH`;
+  const fullTitle = `${title} | Musterfirma GmbH`;
   const currentUrl = canonicalUrl || `${BASE_URL}${pathname}`;
   const imageUrl = ogImage ? `${BASE_URL}${ogImage}` : null;
 
@@ -57,7 +57,7 @@ export function SEOHead({
     setMetaTag("og:type", ogType, true);
     setMetaTag("og:url", currentUrl, true);
     if (imageUrl) setMetaTag("og:image", imageUrl, true);
-    setMetaTag("og:site_name", "Mr.Clean Services GmbH", true);
+    setMetaTag("og:site_name", "Musterfirma GmbH", true);
     setMetaTag("og:locale", "de_DE", true);
 
     // Twitter Card tags

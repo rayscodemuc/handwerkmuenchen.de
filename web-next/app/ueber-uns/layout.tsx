@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Über uns",
-  description: "Generalunternehmer für Facility Management, Handwerk und Reinigung: ein Vertrag, ein Ansprechpartner. Meister pro Gewerk – keine Plattform, keine anonymen Subunternehmer.",
+  title: "Über uns | Die Meisterrunde – Generalunternehmer in München",
+  description: "Meistergewerke unter einem Dach, GU-Vertrag, dokumentierte Übergabe. Reinigung & Facility als Fachbetrieb.",
   alternates: {
     canonical: "/ueber-uns",
   },

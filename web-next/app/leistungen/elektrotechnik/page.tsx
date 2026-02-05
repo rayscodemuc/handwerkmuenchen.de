@@ -2,9 +2,10 @@
 import { CTASection } from "@/components/sections/CTASection";
 import { BadgeRow } from "@/components/BadgeRow";
 import { AnimatedButton } from "@/components/ui/animated-button";
+import { motion } from "framer-motion";
 import { 
-  ChevronRight, Clock, Shield, Award, Phone, ArrowRight,
-  Zap, Home, Cpu, Car, Wrench, Building2, RefreshCw, 
+  ChevronRight, Clock, Shield, Phone, ArrowRight,
+  Home, Cpu, Car, Wrench, Building2, RefreshCw, 
   Camera, Lightbulb, Bell, Gauge
 } from "lucide-react";
 import Link from "next/link";
@@ -12,16 +13,8 @@ import elektrotechnikImage from "@/assets/elektrotechnik-schaltschrank-dguv-v3-p
 
 const HANDWERK_BADGES = ["Meisterbetrieb", "GU-Abwicklung", "Dokumentierte Abnahme"];
 
-// Service Data für die 11 Leistungen
+// Service Data für die 10 Leistungen (ohne Notdienst)
 const services = [
-  {
-    id: "notdienst",
-    icon: Zap,
-    title: "Elektro-Notdienst",
-    description: "24/7 Notfall-Service bei akuten elektrischen Störungen und Gefahrensituationen.",
-    href: "/handwerk/elektrotechnik/notdienst",
-    keywords: ["Elektro Notdienst", "24/7 Elektriker", "Stromausfall Hilfe"]
-  },
   {
     id: "hauselektrik",
     icon: Home,
@@ -104,14 +97,8 @@ const services = [
   }
 ];
 
-// Quick-Nav Kategorien
-const quickNavItems = [
-  { label: "Notdienst", targetId: "notdienst" },
-  { label: "Privatinstallationen", targetId: "hauselektrik" },
-  { label: "Smart Home", targetId: "smart-home" },
-  { label: "E-Mobility", targetId: "e-mobility" },
-  { label: "Sicherheit", targetId: "sicherheitstechnik" },
-];
+// Quick-Nav: alle Leistungen (abgeleitet aus services)
+const quickNavItems = services.map((s) => ({ label: s.title, targetId: s.id }));
 
 export default function Elektrotechnik() {
   const scrollToSection = (id: string) => {
@@ -123,62 +110,54 @@ export default function Elektrotechnik() {
 
   return (
     <>
-      {/* Breadcrumb */}
-      <nav className="bg-primary py-4" aria-label="Breadcrumb">
-          <div className="container mx-auto px-4 lg:px-8">
-            <ol className="flex items-center gap-2 text-sm">
-              <li><Link href="/" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">Startseite</Link></li>
-              <ChevronRight className="h-4 w-4 text-primary-foreground/50" aria-hidden="true" />
-              <li><Link href="/handwerk" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">Handwerk</Link></li>
-              <ChevronRight className="h-4 w-4 text-primary-foreground/50" aria-hidden="true" />
-              <li><span className="font-medium text-primary-foreground">Elektrotechnik</span></li>
-            </ol>
-          </div>
-        </nav>
-
-        {/* Hero - Kompakt */}
-        <section className="bg-primary py-16 lg:py-24">
-          <div className="container mx-auto px-4 lg:px-8">
-            <div className="max-w-3xl">
-              <p className="text-sm font-medium uppercase tracking-wider text-primary-foreground/70">
+      {/* Hero – Aufbau wie Über-uns-Seite, Buttons unverändert */}
+        <section className="relative flex min-h-[520px] items-center bg-[#26413C] py-16 lg:min-h-[640px] lg:py-20">
+          <div className="container relative mx-auto px-4 lg:px-8">
+            <motion.div
+              className="mx-auto max-w-3xl text-center"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <p className="text-sm font-medium uppercase tracking-wider text-white/70">
                 Zertifizierter Elektrofachbetrieb
               </p>
-              <h1 className="mt-3 text-4xl font-black tracking-tight text-primary-foreground lg:text-5xl">
+              <h1 className="mt-3 text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-6xl">
                 Elektrotechnik – Alle Leistungen im Überblick
               </h1>
-              <p className="mt-6 text-lg text-primary-foreground/80 leading-relaxed">
+              <p className="mt-7 max-w-2xl mx-auto text-base md:text-lg text-white leading-relaxed">
                 Von der Steckdose bis zur kompletten Gebäudeautomation: Wir sind Ihr kompetenter Partner für alle elektrotechnischen Anforderungen – privat und gewerblich.
               </p>
-              <div className="mt-8 flex flex-wrap gap-4">
+              <div className="mt-8 flex flex-wrap justify-center gap-4">
                 <Link href="/anfrage">
-                  <AnimatedButton className="bg-white text-foreground hover:bg-foreground hover:text-white">
+                  <AnimatedButton>
                     Kostenloses Angebot
                   </AnimatedButton>
                 </Link>
-                <a href="tel:+498925006355">
+                <a href="tel:+491234567890">
                   <AnimatedButton className="border-2 border-primary-foreground bg-transparent text-primary-foreground hover:bg-primary-foreground hover:text-primary">
                     <Phone className="mr-2 h-4 w-4" aria-hidden="true" />
                     Jetzt anrufen
                   </AnimatedButton>
                 </a>
               </div>
-              <div className="mt-6">
+              <div className="mt-6 flex justify-center">
                 <BadgeRow items={HANDWERK_BADGES} theme="dark" />
               </div>
-            </div>
+            </motion.div>
           </div>
         </section>
 
-        {/* Quick-Nav */}
-        <nav className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm" aria-label="Schnellnavigation">
-          <div className="container mx-auto px-4 lg:px-8">
-            <div className="flex items-center gap-2 overflow-x-auto py-3 scrollbar-hide">
-              <span className="shrink-0 text-sm font-medium text-muted-foreground mr-2">Direkt zu:</span>
+        {/* Quick-Nav – übersichtlich in Zeilen (scrollt mit) */}
+        <nav className="border-b border-border bg-muted/30" aria-label="Schnellnavigation">
+          <div className="container mx-auto px-4 lg:px-8 py-4 flex flex-col items-center">
+            <p className="text-sm font-semibold text-foreground mb-3">Direkt zu:</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 w-full max-w-4xl">
               {quickNavItems.map((item) => (
                 <button
                   key={item.targetId}
                   onClick={() => scrollToSection(item.targetId)}
-                  className="shrink-0 rounded-full border border-border bg-background px-4 py-1.5 text-sm font-medium text-foreground transition-colors hover:border-primary hover:text-primary"
+                  className="rounded-lg border border-border bg-background px-3 py-2.5 text-left text-sm font-medium text-foreground transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
                 >
                   {item.label}
                 </button>
@@ -187,40 +166,22 @@ export default function Elektrotechnik() {
           </div>
         </nav>
 
-        {/* Trust Badges */}
-        <section className="border-b border-border bg-background py-6">
-          <div className="container mx-auto px-4 lg:px-8">
-            <div className="flex flex-wrap items-center justify-center gap-8 lg:gap-12 text-sm">
-              <div className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-primary" aria-hidden="true" />
-                <span className="font-medium">24/7 Notdienst</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-primary" aria-hidden="true" />
-                <span className="font-medium">VdS-Konform</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Award className="h-5 w-5 text-primary" aria-hidden="true" />
-                <span className="font-medium">Zertifizierter Fachbetrieb</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Blog-Style Content */}
+        {/* Hauptinhalt – klare Abschnitte */}
         <article className="bg-background">
           <div className="container mx-auto px-4 lg:px-8">
-            <div className="mx-auto max-w-5xl py-16 lg:py-20">
+            <div className="mx-auto max-w-5xl">
               
-              {/* Intro Text */}
-              <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl">
-                Als zertifizierter Elektrofachbetrieb vereinen wir handwerkliche Präzision mit modernster Technik. 
-                Ob schnelle Hilfe im Notfall, intelligente Gebäudesteuerung oder nachhaltige Ladelösungen – 
-                unsere Experten realisieren Ihr Projekt termingerecht und normkonform.
-              </p>
+              {/* Intro – eigener Block */}
+              <section className="pt-16 pb-10 lg:pt-20 lg:pb-12">
+                <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl">
+                  Als zertifizierter Elektrofachbetrieb vereinen wir handwerkliche Präzision mit modernster Technik. 
+                  Ob intelligente Gebäudesteuerung oder nachhaltige Ladelösungen – 
+                  unsere Experten realisieren Ihr Projekt termingerecht und normkonform.
+                </p>
+              </section>
 
-              {/* Feature Image */}
-              <figure className="my-12">
+              {/* Bild */}
+              <figure className="mb-16">
                 <img
                   src={typeof elektrotechnikImage === 'string' ? elektrotechnikImage : elektrotechnikImage.src}
                   alt="Professionelle Elektroinstallation – Schaltschrank mit sauberer Verkabelung"
@@ -233,17 +194,16 @@ export default function Elektrotechnik() {
                 </figcaption>
               </figure>
 
-              {/* Leistungen Überschrift */}
-              <h2 className="text-3xl font-bold text-foreground mt-16 mb-4">
-                Unsere 11 Kernleistungen
-              </h2>
-              <p className="text-muted-foreground leading-relaxed mb-10 max-w-2xl">
-                Jede Leistung wird von spezialisierten Fachkräften ausgeführt. Klicken Sie auf eine Karte, 
-                um mehr Details zu erfahren und ein unverbindliches Angebot anzufordern.
-              </p>
+              {/* Leistungen – klare Sektion */}
+              <section className="pb-16" aria-labelledby="leistungen-heading">
+                <h2 id="leistungen-heading" className="text-2xl font-bold text-foreground mb-2">
+                  Unsere Leistungen
+                </h2>
+                <p className="text-muted-foreground leading-relaxed mb-8 max-w-2xl">
+                  Jede Leistung wird von spezialisierten Fachkräften ausgeführt. Klicken Sie auf eine Karte für Details und ein unverbindliches Angebot.
+                </p>
 
-              {/* Service Cards Grid */}
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {services.map((service) => (
                   <Link
                     key={service.id}
@@ -266,18 +226,20 @@ export default function Elektrotechnik() {
                     </div>
                   </Link>
                 ))}
-              </div>
+                </div>
+              </section>
 
-              {/* Highlight Box */}
-              <div className="my-16 rounded-2xl bg-primary/5 border border-primary/10 p-8">
+              {/* Vorteile – eigener Block */}
+              <section className="pb-16">
+              <div className="rounded-2xl bg-primary/5 border border-primary/10 p-8">
                 <div className="flex items-start gap-4">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
                     <Shield className="h-6 w-6" aria-hidden="true" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-foreground">Warum Mr.Clean Elektrotechnik?</h3>
+                    <h3 className="text-xl font-bold text-foreground">Ihre Vorteile</h3>
                     <p className="mt-3 text-muted-foreground leading-relaxed">
-                      Mit über 15 Jahren Erfahrung und einem Netzwerk qualifizierter Elektromeister garantieren wir 
+                      Mit über 15 Jahren Erfahrung und einem Netzwerk qualifizierter Elektrotechnik-Experten garantieren wir 
                       höchste Qualität bei jeder Installation. Alle Arbeiten werden nach aktuellen DIN VDE-Normen 
                       ausgeführt und dokumentiert – für Ihre Sicherheit und Gewährleistung.
                     </p>
@@ -299,16 +261,33 @@ export default function Elektrotechnik() {
                   </div>
                 </div>
               </div>
+              </section>
 
-              {/* FAQ Section */}
-              <h2 className="text-2xl font-bold text-foreground mt-16 mb-6">
-                Häufige Fragen
-              </h2>
+              {/* Teamfoto – Bild unter public/images/team/elektrotechnik.jpg ablegen */}
+              <section className="pb-16">
+                <h2 className="text-2xl font-bold text-foreground mb-4">Unser Team</h2>
+                <figure className="overflow-hidden rounded-2xl border border-border bg-muted/30">
+                  <img
+                    src="/images/team/elektrotechnik.jpg"
+                    alt="Unser Elektrotechnik-Team"
+                    className="w-full object-cover aspect-[21/9] sm:aspect-[3/1]"
+                    loading="lazy"
+                  />
+                  <figcaption className="p-4 text-center text-sm text-muted-foreground">
+                    Ihr Ansprechpartner für alle elektrotechnischen Leistungen
+                  </figcaption>
+                </figure>
+              </section>
+
+              {/* FAQ – eigener Block */}
+              <section className="pb-16" aria-labelledby="faq-heading">
+                <h2 id="faq-heading" className="text-2xl font-bold text-foreground mb-6">
+                  Häufige Fragen
+                </h2>
               
-              <div className="space-y-4">
+                <div className="space-y-3">
                 {[
-                  { q: "Welche Elektro-Leistungen bieten Sie an?", a: "Wir decken das gesamte Spektrum ab: Notdienst, Hauselektrik, Smart Home, E-Mobility, Reparaturen, Neubau, Sanierung, Sicherheitstechnik, LED-Beleuchtung, Klingelanlagen und Messsysteme." },
-                  { q: "Wie schnell können Sie bei einem Notfall vor Ort sein?", a: "Unser Elektro-Notdienst ist 24/7 erreichbar. In der Regel sind unsere Techniker innerhalb von 60-90 Minuten bei Ihnen." },
+                  { q: "Welche Elektro-Leistungen bieten Sie an?", a: "Wir decken das gesamte Spektrum ab: Hauselektrik, Smart Home, E-Mobility, Reparaturen, Neubau, Sanierung, Sicherheitstechnik, LED-Beleuchtung, Klingelanlagen und Messsysteme." },
                   { q: "Bieten Sie auch Wartungsverträge an?", a: "Ja, wir bieten maßgeschneiderte Wartungsverträge für Gewerbe und Wohnanlagen an, die regelmäßige Prüfungen und bevorzugte Reaktionszeiten beinhalten." },
                   { q: "Welche Zertifizierungen haben Ihre Elektriker?", a: "Alle Partner sind eingetragene Elektrofachbetriebe mit Meisterbrief und arbeiten nach DIN VDE. Für Sicherheitstechnik sind wir zusätzlich VdS-zertifiziert." },
                 ].map((faq, i) => (
@@ -320,41 +299,42 @@ export default function Elektrotechnik() {
                     <p className="px-5 pb-5 text-muted-foreground">{faq.a}</p>
                   </details>
                 ))}
-              </div>
+                </div>
+              </section>
 
-              {/* Related Links */}
-              <div className="mt-12 rounded-2xl bg-muted p-6">
-                <p className="text-sm font-semibold text-foreground mb-4">Verwandte Leistungen & Standorte</p>
+              {/* Verwandte Links */}
+              <section className="pb-20">
+                <p className="text-sm font-semibold text-foreground mb-3">Verwandte Leistungen & Standorte</p>
                 <div className="flex flex-wrap gap-2">
                   {[
-                    { label: "Alle Handwerk-Leistungen", href: "/handwerk" },
-                    { label: "Service & Wartung", href: "/facility-management/service-wartung" },
+                    { label: "Alle Handwerk-Leistungen", href: "/handwerk/elektrotechnik" },
+                    { label: "Service & Wartung", href: "/handwerk/service-wartung" },
                     { label: "München", href: "/standorte/muenchen" },
                   ].map((link, i) => (
                     <Link
                       key={i}
                       href={link.href}
-                      className="inline-flex items-center gap-1 rounded-full bg-background px-4 py-2 text-sm font-medium text-foreground border border-border hover:border-primary hover:text-primary transition-colors"
+                      className="inline-flex items-center gap-1 rounded-lg bg-muted px-4 py-2 text-sm font-medium text-foreground hover:bg-muted/80 hover:text-primary transition-colors"
                     >
                       {link.label}
                       <ArrowRight className="h-3 w-3" aria-hidden="true" />
                     </Link>
                   ))}
                 </div>
-              </div>
+              </section>
 
             </div>
           </div>
         </article>
 
-        {/* Kontakt-Sektion */}
-        <section className="bg-muted py-20 lg:py-28">
+        {/* Kontakt-Sektion – gleicher Hintergrund wie Hero Über uns */}
+        <section className="bg-[#26413C] py-20 lg:py-28">
           <div className="container mx-auto px-4 lg:px-8">
             <div className="mx-auto max-w-3xl text-center">
-              <h2 className="text-3xl font-bold text-foreground lg:text-4xl">
+              <h2 className="text-3xl font-bold text-white lg:text-4xl">
                 Bereit für Ihr Elektroprojekt?
               </h2>
-              <p className="mt-4 text-lg text-muted-foreground leading-relaxed">
+              <p className="mt-4 text-lg text-white/90 leading-relaxed">
                 Lassen Sie uns gemeinsam Ihr Vorhaben besprechen – kostenlos und unverbindlich. 
                 Unsere Experten beraten Sie zu allen elektrotechnischen Fragen.
               </p>
@@ -362,25 +342,25 @@ export default function Elektrotechnik() {
               {/* Kontakt-Optionen */}
               <div className="mt-10 flex flex-col items-center gap-6 sm:flex-row sm:justify-center">
                 <a 
-                  href="tel:+498925006355" 
-                  className="group flex items-center gap-3 rounded-2xl bg-primary px-8 py-5 text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-lg"
+                  href="tel:+491234567890" 
+                  className="group flex items-center gap-3 rounded-2xl bg-[#8AB0AB] px-8 py-5 text-[#26413C] transition-all hover:bg-[#8AB0AB]/90 hover:shadow-lg"
                 >
                   <Phone className="h-6 w-6" aria-hidden="true" />
                   <div className="text-left">
-                    <p className="text-sm font-medium opacity-80">Direkt anrufen</p>
-                    <p className="text-xl font-bold">+49 (0)89 25006355</p>
+                    <p className="text-sm font-medium opacity-90">Direkt anrufen</p>
+                    <p className="text-xl font-bold">+49 (0)123 4567890</p>
                   </div>
                 </a>
                 <Link href="/anfrage">
-                  <AnimatedButton className="h-16 px-10 text-lg">
+                  <AnimatedButton className="h-16 px-10 text-lg border-2 border-white bg-transparent text-white hover:bg-white hover:text-[#26413C]">
                     Angebot anfordern
                   </AnimatedButton>
                 </Link>
               </div>
 
-              <p className="mt-8 text-sm text-muted-foreground">
+              <p className="mt-8 text-sm text-white/80">
                 <Clock className="inline-block h-4 w-4 mr-1 -mt-0.5" aria-hidden="true" />
-                Montag – Freitag: 07:00 – 18:00 Uhr | Notdienst: 24/7 erreichbar
+                Montag – Freitag: 07:00 – 18:00 Uhr
               </p>
             </div>
           </div>

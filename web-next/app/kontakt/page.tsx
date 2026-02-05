@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { ContactForm } from "@/components/ContactForm";
 import { GermanyMap } from "@/components/GermanyMap";
-import { Phone, Mail, MapPin, Clock } from "lucide-react";
+import { Phone, Mail, MapPin } from "lucide-react";
 import Link from "next/link";
 import { BUSINESS } from "@/lib/business";
+import { BadgeRow } from "@/components/BadgeRow";
 
 export const metadata: Metadata = {
   title: "Kontakt",
@@ -24,22 +25,15 @@ const contactInfo = [
   {
     icon: Mail,
     title: "E-Mail",
-    content: BUSINESS.email || "kontakt@mr-clean.services",
+    content: BUSINESS.email || "kontakt@example.com",
     subContent: "Antwort innerhalb 24h",
-    href: `mailto:${BUSINESS.email || "kontakt@mr-clean.services"}`,
+    href: `mailto:${BUSINESS.email || "kontakt@example.com"}`,
   },
   {
     icon: MapPin,
     title: "Adresse",
-    content: BUSINESS.address?.street || "Landsbergerstr. 456 RGB",
-    subContent: `DE-${BUSINESS.address?.zip || "81241"} ${BUSINESS.address?.city || "München"}`,
-  },
-  {
-    icon: Clock,
-    title: "24/7 Notfall-Hotline",
-    content: BUSINESS.hotlinePhoneDisplay || BUSINESS.hotlinePhone || BUSINESS.phoneDisplay || BUSINESS.phone,
-    subContent: "Rund um die Uhr erreichbar",
-    href: `tel:${BUSINESS.hotlinePhone || BUSINESS.phone}`,
+    content: BUSINESS.address?.street || "Musterstraße 1",
+    subContent: `DE-${BUSINESS.address?.zip || "80331"} ${BUSINESS.address?.city || "München"}`,
   },
 ];
 
@@ -47,21 +41,26 @@ const locations = [
   { name: "München", href: "/standorte/muenchen" },
 ];
 
+const PROOF_STRIP = ["Rückmeldung in 24h", "Verbindliche Ansprechpartner", "Dokumentierte Kommunikation"];
+
 export default function Kontakt() {
   return (
     <>
-        {/* Hero Section */}
-        <section className="relative flex min-h-[540px] items-center bg-primary lg:min-h-[650px]">
+        {/* Hero Section – wie Über-uns Hero (ohne Animation) */}
+        <section className="relative flex min-h-[420px] items-center bg-[#8AB0AB] py-16 lg:min-h-[480px] lg:py-20">
           <div className="container mx-auto px-4 lg:px-8">
-            <p className="text-sm font-medium uppercase tracking-wider text-primary-foreground/70">
-              Kontakt
-            </p>
-            <h1 className="mt-3 text-4xl font-black tracking-tight text-primary-foreground lg:text-6xl">
-              Sprechen Sie mit uns
-            </h1>
-            <p className="mt-6 max-w-2xl text-lg text-primary-foreground/80">
-              Haben Sie Fragen oder möchten ein unverbindliches Angebot? Wir freuen uns auf Ihre Nachricht.
-            </p>
+            <div className="mx-auto max-w-3xl text-center">
+              <h1 className="text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-6xl">
+                Kontakt zur Meisterrunde
+              </h1>
+              <p className="mt-7 max-w-2xl mx-auto text-base md:text-lg text-white leading-relaxed">
+                Sie haben ein Projekt, eine Frage oder möchten ein unverbindliches Gespräch? Schreiben Sie uns –
+                wir melden uns in der Regel innerhalb von 24 Stunden.
+              </p>
+              <div className="mt-6 flex justify-center">
+                <BadgeRow items={PROOF_STRIP} theme="dark" />
+              </div>
+            </div>
           </div>
         </section>
 
@@ -74,14 +73,15 @@ export default function Kontakt() {
                 pageName="Kontaktseite"
                 title="Nachricht senden"
                 subtitle="Wählen Sie Ihren Standort und Ihr Anliegen – wir leiten Sie an den richtigen Ansprechpartner weiter."
+                accent="brand"
               />
 
               {/* Contact Info */}
-              <div>
-                <h2 className="text-2xl font-bold text-foreground">
+              <div className="rounded-3xl p-8 lg:p-10 bg-card">
+                <h2 className="text-2xl font-bold text-[#3E505B]">
                   Kontaktinformationen
                 </h2>
-                <p className="mt-2 text-muted-foreground">
+                <p className="mt-2 text-[#3E505B]">
                   Erreichen Sie uns auf dem Weg, der Ihnen am besten passt.
                 </p>
 
@@ -91,62 +91,28 @@ export default function Kontakt() {
                       key={info.title}
                       className="flex items-start gap-4 rounded-2xl bg-surface p-6"
                     >
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-                        <info.icon className="h-6 w-6 text-primary" strokeWidth={1.5} />
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#3E505B]/10 text-[#3E505B]">
+                        <info.icon className="h-6 w-6" strokeWidth={1.5} />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-foreground">{info.title}</h3>
+                        <h3 className="font-semibold text-[#3E505B]">{info.title}</h3>
                         {info.href ? (
-                          <a href={info.href} className="mt-1 block text-foreground hover:text-primary transition-colors">
+                          <a href={info.href} className="mt-1 block text-[#3E505B] hover:underline transition-colors">
                             {info.content}
                           </a>
                         ) : (
-                          <p className="mt-1 text-foreground">{info.content}</p>
+                          <p className="mt-1 text-[#3E505B]">{info.content}</p>
                         )}
-                        <p className="text-sm text-muted-foreground">{info.subContent}</p>
+                        <p className="text-sm text-[#3E505B]">{info.subContent}</p>
                       </div>
                     </div>
                   ))}
-                </div>
-
-                {/* Map */}
-                <div className="mt-8 aspect-video overflow-hidden rounded-3xl bg-muted">
-                  <GermanyMap className="w-full h-full" />
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Einsatzgebiete Section */}
-        <section className="bg-muted/50 py-20 lg:py-28">
-          <div className="container mx-auto px-4 lg:px-8">
-            <div className="text-center">
-              <p className="text-sm font-semibold uppercase tracking-wider text-primary">
-                Einsatzgebiet
-              </p>
-              <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground lg:text-4xl">
-                Unser Standort München
-              </h2>
-              <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-                Wir sind in München und der Metropolregion für Sie da.
-              </p>
-            </div>
-
-            <div className="mt-12 grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7">
-              {locations.map((location) => (
-                <Link
-                  key={location.name}
-                  href={location.href}
-                  className="flex items-center justify-center gap-2 rounded-2xl border border-border bg-card p-6 text-center transition-all hover:border-primary hover:shadow-lg"
-                >
-                  <MapPin className="h-5 w-5 text-primary" />
-                  <span className="font-medium text-foreground">{location.name}</span>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
     </>
   );
 }

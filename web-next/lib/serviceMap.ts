@@ -33,7 +33,6 @@ export const HANDWERK_SERVICE_MAP: Record<string, string> = {
   "/handwerk": "Handwerk & Technik",
   "/handwerk/elektrotechnik": "Elektrotechnik",
   "/handwerk/elektrotechnik/e-mobility": "E-Mobility Installation",
-  "/handwerk/elektrotechnik/elektro-notdienst": "Elektro-Notdienst",
   "/handwerk/elektrotechnik/hauselektrik": "Hauselektrik",
   "/handwerk/elektrotechnik/klingelanlagen": "Klingelanlagen",
   "/handwerk/elektrotechnik/led": "LED & Beleuchtung",

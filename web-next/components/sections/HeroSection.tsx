@@ -1,153 +1,127 @@
 "use client";
 
 import { AnimatedButton } from "@/components/ui/animated-button";
-import { BadgeRow } from "@/components/BadgeRow";
 import Link from "next/link";
-import heroImageDesktop from "@/assets/hero-facility-desktop.webp";
-import heroImageMobile from "@/assets/hero-facility-mobile.webp";
-import { CheckCircle2, Calculator } from "lucide-react";
-import { useEffect } from "react";
+import { Calculator } from "lucide-react";
 import { motion } from "framer-motion";
 
-const HERO_BADGES = ["Meistergeführt", "GU-Abwicklung", "Dokumentation & Übergabe"];
+const GEWERKE_PRIMARY = [
+  { label: "Elektrotechnik", href: "/handwerk/elektrotechnik" },
+  { label: "Sanitär & Heizung", href: "/handwerk/sanitaer-heizung" },
+  { label: "Innenausbau", href: "/maler-boden" },
+];
+const PROOF_STRIP = "GU-Vertrag · Dokumentation & Übergabe";
 
 export function HeroSection() {
-  // Preload hero image for LCP optimization
-  useEffect(() => {
-    const link = document.createElement("link");
-    link.rel = "preload";
-    link.as = "image";
-    link.type = "image/webp";
-    // Use desktop image for preload on larger screens
-    const desktopSrc = typeof heroImageDesktop === "string" ? heroImageDesktop : heroImageDesktop.src;
-    const mobileSrc = typeof heroImageMobile === "string" ? heroImageMobile : heroImageMobile.src;
-    link.href = window.innerWidth >= 768 ? desktopSrc : mobileSrc;
-    link.fetchPriority = "high";
-    document.head.appendChild(link);
-
-    return () => {
-      document.head.removeChild(link);
-    };
-  }, []);
-
   return (
-    <section className="relative overflow-hidden bg-primary -mt-[1px]">
-      {/* Main Container - responsive height for large screens */}
-      <div className="relative min-h-[480px] md:min-h-[520px] lg:min-h-[70vh] lg:max-h-[800px]">
-        {/* Full Background Image with Art Direction */}
-        <div className="absolute inset-0">
-          <picture>
-            {/* Mobile: Portrait crop optimized for smaller screens */}
-            <source
-              media="(max-width: 767px)"
-              srcSet={typeof heroImageMobile === "string" ? heroImageMobile : heroImageMobile.src}
-              type="image/webp"
-            />
-            {/* Desktop: Wide 16:9 format */}
-            <source
-              media="(min-width: 768px)"
-              srcSet={typeof heroImageDesktop === "string" ? heroImageDesktop : heroImageDesktop.src}
-              type="image/webp"
-            />
-            <img
-              src={typeof heroImageDesktop === "string" ? heroImageDesktop : heroImageDesktop.src}
-              alt="Partnerschaft und Vertrauen - Händeschütteln zwischen Geschäftspartnern"
-              className="h-full w-full object-cover pointer-events-none"
-              loading="eager"
-              fetchPriority="high"
-              decoding="async"
-              style={{
-                objectPosition: "center center",
-              }}
-            />
-          </picture>
-          {/* Gradient overlay - blend top with header */}
-          <div className="absolute inset-0 bg-gradient-to-b from-primary via-primary/90 via-30% to-primary/85 lg:from-primary lg:via-primary/85 lg:via-25% lg:to-primary/80" />
-        </div>
-
-        {/* Content Container - Centered */}
-        <div className="container relative mx-auto flex min-h-[560px] sm:min-h-[500px] items-center justify-center px-4 lg:min-h-[70vh] lg:max-h-[800px] lg:px-8">
-          {/* Centered Content with Fade-in Animation */}
+    <section className="relative overflow-hidden bg-[#3E505B] -mt-[1px] border-b-0">
+      <div className="relative min-h-[560px] md:min-h-[600px] lg:min-h-[70vh] lg:max-h-[800px] flex items-center justify-center">
+        <div className="container mx-auto px-4 lg:px-8 flex items-center justify-center py-16 lg:py-24">
           <motion.div
-            className="relative z-10 w-full max-w-3xl py-12 sm:py-16 lg:py-24 text-center"
+            className="w-full max-w-3xl pt-4 pb-8 lg:pt-6 lg:pb-12 text-center"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
           >
-            {/* Main Headline with staggered animation */}
-            <motion.h1
-              className="font-bold leading-[0.9] tracking-tight text-foreground"
+            {/* Main Headline */}
+            <motion.div
+              className="relative"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
             >
-              <span className="block text-[2.3rem] sm:text-[3.3rem] md:text-[4.3rem] lg:text-[5.3rem] xl:text-[6rem]">
-                Die Meisterrunde.
-              </span>
-              <span className="mt-1 block text-[2.1rem] sm:text-[3.1rem] md:text-[4.1rem] lg:text-[5.1rem] xl:text-[5.8rem]">
-                Ein Tisch.
-              </span>
-              <span className="mt-1 block text-[2.1rem] sm:text-[3.1rem] md:text-[4.1rem] lg:text-[5.1rem] xl:text-[5.8rem]">
-                Ein Vertrag.
-              </span>
-            </motion.h1>
+              <h1 className="font-bold leading-[0.9] tracking-tight">
+                <span className="block text-[2.6rem] sm:text-[3.4rem] md:text-[4.4rem] lg:text-[5.4rem] xl:text-[6.2rem] text-white">
+                  Die Meisterrunde.
+                </span>
+              </h1>
+            </motion.div>
 
-            {/* Subheadline with delayed fade-in */}
+            {/* H2 */}
             <motion.p
-              className="mt-6 sm:mt-8 mx-auto max-w-[580px] text-sm sm:text-base leading-relaxed text-foreground/85 lg:text-lg lg:text-foreground/75"
+              className="mt-3 sm:mt-4 mx-auto max-w-[520px] text-base sm:text-lg lg:text-xl font-medium text-white"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
             >
-              Elektro, Sanitär &amp; Heizung, Maler &amp; Boden – gemeinsam geplant und meistergeführt umgesetzt. Reinigung &amp; Facility als
-              Fachbetrieb. Als Generalunternehmer koordinieren wir alles aus einer Hand – ohne Subunternehmer-Kette.
+              Ein Vertrag. Keine Subunternehmer-Kette.
             </motion.p>
 
-            {/* Badges with delayed fade-in */}
+            {/* Gewerk-Leiste: Elektro · SHK · Innenausbau (prominent), dann + Reinigung & Facility (sekundär) */}
             <motion.div
-              className="mt-6 sm:mt-7 flex justify-center"
+              className="mt-14 sm:mt-20 flex flex-col items-center gap-3"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.45, ease: "easeOut" }}
+              transition={{ duration: 0.5, delay: 0.4, ease: "easeOut" }}
             >
-              <BadgeRow items={HERO_BADGES} theme="dark" />
+              <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
+                {GEWERKE_PRIMARY.map((g) => (
+                  <Link
+                    key={g.href}
+                    href={g.href}
+                    className="inline-flex items-center rounded-full border border-transparent bg-[#4C626C] px-4 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-base font-semibold text-white transition-colors hover:bg-[#8AB0AB]"
+                  >
+                    {g.label}
+                  </Link>
+                ))}
+              </div>
+              <p className="mt-4 text-center text-xs sm:text-sm text-white">
+                <span>+ </span>
+                <Link
+                  href="/reinigung"
+                  className="text-[#8AB0AB] hover:text-[#8AB0AB] underline-offset-2 hover:underline"
+                >
+                  Reinigung
+                </Link>
+                <span> & </span>
+                <Link
+                  href="/facility-management"
+                  className="text-[#8AB0AB] hover:text-[#8AB0AB] underline-offset-2 hover:underline"
+                >
+                  Facility
+                </Link>
+                <span> (Fachbetrieb) – Qualitätsstandards, dokumentierte Leistung.</span>
+              </p>
             </motion.div>
 
-            {/* CTA Buttons with delayed fade-in */}
+            {/* Proof-Zeile (unter Gewerk-Leiste, kleiner) */}
+            <motion.p
+              className="mt-4 text-xs sm:text-sm text-white"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.5, ease: "easeOut" }}
+            >
+              {PROOF_STRIP}
+            </motion.p>
+
+            {/* Primary CTA */}
             <motion.div
-              className="mt-8 sm:mt-10 flex flex-col sm:flex-row justify-center gap-3 sm:gap-4"
+              className="mt-6 sm:mt-8 flex justify-center"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.6, ease: "easeOut" }}
+              transition={{ duration: 0.5, delay: 0.55, ease: "easeOut" }}
             >
               <Link href="/anfrage" className="w-full sm:w-auto">
-                <AnimatedButton className="w-full sm:w-auto bg-foreground text-white hover:bg-foreground/90 shadow-lg shadow-foreground/20 text-base px-8 py-5 sm:py-6">
+                <AnimatedButton className="w-full sm:w-auto bg-[#8AB0AB] text-primary-foreground hover:bg-[#8AB0AB]/90 shadow-sm text-base px-8 py-5 sm:py-6">
                   Projekt anfragen
                 </AnimatedButton>
               </Link>
-              <Link href="/rechner" className="w-full sm:w-auto">
-                <AnimatedButton className="w-full sm:w-auto border-foreground/30 bg-white/50 sm:bg-transparent text-foreground hover:bg-foreground/10 text-base px-8 py-5 sm:py-6">
-                  <Calculator className="w-5 h-5" />
-                  Kostencheck Reinigung/Facility
-                </AnimatedButton>
-              </Link>
             </motion.div>
 
-            {/* Trust Badge with delayed fade-in */}
+            {/* Secondary CTA: leiser, unter Primary, Textlink ohne Kästchen */}
             <motion.div
-              className="mt-5 sm:mt-6 flex flex-col sm:flex-row justify-center sm:items-center gap-2 sm:gap-6 text-sm text-foreground/70 sm:text-foreground/60"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.8, ease: "easeOut" }}
+              className="mt-4 flex justify-center"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.65, ease: "easeOut" }}
             >
-              <span className="flex items-center justify-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
-                Kostenlos &amp; unverbindlich
-              </span>
-              <span className="flex items-center justify-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
-                Antwort in 24h
-              </span>
+              <Link
+                href="/rechner"
+                className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-white/80 hover:text-white underline-offset-2 hover:underline"
+              >
+                <Calculator className="w-3.5 h-3.5 sm:w-4 sm:h-4 opacity-70" />
+                <span>Richtpreis Reinigung/Facility →</span>
+              </Link>
             </motion.div>
           </motion.div>
         </div>

@@ -4,7 +4,7 @@ export interface BadgeRowProps {
   /** List of badge labels */
   items: string[];
   /** "light" = on light background (default), "dark" = on primary/dark hero */
-  theme?: "light" | "dark";
+  theme?: "light" | "dark" | "anfrage";
   className?: string;
 }
 
@@ -16,7 +16,9 @@ export function BadgeRow({ items, theme = "light", className }: BadgeRowProps) {
   const lightClass =
     "border-border bg-muted/60 text-muted-foreground";
   const darkClass =
-    "border-primary-foreground/30 bg-primary-foreground/10 text-primary-foreground/90";
+    "border-transparent bg-[#4C626C] text-white";
+  const anfrageClass =
+    "border-transparent bg-[#4C626C] text-[#3E505B]";
 
   return (
     <div
@@ -33,7 +35,7 @@ export function BadgeRow({ items, theme = "light", className }: BadgeRowProps) {
           role="listitem"
           className={cn(
             badgeBase,
-            theme === "dark" ? darkClass : lightClass
+            theme === "dark" ? darkClass : theme === "anfrage" ? anfrageClass : lightClass
           )}
         >
           {label}

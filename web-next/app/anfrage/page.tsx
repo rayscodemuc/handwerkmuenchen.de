@@ -11,6 +11,7 @@ import { z } from "zod";
 import { Send, Phone, Mail, MapPin, Clock } from "lucide-react";
 import { useFormSubmit, type InquiryFormFields } from "@/hooks/useFormSubmit";
 import Link from "next/link";
+import { BadgeRow } from "@/components/BadgeRow";
 
 const FORM_ID = "inquiry_form";
 
@@ -25,32 +26,31 @@ const anfrageSchema = z.object({
 });
 
 const serviceOptions = [
-  { value: "handwerk", label: "Handwerk (Elektro, Sanitär, Heizung)" },
-  { value: "facility", label: "Facility Management" },
+  { value: "elektrotechnik", label: "Elektrotechnik" },
+  { value: "sanitaer_heizung", label: "Sanitär & Heizung" },
+  { value: "innenausbau", label: "Innenausbau" },
   { value: "reinigung", label: "Reinigung" },
-  { value: "aussenanlagen", label: "Außenanlagen & Grünpflege" },
-  { value: "winterdienst", label: "Winterdienst" },
+  { value: "facility", label: "Facility" },
   { value: "komplett", label: "Komplettpaket / Mehrere Leistungen" },
-  { value: "sonstiges", label: "Sonstiges" },
 ];
 
 const contactInfo = [
   {
     icon: Phone,
     title: "Telefon",
-    content: "+49 (0)89 25006355",
-    href: "tel:+498925006355",
+    content: "+49 (0)123 4567890",
+    href: "tel:+491234567890",
   },
   {
     icon: Mail,
     title: "E-Mail",
-    content: "kontakt@mr-clean.services",
-    href: "mailto:kontakt@mr-clean.services",
+    content: "kontakt@example.com",
+    href: "mailto:kontakt@example.com",
   },
   {
     icon: MapPin,
     title: "Adresse",
-    content: "Landsbergerstr. 456 RGB, DE-81241 München",
+    content: "Musterstraße 1, DE-80331 München",
     href: null,
   },
   {
@@ -59,6 +59,12 @@ const contactInfo = [
     content: "Mo–Fr: 08:00–18:00 Uhr",
     href: null,
   },
+];
+
+const HERO_PROOF_STRIP = [
+  "Rückmeldung in 24h",
+  "Verbindliche Ansprechpartner",
+  "Dokumentierte Kommunikation",
 ];
 
 function AnfrageInner() {
@@ -128,52 +134,54 @@ function AnfrageInner() {
 
   return (
     <>
-        {/* Hero Section */}
-        <section className="bg-primary py-20 lg:py-28">
+        {/* Hero Section – wie Kontakt-Hero */}
+        <section className="relative flex min-h-[420px] items-center bg-[#8AB0AB] py-16 lg:min-h-[480px] lg:py-20">
           <div className="container mx-auto px-4 lg:px-8">
-            <p className="text-sm font-medium uppercase tracking-wider text-primary-foreground/70">
-              Kontakt
-            </p>
-            <h1 className="mt-3 text-4xl font-black tracking-tight text-primary-foreground lg:text-6xl">
-              Sprechen wir über Ihr Projekt
-            </h1>
-            <p className="mt-6 max-w-2xl text-lg text-primary-foreground/80">
-              Beschreiben Sie uns Ihr Anliegen und wir erstellen Ihnen ein unverbindliches Angebot – 
-              schnell, transparent und auf Ihre Bedürfnisse zugeschnitten.
-            </p>
+            <div className="mx-auto max-w-3xl text-center">
+              <h1 className="text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-6xl">
+                Sprechen wir über Ihr Projekt
+              </h1>
+              <p className="mt-7 max-w-2xl mx-auto text-base md:text-lg text-white leading-relaxed">
+                Beschreiben Sie uns Ihr Anliegen – wir erstellen Ihnen ein unverbindliches Angebot, schnell,
+                transparent und auf Ihre Bedürfnisse zugeschnitten.
+              </p>
+              <div className="mt-6 flex justify-center">
+                <BadgeRow items={HERO_PROOF_STRIP} theme="dark" />
+              </div>
+            </div>
           </div>
         </section>
 
         {/* Form Section */}
-        <section className="bg-background py-20 lg:py-28">
+        <section className="bg-white py-20 lg:py-28">
           <div className="container mx-auto px-4 lg:px-8">
             <div className="grid gap-12 lg:grid-cols-3 lg:gap-16">
               {/* Contact Info Sidebar */}
               <div className="lg:col-span-1">
-                <h2 className="text-2xl font-bold text-foreground">
+                <h2 className="text-2xl font-bold text-[#3E505B]">
                   Kontaktdaten
                 </h2>
-                <p className="mt-3 text-muted-foreground">
+                <p className="mt-3 text-[#3E505B]">
                   Sie erreichen uns auch direkt per Telefon oder E-Mail.
                 </p>
 
                 <div className="mt-10 space-y-6">
                   {contactInfo.map((item) => (
                     <div key={item.title} className="flex gap-4">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10">
-                        <item.icon className="h-5 w-5 text-primary" />
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#3E505B]/10">
+                        <item.icon className="h-5 w-5 text-[#3E505B]" />
                       </div>
                       <div>
-                        <p className="text-sm text-muted-foreground">{item.title}</p>
+                        <p className="text-sm text-[#3E505B]">{item.title}</p>
                         {item.href ? (
                           <a
                             href={item.href}
-                            className="font-medium text-foreground hover:text-primary transition-colors"
+                            className="font-medium text-[#3E505B] hover:text-[#3E505B]/80 transition-colors"
                           >
                             {item.content}
                           </a>
                         ) : (
-                          <p className="font-medium text-foreground">{item.content}</p>
+                          <p className="font-medium text-[#3E505B]">{item.content}</p>
                         )}
                       </div>
                     </div>
@@ -181,11 +189,11 @@ function AnfrageInner() {
                 </div>
 
                 {/* Quick Response Note */}
-                <div className="mt-10 rounded-2xl bg-primary/5 p-6">
-                  <p className="text-sm font-medium text-foreground">
+                <div className="mt-10 rounded-2xl bg-[#3E505B]/5 p-6">
+                  <p className="text-sm font-medium text-[#3E505B]">
                     Schnelle Reaktionszeit
                   </p>
-                  <p className="mt-2 text-sm text-muted-foreground">
+                  <p className="mt-2 text-sm text-[#3E505B]">
                     Wir antworten in der Regel innerhalb von 24 Stunden auf Ihre Anfrage.
                   </p>
                 </div>
@@ -193,21 +201,21 @@ function AnfrageInner() {
 
               {/* Form */}
               <div className="lg:col-span-2">
-                <form onSubmit={handleSubmit} className="rounded-3xl bg-card p-8 lg:p-10">
-                  <h3 className="text-xl font-bold text-foreground mb-8">
+                <form onSubmit={handleSubmit} className="rounded-3xl bg-[#8AB0AB] p-8 lg:p-10">
+                  <h3 className="text-xl font-bold text-white mb-8">
                     Ihre Anfrage
                   </h3>
 
                   <div className="grid gap-6 md:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="customer_name">Name *</Label>
+                      <Label htmlFor="customer_name" className="text-white">Name *</Label>
                       <Input
                         id="customer_name"
                         name="customer_name"
                         value={formData.customer_name}
                         onChange={(e) => handleChange("customer_name", e.target.value)}
                         placeholder="Max Mustermann"
-                        className={errors.customer_name ? "border-destructive" : ""}
+                        className={`text-[#3E505B] placeholder:text-[#3E505B]/60 ${errors.customer_name ? "border-destructive" : ""}`}
                       />
                       {errors.customer_name && (
                         <p className="text-sm text-destructive">{errors.customer_name}</p>
@@ -215,18 +223,19 @@ function AnfrageInner() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="company_name">Firma (optional)</Label>
+                      <Label htmlFor="company_name" className="text-white">Firma (optional)</Label>
                       <Input
                         id="company_name"
                         name="company_name"
                         value={formData.company_name}
                         onChange={(e) => handleChange("company_name", e.target.value)}
                         placeholder="Ihre Firma GmbH"
+                        className="text-[#3E505B] placeholder:text-[#3E505B]/60"
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="customer_email">E-Mail *</Label>
+                      <Label htmlFor="customer_email" className="text-white">E-Mail *</Label>
                       <Input
                         id="customer_email"
                         name="customer_email"
@@ -234,7 +243,7 @@ function AnfrageInner() {
                         value={formData.customer_email}
                         onChange={(e) => handleChange("customer_email", e.target.value)}
                         placeholder="max@beispiel.de"
-                        className={errors.customer_email ? "border-destructive" : ""}
+                        className={`text-[#3E505B] placeholder:text-[#3E505B]/60 ${errors.customer_email ? "border-destructive" : ""}`}
                       />
                       {errors.customer_email && (
                         <p className="text-sm text-destructive">{errors.customer_email}</p>
@@ -242,7 +251,7 @@ function AnfrageInner() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="customer_phone">Telefon (optional)</Label>
+                      <Label htmlFor="customer_phone" className="text-white">Telefon (optional)</Label>
                       <Input
                         id="customer_phone"
                         name="customer_phone"
@@ -250,23 +259,28 @@ function AnfrageInner() {
                         value={formData.customer_phone}
                         onChange={(e) => handleChange("customer_phone", e.target.value)}
                         placeholder="+49 123 456789"
+                        className="text-[#3E505B] placeholder:text-[#3E505B]/60"
                       />
                     </div>
                   </div>
 
                   <div className="mt-6 space-y-2">
-                    <Label htmlFor="service_type">Gewünschte Leistung *</Label>
+                    <Label htmlFor="service_type" className="text-white">Gewünschte Leistung *</Label>
                     <Select
                       name="service_type"
                       value={formData.service_type}
                       onValueChange={(value) => handleChange("service_type", value)}
                     >
-                      <SelectTrigger className={errors.service_type ? "border-destructive" : ""}>
+                      <SelectTrigger className={`text-[#3E505B] [&_[data-placeholder]]:text-[#3E505B] ${errors.service_type ? "border-destructive bg-white" : "bg-white"}`}>
                         <SelectValue placeholder="Leistung auswählen" />
                       </SelectTrigger>
                       <SelectContent>
                         {serviceOptions.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
+                          <SelectItem
+                            key={option.value}
+                            value={option.value}
+                            className="hover:bg-[#8AB0AB] hover:text-[#3E505B] focus:bg-[#8AB0AB] focus:text-[#3E505B]"
+                          >
                             {option.label}
                           </SelectItem>
                         ))}
@@ -278,7 +292,7 @@ function AnfrageInner() {
                   </div>
 
                   <div className="mt-6 space-y-2">
-                    <Label htmlFor="message">Ihre Nachricht *</Label>
+                    <Label htmlFor="message" className="text-white">Ihre Nachricht *</Label>
                     <Textarea
                       id="message"
                       name="message"
@@ -286,28 +300,28 @@ function AnfrageInner() {
                       onChange={(e) => handleChange("message", e.target.value)}
                       placeholder="Beschreiben Sie Ihr Anliegen, Ihren Bedarf oder Ihre Fragen..."
                       rows={6}
-                      className={errors.message ? "border-destructive" : ""}
+                      className={`text-[#3E505B] placeholder:text-[#3E505B]/60 ${errors.message ? "border-destructive" : ""}`}
                     />
                     {errors.message && (
                       <p className="text-sm text-destructive">{errors.message}</p>
                     )}
                   </div>
 
-                  <div className="mt-6 flex items-start gap-3">
+                  <div className="mt-6 flex items-center gap-3">
                     <Checkbox
                       id="privacy_accepted"
                       name="privacy_accepted"
                       checked={formData.privacy_accepted}
                       onCheckedChange={(checked) => handleChange("privacy_accepted", checked === true)}
-                      className={errors.privacy_accepted ? "border-destructive" : ""}
+                      className={`bg-white border-white data-[state=checked]:bg-white data-[state=checked]:text-[#3E505B] ${errors.privacy_accepted ? "border-destructive" : ""}`}
                     />
                     <div className="grid gap-1.5 leading-none">
                       <Label
                         htmlFor="privacy_accepted"
-                        className="text-sm font-normal text-muted-foreground cursor-pointer"
+                        className="text-sm font-normal text-white cursor-pointer"
                       >
                         Ich stimme der Verarbeitung meiner Daten gemäß der{" "}
-                        <Link href="/datenschutz" className="text-primary hover:underline">
+                        <Link href="/datenschutz" className="inline-block rounded-md bg-white px-2 py-0.5 text-[#3E505B] font-medium hover:bg-white/90 hover:underline">
                           Datenschutzerklärung
                         </Link>{" "}
                         zu. *
@@ -322,7 +336,7 @@ function AnfrageInner() {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="group relative flex h-16 w-full items-center justify-center gap-3 overflow-hidden rounded-full bg-primary text-primary-foreground text-lg font-semibold transition-all duration-300 hover:bg-foreground hover:text-background hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed"
+                      className="group relative flex h-16 w-full items-center justify-center gap-3 overflow-hidden rounded-full bg-[#3E505B] text-white text-lg font-semibold transition-all duration-300 hover:bg-[#4C626C] hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed"
                     >
                       {isSubmitting ? (
                         <span className="flex items-center gap-3">

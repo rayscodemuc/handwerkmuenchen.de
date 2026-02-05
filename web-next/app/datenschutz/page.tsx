@@ -42,15 +42,15 @@ export default function Datenschutz() {
                 Verantwortlich für die Datenverarbeitung auf dieser Website ist:
               </p>
               <p className="text-foreground mb-6">
-                Mr. Clean Services GmbH<br />
-                Landsbergerstr. 456 RGB<br />
-                DE-81241 München<br />
+                Musterfirma GmbH<br />
+                Musterstraße 1<br />
+                DE-80331 München<br />
                 Deutschland
               </p>
               <p className="text-foreground mb-6">
-                Telefon: +49 (0)89 25006355<br />
-                E-Mail: kontakt@mr-clean.services<br />
-                Website: www.mr-clean-services.de
+                Telefon: +49 (0)123 4567890<br />
+                E-Mail: kontakt@example.com<br />
+                Website: www.example.com
               </p>
 
               <h2 className="text-2xl font-bold mt-10 mb-4">3. Erhebung und Speicherung personenbezogener Daten beim Besuch der Website</h2>

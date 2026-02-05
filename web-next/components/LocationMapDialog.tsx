@@ -59,18 +59,18 @@ export function LocationMapDialog({ open, onOpenChange }: LocationMapDialogProps
           {/* Contact Info */}
           <div className="flex flex-col items-center justify-center gap-3 rounded-xl bg-primary p-4">
             <a 
-              href="tel:+498925006355" 
+              href="tel:+491234567890" 
               className="flex items-center gap-2 text-foreground hover:text-foreground/80 transition-colors"
             >
               <Phone className="h-5 w-5" />
-              <span className="font-medium">+49 (0)89 25006355</span>
+              <span className="font-medium">+49 (0)123 4567890</span>
             </a>
             <a 
-              href="mailto:kontakt@mr-clean.services"
+              href="mailto:kontakt@example.com"
               className="flex items-center gap-2 text-foreground hover:text-foreground/80 transition-colors"
             >
               <Mail className="h-5 w-5" />
-              <span className="font-medium">kontakt@mr-clean.services</span>
+              <span className="font-medium">kontakt@example.com</span>
             </a>
           </div>
         </div>

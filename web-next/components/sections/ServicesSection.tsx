@@ -4,12 +4,12 @@ import { AnimatedButton } from "@/components/ui/animated-button";
 import Link from "next/link";
 import { Zap, Droplets, Paintbrush, Sparkles, Building2, ArrowRight } from "lucide-react";
 
-// 5 Gewerke: Elektromeister, Sanitär & Heizung, Maler & Boden, Reinigung, Facility
+// 5 Gewerke: Elektrotechnik, Sanitär & Heizung, Innenausbau, Reinigung, Facility
 const services = [
   {
-    id: "elektromeister",
-    title: "Elektromeister",
-    description: "Elektrotechnik und Elektro-Notdienst – ein Vertrag, ein Ansprechpartner. Meisterbetrieb als Qualitätsinstanz.",
+    id: "elektrotechnik",
+    title: "Elektrotechnik",
+    description: "Elektrotechnik – ein Vertrag, ein Ansprechpartner. Meisterbetrieb als Qualitätsinstanz.",
     href: "/handwerk/elektrotechnik",
     icon: Zap,
   },
@@ -21,8 +21,8 @@ const services = [
     icon: Droplets,
   },
   {
-    id: "maler-boden",
-    title: "Maler & Boden",
+    id: "innenausbau",
+    title: "Innenausbau",
     description: "Malerei, Fassade und Bodenbeläge. Innen- und Außenanstrich, Bodenbeschichtungen, Oberflächenschutz.",
     href: "/maler-boden",
     icon: Paintbrush,
@@ -45,38 +45,47 @@ const services = [
 
 export function ServicesSection() {
   return (
-    <section id="services" className="bg-background py-28 lg:py-36">
+    <section id="services" className="bg-[#8AB0AB] py-28 lg:py-36 -mt-1 relative z-10">
       <div className="container mx-auto px-4 lg:px-8">
         {/* Section Header */}
         <div className="mx-auto max-w-3xl text-center">
-          <h2 className="text-4xl font-black tracking-tight text-foreground lg:text-5xl xl:text-6xl">
+          <h2 className="text-4xl font-black tracking-tight text-white lg:text-5xl xl:text-6xl">
             Leistungen, die über den Standard hinausgehen
           </h2>
-          <p className="mt-6 text-lg text-muted-foreground lg:text-xl">
+          <p className="mt-6 text-lg text-white lg:text-xl">
             Ein Vertrag, ein Ansprechpartner – kein Subunternehmer-Lotto. Wir steuern als Generalunternehmer alle Gewerke: feste Meister pro Fachbereich, volle Haftungsübernahme, beweisbare Qualität.
           </p>
         </div>
 
-        {/* Service Cards Grid - 5 Gewerke */}
-        <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {services.map((service) => {
+        {/* Service Cards Grid - 5 Gewerke (Fenster öffnen sich beim Hover) */}
+        <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3 [perspective:1000px]">
+          {services.map((service, index) => {
             const Icon = service.icon;
+            const isFourth = index === 3;
+            const isFifth = index === 4;
             return (
               <Link
                 key={service.id}
                 href={service.href}
-                className="group flex flex-col rounded-3xl border border-border bg-card p-8 transition-all duration-300 hover:border-primary/30 hover:shadow-xl lg:p-10"
+                className={`group relative flex flex-col overflow-hidden rounded-lg border-[3px] border-primary/25 bg-card p-8 transition-[transform,box-shadow,border-color] duration-300 ease-out will-change-transform hover:border-primary/40 hover:shadow-xl hover:[transform:rotateY(-10deg)] lg:p-10 ${isFourth ? "lg:col-start-2" : ""} ${isFifth ? "lg:col-start-3" : ""}`}
+                style={{ transformStyle: "preserve-3d" }}
               >
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                {/* Fensterkreuz: vertikale und horizontale Linie */}
+                <span className="pointer-events-none absolute left-1/2 top-0 h-full w-px -translate-x-px bg-primary/15" aria-hidden />
+                <span className="pointer-events-none absolute top-1/2 left-0 h-px w-full -translate-y-px bg-primary/15" aria-hidden />
+                {/* Leichter Glaseffekt oben */}
+                <span className="pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-white/20 to-transparent" aria-hidden />
+
+                <div className="relative z-10 flex h-14 w-14 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-[#3E505B] transition-colors group-hover:bg-primary/20 group-hover:text-[#3E505B]">
                   <Icon className="h-7 w-7" />
                 </div>
-                <h3 className="mt-6 text-2xl font-black text-foreground lg:text-3xl">
+                <h3 className="relative z-10 mt-6 text-2xl font-black text-[#3E505B] lg:text-3xl">
                   {service.title}
                 </h3>
-                <p className="mt-4 flex-1 text-muted-foreground leading-relaxed">
+                <p className="relative z-10 mt-4 flex-1 text-[#3E505B] leading-relaxed">
                   {service.description}
                 </p>
-                <div className="mt-8 flex items-center gap-2 font-semibold text-primary transition-colors group-hover:text-primary/80">
+                <div className="relative z-10 mt-8 flex items-center gap-2 font-semibold text-[#3E505B] transition-colors group-hover:text-[#3E505B]">
                   Mehr erfahren
                   <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
                 </div>
@@ -88,7 +97,9 @@ export function ServicesSection() {
         {/* Bottom CTA */}
         <div className="mt-16 flex justify-center">
           <Link href="/anfrage">
-            <AnimatedButton className="h-14 px-10 text-base">Angebot anfragen</AnimatedButton>
+            <AnimatedButton className="h-14 px-10 text-base bg-[#3E505B] text-white hover:bg-[#3E505B]/90">
+              Angebot anfragen
+            </AnimatedButton>
           </Link>
         </div>
       </div>

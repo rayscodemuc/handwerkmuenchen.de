@@ -6,11 +6,12 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
-      {
-        source: "/24-7-service",
-        destination: "/service-24-7",
-        permanent: true,
-      },
+      // Notdienst-Bereich entfernt → Weiterleitungen
+      { source: "/service-24-7", destination: "/kontakt", permanent: true },
+      { source: "/service-24-7/", destination: "/kontakt", permanent: true },
+      { source: "/24-7-service", destination: "/kontakt", permanent: true },
+      { source: "/handwerk/elektrotechnik/elektro-notdienst", destination: "/handwerk/elektrotechnik", permanent: true },
+      { source: "/handwerk/elektrotechnik/elektro-notdienst/", destination: "/handwerk/elektrotechnik", permanent: true },
       // Haupt-Redirect: /leistungen (mit und ohne Slash) -> /reinigung
       // Diese müssen GANZ OBEN stehen, damit sie nicht von anderen Regeln überschrieben werden
       {
@@ -23,7 +24,13 @@ const nextConfig: NextConfig = {
         destination: "/reinigung",
         permanent: true,
       },
-      // Handwerk Redirects
+      // Handwerk: Übersichtsseite entfernt → Weiterleitung auf Elektrotechnik
+      {
+        source: "/handwerk",
+        destination: "/handwerk/elektrotechnik",
+        permanent: true,
+      },
+      // Handwerk Redirects (von /leistungen)
       {
         source: "/leistungen/sanitaer-heizung",
         destination: "/handwerk/sanitaer-heizung",

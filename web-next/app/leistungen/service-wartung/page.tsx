@@ -66,7 +66,7 @@ const faqs = [
 ];
 
 const relatedLinks = [
-  { label: "Alle Handwerk-Leistungen", href: "/handwerk" },
+  { label: "Alle Handwerk-Leistungen", href: "/handwerk/elektrotechnik" },
   { label: "Elektrotechnik & DGUV V3", href: "/leistungen/elektrotechnik" },
   { label: "Sanitär- & Heizungstechnik", href: "/leistungen/sanitaer-heizung" },
   { label: "München", href: "/standorte/muenchen" },
@@ -95,7 +95,7 @@ export default function ServiceWartung() {
               </li>
               <ChevronRight className="h-4 w-4 text-primary-foreground/50" aria-hidden="true" />
               <li>
-                <Link href="/handwerk" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">
+                <Link href="/handwerk/elektrotechnik" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">
                   Handwerk
                 </Link>
               </li>
@@ -122,11 +122,11 @@ export default function ServiceWartung() {
               </p>
               <div className="mt-8 flex flex-wrap gap-4">
                 <Link href="/anfrage">
-                  <AnimatedButton className="bg-white text-foreground hover:bg-foreground hover:text-white">
+                  <AnimatedButton>
                     Kostenloses Angebot
                   </AnimatedButton>
                 </Link>
-                <a href="tel:+498925006355">
+                <a href="tel:+491234567890">
                   <AnimatedButton className="border-2 border-primary-foreground bg-transparent text-primary-foreground hover:bg-primary-foreground hover:text-primary">
                     <Phone className="mr-2 h-4 w-4" aria-hidden="true" />
                     Jetzt anrufen

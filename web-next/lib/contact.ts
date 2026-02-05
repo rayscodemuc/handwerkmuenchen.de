@@ -37,13 +37,13 @@ export function getHotlineDisplay(): string {
  * Gibt die E-Mail-Adresse zurück
  */
 export function getEmail(): string {
-  return BUSINESS.email || "kontakt@mr-clean.services";
+  return BUSINESS.email || "kontakt@example.com";
 }
 
 /**
  * Gibt die vollständige Adresse als String zurück
  */
 export function getAddressDisplay(): string {
-  if (!BUSINESS.address) return "Landsbergerstr. 456 RGB, DE-81241 München";
+  if (!BUSINESS.address) return "Musterstraße 1, DE-80331 München";
   return `${BUSINESS.address.street}, DE-${BUSINESS.address.zip} ${BUSINESS.address.city}`;
 }

@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { Menu, X, ChevronDown, Clock, MapPin } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Menu, X, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LocationMapDialog } from "@/components/LocationMapDialog";
 import { LogoPlaceholder } from "@/components/LogoPlaceholder";
+import { useGewerkHover, getGewerkHoverKey } from "@/components/providers/GewerkHoverContext";
 
 const primaryNav = [
   { name: "Startseite", href: "/" },
@@ -14,14 +14,13 @@ const primaryNav = [
   { name: "Kontakt", href: "/kontakt" },
 ];
 
-// 5 Gewerke: Elektrotechnik, Sanitär & Heizung, Maler & Boden, Reinigung, Facility (Außenanlagen unter Facility)
+// 5 Gewerke: Elektrotechnik, Sanitär & Heizung, Innenausbau, Reinigung, Facility (Außenanlagen unter Facility)
 const secondaryNav = [
   {
     name: "Elektrotechnik",
     href: "/handwerk/elektrotechnik",
     subItems: [
       { name: "Elektrotechnik", href: "/handwerk/elektrotechnik" },
-      { name: "Elektro-Notdienst", href: "/handwerk/elektrotechnik/elektro-notdienst" },
       { name: "Service & Wartung", href: "/handwerk/service-wartung" },
     ],
   },
@@ -33,10 +32,14 @@ const secondaryNav = [
     ],
   },
   {
-    name: "Maler & Boden",
+    name: "Innenausbau",
     href: "/maler-boden",
     subItems: [
-      { name: "Maler & Boden", href: "/maler-boden" },
+      { name: "Malerarbeiten (innen & außen)", href: "/maler-boden" },
+      { name: "Fassadenarbeiten", href: "/maler-boden" },
+      { name: "Bodenbeläge", href: "/maler-boden" },
+      { name: "Fliesenarbeiten", href: "/maler-boden" },
+      { name: "Estrich", href: "/maler-boden" },
     ],
   },
   {
@@ -72,11 +75,11 @@ const secondaryNav = [
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  const [locationDialogOpen, setLocationDialogOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
+  const [isScrolled, setIsScrolled] = useState(false);
+  const { setHoveredGewerk } = useGewerkHover();
   
-  // Scroll detection (with hysteresis + rAF to prevent jitter)
+  // Scroll detection with small hysteresis to avoid jitter
   const isScrolledRef = useRef(false);
 
   useEffect(() => {
@@ -87,9 +90,7 @@ export function Header() {
 
     const update = () => {
       const y = window.scrollY;
-      const next = isScrolledRef.current
-        ? !(y < EXPAND_AT)
-        : y > SHRINK_AT;
+      const next = isScrolledRef.current ? !(y < EXPAND_AT) : y > SHRINK_AT;
 
       if (next !== isScrolledRef.current) {
         isScrolledRef.current = next;
@@ -110,27 +111,43 @@ export function Header() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-  
-  // Check if current page is Kontakt (dark background needs white text)
-  const isKontaktPage = pathname === "/kontakt";
-  const textColor = isKontaktPage ? "text-white" : "text-foreground";
-  const textColorMuted = isKontaktPage ? "text-white/70" : "text-foreground/70";
-  const borderColor = isKontaktPage ? "border-white/30" : "border-foreground/30";
-  const hoverBg = isKontaktPage ? "hover:bg-white/10" : "hover:bg-foreground/10";
+
+  /* Header-Farben */
+  const textColor = "text-white";
+  const textColorMuted = "text-white/70";
+  const borderColor = "border-white/20";
+  const dividerBorder = "border-white/10";
+  const hoverBg = "hover:bg-white/10";
+  const activeDotBg = "bg-white";
+
+  // Startseite: 3E505B, Über uns: 26413C, Kontakt & Anfrage: 8AB0AB, Rest: 26413C
+  const headerBg =
+    pathname === "/"
+      ? "bg-[#3E505B]"
+      : pathname === "/kontakt" || pathname === "/anfrage"
+        ? "bg-[#8AB0AB]"
+        : "bg-[#26413C]";
 
   return (
-    <header className={`sticky top-0 z-50 w-full bg-primary transition-all duration-300 ease-out ${isScrolled ? 'shadow-lg' : ''}`}>
+    <header className={`sticky top-0 z-50 w-full ${headerBg} transition-shadow duration-300 ${isScrolled ? "shadow-md" : "shadow-none"}`}>
+      <div className="relative z-10">
       {/* Primary Navigation Row */}
-      <div className={`border-b ${isKontaktPage ? 'border-white/10' : 'border-foreground/10'}`}>
-        <nav className={`container mx-auto flex items-center px-4 lg:px-8 transition-[height] duration-300 ease-out ${isScrolled ? 'h-14' : 'h-20'}`}>
-          {/* Logo */}
-          <LogoPlaceholder
-            variant="header"
-            className={`transition-all duration-300 ${isScrolled ? "h-8 lg:h-9 text-sm" : "h-10 lg:h-12 text-base"}`}
-          />
+      <div className={`relative border-b ${dividerBorder}`}>
+        <nav
+          className={`container mx-auto flex items-center justify-between gap-4 px-4 lg:px-8 transition-[height] duration-300 ease-out ${
+            isScrolled ? "h-16" : "h-24"
+          }`}
+        >
+          {/* Logo - links */}
+          <div className="flex shrink-0">
+            <LogoPlaceholder
+              variant="header"
+              className={`text-base transition-transform duration-300 ${isScrolled ? "scale-[0.95]" : "scale-100"}`}
+            />
+          </div>
 
-          {/* Primary Nav - Desktop */}
-          <div className="hidden md:flex md:items-center md:gap-8 md:ml-20">
+          {/* Primary Nav - Desktop, zentral */}
+          <div className="hidden md:flex md:items-center md:gap-8 md:absolute md:left-1/2 md:-translate-x-1/2">
             {primaryNav.map((item) => {
               const isActive = pathname === item.href;
               return (
@@ -143,9 +160,9 @@ export function Header() {
                       : `${textColorMuted} hover:${textColor}`
                   }`}
                 >
-                  {item.name}
+                    {item.name}
                   {isActive && (
-                    <span className={`absolute -bottom-1 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full ${isKontaktPage ? 'bg-white' : 'bg-foreground'}`} />
+                    <span className={`absolute -bottom-1 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full ${activeDotBg}`} />
                   )}
                 </Link>
               );
@@ -153,35 +170,13 @@ export function Header() {
           </div>
 
           {/* Right Side Actions - Desktop */}
-          <div className="hidden md:flex md:items-center md:gap-3 md:ml-auto">
-            {/* Icon Buttons */}
-            <Link 
-              href="/service-24-7"
-              className="flex h-12 items-center justify-center gap-1.5 rounded-full bg-red-600 px-4 text-white transition-colors hover:bg-red-700"
-            >
-              <Clock className="h-4 w-4" />
-              <span className="text-sm font-semibold">24/7</span>
-            </Link>
-            <button 
-              onClick={() => setLocationDialogOpen(true)}
-              className={`flex h-12 w-12 items-center justify-center rounded-full border ${borderColor} transition-colors ${hoverBg}`}
-            >
-              <MapPin className={`h-5 w-5 ${textColor}`} />
-            </button>
-
-            {/* CTA Button */}
-            <Link href="/partner-werden">
-              <Button variant="hero-white" size="lg" className="rounded-full px-6">
-                Partner werden
-              </Button>
-            </Link>
-
+          <div className="hidden md:flex md:items-center md:gap-3 md:shrink-0">
             {/* Anfrage Button */}
             <Link href="/anfrage">
               <Button 
                 variant="ghost" 
                 size="lg"
-                className={`rounded-full border ${borderColor} ${textColor} ${hoverBg} hover:${textColor} px-6`}
+                className="rounded-full border border-transparent bg-[#4C626C] text-white hover:bg-[#4C626C]/90 px-6"
               >
                 Anfrage
               </Button>
@@ -200,17 +195,29 @@ export function Header() {
         </nav>
       </div>
 
-      {/* Secondary Navigation Row - Desktop (hidden when scrolled) */}
-      <div 
-        className={`hidden md:block transition-[height,opacity] duration-300 ease-out ${isScrolled ? 'h-0 opacity-0 pointer-events-none overflow-hidden' : 'h-12 opacity-100'}`}
+      {/* Secondary Navigation Row - Desktop (klappt beim Scrollen vollständig ein) */}
+      <div
+        className={`hidden md:block transition-[height,opacity] duration-300 ease-out ${
+          isScrolled ? "h-0 opacity-0 overflow-hidden" : "h-14 opacity-100 overflow-visible"
+        }`}
       >
-        <nav className="container mx-auto flex h-full items-center gap-12 px-4 lg:px-8">
+        <nav
+          className="container mx-auto flex h-14 items-center justify-center gap-12 px-4 lg:px-8"
+        >
           {secondaryNav.map((item) => (
             <div
               key={item.name}
               className="relative"
-              onMouseEnter={() => setOpenDropdown(item.name)}
-              onMouseLeave={() => setOpenDropdown(null)}
+              onMouseEnter={() => {
+                setOpenDropdown(item.name);
+                const key = getGewerkHoverKey(item.name);
+                if (key) setHoveredGewerk(key);
+              }}
+              onMouseLeave={() => {
+                setOpenDropdown(null);
+                const key = getGewerkHoverKey(item.name);
+                if (key) setHoveredGewerk(null);
+              }}
             >
               <Link
                 href={item.href}
@@ -250,13 +257,14 @@ export function Header() {
           ))}
         </nav>
       </div>
+      </div>
 
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
-        <div className={`md:hidden border-t ${isKontaktPage ? 'border-white/10' : 'border-foreground/10'} bg-primary`}>
-          <div className="container mx-auto px-4 py-4 space-y-1">
+        <div className={`md:hidden relative border-t ${dividerBorder}`}>
+          <div className="container relative z-10 mx-auto px-4 py-4 space-y-1">
             {/* Primary Nav Items */}
-            <div className={`pb-4 border-b ${isKontaktPage ? 'border-white/10' : 'border-foreground/10'}`}>
+            <div className={`pb-4 border-b ${dividerBorder}`}>
               {primaryNav.map((item) => {
                 const isActive = pathname === item.href;
                 return (
@@ -278,7 +286,18 @@ export function Header() {
             {/* Secondary Nav Items with Submenus */}
             <div className="pt-2 pb-4">
               {secondaryNav.map((item) => (
-                <div key={item.name} className="py-2">
+                <div
+                  key={item.name}
+                  className="py-2"
+                  onMouseEnter={() => {
+                    const key = getGewerkHoverKey(item.name);
+                    if (key) setHoveredGewerk(key);
+                  }}
+                  onMouseLeave={() => {
+                    const key = getGewerkHoverKey(item.name);
+                    if (key) setHoveredGewerk(null);
+                  }}
+                >
                   <div className="flex w-full items-center justify-between">
                     <Link
                       href={item.href}
@@ -323,20 +342,7 @@ export function Header() {
               ))}
             </div>
 
-            <div className={`flex flex-col gap-3 pt-4 border-t ${isKontaktPage ? 'border-white/10' : 'border-foreground/10'}`}>
-              <Link 
-                href="/service-24-7" 
-                className="flex items-center justify-center gap-2 rounded-full bg-red-600 px-4 py-3 text-white font-semibold transition-colors hover:bg-red-700"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <Clock className="h-4 w-4" />
-                24/7 Notdienst
-              </Link>
-              <Link href="/partner-werden" onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="hero-white" className="w-full rounded-full">
-                  Partner werden
-                </Button>
-              </Link>
+            <div className={`flex flex-col gap-3 pt-4 border-t ${dividerBorder}`}>
               <Link href="/anfrage" onClick={() => setMobileMenuOpen(false)}>
                 <Button 
                   variant="ghost" 
@@ -349,9 +355,6 @@ export function Header() {
           </div>
         </div>
       )}
-
-      {/* Location Map Dialog */}
-      <LocationMapDialog open={locationDialogOpen} onOpenChange={setLocationDialogOpen} />
     </header>
   );
 }

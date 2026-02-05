@@ -11,8 +11,8 @@ const reasons = [
   },
   {
     icon: Clock,
-    title: "24/7 Erreichbarkeit",
-    description: "Rund um die Uhr für Sie da – bei Notfällen und dringenden Anliegen.",
+    title: "Schnelle Reaktionszeiten",
+    description: "Feste Ansprechpartner und zügige Terminierung – wir melden uns zeitnah.",
   },
   {
     icon: Award,
@@ -32,18 +32,18 @@ export function WhyUsSection() {
       <div className="container mx-auto px-4 lg:px-8">
         {/* Section Header */}
         <div className="mx-auto max-w-xl text-center">
-          <p className="text-sm font-medium uppercase tracking-wider text-primary">
+          <p className="text-sm font-medium uppercase tracking-wider text-[#3E505B]">
             Ihre Vorteile
           </p>
-          <h2 className="mt-3 text-4xl font-black tracking-tight text-foreground lg:text-5xl">
+          <h2 className="mt-3 text-4xl font-black tracking-tight text-[#3E505B] lg:text-5xl">
             Warum Wir
           </h2>
-          <p className="mt-6 text-lg text-muted-foreground">
+          <p className="mt-6 text-lg text-[#3E505B]">
             Was uns von anderen unterscheidet und warum Kunden uns vertrauen.
           </p>
-          <Link 
-            href="/ueber-uns" 
-            className="mt-6 inline-flex items-center gap-2 text-primary font-medium hover:underline"
+          <Link
+            href="/ueber-uns"
+            className="mt-6 inline-flex items-center gap-2 text-[#3E505B] font-medium hover:underline"
           >
             Mehr über uns erfahren
             <ArrowRight className="h-4 w-4" />
@@ -58,20 +58,20 @@ export function WhyUsSection() {
               className="group rounded-3xl bg-background p-8 transition-all duration-300 hover:shadow-lg"
             >
               {/* Icon */}
-              <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 transition-colors duration-300 group-hover:bg-primary">
+              <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#3E505B]/10 transition-colors duration-300 group-hover:bg-[#3E505B]/15">
                 <reason.icon
-                  className="h-7 w-7 text-primary transition-colors duration-300 group-hover:text-primary-foreground"
+                  className="h-7 w-7 text-[#3E505B] transition-colors duration-300 group-hover:text-[#3E505B]"
                   strokeWidth={1.5}
                 />
               </div>
 
               {/* Title */}
-              <h3 className="text-xl font-bold text-foreground">
+              <h3 className="text-xl font-bold text-[#3E505B]">
                 {reason.title}
               </h3>
 
               {/* Description */}
-              <p className="mt-3 text-muted-foreground leading-relaxed">
+              <p className="mt-3 text-[#3E505B] leading-relaxed">
                 {reason.description}
               </p>
             </div>
