@@ -127,14 +127,15 @@ export function MobileStickyCTA() {
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: showCTA ? 0 : 100, opacity: showCTA ? 1 : 0 }}
       transition={{ duration: 0.4 }}
-      className={`fixed bottom-4 left-4 right-4 z-50 lg:hidden ${showCTA ? "" : "pointer-events-none"}`}
+      className={`fixed left-4 right-4 z-50 lg:hidden ${showCTA ? "" : "pointer-events-none"}`}
+      style={{ bottom: "max(1rem, env(safe-area-inset-bottom))" }}
     >
       <Link
         href="/rechner"
-        className="flex items-center justify-center gap-2 bg-accent text-accent-foreground px-6 py-4 rounded-xl shadow-md w-full font-semibold hover:bg-accent/90"
+        className="flex items-center justify-center gap-2 min-h-[48px] bg-accent text-accent-foreground px-6 py-3.5 rounded-xl shadow-lg w-full font-semibold hover:bg-accent/90 active:scale-[0.98] transition-transform"
       >
-        <Calculator className="h-5 w-5" />
-        Richtpreis berechnen
+        <Calculator className="h-5 w-5 shrink-0" aria-hidden />
+        <span>Richtpreis berechnen</span>
       </Link>
     </motion.div>
   );

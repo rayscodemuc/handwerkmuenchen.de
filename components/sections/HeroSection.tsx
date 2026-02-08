@@ -117,10 +117,11 @@ export function HeroSection() {
             >
               <Link
                 href="/rechner"
-                className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-white/80 hover:text-white underline-offset-2 hover:underline"
+                className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 py-2.5 rounded-full border border-white/30 bg-white/10 text-white text-sm font-medium sm:min-h-0 sm:px-0 sm:py-0 sm:rounded-none sm:border-0 sm:bg-transparent sm:text-xs sm:font-normal sm:gap-1.5 sm:text-white/80 sm:hover:text-white sm:underline-offset-2 sm:hover:underline"
               >
-                <Calculator className="w-3.5 h-3.5 sm:w-4 sm:h-4 opacity-70" />
-                <span>Richtpreis Reinigung/Facility →</span>
+                <Calculator className="w-4 h-4 sm:w-4 sm:h-4 shrink-0 sm:opacity-70" aria-hidden />
+                <span>Richtpreis berechnen</span>
+                <span className="hidden sm:inline">→</span>
               </Link>
             </motion.div>
           </motion.div>
