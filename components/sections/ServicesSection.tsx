@@ -71,7 +71,7 @@ export function ServicesSection() {
               <Link
                 key={service.id}
                 href={service.href}
-                className={`group relative flex flex-col overflow-hidden rounded-lg border-[3px] border-primary/25 bg-card p-8 transition-[transform,box-shadow,border-color] duration-300 ease-out will-change-transform hover:border-primary/40 hover:shadow-xl hover:[transform:rotateY(-10deg)] lg:p-10 ${isFourth ? "lg:col-start-2" : ""} ${isFifth ? "lg:col-start-3" : ""}`}
+                className={`group relative flex flex-col overflow-hidden rounded-lg border-[3px] border-primary/25 bg-card p-8 transition-[transform,box-shadow,border-color] duration-300 ease-out will-change-transform lg:p-10 lg:hover:border-primary/40 lg:hover:shadow-xl lg:hover:[transform:rotateY(-10deg)] ${isFourth ? "lg:col-start-2" : ""} ${isFifth ? "lg:col-start-3" : ""}`}
                 style={{ transformStyle: "preserve-3d" }}
               >
                 {/* Fensterkreuz: vertikale und horizontale Linie */}
@@ -80,7 +80,7 @@ export function ServicesSection() {
                 {/* Leichter Glaseffekt oben */}
                 <span className="pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-white/20 to-transparent" aria-hidden />
 
-                <div className="relative z-10 flex h-14 w-14 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-[#3E505B] transition-colors group-hover:bg-primary/20 group-hover:text-[#3E505B]">
+                <div className="relative z-10 flex h-14 w-14 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-[#3E505B] transition-colors lg:group-hover:bg-primary/20 lg:group-hover:text-[#3E505B]">
                   <Icon className="h-7 w-7" />
                 </div>
                 <h3 className="relative z-10 mt-6 text-2xl font-black text-[#3E505B] lg:text-3xl">
@@ -89,9 +89,9 @@ export function ServicesSection() {
                 <p className="relative z-10 mt-4 flex-1 text-[#3E505B] leading-relaxed">
                   {service.description}
                 </p>
-                <div className="relative z-10 mt-8 flex items-center gap-2 font-semibold text-[#3E505B] transition-colors group-hover:text-[#3E505B]">
+                <div className="relative z-10 mt-8 flex items-center gap-2 font-semibold text-[#3E505B] transition-colors">
                   Mehr erfahren
-                  <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                  <ArrowRight className="h-5 w-5 transition-transform lg:group-hover:translate-x-1" />
                 </div>
               </Link>
             );
