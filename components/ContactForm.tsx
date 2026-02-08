@@ -174,8 +174,8 @@ export function ContactForm({
   // Success State
   if (isSuccess) {
     return (
-      <div className={cn("rounded-3xl p-8 lg:p-10", isDark ? "bg-primary-foreground/10" : "bg-card", className)}>
-        <div className="flex flex-col items-center text-center py-8">
+      <div className={cn("rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-10", isDark ? "bg-primary-foreground/10" : "bg-card", className)}>
+        <div className="flex flex-col items-center text-center py-6 sm:py-8">
           <div className={cn(
             "flex h-20 w-20 items-center justify-center rounded-full mb-6",
             isDark ? "bg-green-500/20" : "bg-green-100"
@@ -220,12 +220,12 @@ export function ContactForm({
   const labelClasses = isDark ? "text-primary-foreground" : isBrand ? "text-[#3E505B]" : "";
 
   return (
-    <div className={cn("rounded-3xl p-8 lg:p-10", isDark ? "" : "bg-card", className)}>
+    <div className={cn("rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-10", isDark ? "" : "bg-card", className)}>
       {showTitle && (
         <>
           <h2
             className={cn(
-              "text-2xl font-bold",
+              "text-xl sm:text-2xl font-bold",
               isBrand
                 ? "text-[#3E505B]"
                 : isDark
@@ -250,7 +250,7 @@ export function ContactForm({
         </>
       )}
 
-      <form onSubmit={handleSubmit} className={cn("space-y-6", showTitle && "mt-8")}>
+      <form onSubmit={handleSubmit} className={cn("space-y-5 sm:space-y-6", showTitle && "mt-6 sm:mt-8")}>
         {/* Hidden field for page tracking */}
         <input type="hidden" name="pageName" value={pageName || ""} />
         <div className="grid gap-6 sm:grid-cols-2">

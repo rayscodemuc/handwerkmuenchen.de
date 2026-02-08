@@ -84,7 +84,10 @@ export default function LeistungenHubPage() {
               Leistungen
             </h1>
             <p className="mt-4 text-lg md:text-xl text-white/90">
-              Wählen Sie Ihr Gewerk
+              Für Hausverwaltungen, Gewerbe &amp; Privat – ein Ansprechpartner, klare Verantwortung
+            </p>
+            <p className="mt-2 text-sm text-white/70">
+              Gewerk auswählen
             </p>
           </div>
         </div>

@@ -46,64 +46,68 @@ const PROOF_STRIP = ["Rückmeldung in 24h", "Verbindliche Ansprechpartner", "Dok
 export default function Kontakt() {
   return (
     <>
-        {/* Hero Section – wie Über-uns Hero (ohne Animation) */}
-        <section className="relative flex min-h-[420px] items-center bg-[#26413C] py-16 lg:min-h-[480px] lg:py-20">
-          <div className="container mx-auto px-4 lg:px-8">
+        {/* Hero Section – wie Über-uns Hero (ohne Animation), mobil optimiert */}
+        <section className="relative flex min-h-[320px] sm:min-h-[380px] items-center bg-[#26413C] py-10 sm:py-14 lg:min-h-[480px] lg:py-20">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-3xl text-center">
-              <h1 className="text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-6xl">
+              <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl md:text-5xl lg:text-6xl text-balance">
                 Kontakt zur Meisterrunde
               </h1>
-              <p className="mt-7 max-w-2xl mx-auto text-base md:text-lg text-white leading-relaxed">
+              <p className="mt-4 sm:mt-6 max-w-2xl mx-auto text-sm sm:text-base md:text-lg text-white/95 leading-relaxed text-balance">
                 Sie haben ein Projekt, eine Frage oder möchten ein unverbindliches Gespräch? Schreiben Sie uns –
                 wir melden uns in der Regel innerhalb von 24 Stunden.
               </p>
-              <div className="mt-6 flex justify-center">
-                <BadgeRow items={PROOF_STRIP} theme="dark" />
+              <div className="mt-4 sm:mt-6 flex flex-wrap justify-center gap-2 sm:gap-3">
+                <BadgeRow items={PROOF_STRIP} theme="dark" className="justify-center" />
               </div>
             </div>
           </div>
         </section>
 
-        {/* Contact Section */}
-        <section className="bg-background py-20 lg:py-28">
-          <div className="container mx-auto px-4 lg:px-8">
-            <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
+        {/* Contact Section – mobil: einspaltig, weniger Abstand */}
+        <section className="bg-background py-10 sm:py-14 lg:py-28">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid gap-8 sm:gap-10 lg:grid-cols-2 lg:gap-16">
               {/* Contact Form with dynamic dropdowns */}
               <ContactForm 
                 pageName="Kontaktseite"
                 title="Nachricht senden"
                 subtitle="Wählen Sie Ihren Standort und Ihr Anliegen – wir leiten Sie an den richtigen Ansprechpartner weiter."
                 accent="brand"
+                className="p-4 sm:p-6 lg:p-10"
               />
 
-              {/* Contact Info */}
-              <div className="rounded-3xl p-8 lg:p-10 bg-card">
-                <h2 className="text-2xl font-bold text-[#3E505B]">
+              {/* Contact Info – mobil: kompaktere Karten, tappbare Links */}
+              <div className="rounded-2xl sm:rounded-3xl p-5 sm:p-6 lg:p-10 bg-card">
+                <h2 className="text-xl sm:text-2xl font-bold text-[#3E505B]">
                   Kontaktinformationen
                 </h2>
-                <p className="mt-2 text-[#3E505B]">
+                <p className="mt-1.5 sm:mt-2 text-sm sm:text-base text-[#3E505B]">
                   Erreichen Sie uns auf dem Weg, der Ihnen am besten passt.
                 </p>
 
-                <div className="mt-8 space-y-6">
+                <div className="mt-6 sm:mt-8 space-y-4 sm:space-y-6">
                   {contactInfo.map((info) => (
                     <div
                       key={info.title}
-                      className="flex items-start gap-4 rounded-2xl bg-surface p-6"
+                      className="flex items-start gap-3 sm:gap-4 rounded-xl sm:rounded-2xl bg-surface p-4 sm:p-6"
                     >
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#3E505B]/10 text-[#3E505B]">
-                        <info.icon className="h-6 w-6" strokeWidth={1.5} />
+                      <div className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-lg sm:rounded-xl bg-[#3E505B]/10 text-[#3E505B]">
+                        <info.icon className="h-5 w-5 sm:h-6 sm:w-6" strokeWidth={1.5} />
                       </div>
-                      <div>
-                        <h3 className="font-semibold text-[#3E505B]">{info.title}</h3>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-semibold text-[#3E505B] text-sm sm:text-base">{info.title}</h3>
                         {info.href ? (
-                          <a href={info.href} className="mt-1 block text-[#3E505B] hover:underline transition-colors">
+                          <a
+                            href={info.href}
+                            className="mt-0.5 sm:mt-1 block text-[#3E505B] hover:underline transition-colors text-sm sm:text-base break-all"
+                          >
                             {info.content}
                           </a>
                         ) : (
-                          <p className="mt-1 text-[#3E505B]">{info.content}</p>
+                          <p className="mt-0.5 sm:mt-1 text-[#3E505B] text-sm sm:text-base">{info.content}</p>
                         )}
-                        <p className="text-sm text-[#3E505B]">{info.subContent}</p>
+                        <p className="text-xs sm:text-sm text-[#3E505B]/90 mt-0.5">{info.subContent}</p>
                       </div>
                     </div>
                   ))}
