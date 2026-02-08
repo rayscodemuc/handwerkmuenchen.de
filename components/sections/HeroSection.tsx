@@ -47,19 +47,19 @@ export function HeroSection() {
               Feste Meister. Ein Vertrag. Keine Subunternehmer-Kette.
             </motion.p>
 
-            {/* Gewerke-Chips: dominant (größere Höhe, mehr Padding, klare Umrandung) */}
+            {/* Gewerke-Chips: Mobile untereinander/gleiche Breite, ab sm horizontal */}
             <motion.div
-              className="mt-14 sm:mt-20 flex flex-col items-center gap-4"
+              className="mt-14 sm:mt-20 flex flex-col items-center gap-4 w-full sm:w-auto max-w-md sm:max-w-none mx-auto"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4, ease: "easeOut" }}
             >
-              <div className="flex flex-wrap justify-center gap-2 sm:gap-3 md:gap-4">
+              <div className="flex flex-col sm:flex-row sm:flex-wrap justify-center gap-2 sm:gap-3 md:gap-4 w-full sm:w-auto">
                 {GEWERKE_PRIMARY.map((g) => (
                   <Link
                     key={g.href}
                     href={g.href}
-                    className="inline-flex items-center justify-center min-h-[48px] sm:min-h-[52px] rounded-full border-2 border-white/40 bg-[#4C626C] px-5 py-3 sm:px-6 sm:py-3.5 text-base sm:text-lg font-semibold text-white transition-colors hover:border-white/70 hover:bg-[#8AB0AB]"
+                    className="w-full sm:w-auto inline-flex items-center justify-center min-h-[48px] sm:min-h-[52px] rounded-full border-2 border-white/40 bg-[#4C626C] px-5 py-3 sm:px-6 sm:py-3.5 text-base sm:text-lg font-semibold text-white transition-colors hover:border-white/70 hover:bg-[#8AB0AB]"
                   >
                     {g.label}
                   </Link>
