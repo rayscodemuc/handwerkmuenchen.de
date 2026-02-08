@@ -129,6 +129,86 @@ export const allObjectTypesFromProjects: ObjectType[] = Array.from(
   new Set(projects.map((p) => p.objectType))
 );
 
+/** Erlaubte Gewerk-Slugs für Route /projekte/[gewerk]. reinigung-facility = Projekte mit reinigung ODER facility. */
+export const ALLOWED_GEWERK_SLUGS = [
+  "elektrotechnik",
+  "sanitaer-heizung",
+  "innenausbau",
+  "reinigung",
+  "facility",
+  "reinigung-facility",
+] as const;
+
+export type GewerkSlug = (typeof ALLOWED_GEWERK_SLUGS)[number];
+
+/** Anzeige-Label pro Gewerk-Slug (für Pill/Breadcrumb). */
+export const gewerkSlugToLabel: Record<GewerkSlug, string> = {
+  elektrotechnik: "Elektrotechnik",
+  "sanitaer-heizung": "Sanitär & Heizung",
+  innenausbau: "Innenausbau",
+  reinigung: "Reinigung",
+  facility: "Facility",
+  "reinigung-facility": "Reinigung & Facility",
+};
+
+/** Hero-Überschriften pro Gewerk für /projekte/[gewerk]. */
+export const gewerkHeroHeadings: Record<
+  GewerkSlug,
+  { eyebrow: string; title: string; subline: string }
+> = {
+  elektrotechnik: {
+    eyebrow: "ELEKTROTECHNIK",
+    title: "Referenzprojekte Elektrotechnik",
+    subline:
+      "E-Check, Wartung, Installation – belegbare Qualität aus München.",
+  },
+  "sanitaer-heizung": {
+    eyebrow: "SANITÄR & HEIZUNG",
+    title: "Referenzprojekte Sanitär & Heizung",
+    subline:
+      "SHK-Wartung, Heizung, Sanierung – ein Ansprechpartner, dokumentiert.",
+  },
+  innenausbau: {
+    eyebrow: "INNENAUSBAU",
+    title: "Referenzprojekte Innenausbau",
+    subline:
+      "Malerarbeiten, Trockenbau, Boden – termingerecht und abgenommen.",
+  },
+  reinigung: {
+    eyebrow: "REINIGUNG",
+    title: "Referenzprojekte Reinigung",
+    subline:
+      "Unterhaltsreinigung, Grundreinigung, Sonderreinigung – dokumentierte Qualität.",
+  },
+  facility: {
+    eyebrow: "FACILITY",
+    title: "Referenzprojekte Facility",
+    subline:
+      "Hausmeisterservice, Winterdienst, Grünpflege – ein Ansprechpartner für alle Gewerke.",
+  },
+  "reinigung-facility": {
+    eyebrow: "REINIGUNG & FACILITY",
+    title: "Referenzprojekte Reinigung & Facility",
+    subline:
+      "Reinigung, Hausmeisterservice und mehr – koordiniert aus einer Hand.",
+  },
+};
+
+/** Prüft, ob ein Slug ein gültiger Gewerk-Slug für /projekte/[gewerk] ist. */
+export function isAllowedGewerkSlug(slug: string): slug is GewerkSlug {
+  return (ALLOWED_GEWERK_SLUGS as readonly string[]).includes(slug);
+}
+
+/** Projekte nach Gewerk filtern (für /projekte/[gewerk]). reinigung-facility = reinigung ODER facility. */
+export function getProjectsByGewerk(gewerkSlug: GewerkSlug): ProjectItem[] {
+  if (gewerkSlug === "reinigung-facility") {
+    return projects.filter(
+      (p) => p.trades.includes("reinigung") || p.trades.includes("facility")
+    );
+  }
+  return projects.filter((p) => p.trades.includes(gewerkSlug as Trade));
+}
+
 /** Einzelnes Projekt per Slug */
 export function getProjectBySlug(slug: string): ProjectItem | undefined {
   return projects.find((p) => p.slug === slug);

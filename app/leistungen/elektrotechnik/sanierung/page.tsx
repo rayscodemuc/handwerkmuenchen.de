@@ -67,9 +67,9 @@ export default function Sanierung() {
         <section className="border-b border-border bg-background py-6">
           <div className="container mx-auto px-4 lg:px-8">
             <div className="flex flex-wrap items-center justify-center gap-8 lg:gap-12 text-sm">
-              <div className="flex items-center gap-2"><RefreshCw className="h-5 w-5 text-primary" /><span className="font-medium">Minimal-invasiv</span></div>
-              <div className="flex items-center gap-2"><Shield className="h-5 w-5 text-primary" /><span className="font-medium">Versicherungskonform</span></div>
-              <div className="flex items-center gap-2"><Award className="h-5 w-5 text-primary" /><span className="font-medium">Meisterbetrieb</span></div>
+              <div className="flex items-center gap-2"><RefreshCw className="h-5 w-5 text-[#3E505B]" /><span className="font-medium text-[#3E505B]">Minimal-invasiv</span></div>
+              <div className="flex items-center gap-2"><Shield className="h-5 w-5 text-[#3E505B]" /><span className="font-medium text-[#3E505B]">Versicherungskonform</span></div>
+              <div className="flex items-center gap-2"><Award className="h-5 w-5 text-[#3E505B]" /><span className="font-medium text-[#3E505B]">Meisterbetrieb</span></div>
             </div>
           </div>
         </section>
@@ -78,7 +78,7 @@ export default function Sanierung() {
           <div className="container mx-auto px-4 lg:px-8">
             <div className="mx-auto max-w-3xl py-16 lg:py-20">
               
-              <p className="text-xl text-muted-foreground leading-relaxed">
+              <p className="text-xl text-[#3E505B]/90 leading-relaxed">
                 Elektroinstallationen aus den 60er, 70er oder 80er Jahren entsprechen oft nicht mehr heutigen Sicherheitsstandards. Eine Modernisierung schützt vor Brandgefahr und erhöht den Immobilienwert.
               </p>
 
@@ -88,8 +88,8 @@ export default function Sanierung() {
                     <AlertTriangle className="h-5 w-5" />
                   </div>
                   <div>
-                    <h2 className="font-bold text-foreground">Warnzeichen für Sanierungsbedarf</h2>
-                    <ul className="mt-3 space-y-2 text-muted-foreground">
+                    <h2 className="font-bold text-[#3E505B]">Warnzeichen für Sanierungsbedarf</h2>
+                    <ul className="mt-3 space-y-2 text-[#3E505B]/90">
                       {warningSign.map((item, i) => (
                         <li key={i} className="flex items-start gap-2">
                           <Zap className="h-4 w-4 mt-0.5 text-amber-500 shrink-0" />
@@ -101,7 +101,7 @@ export default function Sanierung() {
                 </div>
               </div>
 
-              <h2 className="text-2xl font-bold text-foreground mt-12 mb-4">Unsere Sanierungsleistungen</h2>
+              <h2 className="text-2xl font-bold text-[#3E505B] mt-12 mb-4">Unsere Sanierungsleistungen</h2>
               <ul className="space-y-3">
                 {[
                   "Kompletterneuerung der Elektroinstallation",
@@ -110,21 +110,21 @@ export default function Sanierung() {
                   "Erhöhung der Anschlussleistung für moderne Verbraucher",
                   "Vorbereitung für Smart Home und E-Mobility",
                 ].map((item, i) => (
-                  <li key={i} className="flex items-center gap-3 text-muted-foreground">
-                    <CheckCircle className="h-5 w-5 text-primary shrink-0" />
+                  <li key={i} className="flex items-center gap-3 text-[#3E505B]/90">
+                    <CheckCircle className="h-5 w-5 text-[#3E505B] shrink-0" />
                     {item}
                   </li>
                 ))}
               </ul>
 
               <div className="my-12 rounded-2xl bg-primary/5 border border-primary/10 p-8">
-                <h3 className="font-bold text-foreground">Sanierung bei laufendem Betrieb</h3>
-                <p className="mt-2 text-muted-foreground">
+                <h3 className="font-bold text-[#3E505B]">Sanierung bei laufendem Betrieb</h3>
+                <p className="mt-2 text-[#3E505B]/90">
                   Wir planen die Arbeiten so, dass Ihr Alltag möglichst wenig gestört wird. Abschnittsweise Sanierung minimiert Ausfallzeiten.
                 </p>
               </div>
 
-              <h2 className="text-2xl font-bold text-foreground mt-12 mb-4">Häufige Fragen</h2>
+              <h2 className="text-2xl font-bold text-[#3E505B] mt-12 mb-4">Häufige Fragen</h2>
               <div className="space-y-4">
                 {[
                   { q: "Was kostet eine Elektrosanierung?", a: "Die Kosten hängen vom Umfang ab. Eine Teilsanierung (z.B. nur Zählerschrank) beginnt bei ca. 2.000€, Komplettsanierungen bei 8.000-15.000€." },
@@ -132,25 +132,25 @@ export default function Sanierung() {
                   { q: "Muss ich während der Arbeiten ausziehen?", a: "In der Regel nicht. Wir arbeiten abschnittsweise und stellen sicher, dass immer zumindest Teile der Wohnung nutzbar bleiben." },
                 ].map((faq, i) => (
                   <details key={i} className="group rounded-xl border border-border bg-card">
-                    <summary className="cursor-pointer p-5 font-medium text-foreground list-none flex items-center justify-between">
+                    <summary className="cursor-pointer p-5 font-medium text-[#3E505B] list-none flex items-center justify-between">
                       {faq.q}
-                      <ChevronRight className="h-5 w-5 text-muted-foreground transition-transform group-open:rotate-90" />
+                      <ChevronRight className="h-5 w-5 text-[#3E505B] transition-transform group-open:rotate-90" />
                     </summary>
-                    <p className="px-5 pb-5 text-muted-foreground">{faq.a}</p>
+                    <p className="px-5 pb-5 text-[#3E505B]/90">{faq.a}</p>
                   </details>
                 ))}
               </div>
 
               <div className="mt-12 rounded-2xl bg-muted p-6">
-                <p className="text-sm font-semibold text-foreground mb-4">Weitere Elektro-Leistungen</p>
+                <p className="text-sm font-semibold text-[#3E505B] mb-4">Weitere Elektro-Leistungen</p>
                 <div className="flex flex-wrap gap-2">
                   {[
                     { label: "Alle Elektro-Leistungen", href: "/leistungen/elektrotechnik" },
                     { label: "Hauselektrik", href: "/leistungen/elektrotechnik/hauselektrik" },
                     { label: "Smart Home", href: "/leistungen/elektrotechnik/smart-home" },
                   ].map((link, i) => (
-                    <Link key={i} href={link.href} className="inline-flex items-center gap-1 rounded-full bg-background px-4 py-2 text-sm font-medium text-foreground border border-border hover:border-primary hover:text-primary transition-colors">
-                      {link.label}<ArrowRight className="h-3 w-3" />
+                    <Link key={i} href={link.href} className="inline-flex items-center gap-1 rounded-full bg-background px-4 py-2 text-sm font-medium text-[#3E505B] border border-border hover:border-primary hover:text-primary transition-colors">
+                      {link.label}<ArrowRight className="h-3 w-3 text-[#3E505B]" />
                     </Link>
                   ))}
                 </div>

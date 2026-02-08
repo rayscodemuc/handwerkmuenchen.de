@@ -52,10 +52,11 @@ export default function InnenausbauPage() {
         heading={config.leistungenHeading}
         subline={config.leistungenSubline}
         leistungen={config.leistungen}
+        lightSectionColor="#3E505B"
       />
       <NetzwerkPrinzipien cards={config.netzwerkCards} />
       <VerantwortlicheSection teamSection={config.teamSection} />
-      <FAQSection faqs={config.faqs} />
+      <FAQSection faqs={config.faqs} lightSectionColor="#3E505B" />
       <FinalCTA
         heading={config.ctaHeading}
         subline={config.ctaSubline}

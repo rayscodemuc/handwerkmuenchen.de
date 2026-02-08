@@ -66,9 +66,9 @@ export default function Hauselektrik() {
         <section className="border-b border-border bg-background py-6">
           <div className="container mx-auto px-4 lg:px-8">
             <div className="flex flex-wrap items-center justify-center gap-8 lg:gap-12 text-sm">
-              <div className="flex items-center gap-2"><Clock className="h-5 w-5 text-primary" /><span className="font-medium">Flexible Termine</span></div>
-              <div className="flex items-center gap-2"><Shield className="h-5 w-5 text-primary" /><span className="font-medium">Festpreisgarantie</span></div>
-              <div className="flex items-center gap-2"><Award className="h-5 w-5 text-primary" /><span className="font-medium">Meisterbetrieb</span></div>
+              <div className="flex items-center gap-2"><Clock className="h-5 w-5 text-[#3E505B]" /><span className="font-medium text-[#3E505B]">Flexible Termine</span></div>
+              <div className="flex items-center gap-2"><Shield className="h-5 w-5 text-[#3E505B]" /><span className="font-medium text-[#3E505B]">Festpreisgarantie</span></div>
+              <div className="flex items-center gap-2"><Award className="h-5 w-5 text-[#3E505B]" /><span className="font-medium text-[#3E505B]">Meisterbetrieb</span></div>
             </div>
           </div>
         </section>
@@ -77,33 +77,33 @@ export default function Hauselektrik() {
           <div className="container mx-auto px-4 lg:px-8">
             <div className="mx-auto max-w-3xl py-16 lg:py-20">
               
-              <p className="text-xl text-muted-foreground leading-relaxed">
+              <p className="text-xl text-[#3E505B]/90 leading-relaxed">
                 Ob Sie zusätzliche Steckdosen im Home-Office benötigen, eine neue Küchenbeleuchtung wünschen oder Ihr Altbau komplett neu verkabelt werden muss – unser Elektrotechnik-Team setzt Ihr Projekt sauber, sicher und termingerecht um.
               </p>
 
-              <h2 className="text-2xl font-bold text-foreground mt-12 mb-6">Unsere Leistungen für Ihr Zuhause</h2>
+              <h2 className="text-2xl font-bold text-[#3E505B] mt-12 mb-6">Unsere Leistungen für Ihr Zuhause</h2>
               <div className="grid gap-4 sm:grid-cols-2">
                 {services.map((item, i) => (
                   <div key={i} className="flex items-start gap-4 rounded-xl border border-border p-5 hover:border-primary/30 transition-colors">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                      <item.icon className="h-5 w-5 text-primary" />
+                      <item.icon className="h-5 w-5 text-[#3E505B]" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-foreground">{item.title}</h3>
-                      <p className="text-sm text-muted-foreground">{item.desc}</p>
+                      <h3 className="font-semibold text-[#3E505B]">{item.title}</h3>
+                      <p className="text-sm text-[#3E505B]/90">{item.desc}</p>
                     </div>
                   </div>
                 ))}
               </div>
 
               <div className="my-12 rounded-2xl bg-primary/5 border border-primary/10 p-8">
-                <h3 className="font-bold text-foreground">Sicherheit steht an erster Stelle</h3>
-                <p className="mt-2 text-muted-foreground">
+                <h3 className="font-bold text-[#3E505B]">Sicherheit steht an erster Stelle</h3>
+                <p className="mt-2 text-[#3E505B]/90">
                   Alle unsere Installationen entsprechen den aktuellen DIN VDE-Normen. Nach Abschluss der Arbeiten erhalten Sie eine vollständige Dokumentation und Prüfprotokoll.
                 </p>
               </div>
 
-              <h2 className="text-2xl font-bold text-foreground mt-12 mb-4">Häufige Fragen</h2>
+              <h2 className="text-2xl font-bold text-[#3E505B] mt-12 mb-4">Häufige Fragen</h2>
               <div className="space-y-4">
                 {[
                   { q: "Was kostet eine neue Steckdose?", a: "Die Kosten hängen von der Verlegeart ab. Bei Aufputz-Installation ab ca. 80€, bei Unterputz-Verlegung ab ca. 150€ inklusive Material." },
@@ -111,25 +111,25 @@ export default function Hauselektrik() {
                   { q: "Arbeiten Sie auch am Wochenende?", a: "Reguläre Termine bieten wir Mo-Fr an. Bei dringenden Anliegen ist auch Samstags ein Termin möglich." },
                 ].map((faq, i) => (
                   <details key={i} className="group rounded-xl border border-border bg-card">
-                    <summary className="cursor-pointer p-5 font-medium text-foreground list-none flex items-center justify-between">
+                    <summary className="cursor-pointer p-5 font-medium text-[#3E505B] list-none flex items-center justify-between">
                       {faq.q}
-                      <ChevronRight className="h-5 w-5 text-muted-foreground transition-transform group-open:rotate-90" />
+                      <ChevronRight className="h-5 w-5 text-[#3E505B] transition-transform group-open:rotate-90" />
                     </summary>
-                    <p className="px-5 pb-5 text-muted-foreground">{faq.a}</p>
+                    <p className="px-5 pb-5 text-[#3E505B]/90">{faq.a}</p>
                   </details>
                 ))}
               </div>
 
               <div className="mt-12 rounded-2xl bg-muted p-6">
-                <p className="text-sm font-semibold text-foreground mb-4">Weitere Elektro-Leistungen</p>
+                <p className="text-sm font-semibold text-[#3E505B] mb-4">Weitere Elektro-Leistungen</p>
                 <div className="flex flex-wrap gap-2">
                   {[
                     { label: "Alle Elektro-Leistungen", href: "/leistungen/elektrotechnik" },
                     { label: "Smart Home", href: "/leistungen/elektrotechnik/smart-home" },
                     { label: "LED-Umrüstung", href: "/leistungen/elektrotechnik/led" },
                   ].map((link, i) => (
-                    <Link key={i} href={link.href} className="inline-flex items-center gap-1 rounded-full bg-background px-4 py-2 text-sm font-medium text-foreground border border-border hover:border-primary hover:text-primary transition-colors">
-                      {link.label}<ArrowRight className="h-3 w-3" />
+                    <Link key={i} href={link.href} className="inline-flex items-center gap-1 rounded-full bg-background px-4 py-2 text-sm font-medium text-[#3E505B] border border-border hover:border-primary hover:text-primary transition-colors">
+                      {link.label}<ArrowRight className="h-3 w-3 text-[#3E505B]" />
                     </Link>
                   ))}
                 </div>

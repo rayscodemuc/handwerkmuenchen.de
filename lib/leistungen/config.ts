@@ -427,6 +427,14 @@ export const GEWERK_CONFIGS = {
 
 export type GewerkSlug = keyof typeof GEWERK_CONFIGS;
 
+/** Gewerke für Secondary-Nav (Header) und Leistungen-Hub-Grid. Ein Eintrag = ein Nav-Item / eine Kachel. */
+export const NAV_GEWERKE = [
+  { name: "Elektrotechnik", slug: "elektrotechnik" },
+  { name: "Sanitär & Heizung", slug: "sanitaer-heizung" },
+  { name: "Innenausbau", slug: "innenausbau" },
+  { name: "Reinigung & Facility", slug: "reinigung-facility" },
+] as const;
+
 // --- Reinigung & Facility Hub (Landing mit 2 Wahlkacheln) ---
 
 export type HubChoiceItem = {

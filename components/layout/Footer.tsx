@@ -127,8 +127,13 @@ export function Footer() {
           Ein Ansprechpartner, klare Verantwortung – meistergeführt koordiniert, ohne Subunternehmer-Kette.
         </p>
 
+        {/* Überschrift über der Unterschrift / Copyright-Zeile */}
+        <h3 className="mt-10 text-sm font-semibold uppercase tracking-widest text-foreground">
+          Handwerk &amp; Gebäudeservice in München
+        </h3>
+
         {/* Bottom Section */}
-        <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-border pt-8 md:flex-row">
+        <div className="mt-4 flex flex-col items-center justify-between gap-4 border-t border-border pt-6 md:flex-row">
           <p className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} Musterfirma GmbH. Alle Rechte vorbehalten.
           </p>

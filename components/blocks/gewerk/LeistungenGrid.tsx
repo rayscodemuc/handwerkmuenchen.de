@@ -1,23 +1,26 @@
-import Link from "next/link";
-import { ChevronRight } from "lucide-react";
 import type { LeistungItem } from "@/lib/leistungen/config";
 
 type LeistungenGridProps = {
   heading: string;
   subline: string;
   leistungen: LeistungItem[];
+  /** Wenn "#3E505B", Schrift und Symbole in heller Sektion in dieser Farbe (z.B. Elektrotechnik). */
+  lightSectionColor?: string;
 };
 
-export function LeistungenGrid({ heading, subline, leistungen }: LeistungenGridProps) {
+const isElektro = (c?: string) => c === "#3E505B";
+const textCls = (c?: string) => (isElektro(c) ? "text-[#3E505B]" : "text-[#313D5A]");
+const sublineCls = (c?: string) => (isElektro(c) ? "text-[#3E505B]" : "text-[#73628A]");
+export function LeistungenGrid({ heading, subline, leistungen, lightSectionColor }: LeistungenGridProps) {
   if (leistungen.length === 0) return null;
   return (
     <section id="leistungen" className="bg-[#f8f7f6] py-16 lg:py-20" aria-labelledby="leistungen-heading">
       <div className="container mx-auto px-4 lg:px-8">
         <div className="mx-auto max-w-4xl text-center mb-12">
-          <h2 id="leistungen-heading" className="text-2xl font-bold text-[#313D5A] md:text-3xl">
+          <h2 id="leistungen-heading" className={`text-2xl font-bold md:text-3xl ${textCls(lightSectionColor)}`}>
             {heading}
           </h2>
-          <p className="mt-4 text-[#73628A] text-base sm:text-lg leading-relaxed">
+          <p className={`mt-4 text-base sm:text-lg leading-relaxed ${sublineCls(lightSectionColor)}`}>
             {subline}
           </p>
         </div>
@@ -27,17 +30,8 @@ export function LeistungenGrid({ heading, subline, leistungen }: LeistungenGridP
               key={item.title}
               className="group rounded-2xl border border-[#E5E7EB] bg-[#FFFFFF] p-6 flex flex-col gap-4 transition-colors hover:bg-[#FFFFFF]/90 hover:border-[#78716C]/30"
             >
-              <div className="flex items-start justify-between gap-4">
-                <h3 className="text-lg font-semibold text-[#313D5A]">{item.title}</h3>
-                <Link
-                  href={item.href}
-                  className="text-sm font-medium text-[#313D5A] hover:text-[#78716C] flex items-center gap-1 shrink-0"
-                >
-                  Mehr
-                  <ChevronRight className="h-4 w-4" aria-hidden />
-                </Link>
-              </div>
-              <p className="text-[#73628A] leading-relaxed text-sm flex-1">{item.description}</p>
+              <h3 className={`text-lg font-semibold ${textCls(lightSectionColor)}`}>{item.title}</h3>
+              <p className={`leading-relaxed text-sm flex-1 ${sublineCls(lightSectionColor)}`}>{item.description}</p>
             </div>
           ))}
         </div>

@@ -7,42 +7,38 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogoPlaceholder } from "@/components/LogoPlaceholder";
 import { useGewerkHover, getGewerkHoverKey } from "@/components/providers/GewerkHoverContext";
+import { NAV_GEWERKE } from "@/lib/leistungen/config";
 
 const primaryNav = [
   { name: "Leistungen", href: "/leistungen" },
-  { name: "Projekte", href: "/meisterleistungen" },
+  { name: "Projekte", href: "/projekte" },
   { name: "Über uns", href: "/ueber-uns" },
   { name: "Kontakt", href: "/kontakt" },
 ];
 
-// Gewerke – finale Routen unter /leistungen
-const secondaryNav = [
-  { name: "Elektrotechnik", href: "/leistungen/elektrotechnik" },
-  { name: "Sanitär & Heizung", href: "/leistungen/sanitaer-heizung" },
-  { name: "Innenausbau", href: "/leistungen/innenausbau" },
-  { name: "Reinigung & Facility", href: "/leistungen/reinigung-facility" },
-];
+/** Zeige Gewerke-Leiste nur unter /leistungen und /leistungen/* bzw. /meisterleistungen und /meisterleistungen/* (bzw. /projekte wenn vorhanden). */
+function showGewerkeBar(pathname: string): boolean {
+  return pathname.startsWith("/leistungen") || pathname.startsWith("/meisterleistungen") || pathname.startsWith("/projekte");
+}
 
-function isSecondaryActive(pathname: string, item: { name: string; href: string }): boolean {
-  if (item.name === "Elektrotechnik") {
-    return pathname === "/leistungen/elektrotechnik" || pathname.startsWith("/leistungen/elektrotechnik/");
-  }
-  if (item.name === "Sanitär & Heizung") {
-    return pathname === "/leistungen/sanitaer-heizung" || pathname.startsWith("/leistungen/sanitaer-heizung/");
-  }
-  if (item.name === "Innenausbau") {
-    return pathname === "/leistungen/innenausbau" || pathname.startsWith("/leistungen/innenausbau/");
-  }
-  if (item.name === "Reinigung & Facility") {
-    return pathname === "/leistungen/reinigung-facility" || pathname.startsWith("/leistungen/reinigung-facility/");
-  }
-  return pathname === item.href || pathname.startsWith(item.href + "/");
+/** Basis-Pfad für Gewerke-Links: /leistungen oder /projekte. Unter /meisterleistungen verlinken wir auf /leistungen/<slug>, da Meisterleistungen-[slug] Referenzprojekte sind. */
+function getGewerkeBasePath(pathname: string): string {
+  if (pathname.startsWith("/leistungen")) return "/leistungen";
+  if (pathname.startsWith("/projekte")) return "/projekte";
+  return "/leistungen";
+}
+
+/** Prüft, ob das Gewerk auf der aktuellen Seite aktiv ist (z. B. /leistungen/elektrotechnik). */
+function isGewerkActive(pathname: string, basePath: string, slug: string): boolean {
+  const prefix = `${basePath}/${slug}`;
+  return pathname === prefix || pathname.startsWith(prefix + "/");
 }
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [hoveredGewerkSlug, setHoveredGewerkSlug] = useState<string | null>(null);
   const { setHoveredGewerk } = useGewerkHover();
   
   // Scroll detection with small hysteresis to avoid jitter
@@ -108,12 +104,13 @@ export function Header() {
             />
           </div>
 
-          {/* Top-Nav Mitte: Leistungen, Über uns, Kontakt */}
+          {/* Top-Nav Mitte: Leistungen, Projekte, Über uns, Kontakt */}
           <div className="hidden md:flex md:items-center md:gap-8 md:absolute md:left-1/2 md:-translate-x-1/2">
             {primaryNav.map((item) => {
               const isActive =
                 pathname === item.href ||
-                (item.href === "/leistungen" && pathname.startsWith("/leistungen/"));
+                (item.href === "/leistungen" && pathname.startsWith("/leistungen/")) ||
+                (item.href === "/projekte" && pathname.startsWith("/projekte"));
               return (
                 <Link
                   key={item.name}
@@ -131,13 +128,13 @@ export function Header() {
             })}
           </div>
 
-          {/* CTA rechts: Projekt anfragen */}
+          {/* CTA rechts: Projekt anfragen – überall heller Hover wie auf der Startseite */}
           <div className="hidden md:flex md:items-center md:shrink-0">
             <Link href="/anfrage">
               <Button
                 variant="ghost"
                 size="lg"
-                className="rounded-full border border-transparent bg-[#4C626C] text-white hover:bg-[#4C626C]/90 px-6"
+                className="rounded-full border border-transparent bg-[#4C626C] text-white px-6 hover:bg-[#8AB0AB] hover:text-[#26413C]"
               >
                 Projekt anfragen
               </Button>
@@ -156,39 +153,52 @@ export function Header() {
         </nav>
       </div>
 
-      {/* Secondary-Nav: Gewerke als Tabs/Chips (visuell dominanter) */}
-      <div
-        className={`hidden md:block transition-[height,opacity] duration-300 ease-out ${
-          isScrolled ? "h-0 opacity-0 overflow-hidden" : "h-14 opacity-100 overflow-visible"
-        }`}
-      >
-        <nav className="container mx-auto flex h-14 items-center justify-center gap-2 lg:gap-3 px-4 lg:px-8">
-          {secondaryNav.map((item) => {
-            const isActive = isSecondaryActive(pathname, item);
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`rounded-full px-4 py-2 text-xl font-semibold transition-all ${
-                  isActive
-                    ? "bg-white/20 text-white border border-white/30"
-                    : `text-white/85 border border-transparent hover:bg-white/10 hover:text-white hover:border-white/20`
-                }`}
-                onMouseEnter={() => {
-                  const key = getGewerkHoverKey(item.name);
-                  if (key) setHoveredGewerk(key);
-                }}
-                onMouseLeave={() => {
-                  const key = getGewerkHoverKey(item.name);
-                  if (key) setHoveredGewerk(null);
-                }}
-              >
-                {item.name}
-              </Link>
-            );
-          })}
-        </nav>
-      </div>
+      {/* Secondary-Nav: Gewerke nur unter /leistungen und /meisterleistungen (bzw. /projekte) */}
+      {showGewerkeBar(pathname) && (
+        <div
+          className={`hidden md:block transition-[height,opacity] duration-300 ease-out ${
+            isScrolled ? "h-0 opacity-0 overflow-hidden" : "h-14 opacity-100 overflow-visible"
+          }`}
+        >
+          <nav className="container mx-auto flex h-14 items-center justify-center gap-2 lg:gap-3 px-4 lg:px-8">
+            {NAV_GEWERKE.map((item) => {
+              const basePath = getGewerkeBasePath(pathname);
+              const href = `${basePath}/${item.slug}`;
+              const isActive = isGewerkActive(pathname, basePath, item.slug);
+              const isHovered = hoveredGewerkSlug === item.slug;
+              const hasAnyFocus = NAV_GEWERKE.some((i) => isGewerkActive(pathname, basePath, i.slug)) || hoveredGewerkSlug !== null;
+              const isDimmed = hasAnyFocus && !isActive && !isHovered;
+              return (
+                <Link
+                  key={item.name}
+                  href={href}
+                  className={`rounded-full px-4 py-2 font-semibold transition-all ${
+                    isActive
+                      ? "text-xl bg-white/20 text-white border border-white/30"
+                      : isHovered
+                        ? "text-xl text-white border border-transparent hover:bg-white/10 hover:border-white/20"
+                        : isDimmed
+                          ? "text-base text-white/50 border border-transparent hover:bg-white/10 hover:text-white hover:border-white/20"
+                          : "text-xl text-white/85 border border-transparent hover:bg-white/10 hover:text-white hover:border-white/20"
+                  }`}
+                  onMouseEnter={() => {
+                    setHoveredGewerkSlug(item.slug);
+                    const key = getGewerkHoverKey(item.name);
+                    if (key) setHoveredGewerk(key);
+                  }}
+                  onMouseLeave={() => {
+                    setHoveredGewerkSlug(null);
+                    const key = getGewerkHoverKey(item.name);
+                    if (key) setHoveredGewerk(null);
+                  }}
+                >
+                  {item.name}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+      )}
       </div>
 
       {/* Mobile Navigation */}
@@ -200,7 +210,8 @@ export function Header() {
               {primaryNav.map((item) => {
                 const isActive =
                   pathname === item.href ||
-                  (item.href === "/leistungen" && pathname.startsWith("/leistungen/"));
+                  (item.href === "/leistungen" && pathname.startsWith("/leistungen/")) ||
+                  (item.href === "/projekte" && pathname.startsWith("/projekte"));
                 return (
                   <Link
                     key={item.name}
@@ -217,26 +228,35 @@ export function Header() {
               })}
             </div>
 
-            {/* Secondary: Gewerke (horizontal scrollbar, keine Dropdowns) */}
-            <div className="pt-3 pb-4 -mx-4 px-4 overflow-x-auto">
-              <div className="flex gap-2 min-w-max pb-1">
-                {secondaryNav.map((item) => {
-                  const isActive = isSecondaryActive(pathname, item);
-                  return (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      className={`shrink-0 rounded-full px-4 py-2.5 text-lg font-semibold transition-colors ${
-                        isActive ? "bg-white/20 text-white" : `text-white/85 hover:bg-white/10 hover:text-white`
-                      }`}
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      {item.name}
-                    </Link>
-                  );
-                })}
+            {/* Secondary: Gewerke nur im Kontext Leistungen/Projekte */}
+            {showGewerkeBar(pathname) && (
+              <div className="pt-3 pb-4 -mx-4 px-4 overflow-x-auto">
+                <div className="flex gap-2 min-w-max pb-1">
+                  {NAV_GEWERKE.map((item) => {
+                    const basePath = getGewerkeBasePath(pathname);
+                    const href = `${basePath}/${item.slug}`;
+                    const isActive = isGewerkActive(pathname, basePath, item.slug);
+                    const hasAnyActive = NAV_GEWERKE.some((i) => isGewerkActive(pathname, basePath, i.slug));
+                    return (
+                      <Link
+                        key={item.name}
+                        href={href}
+                        className={`shrink-0 rounded-full px-4 py-2.5 font-semibold transition-colors ${
+                          isActive
+                            ? "text-lg bg-white/20 text-white"
+                            : hasAnyActive
+                              ? "text-sm text-white/50 hover:bg-white/10 hover:text-white"
+                              : "text-lg text-white/85 hover:bg-white/10 hover:text-white"
+                        }`}
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        {item.name}
+                      </Link>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            )}
 
             <div className={`flex flex-col gap-3 pt-4 border-t ${dividerBorder}`}>
               <Link href="/anfrage" onClick={() => setMobileMenuOpen(false)}>

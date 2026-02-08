@@ -10,7 +10,7 @@ const GEWERKE_PRIMARY = [
   { label: "Sanitär & Heizung", href: "/leistungen/sanitaer-heizung" },
   { label: "Innenausbau", href: "/leistungen/innenausbau" },
 ];
-const PROOF_STRIP = "GU-Vertrag · Dokumentation & Übergabe";
+const PROOF_STRIP = "Ein Vertrag · Dokumentation & Übergabe";
 
 export function HeroSection() {
   return (

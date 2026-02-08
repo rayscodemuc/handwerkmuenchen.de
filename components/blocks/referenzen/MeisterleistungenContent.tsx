@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { Phone } from "lucide-react";
 import {
   projects,
   allTradesFromProjects,
@@ -66,20 +67,37 @@ export function MeisterleistungenContent() {
 
       <ReferenzHighlights items={highlightItems} />
 
-      <section className="border-t border-[#E5E7EB] bg-[#26413C] py-16 lg:py-20">
-        <div className="container mx-auto px-4 text-center lg:px-8">
-          <h2 className="text-2xl font-bold text-white md:text-3xl">
-            Eigenes Projekt anfragen
-          </h2>
-          <p className="mt-3 max-w-xl mx-auto text-white/80">
-            München & Umgebung · Ein Ansprechpartner für alle Gewerke
-          </p>
-          <div className="mt-8">
-            <Link href="/anfrage">
-              <AnimatedButton className="bg-[#8AB0AB] text-[#26413C] hover:bg-[#8AB0AB]/90 border-0 px-8 py-5 text-base">
-                Projekt anfragen
-              </AnimatedButton>
-            </Link>
+      <section id="kontakt" className="border-t border-[#E5E7EB] bg-[#26413C] py-16 lg:py-20" aria-labelledby="meisterleistungen-cta-heading">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="mx-auto max-w-3xl rounded-3xl border border-white/10 bg-white/5 p-8 sm:p-10 text-center">
+            <h2 id="meisterleistungen-cta-heading" className="text-2xl font-bold text-white md:text-3xl">
+              Eigenes Projekt anfragen
+            </h2>
+            <p className="mt-4 text-white/75 text-base sm:text-lg leading-relaxed">
+              München &amp; Umgebung · Ein Ansprechpartner für alle Gewerke. Unverbindlich anfragen, klare Einschätzung.
+            </p>
+            <div className="mt-8 flex flex-wrap justify-center gap-4">
+              <Link href="/anfrage">
+                <AnimatedButton className="bg-[#8AB0AB] text-[#26413C] hover:bg-[#8AB0AB]/90 border-0 px-8 py-5 text-base">
+                  Projekt anfragen
+                </AnimatedButton>
+              </Link>
+              <Link
+                href="/kontakt"
+                className="inline-flex items-center justify-center rounded-lg border border-white/35 bg-transparent px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-white/10"
+              >
+                <Phone className="mr-2 h-4 w-4" aria-hidden />
+                Rückruf anfordern
+              </Link>
+            </div>
+            <p className="mt-6 text-sm text-white/60">
+              Feste Meisterbetriebe im Netzwerk · Keine Subunternehmerkette
+            </p>
+            <p className="mt-4">
+              <Link href="/projekte" className="text-sm font-medium text-white/80 hover:text-white underline underline-offset-2">
+                Alle Projekte
+              </Link>
+            </p>
           </div>
         </div>
       </section>

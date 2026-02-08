@@ -6,13 +6,15 @@ import { MapPin } from "lucide-react";
 
 type ReferenzenGridProps = {
   projects: ProjectItem[];
+  /** Optional: z. B. "Keine Projekte in diesem Gewerk." bei gefilterter Ansicht */
+  emptyMessage?: string;
 };
 
-export function ReferenzenGrid({ projects }: ReferenzenGridProps) {
+export function ReferenzenGrid({ projects, emptyMessage }: ReferenzenGridProps) {
   if (projects.length === 0) {
     return (
       <p className="rounded-xl border border-[#E5E7EB] bg-[#FFFFFF] p-8 text-center text-[#73628A]">
-        Keine Referenzen für die gewählten Filter.
+        {emptyMessage ?? "Keine Referenzen für die gewählten Filter."}
       </p>
     );
   }

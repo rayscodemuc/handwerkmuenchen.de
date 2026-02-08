@@ -107,10 +107,6 @@ const initialState: CalculatorState = {
   additional_message: "",
 };
 
-const standorte = [
-  { value: "muenchen", label: "München" },
-];
-
 // Preisfaktoren (Netto-Werte, marktgerechte Kalkulation)
 const preisfaktoren = {
   reinigung: {
@@ -513,8 +509,7 @@ export default function Rechner() {
         return (
           state.customer_name.trim() !== "" &&
           state.customer_email.trim() !== "" &&
-          state.customer_phone.trim() !== "" &&
-          state.city !== ""
+          state.customer_phone.trim() !== ""
         );
       default:
         return false;
@@ -1754,25 +1749,6 @@ export default function Rechner() {
                                 value={state.customer_email}
                                 onChange={(e) => updateState({ customer_email: e.target.value })}
                               />
-                            </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="city">Gewünschter Standort *</Label>
-                              <Select
-                                name="city"
-                                value={state.city}
-                                onValueChange={(v) => updateState({ city: v })}
-                              >
-                                <SelectTrigger className="bg-white">
-                                  <SelectValue placeholder="Standort wählen" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {standorte.map((s) => (
-                                    <SelectItem key={s.value} value={s.value}>
-                                      {s.label}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
                             </div>
                           </div>
                           <div className="space-y-2">
