@@ -57,8 +57,8 @@ export default function Kontakt() {
                 Sie haben ein Projekt, eine Frage oder möchten ein unverbindliches Gespräch? Schreiben Sie uns –
                 wir melden uns in der Regel innerhalb von 24 Stunden.
               </p>
-              <div className="mt-4 sm:mt-6 flex flex-wrap justify-center gap-2 sm:gap-3">
-                <BadgeRow items={PROOF_STRIP} theme="dark" className="justify-center" />
+              <div className="mt-4 sm:mt-6">
+                <BadgeRow items={PROOF_STRIP} theme="dark" equalWidthMobile className="justify-center" />
               </div>
             </div>
           </div>

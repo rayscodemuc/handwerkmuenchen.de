@@ -6,9 +6,9 @@ import { NAV_GEWERKE } from "@/lib/leistungen/config";
 import { ALLOWED_GEWERK_SLUGS, gewerkSlugToLabel } from "@/lib/referenzen/projects";
 import { cn } from "@/lib/utils";
 
-/** Zeige nur auf /leistungen* und /projekte*. */
+/** Zeige nur auf den Hub-Seiten, nicht auf /leistungen/(gewerk) oder /projekte/(gewerk). */
 function shouldShow(pathname: string): boolean {
-  return pathname.startsWith("/leistungen") || pathname.startsWith("/projekte");
+  return pathname === "/leistungen" || pathname === "/projekte";
 }
 
 /** Ist aktuell eine konkrete Gewerk-Seite (nicht Hub)? */

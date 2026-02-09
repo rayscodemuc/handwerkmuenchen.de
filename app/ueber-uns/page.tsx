@@ -107,11 +107,11 @@ export default function UeberUnsPage() {
               Bei uns sitzen die Meister an einem Tisch. Sie planen gemeinsam und tragen Verantwortung – als Generalunternehmer mit einem Vertrag und dokumentierter Übergabe.
             </p>
             <div className="mt-6 flex justify-center">
-              <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
+              <div className="flex w-full max-w-sm flex-col gap-2 sm:max-w-none sm:flex-row sm:flex-wrap sm:justify-center sm:gap-3">
                 {PROOF_STRIP.map((label) => (
                   <span
                     key={label}
-                    className="inline-flex items-center rounded-full border border-transparent bg-[#8AB0AB] px-3 py-1 text-xs font-medium text-[#26413C]"
+                    className="inline-flex w-full items-center justify-center rounded-full border border-transparent bg-[#8AB0AB] px-3 py-2.5 text-xs font-medium text-[#26413C] sm:w-auto sm:py-1"
                   >
                     {label}
                   </span>

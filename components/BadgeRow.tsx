@@ -5,10 +5,12 @@ export interface BadgeRowProps {
   items: string[];
   /** "light" = on light background (default), "dark" = on primary/dark hero */
   theme?: "light" | "dark" | "anfrage";
+  /** Auf Mobile alle Badges gleich breit (100 %) */
+  equalWidthMobile?: boolean;
   className?: string;
 }
 
-export function BadgeRow({ items, theme = "light", className }: BadgeRowProps) {
+export function BadgeRow({ items, theme = "light", equalWidthMobile, className }: BadgeRowProps) {
   if (!items?.length) return null;
 
   const badgeBase =
@@ -23,7 +25,8 @@ export function BadgeRow({ items, theme = "light", className }: BadgeRowProps) {
   return (
     <div
       className={cn(
-        "flex flex-wrap justify-center gap-3 sm:gap-4",
+        "flex justify-center gap-3 sm:gap-4",
+        equalWidthMobile ? "flex-col sm:flex-row sm:flex-wrap max-w-sm sm:max-w-none mx-auto" : "flex-wrap",
         className
       )}
       role="list"
@@ -35,6 +38,7 @@ export function BadgeRow({ items, theme = "light", className }: BadgeRowProps) {
           role="listitem"
           className={cn(
             badgeBase,
+            equalWidthMobile && "w-full sm:w-auto",
             theme === "dark" ? darkClass : theme === "anfrage" ? anfrageClass : lightClass
           )}
         >
