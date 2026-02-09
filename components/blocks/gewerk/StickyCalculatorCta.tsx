@@ -15,10 +15,11 @@ export function StickyCalculatorCta() {
         <Calculator className="h-5 w-5 shrink-0" aria-hidden />
         <span className="font-semibold whitespace-nowrap">Richtpreis berechnen</span>
       </Link>
-      {/* Mobile: fixed full-width bottom bar with safe-area, gut tappbar */}
+      {/* Mobile: schwebende Bar oberhalb der Browser-Leiste (iOS), klar abgesetzt */}
       <Link
         href={RECHNER_HREF}
-        className="fixed left-0 right-0 bottom-0 z-50 flex lg:hidden items-center justify-center gap-2 min-h-[52px] bg-[#313D5A] text-white py-3 px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-[0_-4px_12px_rgba(0,0,0,0.12)] hover:bg-[#8AB0AB] hover:text-[#26413C] active:scale-[0.99] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white animate-none"
+        style={{ bottom: "max(1rem, calc(env(safe-area-inset-bottom) + 0.5rem))" }}
+        className="fixed left-4 right-4 z-50 flex lg:hidden items-center justify-center gap-2 min-h-[52px] bg-[#313D5A] text-white py-3.5 px-4 rounded-xl shadow-[0_-4px_20px_rgba(0,0,0,0.2)] hover:bg-[#8AB0AB] hover:text-[#26413C] active:scale-[0.99] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white animate-none"
         aria-label="Richtpreis berechnen"
       >
         <Calculator className="h-5 w-5 shrink-0" aria-hidden />

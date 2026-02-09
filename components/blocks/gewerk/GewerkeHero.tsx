@@ -39,7 +39,7 @@ export function GewerkeHero({ eyebrow, h1, subline, ctas, chips }: GewerkeHeroPr
               </Link>
             )}
           </div>
-          <div className="mt-8 flex flex-wrap justify-center gap-2 sm:gap-3">
+          <div className="mt-8 hidden sm:flex flex-wrap justify-center gap-2 sm:gap-3">
             {chips.map((label) => (
               <span
                 key={label}
