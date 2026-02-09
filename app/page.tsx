@@ -5,21 +5,19 @@ import { WhyUsSection } from "@/components/sections/WhyUsSection";
 import { CTASection } from "@/components/sections/CTASection";
 
 export const metadata: Metadata = {
-  title: "handwerkmuenchen.de | Ihr Meisterbetrieb für Sanitär, Elektro & Ausbau in München",
-  description: "Professionelle Handwerksleistungen in München. Von der Reparatur bis zur Sanierung – meistergeführt, zuverlässig und direkt. Ihr Partner für Privatkunden, Gewerbe & Hausverwaltungen. Alles aus einer Hand, keine Subunternehmer-Ketten.",
+  title: "Ihr Meisterbetrieb für Sanitär, Elektro & Ausbau in München",
+  description:
+    "Meistergeführtes Handwerk in München: Sanitär, Elektro & Innenausbau aus einer Hand. Zuverlässig für Privat & Hausverwaltung – ohne Subunternehmer-Ketten.",
   keywords: [
     "Handwerk München",
     "Meisterbetrieb München",
     "Sanitär München",
     "Elektroinstallation München",
     "Innenausbau München",
-    "Badsanierung München",
-    "Immobilien Instandhaltung München",
-    "Renovierung München",
-    "Handwerkerservice München",
+    "Hausverwaltung Handwerker",
   ],
   alternates: {
-    canonical: "/",
+    canonical: "https://handwerkmuenchen.de",
   },
 };
 
