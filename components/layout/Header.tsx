@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogoPlaceholder } from "@/components/LogoPlaceholder";
 import { useGewerkHover, getGewerkHoverKey } from "@/components/providers/GewerkHoverContext";
 import { NAV_GEWERKE } from "@/lib/leistungen/config";
+import { MobileNav } from "@/components/nav/MobileNav";
+import { GewerkSubnav } from "@/components/nav/GewerkSubnav";
 
 const primaryNav = [
   { name: "Leistungen", href: "/leistungen" },
@@ -88,6 +90,7 @@ export function Header() {
 
   return (
     <header className={`sticky top-0 z-50 w-full ${headerBg} transition-shadow duration-300 ${isScrolled ? "shadow-md" : "shadow-none"}`}>
+      <MobileNav open={mobileMenuOpen} onOpenChange={setMobileMenuOpen} />
       <div className="relative z-10">
       {/* Top-Nav */}
       <div className={`relative border-b ${dividerBorder}`}>
@@ -104,8 +107,8 @@ export function Header() {
             />
           </div>
 
-          {/* Top-Nav Mitte: Leistungen, Projekte, Über uns, Kontakt */}
-          <div className="hidden md:flex md:items-center md:gap-8 md:absolute md:left-1/2 md:-translate-x-1/2">
+          {/* Desktop: Top-Nav Mitte (ab lg) */}
+          <div className="hidden lg:flex lg:items-center lg:gap-8 lg:absolute lg:left-1/2 lg:-translate-x-1/2">
             {primaryNav.map((item) => {
               const isActive =
                 pathname === item.href ||
@@ -128,8 +131,8 @@ export function Header() {
             })}
           </div>
 
-          {/* CTA rechts: Projekt anfragen – überall heller Hover wie auf der Startseite */}
-          <div className="hidden md:flex md:items-center md:shrink-0">
+          {/* Desktop: CTA rechts (ab lg) */}
+          <div className="hidden lg:flex lg:items-center lg:shrink-0">
             <Link href="/anfrage">
               <Button
                 variant="ghost"
@@ -141,19 +144,21 @@ export function Header() {
             </Link>
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile: Burger (unter lg) */}
           <button
             type="button"
-            className={`md:hidden inline-flex items-center justify-center rounded-lg p-2 ${textColor} ${hoverBg} ml-auto`}
+            className={`lg:hidden inline-flex items-center justify-center rounded-lg p-2 ${textColor} ${hoverBg} ml-auto`}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-nav-sheet"
           >
             <span className="sr-only">Menü öffnen</span>
-            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            <Menu className="h-6 w-6" />
           </button>
         </nav>
       </div>
 
-      {/* Secondary-Nav: Gewerke nur unter /leistungen und /meisterleistungen (bzw. /projekte) */}
+      {/* Desktop: Secondary-Nav Gewerke (ab md, nur /leistungen und /projekte) */}
       {showGewerkeBar(pathname) && (
         <div
           className={`hidden md:block transition-[height,opacity] duration-300 ease-out ${
@@ -199,77 +204,12 @@ export function Header() {
           </nav>
         </div>
       )}
+
+      {/* Mobile: Gewerk-Pills nur auf /leistungen* und /projekte* */}
+      <div className="lg:hidden">
+        <GewerkSubnav />
       </div>
-
-      {/* Mobile Navigation */}
-      {mobileMenuOpen && (
-        <div className={`md:hidden relative border-t ${dividerBorder}`}>
-          <div className="container relative z-10 mx-auto px-4 py-4 space-y-1">
-            {/* Primary Nav Items */}
-            <div className={`pb-4 border-b ${dividerBorder}`}>
-              {primaryNav.map((item) => {
-                const isActive =
-                  pathname === item.href ||
-                  (item.href === "/leistungen" && pathname.startsWith("/leistungen/")) ||
-                  (item.href === "/projekte" && pathname.startsWith("/projekte"));
-                return (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={`block py-2.5 text-sm font-medium ${
-                      isActive ? textColor : textColorMuted
-                    }`}
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    {isActive && <span className="mr-2">•</span>}
-                    {item.name}
-                  </Link>
-                );
-              })}
-            </div>
-
-            {/* Secondary: Gewerke nur im Kontext Leistungen/Projekte */}
-            {showGewerkeBar(pathname) && (
-              <div className="pt-3 pb-4 -mx-4 px-4 overflow-x-auto">
-                <div className="flex gap-2 min-w-max pb-1">
-                  {NAV_GEWERKE.map((item) => {
-                    const basePath = getGewerkeBasePath(pathname);
-                    const href = `${basePath}/${item.slug}`;
-                    const isActive = isGewerkActive(pathname, basePath, item.slug);
-                    const hasAnyActive = NAV_GEWERKE.some((i) => isGewerkActive(pathname, basePath, i.slug));
-                    return (
-                      <Link
-                        key={item.name}
-                        href={href}
-                        className={`shrink-0 rounded-full px-4 py-2.5 font-semibold transition-colors ${
-                          isActive
-                            ? "text-lg bg-white/20 text-white"
-                            : hasAnyActive
-                              ? "text-sm text-white/50 hover:bg-white/10 hover:text-white"
-                              : "text-lg text-white/85 hover:bg-white/10 hover:text-white"
-                        }`}
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        {item.name}
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            <div className={`flex flex-col gap-3 pt-4 border-t ${dividerBorder}`}>
-              <Link href="/anfrage" onClick={() => setMobileMenuOpen(false)}>
-                <Button
-                  className={`w-full rounded-full bg-white/20 text-white border border-white/30 hover:bg-white/30`}
-                >
-                  Projekt anfragen
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
+      </div>
     </header>
   );
 }
