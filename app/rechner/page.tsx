@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -194,24 +194,16 @@ export default function Rechner() {
     }
   };
 
-  // Beim Öffnen der Seite ganz an den Start scrollen (z. B. von Hero „Richtpreis“ oder Reinigung/Facility)
-  useEffect(() => {
-    const scrollToStart = () => {
-      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-    };
-    scrollToStart();
-    const t = setTimeout(scrollToStart, 100);
-    const t2 = setTimeout(scrollToStart, 300);
-    return () => {
-      clearTimeout(t);
-      clearTimeout(t2);
-    };
+  // Vor dem ersten Paint oben positionieren, damit kein Springen sichtbar ist
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
   }, []);
 
-  // Scroll beim Step-Wechsel
+  // Scroll erst nach echtem Step-Wechsel (erster Klick), nicht beim Landen auf der Seite
+  const previousStepRef = useRef(step);
   useEffect(() => {
+    if (previousStepRef.current === step) return;
+    previousStepRef.current = step;
     scrollToCenter();
   }, [step]);
 
