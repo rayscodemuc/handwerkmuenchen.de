@@ -5,8 +5,19 @@ import { WhyUsSection } from "@/components/sections/WhyUsSection";
 import { CTASection } from "@/components/sections/CTASection";
 
 export const metadata: Metadata = {
-  title: "Facility Management, Handwerk & Reinigung in München",
-  description: "Generalunternehmer für Facility Management, Handwerk und Reinigung: ein Vertrag, ein Ansprechpartner. Pro Gewerk ein verantwortlicher Meister – keine Plattform, keine anonymen Subunternehmer.",
+  title: "handwerkmuenchen.de | Ihr Meisterbetrieb für Sanitär, Elektro & Ausbau in München",
+  description: "Professionelle Handwerksleistungen in München. Von der Reparatur bis zur Sanierung – meistergeführt, zuverlässig und direkt. Ihr Partner für Privatkunden, Gewerbe & Hausverwaltungen. Alles aus einer Hand, keine Subunternehmer-Ketten.",
+  keywords: [
+    "Handwerk München",
+    "Meisterbetrieb München",
+    "Sanitär München",
+    "Elektroinstallation München",
+    "Innenausbau München",
+    "Badsanierung München",
+    "Immobilien Instandhaltung München",
+    "Renovierung München",
+    "Handwerkerservice München",
+  ],
   alternates: {
     canonical: "/",
   },

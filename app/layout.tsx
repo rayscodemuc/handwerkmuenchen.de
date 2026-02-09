@@ -26,13 +26,25 @@ const getBaseUrl = (): string => {
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseUrl()),
   title: {
-    default: "Calm Design Foundation",
-    template: "%s | Calm Design Foundation",
+    default: "handwerkmuenchen.de | Ihr Meisterbetrieb für Sanitär, Elektro & Ausbau in München",
+    template: "%s | handwerkmuenchen.de",
   },
-  description: "Generalunternehmer für Facility Management, Handwerk und Reinigung: ein Vertrag, ein Ansprechpartner. Meister pro Gewerk – keine anonymen Subunternehmer.",
+  description:
+    "Professionelle Handwerksleistungen in München. Von der Reparatur bis zur Sanierung – meistergeführt, zuverlässig und direkt. Ihr Partner für Privatkunden, Gewerbe & Hausverwaltungen. Alles aus einer Hand, keine Subunternehmer-Ketten.",
+  keywords: [
+    "Handwerk München",
+    "Meisterbetrieb München",
+    "Sanitär München",
+    "Elektroinstallation München",
+    "Innenausbau München",
+    "Badsanierung München",
+    "Immobilien Instandhaltung München",
+    "Renovierung München",
+    "Handwerkerservice München",
+  ],
   openGraph: {
     type: "website",
-    siteName: "Calm Design Foundation",
+    siteName: "handwerkmuenchen.de",
   },
   robots: {
     index: true,
