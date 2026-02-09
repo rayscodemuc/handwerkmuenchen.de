@@ -194,6 +194,22 @@ export default function Rechner() {
     }
   };
 
+  // Beim Öffnen der Seite ganz an den Start scrollen (z. B. von Hero „Richtpreis“ oder Reinigung/Facility)
+  useEffect(() => {
+    const scrollToStart = () => {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
+    scrollToStart();
+    const t = setTimeout(scrollToStart, 100);
+    const t2 = setTimeout(scrollToStart, 300);
+    return () => {
+      clearTimeout(t);
+      clearTimeout(t2);
+    };
+  }, []);
+
   // Scroll beim Step-Wechsel
   useEffect(() => {
     scrollToCenter();

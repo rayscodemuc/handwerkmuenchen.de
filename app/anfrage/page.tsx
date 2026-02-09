@@ -146,7 +146,7 @@ function AnfrageInner() {
                 transparent und auf Ihre Bedürfnisse zugeschnitten.
               </p>
               <div className="mt-6 flex justify-center">
-                <BadgeRow items={HERO_PROOF_STRIP} theme="dark" />
+                <BadgeRow items={HERO_PROOF_STRIP} theme="dark" equalWidthMobile />
               </div>
             </div>
           </div>
