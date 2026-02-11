@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
-import dynamic from "next/dynamic";
 import { ContactForm } from "@/components/ContactForm";
+import { EinsatzgebietMapLoader } from "@/components/EinsatzgebietMapLoader";
 import { Phone, Mail, MapPin } from "lucide-react";
-
-const EinsatzgebietMap = dynamic(() => import("@/components/EinsatzgebietMap").then(m => m.EinsatzgebietMap), { ssr: false });
 import Link from "next/link";
 import { BUSINESS } from "@/lib/business";
 import { BadgeRow } from "@/components/BadgeRow";
@@ -121,7 +119,7 @@ export default function Kontakt() {
 
         {/* Einsatzgebiet-Karte: München-Zentrum, 30-km-Radius, Info-Text */}
         <section className="bg-background pt-4 pb-10 sm:pt-6 sm:pb-14 lg:pt-8 lg:pb-20">
-          <EinsatzgebietMap />
+          <EinsatzgebietMapLoader />
         </section>
     </>
   );
