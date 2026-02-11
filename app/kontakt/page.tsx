@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 import { ContactForm } from "@/components/ContactForm";
-import { EinsatzgebietMap } from "@/components/EinsatzgebietMap";
 import { Phone, Mail, MapPin } from "lucide-react";
+
+const EinsatzgebietMap = dynamic(() => import("@/components/EinsatzgebietMap").then(m => m.EinsatzgebietMap), { ssr: false });
 import Link from "next/link";
 import { BUSINESS } from "@/lib/business";
 import { BadgeRow } from "@/components/BadgeRow";
