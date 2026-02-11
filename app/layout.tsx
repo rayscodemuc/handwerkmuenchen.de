@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
+import { ConditionalHeader } from "@/components/layout/ConditionalHeader";
+import { ConditionalFooter } from "@/components/layout/ConditionalFooter";
 import { ThemeLayout } from "@/components/ThemeLayout";
 import { ThemeMain } from "@/components/ThemeMain";
 import { GewerkHoverProvider } from "@/components/providers/GewerkHoverContext";
@@ -78,11 +78,11 @@ export default function RootLayout({
               <div className="flex min-h-screen flex-col">
                 <GewerkHoverProvider>
                   <ThemeLayout>
-                    <Header />
+                    <ConditionalHeader />
                     <ThemeMain>{children}</ThemeMain>
                   </ThemeLayout>
                 </GewerkHoverProvider>
-                <Footer />
+                <ConditionalFooter />
               </div>
               <CookieConsent />
               <Toaster />

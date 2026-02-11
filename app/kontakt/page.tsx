@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ContactForm } from "@/components/ContactForm";
-import { GermanyMap } from "@/components/GermanyMap";
+import { EinsatzgebietMap } from "@/components/EinsatzgebietMap";
 import { Phone, Mail, MapPin } from "lucide-react";
 import Link from "next/link";
 import { BUSINESS } from "@/lib/business";
@@ -117,6 +117,10 @@ export default function Kontakt() {
           </div>
         </section>
 
+        {/* Einsatzgebiet-Karte: München-Zentrum, 30-km-Radius, Info-Text */}
+        <section className="bg-background pt-4 pb-10 sm:pt-6 sm:pb-14 lg:pt-8 lg:pb-20">
+          <EinsatzgebietMap />
+        </section>
     </>
   );
 }
