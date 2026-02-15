@@ -209,3 +209,13 @@ export interface CalculatorFormFields {
   is_monthly_price: boolean;
   additional_message?: string;
 }
+
+export interface PartnerFormFields {
+  company_name: string;
+  contact_person: string;
+  customer_email: string;
+  customer_phone: string;
+  service_category: string;
+  region: string;
+  message?: string;
+}
