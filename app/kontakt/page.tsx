@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ContactForm } from "@/components/ContactForm";
-import { GermanyMap } from "@/components/GermanyMap";
+import { EinsatzgebietMapLoader } from "@/components/EinsatzgebietMapLoader";
 import { Phone, Mail, MapPin } from "lucide-react";
 import Link from "next/link";
 import { BUSINESS } from "@/lib/business";
@@ -71,8 +71,6 @@ export default function Kontakt() {
               {/* Contact Form with dynamic dropdowns */}
               <ContactForm 
                 pageName="Kontaktseite"
-                title="Nachricht senden"
-                subtitle="Wählen Sie Ihren Standort und Ihr Anliegen – wir leiten Sie an den richtigen Ansprechpartner weiter."
                 accent="brand"
                 className="p-4 sm:p-6 lg:p-10"
               />
@@ -117,6 +115,10 @@ export default function Kontakt() {
           </div>
         </section>
 
+        {/* Einsatzgebiet-Karte: München-Zentrum, 30-km-Radius, Info-Text */}
+        <section className="bg-background pt-4 pb-10 sm:pt-6 sm:pb-14 lg:pt-8 lg:pb-20">
+          <EinsatzgebietMapLoader />
+        </section>
     </>
   );
 }

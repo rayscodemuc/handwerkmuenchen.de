@@ -1,14 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
-import { supabase } from "@/lib/supabase"; 
-import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Send, CheckCircle2, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useUniversalSubmit } from "@/hooks/useUniversalSubmit";
+import { DEFAULT_COMPANY_ID } from "@/src/config/businessConfig";
 
 export const locationOptions = [
   { value: "muenchen", label: "München" },
@@ -22,115 +23,6 @@ export const serviceOptions = [
   { value: "facility", label: "Facility" },
   { value: "komplett", label: "Komplettpaket / Mehrere Leistungen" },
 ];
-
-export const useContactForm = ({ pageName, presetLocation, presetService }: any = {}) => {
-  const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [errors, setErrors] = useState<any>({});
-
-  const [formData, setFormData] = useState({
-    customer_first_name: "",
-    customer_last_name: "",
-    customer_email: "",
-    customer_phone: "",
-    message: "",
-    city: presetLocation || "muenchen",
-    service_type: presetService || ""
-  });
-
-  const handleChange = (name: string, value: string) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
-    if (errors[name]) setErrors((prev: any) => ({ ...prev, [name]: null }));
-  };
-
-  const resetForm = () => {
-    setFormData({
-      customer_first_name: "",
-      customer_last_name: "",
-      customer_email: "",
-      customer_phone: "",
-      message: "",
-      city: presetLocation || "muenchen",
-      service_type: ""
-    });
-    setIsSuccess(false);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e?.preventDefault();
-    setIsSubmitting(true);
-    setErrors({});
-
-    // Validierung
-    const newErrors: any = {};
-    if (!formData.customer_first_name) newErrors.customer_first_name = "Vorname ist erforderlich";
-    if (!formData.customer_last_name) newErrors.customer_last_name = "Nachname ist erforderlich";
-    if (!formData.customer_email) newErrors.customer_email = "E-Mail ist erforderlich";
-    if (!formData.message) newErrors.message = "Nachricht ist erforderlich";
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      setIsSubmitting(false);
-      return;
-    }
-
-    try {
-      const sourceUrl = typeof window !== "undefined" ? window.location.href : "";
-      const { error } = await supabase
-        .from('leads')
-        .insert([{ 
-          customer_name: `${formData.customer_first_name} ${formData.customer_last_name}`.trim(),
-          email: formData.customer_email, 
-          phone: formData.customer_phone, 
-          message: formData.message,
-          service_type: formData.service_type || 'Kontaktanfrage',
-          city: formData.city || 'Nicht angegeben',
-          form_id: pageName || 'contact_form',
-          page_url: typeof window !== "undefined" ? window.location.pathname : "",
-          source_url: sourceUrl
-        }]);
-
-      if (error) throw error;
-
-      setIsSuccess(true);
-      toast({ title: "Erfolg!", description: "Ihre Nachricht wurde gesendet." });
-    } catch (error: any) {
-      toast({ variant: "destructive", title: "Fehler", description: error.message });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const getSuccessMessage = () => {
-    const locationLabel = locationOptions.find(l => l.value === formData.city)?.label;
-    const serviceLabel = serviceOptions.find(s => s.value === formData.service_type)?.label;
-    
-    if (locationLabel && serviceLabel) {
-      return `Vielen Dank! Ihr Ansprechpartner für ${serviceLabel} in ${locationLabel} wird sich in Kürze bei Ihnen melden.`;
-    }
-    if (locationLabel) {
-      return `Vielen Dank! Ihr Ansprechpartner in ${locationLabel} wird sich in Kürze bei Ihnen melden.`;
-    }
-    if (serviceLabel) {
-      return `Vielen Dank! Ihr Ansprechpartner für ${serviceLabel} wird sich in Kürze bei Ihnen melden.`;
-    }
-    return "Vielen Dank! Wir werden uns in Kürze bei Ihnen melden.";
-  };
-
-  return { 
-    formData,
-    errors,
-    isSubmitting,
-    isSuccess,
-    handleChange,
-    handleSubmit,
-    resetForm,
-    getSuccessMessage,
-    showLocationDropdown: false,
-    showServiceDropdown: true
-  };
-};
 
 interface ContactFormProps {
   className?: string;
@@ -153,26 +45,114 @@ export function ContactForm({
   accent,
   showTitle = true,
   title = "Nachricht senden",
-  subtitle = "Füllen Sie das Formular aus und wir melden uns schnellstmöglich.",
+  subtitle = "Wählen Sie Ihren Standort und Ihr Anliegen – wir leiten Sie an den richtigen Ansprechpartner weiter.",
 }: ContactFormProps) {
-  const {
-    formData,
-    errors,
-    isSubmitting,
-    isSuccess,
-    handleChange,
-    handleSubmit,
-    resetForm,
-    getSuccessMessage,
-    showLocationDropdown,
-    showServiceDropdown,
-  } = useContactForm({ pageName, presetLocation, presetService });
+  const { submit, loading, success, reset } = useUniversalSubmit();
+
+  const [formData, setFormData] = useState({
+    customer_first_name: "",
+    customer_last_name: "",
+    customer_email: "",
+    customer_phone: "",
+    message: "",
+    city: presetLocation || "muenchen",
+    service_type: presetService || "",
+  });
+
+  const [errors, setErrors] = useState<any>({});
+
+  const showLocationDropdown = false;
+  const showServiceDropdown = true;
+
+  const handleChange = (name: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors((prev: any) => ({ ...prev, [name]: null }));
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      customer_first_name: "",
+      customer_last_name: "",
+      customer_email: "",
+      customer_phone: "",
+      message: "",
+      city: presetLocation || "muenchen",
+      service_type: "",
+    });
+    setErrors({});
+    reset();
+  };
+
+  const getSuccessMessage = () => {
+    const locationLabel = locationOptions.find((l) => l.value === formData.city)?.label;
+    const serviceLabel = serviceOptions.find((s) => s.value === formData.service_type)?.label;
+
+    if (locationLabel && serviceLabel) {
+      return `Vielen Dank! Ihr Ansprechpartner für ${serviceLabel} in ${locationLabel} wird sich in Kürze bei Ihnen melden.`;
+    }
+    if (locationLabel) {
+      return `Vielen Dank! Ihr Ansprechpartner in ${locationLabel} wird sich in Kürze bei Ihnen melden.`;
+    }
+    if (serviceLabel) {
+      return `Vielen Dank! Ihr Ansprechpartner für ${serviceLabel} wird sich in Kürze bei Ihnen melden.`;
+    }
+    return "Vielen Dank! Wir werden uns in Kürze bei Ihnen melden.";
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrors({});
+
+    const newErrors: any = {};
+    if (!formData.customer_first_name) newErrors.customer_first_name = "Vorname ist erforderlich";
+    if (!formData.customer_last_name) newErrors.customer_last_name = "Nachname ist erforderlich";
+    if (!formData.customer_email) newErrors.customer_email = "E-Mail ist erforderlich";
+    if (!formData.message) newErrors.message = "Nachricht ist erforderlich";
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    const customer_name = `${formData.customer_first_name} ${formData.customer_last_name}`.trim();
+    const locationLabel =
+      formData.city?.trim()
+        ? locationOptions.find((l) => l.value === formData.city)?.label || formData.city
+        : "Keine Adresse angegeben";
+
+    const payload = {
+      customer_name,
+      email: formData.customer_email,
+      phone: formData.customer_phone || undefined,
+      // subject bleibt optional – könnte z.B. aus service_type generiert werden
+      message: formData.message,
+      city: locationLabel,
+      service_type: formData.service_type || undefined,
+      pageName: pageName || "Kontaktseite",
+    };
+
+    const result = await submit(payload, DEFAULT_COMPANY_ID);
+    if (result.success) {
+      // Formular-Inhalte leeren; Erfolgscard nutzt Hook-Status
+      setFormData({
+        customer_first_name: "",
+        customer_last_name: "",
+        customer_email: "",
+        customer_phone: "",
+        message: "",
+        city: presetLocation || "muenchen",
+        service_type: "",
+      });
+    }
+  };
 
   const isDark = variant === "dark";
   const isBrand = accent === "brand";
 
   // Success State
-  if (isSuccess) {
+  if (success) {
     return (
       <div className={cn("rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-10", isDark ? "bg-primary-foreground/10" : "bg-card", className)}>
         <div className="flex flex-col items-center text-center py-6 sm:py-8">
@@ -383,7 +363,7 @@ export function ContactForm({
 
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={loading}
           className={cn(
             "group relative flex h-14 w-full items-center justify-center gap-3 overflow-hidden rounded-full text-base font-semibold transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed",
             isDark
@@ -393,7 +373,7 @@ export function ContactForm({
                 : "bg-primary text-primary-foreground hover:bg-foreground hover:text-background",
           )}
         >
-          {isSubmitting ? (
+          {loading ? (
             <span className="flex items-center gap-3">
               <span className="h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent" />
               Wird gesendet...
