@@ -2,7 +2,7 @@
 
 import { Phone, Mail, MapPin } from "lucide-react";
 import Link from "next/link";
-import { LogoPlaceholder } from "@/components/LogoPlaceholder";
+import { Logo } from "@/components/Logo";
 import { BUSINESS } from "@/lib/business";
 
 const footerLinks = {
@@ -32,7 +32,7 @@ export function Footer() {
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-5 lg:gap-8">
           {/* Logo & Contact Info */}
           <div className="md:col-span-2 lg:col-span-2">
-            <LogoPlaceholder variant="footer" className="h-12 px-4 py-2 text-lg" />
+            <Logo variant="footer" height={48} className="shrink-0" />
             <p className="mt-5 max-w-sm text-muted-foreground leading-relaxed text-sm">
               Meistergewerke in München – unter einem Dach koordiniert, Reinigung &amp; Facility als Fachbetrieb.
             </p>
@@ -62,7 +62,7 @@ export function Footer() {
 
           {/* Link-Spalten: Leistungen, Unternehmen, Rechtliches */}
           <div>
-            <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground">
+            <h3 className="text-sm font-semibold uppercase tracking-widest text-[#3E505B]">
               Leistungen
             </h3>
             <ul className="mt-4 space-y-3">
@@ -81,7 +81,7 @@ export function Footer() {
 
           {/* Unternehmen */}
           <div>
-            <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground">
+            <h3 className="text-sm font-semibold uppercase tracking-widest text-[#3E505B]">
               Unternehmen
             </h3>
             <ul className="mt-4 space-y-3">
@@ -100,7 +100,7 @@ export function Footer() {
 
           {/* Rechtliches */}
           <div>
-            <h3 className="text-sm font-semibold uppercase tracking-widest text-foreground">
+            <h3 className="text-sm font-semibold uppercase tracking-widest text-[#3E505B]">
               Rechtliches
             </h3>
             <ul className="mt-4 space-y-3">
@@ -128,7 +128,7 @@ export function Footer() {
         </p>
 
         {/* Überschrift über der Unterschrift / Copyright-Zeile */}
-        <h3 className="mt-10 text-sm font-semibold uppercase tracking-widest text-foreground">
+        <h3 className="mt-10 text-sm font-semibold uppercase tracking-widest text-[#3E505B]">
           Handwerk &amp; Gebäudeservice in München
         </h3>
 

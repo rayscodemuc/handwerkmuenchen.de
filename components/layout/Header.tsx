@@ -5,7 +5,7 @@ import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LogoPlaceholder } from "@/components/LogoPlaceholder";
+import { Logo } from "@/components/Logo";
 import { useGewerkHover, getGewerkHoverKey } from "@/components/providers/GewerkHoverContext";
 import { NAV_GEWERKE } from "@/lib/leistungen/config";
 import { MobileNav } from "@/components/nav/MobileNav";
@@ -99,11 +99,12 @@ export function Header() {
             isScrolled ? "h-16" : "h-24"
           }`}
         >
-          {/* Logo – führt auf / (Link liegt in LogoPlaceholder, kein doppeltes <a>) */}
+          {/* Logo – führt auf / */}
           <div className="flex shrink-0">
-            <LogoPlaceholder
+            <Logo
               variant="header"
-              className={`text-base transition-transform duration-300 ${isScrolled ? "scale-[0.95]" : "scale-100"}`}
+              height={isScrolled ? 36 : 44}
+              className={`transition-transform duration-300 ${isScrolled ? "scale-[0.95]" : "scale-100"}`}
             />
           </div>
 
