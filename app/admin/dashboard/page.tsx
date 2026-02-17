@@ -2,10 +2,11 @@
 
 import React, { useEffect, useRef, useState, startTransition, useMemo, useCallback } from "react";
 import Link from "next/link";
-import { Phone, Paintbrush, SprayCan, Building, Zap, Droplets, Hourglass, CheckCircle, X, ChevronLeft, ChevronRight, GripVertical, Trash2, MessageSquare, Send, Sun, Moon } from "lucide-react";
+import { Phone, Paintbrush, SprayCan, Building, Zap, Droplets, Hourglass, CheckCircle, X, ChevronLeft, ChevronRight, GripVertical, Trash2, MessageSquare, Send, Sun, Moon, CalendarIcon, Plus, FileText } from "lucide-react";
 import { format, add, setHours, setMinutes, startOfWeek as startOfWeekDf } from "date-fns";
 import { de } from "date-fns/locale";
 import { DndContext, DragOverlay, useDraggable, useDroppable, closestCorners, pointerWithin, rectIntersection, MeasuringStrategy, PointerSensor, useSensor, useSensors, type DragEndEvent, type DragStartEvent, type DragOverEvent, type CollisionDetection } from "@dnd-kit/core";
+import { snapCenterToCursor } from "@dnd-kit/modifiers";
 import { SortableContext, verticalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { supabase } from "@/lib/supabase";
@@ -18,7 +19,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BUSINESS_COLUMNS, DEFAULT_COMPANY_ID, STATUS } from "@/src/config/businessConfig";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { BUSINESS_COLUMNS, DEFAULT_COMPANY_ID, STATUS, TERMIN_TYP } from "@/src/config/businessConfig";
+
+const MINUTE_15_OPTIONS = ["00", "15", "30", "45"] as const;
 
 type HistorieEintrag = { date: string; text: string };
 type Kommentar = { id: string; text: string; author: string; timestamp: string };
@@ -43,6 +48,8 @@ type Ticket = {
   image_urls: string[] | null;
   termin_start: string | null;
   termin_ende: string | null;
+  /** Termin-Typ: Besichtigung oder Ausführung (für Kalender-Darstellung). */
+  termin_typ: string | null;
   historie: HistorieEintrag[] | null;
   /** Positionswert für Trello-Style-Reihenfolge innerhalb einer Spalte. */
   position: number | null;
@@ -170,11 +177,29 @@ const kanbanCollisionDetection: CollisionDetection = (args) => {
     return [];
   }
 
-  // Cursor NICHT in einer Spalte → Kalender-Slots
+  // Cursor NICHT in einer Spalte → Kalender-Slots: Slot exakt unter dem Cursor (nicht nach „nächstem“ zum gezogenen Element)
   const slotContainers = droppableContainers.filter((c) => String(c.id).startsWith("slot-"));
-  if (slotContainers.length > 0) {
-    const slotHits = closestCorners({ ...args, droppableContainers: slotContainers });
-    if (slotHits.length > 0) return [slotHits[0]];
+  if (slotContainers.length > 0 && pointerCoordinates) {
+    const px = pointerCoordinates.x;
+    const py = pointerCoordinates.y;
+    for (const slot of slotContainers) {
+      const r = droppableRects.get(slot.id);
+      if (!r || r.width === 0 || r.height === 0) continue;
+      if (px >= r.left && px <= r.right && py >= r.top && py <= r.bottom) {
+        return [{ id: slot.id, data: { droppableContainer: slot, value: 0 } }];
+      }
+    }
+    // Cursor in Kalender-Bereich aber zwischen Zellen: nächsten Slot nach Abstand zum Cursor-Mittelpunkt
+    let closest: { id: string; container: (typeof slotContainers)[0]; dist: number } | null = null;
+    for (const slot of slotContainers) {
+      const r = droppableRects.get(slot.id);
+      if (!r || r.width === 0 || r.height === 0) continue;
+      const cx = r.left + r.width / 2;
+      const cy = r.top + r.height / 2;
+      const dist = (px - cx) ** 2 + (py - cy) ** 2;
+      if (closest === null || dist < closest.dist) closest = { id: slot.id, container: slot, dist };
+    }
+    if (closest) return [{ id: closest.id, data: { droppableContainer: closest.container, value: 0 } }];
   }
 
   // Fallback
@@ -189,10 +214,10 @@ const MEASURING_CONFIG = {
 /** Droppable-IDs für die 6 Spalten (column-1 … column-6) aus der Business-Config. */
 const COLUMN_IDS = BUSINESS_COLUMNS.map((c) => c.droppableId) as string[];
 
-/** Kalender: 07:00–20:00, 30-Min-Slots. */
+/** Kalender: 07:00–20:00, ganze Stunden. */
 const CALENDAR_HOUR_START = 7;
 const CALENDAR_HOUR_END = 20;
-const SLOT_MINUTES = 30;
+const SLOT_MINUTES = 60;
 const SLOTS_PER_HOUR = 60 / SLOT_MINUTES;
 const TOTAL_SLOTS = (CALENDAR_HOUR_END - CALENDAR_HOUR_START) * SLOTS_PER_HOUR;
 
@@ -276,7 +301,7 @@ function DroppableSlot({
     <div
       ref={setNodeRef}
       style={style}
-      className={`min-h-[24px] border-b border-r ${
+      className={`min-h-[48px] border-b border-r ${
         isLight ? "border-slate-200" : "border-slate-800"
       } ${isOver || isHighlight ? (isLight ? "bg-blue-100" : "bg-blue-500/20") : isLight ? "bg-white" : "bg-slate-900/50"}`}
     >
@@ -305,15 +330,19 @@ function DraggableEventPill({
       ref={setNodeRef}
       type="button"
       onClick={(e) => { e.stopPropagation(); onOpenDetail(); }}
-      className={`cursor-grab active:cursor-grabbing touch-none select-none ${className} ${isDragging ? "opacity-0" : ""}`}
+      className={`cursor-grab active:cursor-grabbing touch-none select-none flex flex-col overflow-visible ${className} ${isDragging ? "opacity-0" : ""}`}
       style={style}
       title={`${ev.title} – ziehen zum Verschieben, klicken zum Bearbeiten`}
       {...listeners}
       {...attributes}
     >
-      {(() => { const Icon = getGewerkIcon(ev.resource?.gewerk ?? null); return Icon ? <Icon className="mb-0.5 h-3 w-3 shrink-0" strokeWidth={2} /> : null; })()}
-      <span className="line-clamp-1">{ev.resource?.ticket_display_id ?? ev.id.slice(0, 8)}</span>
-      <span className="line-clamp-1 block text-[10px] opacity-90">{getTicketDisplayName(ev.resource ?? {} as Ticket)}</span>
+      <div className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-visible px-1.5 py-1 text-left">
+        <div className="flex min-w-0 flex-1 items-center gap-1">
+          {(() => { const Icon = getGewerkIcon(ev.resource?.gewerk ?? null); return Icon ? <Icon className="h-3 w-3 shrink-0" strokeWidth={2} /> : null; })()}
+          <span className="min-w-0 truncate text-[11px] font-medium">{ev.resource?.ticket_display_id ?? ev.id.slice(0, 8)}</span>
+        </div>
+        <span className="min-w-0 truncate text-[10px] leading-tight opacity-90">{getTicketDisplayName(ev.resource ?? {} as Ticket)}</span>
+      </div>
     </button>
   );
 }
@@ -371,6 +400,22 @@ function getAgeInHours(createdAt: string | null): number {
   if (!createdAt) return 0;
   const created = new Date(createdAt).getTime();
   return (Date.now() - created) / (1000 * 60 * 60);
+}
+
+/** Rundet Datum+Zeit (YYYY-MM-DDTHH:mm) auf 15-Minuten-Takt. */
+function roundDateTimeTo15Min(localStr: string): string {
+  if (!localStr || localStr.length < 16) return localStr;
+  const d = new Date(localStr);
+  if (isNaN(d.getTime())) return localStr;
+  const ms = d.getTime();
+  const rounded = Math.round(ms / (15 * 60 * 1000)) * (15 * 60 * 1000);
+  const r = new Date(rounded);
+  const y = r.getFullYear();
+  const m = String(r.getMonth() + 1).padStart(2, "0");
+  const day = String(r.getDate()).padStart(2, "0");
+  const h = String(r.getHours()).padStart(2, "0");
+  const min = String(r.getMinutes()).padStart(2, "0");
+  return `${y}-${m}-${day}T${h}:${min}`;
 }
 
 /** Dringlichkeit nach Alter: nur bei status === 'Anfrage'. 0–12h Standard, 12–24h orange, 24h+ rot. */
@@ -502,6 +547,8 @@ export default function AdminDashboardPage() {
   const [signedImageUrls, setSignedImageUrls] = useState<string[]>([]);
   const listScrollRef = useRef<HTMLDivElement>(null);
   const detailSaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const startMinutesRef = useRef<HTMLDivElement>(null);
+  const endMinutesRef = useRef<HTMLDivElement>(null);
   /** Montag der angezeigten Kalenderwoche (für 2-Spalten-Kalender). */
   const [weekStart, setWeekStart] = useState<Date>(() =>
     startOfWeekDf(new Date(), { weekStartsOn: 1 })
@@ -527,6 +574,19 @@ export default function AdminDashboardPage() {
   } | null>(null);
   const [pendingTerminStart, setPendingTerminStart] = useState("");
   const [pendingTerminEnde, setPendingTerminEnde] = useState("");
+  /** Nach Auswahl im "Was für ein Termin?"-Dialog: Besichtigung oder Ausführung. null = Typ noch nicht gewählt. */
+  const [pendingTerminTyp, setPendingTerminTyp] = useState<"Besichtigung" | "Ausführung" | null>(null);
+
+  /** Spalte 1 Tabs: Eingang (Anfrage) | Angebote (Angebot_erstellt). */
+  const [incomingTab, setIncomingTab] = useState<"Eingang" | "Angebote">("Eingang");
+
+  /** Quote Builder Overlay: Ticket für Angebotsbearbeitung, UI only. */
+  const [quoteBuilderOpen, setQuoteBuilderOpen] = useState(false);
+  const [quoteBuilderTicketId, setQuoteBuilderTicketId] = useState<string | null>(null);
+  /** Zeilen des Angebots (Menge, Text, Preis) – UI only. */
+  const [quoteLines, setQuoteLines] = useState<{ menge: number; text: string; preis: number }[]>([
+    { menge: 1, text: "Beispielposition", preis: 150 },
+  ]);
 
   /** Theme aus localStorage laden (nur Client). */
   useEffect(() => {
@@ -908,16 +968,18 @@ export default function AdminDashboardPage() {
     }
   };
 
-  /** Beim Drop einer Karte auf einen Kalender-Slot: Status auf Eingeteilt setzen, Termin speichern, ggf. ticket_display_id vergeben. */
+  /** Beim Bestätigen eines Kalender-Drops: Status = Termin-Typ (Besichtigung/Ausführung), Termin + termin_typ speichern. */
   const assignTicketToSlot = useCallback(
-    async (ticketId: string, startIso: string, endIso: string) => {
+    async (ticketId: string, startIso: string, endIso: string, terminTyp: "Besichtigung" | "Ausführung") => {
       const ticket = tickets.find((t) => t.id === ticketId);
       if (!ticket) return;
       const needsDisplayId = !ticket.ticket_display_id || String(ticket.ticket_display_id).trim() === "";
-      const updates: { status: string; ticket_display_id?: string; termin_start: string; termin_ende: string } = {
-        status: STATUS.EINGETEILT,
+      const statusByTyp = terminTyp === TERMIN_TYP.BESICHTIGUNG ? STATUS.BESICHTIGUNG : STATUS.AUSFUEHRUNG;
+      const updates: { status: string; ticket_display_id?: string; termin_start: string; termin_ende: string; termin_typ: string } = {
+        status: statusByTyp,
         termin_start: startIso,
         termin_ende: endIso,
+        termin_typ: terminTyp,
       };
       if (needsDisplayId) {
         updates.ticket_display_id = await getNextTicketDisplayId();
@@ -938,7 +1000,7 @@ export default function AdminDashboardPage() {
         setDetailTerminEnde(toDateTimeLocal(endIso));
       }
     },
-[tickets, detailTicket]
+    [tickets, detailTicket?.id]
   );
 
   const BUCKET_TICKET_IMAGES = "ticket-images";
@@ -1067,6 +1129,12 @@ export default function AdminDashboardPage() {
   const colAbgelehntCfg = BUSINESS_COLUMNS.find((c) => c.id === "abgelehnt")!;
   const colArchivCfg = BUSINESS_COLUMNS.find((c) => c.id === "archiv")!;
 
+  /** Status-Werte, die im Kalender (Spalte 2) erscheinen. */
+  const calendarStatuses = useMemo(
+    () => [colCalendarCfg.status, "Ticket", STATUS.BESICHTIGUNG, STATUS.AUSFUEHRUNG],
+    [colCalendarCfg.status]
+  );
+
   /** Spalte 1: Neue Anfragen (ohne Termin). Fallback: ungültiger/unbekannter Status → erste Spalte. */
   const col1Tickets = useMemo(
     () =>
@@ -1074,7 +1142,7 @@ export default function AdminDashboardPage() {
         .filter((t) => {
           const s = (t.status ?? "").trim();
           const hasTermin = (t.termin_start ?? "").trim() !== "";
-          const inCol2 = hasTermin && (s === colCalendarCfg.status || s === "Ticket");
+          const inCol2 = hasTermin && calendarStatuses.includes(s);
           const inCol3 = s === colNachbereitungCfg.status;
           const inCol4 = s === colAbrechnungCfg.status;
           const inCol5 = s === colAbgelehntCfg.status;
@@ -1085,7 +1153,7 @@ export default function AdminDashboardPage() {
         .sort(sortByPositionThenCreatedAt),
     [
       tickets,
-      colCalendarCfg.status,
+      calendarStatuses,
       colNachbereitungCfg.status,
       colAbrechnungCfg.status,
       colAbgelehntCfg.status,
@@ -1093,15 +1161,27 @@ export default function AdminDashboardPage() {
     ]
   );
 
-  /** Spalte 2: Terminplaner – Eingeteilt mit Termin (Kalender). */
+  /** Spalte 1 Tab "Eingang": nur status Anfrage. */
+  const col1EingangTickets = useMemo(
+    () => col1Tickets.filter((t) => (t.status ?? "").trim() === STATUS.ANFRAGE),
+    [col1Tickets]
+  );
+
+  /** Spalte 1 Tab "Angebote": nur status Angebot_erstellt. */
+  const col1AngeboteTickets = useMemo(
+    () => col1Tickets.filter((t) => (t.status ?? "").trim() === STATUS.ANGEBOT_ERSTELLT),
+    [col1Tickets]
+  );
+
+  /** Spalte 2: Terminplaner – Tickets mit Termin (Eingeteilt, Besichtigung, Ausführung). */
   const col2Tickets = useMemo(
     () =>
       tickets.filter((t) => {
         const hasTermin = (t.termin_start ?? "").trim() !== "";
         const s = (t.status ?? "").trim();
-        return hasTermin && (s === colCalendarCfg.status || s === "Ticket");
+        return hasTermin && calendarStatuses.includes(s);
       }),
-    [tickets, colCalendarCfg.status]
+    [tickets, calendarStatuses]
   );
 
   /** Spalte 3: Nachbereitung & Doku (Status aus Business-Config). */
@@ -1351,7 +1431,9 @@ export default function AdminDashboardPage() {
         console.log("[DnD] insertBeforeId:", insertBeforeId ?? "END", "→ position:", newPosition);
         const isCol1 = config.colId === COLUMN_IDS[0] || overId === "column-eingang-mobile" || overId === "column-1-mobile-list";
         if (isCol1) {
-          await moveTicketToColumn(ticketId, STATUS.ANFRAGE, newPosition, { termin_start: null, termin_ende: null });
+          const hasTicketNumber = (ticket.ticket_display_id ?? "").trim() !== "";
+          const newStatus = hasTicketNumber ? STATUS.EINGETEILT : STATUS.ANFRAGE;
+          await moveTicketToColumn(ticketId, newStatus, newPosition, { termin_start: null, termin_ende: null, termin_typ: null });
           if (detailTicket?.id === ticketId) {
             setDetailTerminStart("");
             setDetailTerminEnde("");
@@ -1388,7 +1470,12 @@ export default function AdminDashboardPage() {
         const endIso = newEnd.toISOString();
         console.log("[DnD] Kalender-Event verschieben:", { ticketId, startIso, endIso, status: ticket.status });
         // Falls noch keine ticket_display_id → jetzt vergeben
-        const calUpdates: Record<string, unknown> = { termin_start: startIso, termin_ende: endIso, status: STATUS.EINGETEILT };
+        const calUpdates: Record<string, unknown> = {
+          termin_start: startIso,
+          termin_ende: endIso,
+          status: STATUS.EINGETEILT,
+          termin_typ: ticket.termin_typ ?? null,
+        };
         const needsDisplayId = !ticket.ticket_display_id || String(ticket.ticket_display_id).trim() === "";
         if (needsDisplayId) {
           calUpdates.ticket_display_id = await getNextTicketDisplayId();
@@ -1413,20 +1500,21 @@ export default function AdminDashboardPage() {
           setError(dbErr.message);
         }
       } else {
-        // Ticket aus Spalte → Kalender: Zeitfenster-Dialog öffnen
+        // Ticket aus Spalte → Kalender: Zuerst "Was für ein Termin?" (Typ), dann Zeitfenster-Dialog
         const localStart = format(slotStart, "yyyy-MM-dd'T'HH:mm");
         const localEnd = format(slotEnd, "yyyy-MM-dd'T'HH:mm");
-        setPendingTerminStart(localStart);
-        setPendingTerminEnde(localEnd);
+        setPendingTerminStart(roundDateTimeTo15Min(localStart));
+        setPendingTerminEnde(roundDateTimeTo15Min(localEnd));
+        setPendingTerminTyp(null);
         setPendingSlotDrop({ ticketId, ticket, slotStart, slotEnd, wasNachbereitung });
       }
     },
     [weekStart, assignTicketToSlot, detailTicket?.id, tickets, resolveColumnForOverId, computeNewPosition, moveTicketToColumn]
   );
 
-  /** Bestätigt den Termin aus dem Zeitfenster-Dialog und speichert in DB. */
+  /** Bestätigt den Termin aus dem Zeitfenster-Dialog und speichert in DB (mit termin_typ). */
   const confirmSlotDrop = useCallback(async () => {
-    if (!pendingSlotDrop) return;
+    if (!pendingSlotDrop || !pendingTerminTyp) return;
     const { ticketId, ticket, wasNachbereitung } = pendingSlotDrop;
     const startDate = new Date(pendingTerminStart);
     const endDate = new Date(pendingTerminEnde);
@@ -1446,6 +1534,7 @@ export default function AdminDashboardPage() {
 
     const startIso = startDate.toISOString();
     const endIso = endDate.toISOString();
+    const statusByTyp = pendingTerminTyp === TERMIN_TYP.BESICHTIGUNG ? STATUS.BESICHTIGUNG : STATUS.AUSFUEHRUNG;
 
     if (wasNachbereitung && ticket.termin_start) {
       const prevStart = ticket.termin_start;
@@ -1458,27 +1547,28 @@ export default function AdminDashboardPage() {
       const newHistorie = [...currentHistorie, historieEntry];
       const { error: dbErr } = await supabase
         .from("tickets")
-        .update({ termin_start: startIso, termin_ende: endIso, status: STATUS.EINGETEILT, historie: newHistorie })
+        .update({ termin_start: startIso, termin_ende: endIso, termin_typ: pendingTerminTyp, status: statusByTyp, historie: newHistorie })
         .eq("id", ticketId);
       if (!dbErr) {
         setTickets((prev) =>
           prev.map((t) =>
             t.id === ticketId
-              ? { ...t, termin_start: startIso, termin_ende: endIso, status: STATUS.EINGETEILT, historie: newHistorie }
+              ? { ...t, termin_start: startIso, termin_ende: endIso, termin_typ: pendingTerminTyp, status: statusByTyp, historie: newHistorie }
               : t
           )
         );
         if (detailTicket?.id === ticketId) {
-          setDetailTicket((prev) => (prev ? { ...prev, termin_start: startIso, termin_ende: endIso, status: STATUS.EINGETEILT, historie: newHistorie } : null));
+          setDetailTicket((prev) => (prev ? { ...prev, termin_start: startIso, termin_ende: endIso, termin_typ: pendingTerminTyp, status: statusByTyp, historie: newHistorie } : null));
           setDetailTerminStart(toDateTimeLocal(startIso));
           setDetailTerminEnde(toDateTimeLocal(endIso));
         }
       } else setError(dbErr.message);
     } else {
-      await assignTicketToSlot(ticketId, startIso, endIso);
+      await assignTicketToSlot(ticketId, startIso, endIso, pendingTerminTyp);
     }
     setPendingSlotDrop(null);
-  }, [pendingSlotDrop, pendingTerminStart, pendingTerminEnde, assignTicketToSlot, detailTicket?.id, toDateTimeLocal]);
+    setPendingTerminTyp(null);
+  }, [pendingSlotDrop, pendingTerminTyp, pendingTerminStart, pendingTerminEnde, assignTicketToSlot, detailTicket?.id, toDateTimeLocal]);
 
   const handleDragStart = useCallback((event: DragStartEvent) => {
     setActiveDragId(String(event.active?.id ?? ""));
@@ -1568,15 +1658,16 @@ export default function AdminDashboardPage() {
     }
   }, []);
 
-  /** Pill-Farbe nach Gewerk für Kalender-Events. */
+  /** Pill-Farbe/Border für Kalender-Events: Besichtigung = grau, Ausführung = Gewerk/Blau. */
   const eventPillBg = (t: Ticket | undefined) => {
+    if ((t?.termin_typ ?? "").trim() === TERMIN_TYP.BESICHTIGUNG) return "bg-slate-500/90 border border-slate-400";
     switch (t?.gewerk?.trim()) {
       case "Elektro": return "bg-amber-600/90";
       case "Sanitär": return "bg-blue-600/90";
       case "Ausbau": return "bg-orange-600/90";
       case "Reinigung": return "bg-emerald-600/90";
       case "Facility": return "bg-slate-600/90";
-      default: return "bg-slate-600/90";
+      default: return "bg-blue-600/90";
     }
   };
 
@@ -1610,7 +1701,12 @@ export default function AdminDashboardPage() {
   );
 
   /** Rendert Karten für eine beliebige Ticket-Liste (Spalte 1–6). */
-  const renderTicketCards = (list: Ticket[], emptyLabel: string, colId?: string) => {
+  const renderTicketCards = (
+    list: Ticket[],
+    emptyLabel: string,
+    colId?: string,
+    options?: { isAngeboteTab?: boolean; onOpenQuoteBuilder?: (t: Ticket) => void }
+  ) => {
     if (loading) return <p className="text-sm text-slate-400">Lade Tickets…</p>;
     if (list.length === 0) {
       // Auch in leerer Spalte den Indicator zeigen
@@ -1642,12 +1738,12 @@ export default function AdminDashboardPage() {
           const cardBorderClasses = (() => {
             if (isLightTheme) {
               if (cardType === "PARTNER") {
-                return "border-blue-500/60 bg-white shadow-[0_4px_12px_rgba(37,99,235,0.12)] hover:border-blue-500 hover:bg-blue-50/40";
+                return "border-blue-500/60 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:border-blue-500 hover:bg-blue-50/40";
               }
               if (cardType === "ANFRAGE") {
-                return "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50";
+                return "border-slate-200/80 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:border-slate-300 hover:bg-slate-50/80";
               }
-              return "border-blue-500/50 bg-white hover:border-blue-500 hover:bg-blue-50/40";
+              return "border-blue-500/50 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:border-blue-500 hover:bg-blue-50/40";
             }
             // Dark theme
             if (cardType === "PARTNER") {
@@ -1664,7 +1760,7 @@ export default function AdminDashboardPage() {
                 return "border border-blue-500/60 bg-blue-50 text-blue-700";
               }
               if (cardType === "ANFRAGE") {
-                return "border border-slate-300 bg-slate-100 text-slate-700";
+                return "bg-sky-100 text-sky-800";
               }
               return "border border-blue-500/60 bg-blue-50 text-blue-700";
             }
@@ -1672,7 +1768,7 @@ export default function AdminDashboardPage() {
               return "border border-blue-500/70 bg-blue-500/10 text-blue-300";
             }
             if (cardType === "ANFRAGE") {
-              return "border border-slate-600 bg-slate-800 text-slate-200";
+              return "bg-sky-500/20 text-sky-200";
             }
             return "border border-blue-500/60 bg-blue-500/10 text-blue-200";
           })();
@@ -1686,12 +1782,24 @@ export default function AdminDashboardPage() {
                 tabIndex={0}
                 onClick={() => openDetailModal(ticket)}
                 onKeyDown={(e) => e.key === "Enter" && openDetailModal(ticket)}
-                className={`cursor-pointer rounded-lg border p-3 text-sm transition-colors ${cardBorderClasses} ${urgencyLevel !== "neutral" ? urgencyHeatmapClasses : ""} ${urgencyLevel === "24h" ? "animate-pulse" : ""}`}
+                className={`cursor-pointer rounded-2xl border p-3 text-sm transition-colors ${cardBorderClasses} ${urgencyLevel !== "neutral" ? urgencyHeatmapClasses : ""} ${urgencyLevel === "24h" ? "animate-pulse" : ""}`}
               >
               <div className="mb-1 flex items-center justify-between gap-2">
-                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide ${labelBadgeClasses}`}>
-                  {cardType === "PARTNER" ? "[PARTNER]" : cardType === "ANFRAGE" ? "[ANFRAGE]" : "[TICKET]"}
-                </span>
+                <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+                  <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-medium ${labelBadgeClasses}`}>
+                    {cardType === "PARTNER" ? "Partner" : cardType === "ANFRAGE" ? "Anfrage" : "Ticket"}
+                  </span>
+                  {(ticket.status ?? "").trim() === STATUS.BESICHTIGUNG && (
+                    <span className={`rounded px-1.5 py-0.5 text-[10px] ${isLightTheme ? "bg-slate-200 text-slate-700" : "bg-slate-700 text-slate-300"}`}>
+                      Besichtigung
+                    </span>
+                  )}
+                  {(ticket.status ?? "").trim() === STATUS.AUSFUEHRUNG && (
+                    <span className={`rounded px-1.5 py-0.5 text-[10px] ${isLightTheme ? "bg-blue-100 text-blue-800" : "bg-blue-500/20 text-blue-200"}`}>
+                      Ausführung
+                    </span>
+                  )}
+                </div>
                 <span className={`shrink-0 text-xs tabular-nums ${isLightTheme ? "text-slate-500" : "text-slate-400"}`}>
                   {(ticket.status ?? "").trim() === STATUS.ANFRAGE ? "–" : (ticket.ticket_display_id ?? "–")}
                 </span>
@@ -1760,7 +1868,7 @@ export default function AdminDashboardPage() {
                     type="button"
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleConvertToTicket(ticket); }}
                     disabled={isConverting}
-                    className="flex min-w-0 flex-[3] items-center justify-center gap-1.5 rounded-md bg-blue-600 px-2.5 py-1.5 text-xs font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+                    className="flex min-w-0 flex-[3] items-center justify-center gap-1.5 rounded-full bg-blue-600 px-3 py-2 text-xs font-medium text-white transition-all hover:opacity-90 disabled:opacity-50"
                   >
                     <CheckCircle className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
                     <span className="whitespace-nowrap">{isConverting ? "Wird umgewandelt…" : "In Ticket umwandeln"}</span>
@@ -1768,11 +1876,53 @@ export default function AdminDashboardPage() {
                   <button
                     type="button"
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); openRejectionModal(ticket); }}
-                    className="flex min-w-0 flex-[2] items-center justify-center gap-1.5 rounded-md bg-red-600 px-2.5 py-1.5 text-xs font-medium text-white transition-colors hover:bg-red-700"
+                    className="flex min-w-0 flex-[2] items-center justify-center gap-1.5 rounded-full bg-red-600/90 px-3 py-2 text-xs font-medium text-white transition-all hover:opacity-90"
                   >
                     <X className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
                     Ablehnen
                   </button>
+                </div>
+              )}
+              {options?.isAngeboteTab && (
+                <div
+                  className={`mt-3 flex w-full flex-col gap-2 border-t pt-2 ${
+                    isLightTheme ? "border-slate-200" : "border-slate-700"
+                  }`}
+                >
+                  {options.onOpenQuoteBuilder && (
+                    <button
+                      type="button"
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); options.onOpenQuoteBuilder?.(ticket); }}
+                      className={`inline-flex w-full items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-medium transition-all hover:opacity-90 ${
+                        isLightTheme
+                          ? "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                          : "bg-slate-800/80 text-slate-300 hover:bg-slate-700"
+                      }`}
+                    >
+                      <FileText className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
+                      Angebot bearbeiten
+                    </button>
+                  )}
+                  <div className="flex w-full gap-2">
+                    <button
+                      type="button"
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); /* Angenommen – UI only */ }}
+                      className="flex flex-1 items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-xs font-medium transition-all hover:opacity-90"
+                      style={isLightTheme ? { backgroundColor: "#bbf7d0", color: "#166534" } : { backgroundColor: "rgba(34,197,94,0.2)", color: "#86efac" }}
+                    >
+                      <CheckCircle className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
+                      Angenommen
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); /* Abgelehnt – UI only */ }}
+                      className="flex flex-1 items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-xs font-medium transition-all hover:opacity-90"
+                      style={isLightTheme ? { backgroundColor: "#fecaca", color: "#991b1b" } : { backgroundColor: "rgba(239,68,68,0.2)", color: "#fca5a5" }}
+                    >
+                      <X className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
+                      Abgelehnt
+                    </button>
+                  </div>
                 </div>
               )}
             </SortableTicketCard>
@@ -1789,8 +1939,8 @@ export default function AdminDashboardPage() {
   const renderWeekCalendar = () => (
     <>
       <div className="mb-3 flex items-center justify-between gap-2">
-        <h2 className={`text-xs font-semibold uppercase tracking-[0.18em] ${
-          isLightTheme ? "text-slate-600" : "text-slate-400"
+        <h2 className={`text-xs font-medium uppercase tracking-wider ${
+          isLightTheme ? "text-slate-500" : "text-slate-500"
         }`}>
           Terminplaner
         </h2>
@@ -1798,7 +1948,7 @@ export default function AdminDashboardPage() {
           <button
             type="button"
             onClick={() => setWeekStart((prev) => add(prev, { weeks: -1 }))}
-            className={`rounded p-1.5 transition-colors ${
+            className={`rounded-full p-2 transition-all hover:opacity-90 ${
               isLightTheme
                 ? "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
                 : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
@@ -1817,7 +1967,7 @@ export default function AdminDashboardPage() {
           <button
             type="button"
             onClick={() => setWeekStart((prev) => add(prev, { weeks: 1 }))}
-            className={`rounded p-1.5 transition-colors ${
+            className={`rounded-full p-2 transition-all hover:opacity-90 ${
               isLightTheme
                 ? "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
                 : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
@@ -1829,17 +1979,17 @@ export default function AdminDashboardPage() {
         </div>
       </div>
       <p className="mb-2 text-[11px] text-slate-500">
-        24h-Anzeige 07:00–20:00. Karte links in eine Zelle ziehen → Termin + Status „Ticket“.
+        Ganze Stunden 07:00–20:00. Karte links in eine Zelle ziehen → Termin + Status „Ticket“.
       </p>
       <div
-        className={`rounded-lg border overflow-auto ${
-          isLightTheme ? "border-slate-200 bg-white" : "border-slate-800 bg-[#1e293b]"
+        className={`overflow-auto rounded-2xl border ${
+          isLightTheme ? "border-slate-200/80 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)]" : "border-slate-800 bg-[#1e293b]"
         }`}
         style={{
           display: "grid",
           gridTemplateColumns: "56px repeat(7, 1fr)",
-          gridTemplateRows: `32px repeat(${TOTAL_SLOTS}, 24px)`,
-          minHeight: "400px",
+          gridTemplateRows: `36px repeat(${TOTAL_SLOTS}, 48px)`,
+          minHeight: "680px",
         }}
       >
         <div
@@ -1903,11 +2053,13 @@ export default function AdminDashboardPage() {
                 gridColumn: dayIndex + 2,
                 gridRow: `${slotIndex + 2} / span ${span}`,
                 zIndex: 1,
-                minHeight: "22px",
+                minHeight: "44px",
               }}
-              className={`mx-0.5 rounded-lg px-1.5 py-0.5 text-left text-[11px] font-medium text-white shadow ${
-                eventPillBg(ev.resource)
-              } hover:opacity-90`}
+              className={`mx-0.5 rounded-lg border px-0 py-0 text-left text-[11px] font-medium shadow hover:opacity-90 ${
+                (ev.resource?.termin_typ ?? "").trim() === TERMIN_TYP.BESICHTIGUNG
+                  ? "bg-slate-500/90 border-slate-400 text-white"
+                  : `text-white ${eventPillBg(ev.resource)} border-blue-400/50`
+              }`}
               onOpenDetail={() => {
                 const t = tickets.find((x) => x.id === ev.id);
                 if (t) openDetailModal(t);
@@ -1961,10 +2113,10 @@ export default function AdminDashboardPage() {
       const idle =
         config.color === "amber" || config.color === "emerald" || config.color === "red"
           ? isLightTheme
-            ? "border-slate-200 bg-white"
+            ? "border-slate-200/80 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
             : "border-slate-800 bg-slate-900/60"
           : isLightTheme
-            ? "border-slate-200 bg-white"
+            ? "border-slate-200/80 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
             : "border-slate-800 bg-slate-900/60";
 
       return isOver || isManualOver ? active : idle;
@@ -1974,10 +2126,10 @@ export default function AdminDashboardPage() {
       <section
         ref={setNodeRef}
         data-col-droppable={config.droppableId}
-        className={`flex flex-col overflow-hidden rounded-xl border p-4 transition-colors ${sectionColorClasses}`}
+        className={`flex flex-col overflow-hidden rounded-2xl border p-4 transition-colors ${sectionColorClasses}`}
       >
         <div className="mb-2 flex shrink-0 items-center justify-between gap-2">
-          <h2 className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+          <h2 className="text-xs font-medium uppercase tracking-wider text-slate-500">
             {config.title}
           </h2>
           <span
@@ -2016,14 +2168,14 @@ export default function AdminDashboardPage() {
     >
       <div
         className={`sticky top-0 z-10 flex items-center justify-between gap-4 border-b px-4 py-3 backdrop-blur sm:px-6 lg:px-8 ${
-          isLightTheme ? "border-slate-200 bg-white/95" : "border-slate-800 bg-slate-950/95"
+          isLightTheme ? "border-slate-200/80 bg-white/95 shadow-[0_1px_0_0_rgba(0,0,0,0.04)]" : "border-slate-800 bg-slate-950/95"
         }`}
       >
         <Link
           href="/"
-          className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold no-underline transition-colors ${
+          className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium no-underline transition-all hover:opacity-90 ${
             isLightTheme
-              ? "border-slate-300 bg-white text-slate-900 hover:border-slate-400 hover:bg-slate-50"
+              ? "border-slate-200 bg-white text-slate-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:border-slate-300"
               : "border-slate-600 bg-slate-900/80 text-slate-100 hover:border-slate-500 hover:bg-slate-800/80"
           }`}
           aria-label="Zur Startseite"
@@ -2035,9 +2187,9 @@ export default function AdminDashboardPage() {
             type="button"
             onClick={createDummyTicket}
             disabled={inserting}
-            className={`rounded-lg border px-3 py-2 text-sm font-medium transition-colors disabled:opacity-50 ${
+            className={`rounded-full border px-4 py-2 text-sm font-medium transition-all hover:opacity-90 disabled:opacity-50 ${
               isLightTheme
-                ? "border-slate-300 bg-white text-slate-800 hover:border-slate-400 hover:bg-slate-50"
+                ? "border-slate-200 bg-white text-slate-800 shadow-sm hover:border-slate-300 hover:bg-slate-50"
                 : "border-slate-600 bg-slate-800 text-slate-200 hover:border-slate-500 hover:bg-slate-700"
             }`}
           >
@@ -2047,9 +2199,9 @@ export default function AdminDashboardPage() {
             type="button"
             onClick={createAusbauDummyTicket}
             disabled={insertingAusbau}
-            className={`rounded-lg border px-3 py-2 text-sm font-medium transition-colors disabled:opacity-50 ${
+            className={`rounded-full border px-4 py-2 text-sm font-medium transition-all hover:opacity-90 disabled:opacity-50 ${
               isLightTheme
-                ? "border-orange-400/70 bg-orange-50 text-orange-700 hover:border-orange-500 hover:bg-orange-100"
+                ? "border-orange-200 bg-orange-50/80 text-orange-700 shadow-sm hover:bg-orange-100"
                 : "border-orange-500/60 bg-orange-500/20 text-orange-200 hover:border-orange-400 hover:bg-orange-500/30"
             }`}
           >
@@ -2058,9 +2210,9 @@ export default function AdminDashboardPage() {
           <button
             type="button"
             onClick={toggleDashboardTheme}
-            className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors ${
+            className={`inline-flex items-center gap-1 rounded-full border px-3 py-2 text-xs font-medium transition-all hover:opacity-90 ${
               isLightTheme
-                ? "border-slate-300 bg-white text-slate-800 hover:border-slate-400 hover:bg-slate-50"
+                ? "border-slate-200 bg-white text-slate-700 shadow-sm hover:border-slate-300"
                 : "border-slate-600 bg-slate-900/80 text-slate-100 hover:border-slate-500 hover:bg-slate-800/80"
             }`}
           >
@@ -2108,13 +2260,54 @@ export default function AdminDashboardPage() {
               <TabsContent value="list" className="mt-0">
                 <section
                   ref={setCol1MobileListRef}
-                  className={`flex flex-col rounded-xl border p-4 transition-colors ${
+                  className={`flex flex-col rounded-2xl border p-4 transition-colors ${
                     isOverCol1MobileList ? "border-blue-500 bg-slate-800/80 ring-2 ring-blue-500/50" : "border-slate-800 bg-slate-900/70"
                   }`}
                 >
+                  {/* Segmented Control: Eingang | Angebote (Mobile) */}
+                  <div className="mb-3 flex shrink-0 rounded-xl bg-slate-800/60 p-1">
+                    <button
+                      type="button"
+                      onClick={() => setIncomingTab("Eingang")}
+                      className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+                        incomingTab === "Eingang"
+                          ? "bg-slate-700 text-slate-100 shadow-sm"
+                          : "text-slate-400 hover:text-slate-200"
+                      }`}
+                    >
+                      Eingang ({col1EingangTickets.length})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIncomingTab("Angebote")}
+                      className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+                        incomingTab === "Angebote"
+                          ? "bg-slate-700 text-slate-100 shadow-sm"
+                          : "text-slate-400 hover:text-slate-200"
+                      }`}
+                    >
+                      Angebote ({col1AngeboteTickets.length})
+                    </button>
+                  </div>
                   <div ref={listScrollRef} tabIndex={-1} className="max-h-[60vh] space-y-3 overflow-y-auto pr-1">
-                    <SortableContext items={col1Tickets.map(t => `ticket-${t.id}`)} strategy={verticalListSortingStrategy}>
-                      {renderTicketCards(col1Tickets, "Keine Anfragen.", "column-1")}
+                    <SortableContext
+                      items={(incomingTab === "Eingang" ? col1EingangTickets : col1AngeboteTickets).map((t) => `ticket-${t.id}`)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      {renderTicketCards(
+                        incomingTab === "Eingang" ? col1EingangTickets : col1AngeboteTickets,
+                        incomingTab === "Eingang" ? "Keine Anfragen." : "Keine Angebote.",
+                        "column-1",
+                        incomingTab === "Angebote"
+                          ? {
+                              isAngeboteTab: true,
+                              onOpenQuoteBuilder: (t) => {
+                                setQuoteBuilderTicketId(t.id);
+                                setQuoteBuilderOpen(true);
+                              },
+                            }
+                          : undefined
+                      )}
                     </SortableContext>
                   </div>
                 </section>
@@ -2142,18 +2335,18 @@ export default function AdminDashboardPage() {
               <aside
                 ref={setCol1Ref}
                 data-col-droppable="column-1"
-                className={`flex w-[28%] min-w-0 flex-col overflow-hidden rounded-xl border p-4 shadow-sm backdrop-blur transition-colors ${
+                className={`flex w-[28%] min-w-0 flex-col overflow-hidden rounded-2xl border p-4 backdrop-blur transition-colors ${
                   isOverCol1 || manualOverCol === "column-1"
                     ? isLightTheme
-                      ? "border-blue-500 bg-blue-50 ring-2 ring-blue-500/40"
+                      ? "border-blue-500 bg-blue-50 ring-2 ring-blue-500/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
                       : "border-blue-500 bg-slate-800/80 ring-2 ring-blue-500/50"
                     : isLightTheme
-                      ? "border-slate-200 bg-white"
+                      ? "border-slate-200/80 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
                       : "border-slate-800 bg-slate-900/70"
                 }`}
               >
                 <div className="mb-2 flex shrink-0 items-center justify-between gap-2">
-                  <h2 className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  <h2 className="text-xs font-medium uppercase tracking-wider text-slate-500">
                     1. Neue Anfragen
                   </h2>
                   <span className={`rounded-full px-2 py-0.5 text-xs ${
@@ -2161,6 +2354,43 @@ export default function AdminDashboardPage() {
                   }`}>
                     {loading ? "…" : col1Tickets.length}
                   </span>
+                </div>
+                {/* Segmented Control (Apple-Style): Eingang | Angebote */}
+                <div
+                  className={`mb-3 flex shrink-0 rounded-xl p-1 ${
+                    isLightTheme ? "bg-slate-100/80" : "bg-slate-800/60"
+                  }`}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setIncomingTab("Eingang")}
+                    className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+                      incomingTab === "Eingang"
+                        ? isLightTheme
+                          ? "bg-white text-slate-900 shadow-sm"
+                          : "bg-slate-700 text-slate-100 shadow-sm"
+                        : isLightTheme
+                          ? "text-slate-600 hover:text-slate-900"
+                          : "text-slate-400 hover:text-slate-200"
+                    }`}
+                  >
+                    Eingang ({col1EingangTickets.length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIncomingTab("Angebote")}
+                    className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+                      incomingTab === "Angebote"
+                        ? isLightTheme
+                          ? "bg-white text-slate-900 shadow-sm"
+                          : "bg-slate-700 text-slate-100 shadow-sm"
+                        : isLightTheme
+                          ? "text-slate-600 hover:text-slate-900"
+                          : "text-slate-400 hover:text-slate-200"
+                    }`}
+                  >
+                    Angebote ({col1AngeboteTickets.length})
+                  </button>
                 </div>
                 <div className={`mb-2 h-px w-full shrink-0 ${isLightTheme ? "bg-slate-200" : "bg-slate-800"}`} />
                 <p className={`mb-2 shrink-0 text-[11px] ${isLightTheme ? "text-slate-500" : "text-slate-500"}`}>
@@ -2171,15 +2401,31 @@ export default function AdminDashboardPage() {
                   tabIndex={-1}
                   className="min-w-0 flex-1 cursor-default space-y-3 overflow-y-auto pr-1 outline-none"
                 >
-                  <SortableContext items={col1Tickets.map(t => `ticket-${t.id}`)} strategy={verticalListSortingStrategy}>
-                    {renderTicketCards(col1Tickets, "Keine Anfragen.", "column-1")}
+                  <SortableContext
+                    items={(incomingTab === "Eingang" ? col1EingangTickets : col1AngeboteTickets).map((t) => `ticket-${t.id}`)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    {renderTicketCards(
+                      incomingTab === "Eingang" ? col1EingangTickets : col1AngeboteTickets,
+                      incomingTab === "Eingang" ? "Keine Anfragen." : "Keine Angebote.",
+                      "column-1",
+                      incomingTab === "Angebote"
+                        ? {
+                            isAngeboteTab: true,
+                            onOpenQuoteBuilder: (t) => {
+                              setQuoteBuilderTicketId(t.id);
+                              setQuoteBuilderOpen(true);
+                            },
+                          }
+                        : undefined
+                    )}
                   </SortableContext>
                 </div>
               </aside>
               {/* Spalte 2: Terminplaner (Kalender) – gleiche Höhe */}
               <section
-                className={`flex-1 min-w-0 flex flex-col rounded-xl border p-4 h-full overflow-hidden transition-colors ${
-                  isLightTheme ? "border-slate-200 bg-white" : "border-slate-800 bg-slate-900/40"
+                className={`flex-1 min-w-0 flex flex-col rounded-2xl border p-4 h-full overflow-hidden transition-colors ${
+                  isLightTheme ? "border-slate-200/80 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)]" : "border-slate-800 bg-slate-900/40"
                 }`}
               >
                 {renderWeekCalendar()}
@@ -2194,14 +2440,21 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
-          <DragOverlay dropAnimation={null}>
+          <DragOverlay dropAnimation={null} modifiers={[snapCenterToCursor]}>
             {activeDragId?.startsWith("event-") ? (() => {
               const ticketId = activeDragId.replace(/^event-/, "");
               const ev = calendarEvents.find((e) => e.id === ticketId);
               if (!ev) return null;
+              const span = getSlotSpan(ev.start, ev.end);
+              const overlayHeight = Math.max(44, 48 * span - 4);
               return (
                 <div
-                  className={`pointer-events-none cursor-grabbing rounded-lg px-2 py-1 text-left text-[11px] font-medium text-white shadow-lg ${eventPillBg(ev.resource)} min-w-[100px]`}
+                  className={`pointer-events-none cursor-grabbing opacity-70 mx-0.5 rounded-lg border px-1.5 py-0.5 text-left text-[11px] font-medium text-white shadow-lg flex flex-col justify-center min-w-[100px] ${
+                    (ev.resource?.termin_typ ?? "").trim() === TERMIN_TYP.BESICHTIGUNG
+                      ? "bg-slate-500/90 border-slate-400"
+                      : `${eventPillBg(ev.resource)} border-blue-400/50`
+                  }`}
+                  style={{ minHeight: `${overlayHeight}px` }}
                 >
                   <div className="flex items-center gap-1">
                     {(() => { const Icon = getGewerkIcon(ev.resource?.gewerk ?? null); return Icon ? <Icon className="h-3 w-3 shrink-0" strokeWidth={2} /> : null; })()}
@@ -2215,7 +2468,7 @@ export default function AdminDashboardPage() {
               const ticket = tickets.find((t) => t.id === ticketId);
               if (!ticket) return null;
               return (
-                <div className="pointer-events-none cursor-grabbing rounded-lg border border-blue-500/70 bg-slate-900 px-3 py-2 shadow-lg min-w-[140px]">
+                <div className="pointer-events-none cursor-grabbing opacity-70 rounded-lg border border-blue-500/70 bg-slate-900 px-3 py-2 shadow-lg min-w-[140px]">
                   <div className="text-[10px] text-blue-300">TICKET</div>
                   <div className="text-sm font-medium text-slate-100">{getTicketDisplayName(ticket)}</div>
                   {ticket.ticket_display_id && <div className="text-xs text-slate-400">{ticket.ticket_display_id}</div>}
@@ -2226,11 +2479,71 @@ export default function AdminDashboardPage() {
         </DndContext>
       </div>
 
-      {/* ─── Zeitfenster-Dialog: Termin festlegen beim Drop auf Kalender ─── */}
-      <Dialog open={!!pendingSlotDrop} onOpenChange={(open) => { if (!open) setPendingSlotDrop(null); }}>
-        <DialogContent className="border-slate-700 bg-slate-900 text-slate-100 sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Termin festlegen</DialogTitle>
+      {/* ─── Schritt 1: Was für ein Termin? (Apple-Style Glassmorphism) ─── */}
+      <Dialog
+        open={!!pendingSlotDrop && pendingTerminTyp === null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPendingSlotDrop(null);
+            setPendingTerminTyp(null);
+          }
+        }}
+      >
+        <DialogContent className="rounded-3xl border border-slate-700/80 bg-slate-900/90 p-6 shadow-2xl backdrop-blur-xl sm:max-w-sm">
+          <DialogHeader className="space-y-1">
+            <DialogTitle className="text-lg font-semibold tracking-tight text-slate-50">
+              Was für ein Termin?
+            </DialogTitle>
+            <DialogDescription className="text-slate-400">
+              {pendingSlotDrop?.ticket && (
+                <span className="font-medium text-slate-200">{getTicketDisplayName(pendingSlotDrop.ticket)}</span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => setPendingTerminTyp(TERMIN_TYP.BESICHTIGUNG)}
+              className="rounded-2xl border border-slate-600/80 bg-slate-800/80 px-4 py-3.5 text-left text-sm font-medium text-slate-100 transition-colors hover:bg-slate-700/80 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+            >
+              Besichtigung
+            </button>
+            <button
+              type="button"
+              onClick={() => setPendingTerminTyp(TERMIN_TYP.AUSFUEHRUNG)}
+              className="rounded-2xl border border-slate-600/80 bg-slate-800/80 px-4 py-3.5 text-left text-sm font-medium text-slate-100 transition-colors hover:bg-slate-700/80 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+            >
+              Ausführung
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setPendingSlotDrop(null);
+                setPendingTerminTyp(null);
+              }}
+              className="mt-1 text-sm text-slate-500 hover:text-slate-300"
+            >
+              Abbrechen
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ─── Schritt 2: Zeitfenster-Dialog (Termin festlegen, Apple-Style) ─── */}
+      <Dialog
+        open={!!pendingSlotDrop && pendingTerminTyp !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPendingSlotDrop(null);
+            setPendingTerminTyp(null);
+          }
+        }}
+      >
+        <DialogContent className="rounded-3xl border-slate-700/80 bg-slate-900/95 text-slate-100 shadow-2xl backdrop-blur-xl sm:max-w-md">
+          <DialogHeader className="space-y-1.5">
+            <DialogTitle className="text-xl font-semibold tracking-tight text-slate-50">
+              Termin festlegen {pendingTerminTyp ? `· ${pendingTerminTyp}` : ""}
+            </DialogTitle>
             <DialogDescription className="text-slate-400">
               {pendingSlotDrop?.ticket && (
                 <>
@@ -2242,30 +2555,240 @@ export default function AdminDashboardPage() {
               )}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div>
-              <label htmlFor="pending-start" className="mb-1 block text-xs font-medium text-slate-400">
-                Beginn
-              </label>
-              <input
-                id="pending-start"
-                type="datetime-local"
-                value={pendingTerminStart}
-                onChange={(e) => setPendingTerminStart(e.target.value)}
-                className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-100 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              />
+          <div className="space-y-5 py-1 font-sans">
+            {/* Beginn: Apple-Style Popover (Kalender + Zeit, keine Browser-Defaults) */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-slate-400">Beginn</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className="flex w-full items-center justify-between gap-2 rounded-2xl border border-slate-600/80 bg-slate-800/80 px-4 py-3.5 text-left text-sm text-slate-100 outline-none transition-colors hover:bg-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/25"
+                  >
+                    <span className={pendingTerminStart ? "text-slate-100" : "text-slate-500"}>
+                      {pendingTerminStart
+                        ? format(new Date(pendingTerminStart), "EEE, dd.MM.yyyy · HH:mm", { locale: de })
+                        : "Datum und Uhrzeit wählen"}
+                    </span>
+                    <CalendarIcon className="h-4 w-4 shrink-0 text-slate-500" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent
+                  align="start"
+                  sideOffset={8}
+                  className="min-h-[450px] w-auto min-w-[300px] rounded-2xl border border-slate-800/50 bg-slate-900/90 p-0 pb-6 font-sans text-slate-100 shadow-2xl backdrop-blur-xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2"
+                >
+                  {(() => {
+                    const d = pendingTerminStart ? new Date(pendingTerminStart) : new Date();
+                    const startHour = d.getHours();
+                    const startMin = Math.min(45, Math.round(d.getMinutes() / 15) * 15);
+                    const build = (date: Date, h: number, min: number) =>
+                      `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}T${String(h).padStart(2, "0")}:${String(min).padStart(2, "0")}`;
+                    return (
+                      <div className="flex min-h-[450px] flex-col font-sans">
+                        {/* OBEN: Kalender */}
+                        <div className="shrink-0 px-5 pt-5">
+                          <Calendar
+                            mode="single"
+                            selected={d}
+                            onSelect={(date) => date && setPendingTerminStart(build(date, startHour, startMin))}
+                            locale={de}
+                            classNames={{
+                              months: "flex flex-col space-y-4",
+                              month: "space-y-4",
+                              caption: "flex justify-center pt-1 relative items-center",
+                              caption_label: "text-sm font-medium text-slate-200",
+                              nav: "space-x-1 flex items-center",
+                              nav_button: "inline-flex h-8 w-8 items-center justify-center rounded-xl border border-slate-800/50 bg-slate-800/50 text-slate-300 hover:bg-slate-700/80 hover:text-slate-100",
+                              nav_button_previous: "absolute left-1",
+                              nav_button_next: "absolute right-1",
+                              table: "w-full border-collapse space-y-1",
+                              head_row: "flex",
+                              head_cell: "text-slate-500 rounded-md w-9 font-normal text-xs",
+                              row: "flex w-full mt-2",
+                              cell: "h-9 w-9 text-center text-sm p-0 relative",
+                              day: "h-9 w-9 p-0 font-normal rounded-xl text-slate-200 hover:bg-slate-700/80 aria-selected:opacity-100",
+                              day_selected: "bg-blue-600 text-white hover:bg-blue-600 hover:text-white",
+                              day_today: "bg-slate-700/60 text-slate-100",
+                              day_outside: "text-slate-600 opacity-50",
+                              day_disabled: "text-slate-600 opacity-30",
+                              day_hidden: "invisible",
+                            }}
+                          />
+                        </div>
+                        {/* MITTE: Trennlinie */}
+                        <div className="shrink-0 border-t border-slate-800/50" />
+                        {/* UNTEN: Zeitwahl — Links Heute, Mitte Stunden-Dropdown, Rechts Minuten-Pillen */}
+                        <div className="flex shrink-0 flex-wrap items-center justify-between gap-4 px-5 pt-4">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const today = new Date();
+                              setPendingTerminStart(build(today, startHour, startMin));
+                            }}
+                            className="text-sm font-medium text-slate-500 underline-offset-2 hover:text-blue-400 hover:underline"
+                          >
+                            Heute
+                          </button>
+                          <select
+                            value={String(startHour).padStart(2, "0")}
+                            onChange={(e) => {
+                              setPendingTerminStart(build(d, parseInt(e.target.value, 10), startMin));
+                              setTimeout(() => startMinutesRef.current?.focus({ preventScroll: true }), 0);
+                            }}
+                            className="rounded-xl border border-slate-800/50 bg-slate-800/50 px-3 py-2 text-center font-medium tabular-nums text-slate-100 outline-none focus:ring-2 focus:ring-blue-500/30"
+                          >
+                            {Array.from({ length: 24 }, (_, i) => (
+                              <option key={i} value={String(i).padStart(2, "0")}>{String(i).padStart(2, "0")} Uhr</option>
+                            ))}
+                          </select>
+                          <div
+                            ref={startMinutesRef}
+                            tabIndex={-1}
+                            className="flex items-center gap-2 focus:outline-none"
+                          >
+                            {MINUTE_15_OPTIONS.map((m) => {
+                              const minVal = parseInt(m, 10);
+                              const isActive = startMin === minVal;
+                              return (
+                                <button
+                                  key={m}
+                                  type="button"
+                                  onClick={() => setPendingTerminStart(build(d, startHour, minVal))}
+                                  className={`rounded-full px-4 py-2.5 text-sm font-medium tabular-nums transition-colors ${
+                                    isActive
+                                      ? "bg-blue-600 text-white"
+                                      : "bg-slate-800/50 text-slate-400 hover:bg-slate-700/60 hover:text-slate-200"
+                                  }`}
+                                >
+                                  {m}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </PopoverContent>
+              </Popover>
             </div>
-            <div>
-              <label htmlFor="pending-end" className="mb-1 block text-xs font-medium text-slate-400">
-                Ende
-              </label>
-              <input
-                id="pending-end"
-                type="datetime-local"
-                value={pendingTerminEnde}
-                onChange={(e) => setPendingTerminEnde(e.target.value)}
-                className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-100 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              />
+            {/* Ende: Apple-Style Popover */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-slate-400">Ende</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className="flex w-full items-center justify-between gap-2 rounded-2xl border border-slate-600/80 bg-slate-800/80 px-4 py-3.5 text-left text-sm text-slate-100 outline-none transition-colors hover:bg-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/25"
+                  >
+                    <span className={pendingTerminEnde ? "text-slate-100" : "text-slate-500"}>
+                      {pendingTerminEnde
+                        ? format(new Date(pendingTerminEnde), "EEE, dd.MM.yyyy · HH:mm", { locale: de })
+                        : "Datum und Uhrzeit wählen"}
+                    </span>
+                    <CalendarIcon className="h-4 w-4 shrink-0 text-slate-500" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent
+                  align="start"
+                  sideOffset={8}
+                  className="min-h-[450px] w-auto min-w-[300px] rounded-2xl border border-slate-800/50 bg-slate-900/90 p-0 pb-6 font-sans text-slate-100 shadow-2xl backdrop-blur-xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2"
+                >
+                  {(() => {
+                    const d = pendingTerminEnde ? new Date(pendingTerminEnde) : add(new Date(), { hours: 1 });
+                    const endHour = d.getHours();
+                    const endMin = Math.min(45, Math.round(d.getMinutes() / 15) * 15);
+                    const build = (date: Date, h: number, min: number) =>
+                      `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}T${String(h).padStart(2, "0")}:${String(min).padStart(2, "0")}`;
+                    return (
+                      <div className="flex min-h-[450px] flex-col font-sans">
+                        {/* OBEN: Kalender */}
+                        <div className="shrink-0 px-5 pt-5">
+                          <Calendar
+                            mode="single"
+                            selected={d}
+                            onSelect={(date) => date && setPendingTerminEnde(build(date, endHour, endMin))}
+                            locale={de}
+                            classNames={{
+                              months: "flex flex-col space-y-4",
+                              month: "space-y-4",
+                              caption: "flex justify-center pt-1 relative items-center",
+                              caption_label: "text-sm font-medium text-slate-200",
+                              nav: "space-x-1 flex items-center",
+                              nav_button: "inline-flex h-8 w-8 items-center justify-center rounded-xl border border-slate-800/50 bg-slate-800/50 text-slate-300 hover:bg-slate-700/80 hover:text-slate-100",
+                              nav_button_previous: "absolute left-1",
+                              nav_button_next: "absolute right-1",
+                              table: "w-full border-collapse space-y-1",
+                              head_row: "flex",
+                              head_cell: "text-slate-500 rounded-md w-9 font-normal text-xs",
+                              row: "flex w-full mt-2",
+                              cell: "h-9 w-9 text-center text-sm p-0 relative",
+                              day: "h-9 w-9 p-0 font-normal rounded-xl text-slate-200 hover:bg-slate-700/80 aria-selected:opacity-100",
+                              day_selected: "bg-blue-600 text-white hover:bg-blue-600 hover:text-white",
+                              day_today: "bg-slate-700/60 text-slate-100",
+                              day_outside: "text-slate-600 opacity-50",
+                              day_disabled: "text-slate-600 opacity-30",
+                              day_hidden: "invisible",
+                            }}
+                          />
+                        </div>
+                        {/* MITTE: Trennlinie */}
+                        <div className="shrink-0 border-t border-slate-800/50" />
+                        {/* UNTEN: Zeitwahl — Links Heute, Mitte Stunden-Dropdown, Rechts Minuten-Pillen */}
+                        <div className="flex shrink-0 flex-wrap items-center justify-between gap-4 px-5 pt-4">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const today = new Date();
+                              setPendingTerminEnde(build(today, endHour, endMin));
+                            }}
+                            className="text-sm font-medium text-slate-500 underline-offset-2 hover:text-blue-400 hover:underline"
+                          >
+                            Heute
+                          </button>
+                          <select
+                            value={String(endHour).padStart(2, "0")}
+                            onChange={(e) => {
+                              setPendingTerminEnde(build(d, parseInt(e.target.value, 10), endMin));
+                              setTimeout(() => endMinutesRef.current?.focus({ preventScroll: true }), 0);
+                            }}
+                            className="rounded-xl border border-slate-800/50 bg-slate-800/50 px-3 py-2 text-center font-medium tabular-nums text-slate-100 outline-none focus:ring-2 focus:ring-blue-500/30"
+                          >
+                            {Array.from({ length: 24 }, (_, i) => (
+                              <option key={i} value={String(i).padStart(2, "0")}>{String(i).padStart(2, "0")} Uhr</option>
+                            ))}
+                          </select>
+                          <div
+                            ref={endMinutesRef}
+                            tabIndex={-1}
+                            className="flex items-center gap-2 focus:outline-none"
+                          >
+                            {MINUTE_15_OPTIONS.map((m) => {
+                              const minVal = parseInt(m, 10);
+                              const isActive = endMin === minVal;
+                              return (
+                                <button
+                                  key={m}
+                                  type="button"
+                                  onClick={() => setPendingTerminEnde(build(d, endHour, minVal))}
+                                  className={`rounded-full px-4 py-2.5 text-sm font-medium tabular-nums transition-colors ${
+                                    isActive
+                                      ? "bg-blue-600 text-white"
+                                      : "bg-slate-800/50 text-slate-400 hover:bg-slate-700/60 hover:text-slate-200"
+                                  }`}
+                                >
+                                  {m}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </PopoverContent>
+              </Popover>
             </div>
             {pendingTerminStart && pendingTerminEnde && (() => {
               const s = new Date(pendingTerminStart);
@@ -2275,26 +2798,26 @@ export default function AdminDashboardPage() {
                 const h = Math.floor(diffMin / 60);
                 const m = diffMin % 60;
                 return (
-                  <p className="text-xs text-slate-500">
-                    Dauer: {h > 0 ? `${h} Std.` : ""} {m > 0 ? `${m} Min.` : ""} ({format(s, "EEE, dd.MM.yyyy", { locale: de })})
+                  <p className="rounded-2xl bg-slate-800/50 px-4 py-2.5 text-xs text-slate-400">
+                    Dauer: {h > 0 ? `${h} Std.` : ""} {m > 0 ? `${m} Min.` : ""} · {format(s, "EEE, dd.MM.yyyy", { locale: de })}
                   </p>
                 );
               }
               return null;
             })()}
           </div>
-          <DialogFooter className="gap-2 sm:gap-0">
+          <DialogFooter className="gap-3 pt-1 sm:gap-2">
             <button
               type="button"
               onClick={() => setPendingSlotDrop(null)}
-              className="rounded-lg border border-slate-600 bg-slate-800 px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-700"
+              className="rounded-2xl border border-slate-600 bg-slate-800/80 px-5 py-2.5 text-sm font-medium text-slate-300 transition-colors hover:bg-slate-700"
             >
               Abbrechen
             </button>
             <button
               type="button"
               onClick={confirmSlotDrop}
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500"
+              className="rounded-2xl bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-blue-600/20 transition-colors hover:bg-blue-500"
             >
               Termin bestätigen
             </button>
@@ -2752,7 +3275,39 @@ export default function AdminDashboardPage() {
                     </>
                   )}
                   {detailTicket != null && (detailTicket.status ?? "").trim() !== STATUS.ANFRAGE && (
-                    <p className="text-xs text-slate-500">Status: {detailTicket?.status ?? "–"}. Keine Anfrage-Aktionen.</p>
+                    <>
+                      {(detailTicket.status ?? "").trim() === STATUS.BESICHTIGUNG || (detailTicket.status ?? "").trim() === STATUS.EINGETEILT ? (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (detailTicket) setTicketStatus(detailTicket.id, STATUS.ANGEBOT_ERSTELLT);
+                          }}
+                          className="w-full rounded-lg bg-amber-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-amber-700 sm:w-full"
+                        >
+                          Angebot versendet
+                        </button>
+                      ) : null}
+                      {(detailTicket.status ?? "").trim() === STATUS.ANGEBOT_ERSTELLT && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (detailTicket) {
+                              setQuoteBuilderTicketId(detailTicket.id);
+                              setQuoteBuilderOpen(true);
+                            }
+                          }}
+                          className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                        >
+                          <FileText className="h-4 w-4" strokeWidth={2} />
+                          Angebot bearbeiten
+                        </button>
+                      )}
+                      <p className="text-xs text-slate-500">Status: {detailTicket?.status ?? "–"}.</p>
+                    </>
                   )}
                 </div>
               </div>
@@ -2784,6 +3339,196 @@ export default function AdminDashboardPage() {
             className="max-h-[90vh] max-w-full rounded-lg object-contain shadow-xl"
             onClick={(e) => e.stopPropagation()}
           />
+        </div>
+      )}
+
+      {/* Quote Builder Overlay – Angebotsbearbeitung (UI only) */}
+      {quoteBuilderOpen && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-md"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Angebot bearbeiten"
+          onClick={() => setQuoteBuilderOpen(false)}
+        >
+          <div
+            className={`flex max-h-[90vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl shadow-2xl ${
+              isLightTheme ? "bg-white" : "bg-slate-900/95"
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex flex-1 flex-col overflow-hidden sm:flex-row">
+              {/* Links: Zeilen bearbeiten */}
+              <div className={`flex flex-1 flex-col gap-4 overflow-y-auto p-6 ${
+                isLightTheme ? "bg-slate-50/50" : "bg-slate-800/30"
+              }`}>
+                <div className="flex items-center justify-between">
+                  <h3 className={`text-lg font-semibold ${isLightTheme ? "text-slate-900" : "text-slate-100"}`}>
+                    Angebot bearbeiten
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => setQuoteBuilderOpen(false)}
+                    className={`rounded-full p-2 transition-colors ${
+                      isLightTheme ? "text-slate-500 hover:bg-slate-200" : "text-slate-400 hover:bg-slate-700"
+                    }`}
+                    aria-label="Schließen"
+                  >
+                    <X className="h-5 w-5" strokeWidth={2} />
+                  </button>
+                </div>
+                <div className="space-y-3">
+                  {quoteLines.map((line, idx) => (
+                    <div
+                      key={idx}
+                      className={`flex flex-wrap items-center gap-2 rounded-xl border p-3 transition-colors ${
+                        isLightTheme
+                          ? "border-slate-200 bg-white shadow-sm"
+                          : "border-slate-700 bg-slate-800/50"
+                      }`}
+                    >
+                      <input
+                        type="number"
+                        min={1}
+                        value={line.menge}
+                        onChange={(e) => {
+                          const next = [...quoteLines];
+                          next[idx] = { ...next[idx], menge: Math.max(1, Number(e.target.value) || 1) };
+                          setQuoteLines(next);
+                        }}
+                        className={`w-16 rounded-lg border px-2 py-1.5 text-sm ${
+                          isLightTheme
+                            ? "border-slate-200 bg-white text-slate-900"
+                            : "border-slate-600 bg-slate-900 text-slate-100"
+                        }`}
+                      />
+                      <input
+                        type="text"
+                        placeholder="Beschreibung"
+                        value={line.text}
+                        onChange={(e) => {
+                          const next = [...quoteLines];
+                          next[idx] = { ...next[idx], text: e.target.value };
+                          setQuoteLines(next);
+                        }}
+                        className={`min-w-[120px] flex-1 rounded-lg border px-3 py-1.5 text-sm ${
+                          isLightTheme
+                            ? "border-slate-200 bg-white text-slate-900 placeholder:text-slate-400"
+                            : "border-slate-600 bg-slate-900 text-slate-100 placeholder:text-slate-500"
+                        }`}
+                      />
+                      <span className="flex items-center gap-1">
+                        <input
+                          type="number"
+                          min={0}
+                          step={0.01}
+                          value={line.preis}
+                          onChange={(e) => {
+                            const next = [...quoteLines];
+                            next[idx] = { ...next[idx], preis: Math.max(0, Number(e.target.value) || 0) };
+                            setQuoteLines(next);
+                          }}
+                          className={`w-24 rounded-lg border px-2 py-1.5 text-sm ${
+                            isLightTheme
+                              ? "border-slate-200 bg-white text-slate-900"
+                              : "border-slate-600 bg-slate-900 text-slate-100"
+                          }`}
+                        />
+                        <span className="text-sm">€</span>
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setQuoteLines((prev) => [...prev, { menge: 1, text: "", preis: 0 }])}
+                  className={`inline-flex w-full items-center justify-center gap-2 rounded-xl border border-dashed px-4 py-3 text-sm font-medium transition-colors ${
+                    isLightTheme
+                      ? "border-slate-300 text-slate-600 hover:border-slate-400 hover:bg-slate-100"
+                      : "border-slate-600 text-slate-400 hover:border-slate-500 hover:bg-slate-800/50"
+                  }`}
+                >
+                  <Plus className="h-4 w-4" strokeWidth={2} />
+                  Zeile hinzufügen
+                </button>
+              </div>
+
+              {/* Rechts: A4-Vorschau (Briefpapier) */}
+              <div
+                className={`flex flex-col items-center justify-start border-t p-6 sm:min-w-[320px] sm:border-l ${
+                  isLightTheme ? "border-slate-200 bg-slate-100/50" : "border-slate-700 bg-slate-800/50"
+                }`}
+              >
+                <p className={`mb-4 text-xs font-medium uppercase tracking-wider ${
+                  isLightTheme ? "text-slate-500" : "text-slate-400"
+                }`}>
+                  Vorschau
+                </p>
+                <div
+                  className={`aspect-[210/297] w-full max-w-[280px] overflow-hidden rounded-xl shadow-lg ${
+                    isLightTheme ? "bg-white" : "bg-slate-900"
+                  }`}
+                  style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.1)" }}
+                >
+                  <div className={`flex h-full flex-col p-6 font-sans text-[10px] ${
+                    isLightTheme ? "text-slate-800" : "text-slate-200"
+                  }`}>
+                    <div className="mb-6 border-b pb-4">
+                      <h4 className="text-xs font-semibold">Angebot</h4>
+                      <p className="mt-1 opacity-70">Kundennummer • Datum</p>
+                    </div>
+                    <table className="w-full flex-1 border-collapse text-[9px]">
+                      <thead>
+                        <tr className={`border-b ${isLightTheme ? "border-slate-200" : "border-slate-700"}`}>
+                          <th className="py-2 text-left font-medium">Menge</th>
+                          <th className="py-2 text-left font-medium">Beschreibung</th>
+                          <th className="py-2 text-right font-medium">Preis</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {quoteLines.map((line, idx) => (
+                          <tr key={idx} className={`border-b ${isLightTheme ? "border-slate-100" : "border-slate-800"}`}>
+                            <td className="py-2">{line.menge}</td>
+                            <td className="py-2">{line.text || "–"}</td>
+                            <td className="py-2 text-right">{line.preis.toFixed(2)} €</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    <div className={`mt-2 border-t pt-2 text-right font-semibold ${
+                      isLightTheme ? "border-slate-200" : "border-slate-700"
+                    }`}>
+                      Gesamt: {quoteLines.reduce((s, l) => s + l.menge * l.preis, 0).toFixed(2)} €
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Unten rechts: Button "Angebot finalisieren" */}
+            <div className={`flex shrink-0 justify-end gap-3 border-t p-4 ${
+              isLightTheme ? "border-slate-200 bg-white" : "border-slate-800 bg-slate-900/80"
+            }`}>
+              <button
+                type="button"
+                onClick={() => setQuoteBuilderOpen(false)}
+                className={`rounded-full px-5 py-2.5 text-sm font-medium transition-colors ${
+                  isLightTheme
+                    ? "text-slate-600 hover:bg-slate-100"
+                    : "text-slate-400 hover:bg-slate-800"
+                }`}
+              >
+                Abbrechen
+              </button>
+              <button
+                type="button"
+                onClick={() => setQuoteBuilderOpen(false)}
+                className="rounded-full bg-blue-600 px-8 py-3 text-sm font-semibold text-white shadow-md transition-all hover:bg-blue-700 hover:shadow-lg"
+              >
+                Angebot finalisieren
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </main>

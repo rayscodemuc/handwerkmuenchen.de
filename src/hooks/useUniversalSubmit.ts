@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 type UniversalFormData = Record<string, unknown>;
 
 type UniversalSubmitOptions = {
-  /** Optional: überschreibt den Status, Standard ist "new" */
+  /** Wird ignoriert – DB erlaubt nur status = 'Anfrage'. */
   status?: string;
 };
 
@@ -17,25 +17,35 @@ export type UniversalSubmitResult<T = unknown> = {
   error?: string;
 };
 
-// Feste Spalten in der tickets-Tabelle, alles andere wandert in additional_data
+// Keys, die wir aus formData in DB-Spalten mappen (engl. + dt.); Rest → additional_data
 const STANDARD_KEYS = new Set([
   "customer_name",
+  "kunde_name",
   "email",
+  "kontakt_email",
   "phone",
+  "kontakt_telefon",
   "status",
   "company_id",
   "subject",
+  "message",
+  "beschreibung",
+  "address",
+  "objekt_adresse",
+  "city",
 ]);
+
+/** Status-Wert, den die DB akzeptiert (Constraint). Andere Werte führen zu 23514. */
+const STATUS_ANFRAGE = "Anfrage";
 
 /**
  * useUniversalSubmit
  *
- * Agnostischer „Postbote“ für die Tabelle `tickets`.
- * - UI definiert beliebige Form-Felder.
- * - Hook trennt Standard-Spalten von dynamischen Feldern.
- * - Standard: customer_name, email, phone, status, company_id, subject.
- * - Rest: wird als JSONB `additional_data` gespeichert.
- * - Explizites Auth/RLS-Handling (401 / permission denied).
+ * „Postbote“ für die Tabelle `tickets` (deutsches Schema).
+ * - Mappt: kunde_name, kontakt_email, kontakt_telefon, objekt_adresse, beschreibung.
+ * - status ist fest 'Anfrage' (DB-Constraint).
+ * - objekt_adresse darf nicht null sein (Fallback: 'Keine Angabe').
+ * - Rest aus formData → additional_data (JSONB).
  */
 export function useUniversalSubmit() {
   const { toast } = useToast();
@@ -68,39 +78,45 @@ export function useUniversalSubmit() {
           throw new Error("company_id fehlt beim Aufruf von useUniversalSubmit.");
         }
 
-        // 2) Standard-Felder per Destructuring extrahieren
-        const {
-          customer_name,
-          email,
-          phone,
-          status,
-          company_id: _ignoredCompanyId, // bewusst ignoriert, wir nutzen effectiveCompanyId
-          subject,
-          ...rest
-        } = formData as {
-          customer_name?: string;
-          email?: string;
-          phone?: string;
-          status?: string;
-          company_id?: string;
-          subject?: string;
-          [key: string]: unknown;
-        };
+        // 2) Werte aus formData (engl. oder dt. Keys) für DB-Spalten
+        const raw = formData as Record<string, unknown>;
+        const kunde_name =
+          (raw["kunde_name"] as string | undefined) ??
+          (raw["customer_name"] as string | undefined) ??
+          null;
+        const kontakt_email =
+          (raw["kontakt_email"] as string | undefined) ??
+          (raw["email"] as string | undefined) ??
+          null;
+        const kontakt_telefon =
+          (raw["kontakt_telefon"] as string | undefined) ??
+          (raw["phone"] as string | undefined) ??
+          null;
+        const beschreibung =
+          (raw["beschreibung"] as string | undefined) ??
+          (raw["message"] as string | undefined) ??
+          null;
+        const objekt_adresse =
+          (raw["objekt_adresse"] as string | undefined)?.trim() ||
+          (raw["address"] as string | undefined)?.trim() ||
+          (raw["city"] as string | undefined)?.trim() ||
+          "Keine Angabe";
 
-        // 3) Alle übrigen Felder → additional_data (JSONB)
-        const additionalEntries = Object.entries(rest).filter(
-          ([key]) => !STANDARD_KEYS.has(key)
+        // 3) Alle Felder, die nicht in DB-Spalten gehen → additional_data (JSONB)
+        const additionalEntries = Object.entries(raw).filter(
+          ([key]) => !STANDARD_KEYS.has(key) && key !== "company_id"
         );
         const additional_data =
           additionalEntries.length > 0 ? Object.fromEntries(additionalEntries) : null;
 
         const row = {
           company_id: effectiveCompanyId,
-          customer_name: customer_name ?? null,
-          email: email ?? null,
-          phone: phone ?? null,
-          status: options?.status ?? status ?? "new",
-          subject: subject ?? null,
+          kunde_name,
+          kontakt_email,
+          kontakt_telefon,
+          objekt_adresse,
+          beschreibung,
+          status: STATUS_ANFRAGE,
           additional_data,
         };
 

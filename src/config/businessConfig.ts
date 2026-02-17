@@ -1,10 +1,19 @@
 export const STATUS = {
   ANFRAGE: "Anfrage",
   EINGETEILT: "Eingeteilt",
+  BESICHTIGUNG: "Besichtigung",
+  ANGEBOT_ERSTELLT: "Angebot_erstellt",
+  AUSFUEHRUNG: "Ausführung",
   NACHBEREITUNG: "Nachbereitung",
   ABRECHNUNG: "Abrechnung",
   ABGELEHNT: "Abgelehnt",
   ARCHIV: "Archiv",
+} as const;
+
+/** Termin-Typen für Kalender (Besichtigung vs Ausführung). */
+export const TERMIN_TYP = {
+  BESICHTIGUNG: "Besichtigung",
+  AUSFUEHRUNG: "Ausführung",
 } as const;
 
 export type StatusValue = (typeof STATUS)[keyof typeof STATUS];
