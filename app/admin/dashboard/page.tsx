@@ -197,7 +197,7 @@ const kanbanCollisionDetection: CollisionDetection = (args) => {
       const cx = r.left + r.width / 2;
       const cy = r.top + r.height / 2;
       const dist = (px - cx) ** 2 + (py - cy) ** 2;
-      if (closest === null || dist < closest.dist) closest = { id: slot.id, container: slot, dist };
+      if (closest === null || dist < closest.dist) closest = { id: String(slot.id), container: slot, dist };
     }
     if (closest) return [{ id: closest.id, data: { droppableContainer: closest.container, value: 0 } }];
   }
