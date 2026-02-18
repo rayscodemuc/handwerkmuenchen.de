@@ -135,7 +135,7 @@ export function Footer() {
         {/* Bottom Section */}
         <div className="mt-4 flex flex-col items-center justify-between gap-4 border-t border-border pt-6 md:flex-row">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Musterfirma GmbH. Alle Rechte vorbehalten.
+            © {new Date().getFullYear()} handwerkmuenchen.de. Alle Rechte vorbehalten.
           </p>
           <p className="text-sm text-muted-foreground">
             Planbar. Dokumentiert. Verlässlich.

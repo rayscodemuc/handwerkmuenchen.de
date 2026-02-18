@@ -14,6 +14,7 @@ import { useUniversalSubmit } from "@/hooks/useUniversalSubmit";
 import { DEFAULT_COMPANY_ID } from "@/src/config/businessConfig";
 import Link from "next/link";
 import { BadgeRow } from "@/components/BadgeRow";
+import { BUSINESS } from "@/lib/business";
 
 const FORM_ID = "inquiry_form";
 
@@ -40,19 +41,19 @@ const contactInfo = [
   {
     icon: Phone,
     title: "Telefon",
-    content: "+49 (0)123 4567890",
-    href: "tel:+491234567890",
+    content: BUSINESS.phoneDisplay || BUSINESS.phone,
+    href: `tel:${BUSINESS.phone}`,
   },
   {
     icon: Mail,
     title: "E-Mail",
-    content: "kontakt@handwerkmuenchen.de",
-    href: "mailto:kontakt@handwerkmuenchen.de",
+    content: BUSINESS.email || "info@handwerkmuenchen.de",
+    href: `mailto:${BUSINESS.email || "info@handwerkmuenchen.de"}`,
   },
   {
     icon: MapPin,
     title: "Adresse",
-    content: "Musterstraße 1, DE-80331 München",
+    content: `${BUSINESS.address?.street || "Friedrichstraße 11"}, DE-${BUSINESS.address?.zip || "80801"} ${BUSINESS.address?.city || "München"}`,
     href: null,
   },
   {

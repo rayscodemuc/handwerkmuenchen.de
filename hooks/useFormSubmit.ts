@@ -105,7 +105,7 @@ function normalizeFormData<T extends object>(
     return {
       ...baseData,
       customer_name: 'Unbekannt',
-      email: 'unknown@handwerkmuenchen.de',
+      email: 'info@handwerkmuenchen.de',
       message: JSON.stringify(formData),
       additional_data: formData as Record<string, any>,
     };

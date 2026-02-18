@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState, startTransition, useMemo, useCallback } from "react";
+import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { Phone, Paintbrush, SprayCan, Building, Zap, Droplets, Hourglass, CheckCircle, X, ChevronLeft, ChevronRight, GripVertical, Trash2, MessageSquare, Send, Sun, Moon, CalendarIcon, Plus, FileText } from "lucide-react";
 import { format, add, setHours, setMinutes, startOfWeek as startOfWeekDf } from "date-fns";
@@ -21,12 +21,21 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import { Logo } from "@/components/Logo";
 import { BUSINESS_COLUMNS, DEFAULT_COMPANY_ID, STATUS, TERMIN_TYP } from "@/src/config/businessConfig";
 
 const MINUTE_15_OPTIONS = ["00", "15", "30", "45"] as const;
 
 type HistorieEintrag = { date: string; text: string };
 type Kommentar = { id: string; text: string; author: string; timestamp: string };
+type TicketHistoryRow = {
+  id?: string;
+  ticket_id?: string;
+  /** Bestätigtes Schema (Bild 12). */
+  aktion?: string | null;
+  details?: { von?: string | null; bis?: string | null } | Record<string, unknown> | null;
+  erstellt_at?: string | null;
+};
 
 type Ticket = {
   id: string;
@@ -38,7 +47,8 @@ type Ticket = {
   kontakt_telefon: string | null;
   objekt_adresse: string | null;
   beschreibung: string | null;
-  gewerk: string | null;
+  /** Mehrere Gewerke (DB: text[]). */
+  gewerk: string[] | null;
   status: string | null;
   ablehnungs_grund: string | null;
   abgelehnt_am: string | null;
@@ -329,8 +339,13 @@ function DraggableEventPill({
     <button
       ref={setNodeRef}
       type="button"
-      onClick={(e) => { e.stopPropagation(); onOpenDetail(); }}
-      className={`cursor-grab active:cursor-grabbing touch-none select-none flex flex-col overflow-visible ${className} ${isDragging ? "opacity-0" : ""}`}
+      onClick={(e) => {
+        e.stopPropagation();
+        onOpenDetail();
+      }}
+      className={`cursor-grab active:cursor-grabbing touch-none select-none flex flex-col overflow-visible ${className} ${
+        isDragging ? "opacity-0" : ""
+      }`}
       style={style}
       title={`${ev.title} – ziehen zum Verschieben, klicken zum Bearbeiten`}
       {...listeners}
@@ -338,10 +353,19 @@ function DraggableEventPill({
     >
       <div className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-visible px-1.5 py-1 text-left">
         <div className="flex min-w-0 flex-1 items-center gap-1">
-          {(() => { const Icon = getGewerkIcon(ev.resource?.gewerk ?? null); return Icon ? <Icon className="h-3 w-3 shrink-0" strokeWidth={2} /> : null; })()}
-          <span className="min-w-0 truncate text-[11px] font-medium">{ev.resource?.ticket_display_id ?? ev.id.slice(0, 8)}</span>
+          {(() => {
+            const gewerkeList = normalizeGewerke((ev.resource as Ticket | undefined)?.gewerk ?? null);
+            const firstGewerk = gewerkeList[0] ?? null;
+            const Icon = getGewerkIcon(firstGewerk);
+            return Icon ? <Icon className="h-3 w-3 shrink-0" strokeWidth={2} /> : null;
+          })()}
+          <span className="min-w-0 truncate text-[11px] font-medium">
+            {ev.resource?.ticket_display_id ?? ev.id.slice(0, 8)}
+          </span>
         </div>
-        <span className="min-w-0 truncate text-[10px] leading-tight opacity-90">{getTicketDisplayName(ev.resource ?? {} as Ticket)}</span>
+        <span className="min-w-0 truncate text-[10px] leading-tight opacity-90">
+          {getTicketDisplayName(ev.resource ?? ({} as Ticket))}
+        </span>
       </div>
     </button>
   );
@@ -360,6 +384,15 @@ const ASSIGNEE_OPTIONS = [
   { value: "max.mustermann", label: "Max Mustermann" },
   { value: "anna.schmidt", label: "Anna Schmidt" },
   { value: "thomas.weber", label: "Thomas Weber" },
+] as const;
+
+/** Verfügbare Gewerke für Multi-Select. */
+const GEWERKE_OPTIONS = [
+  { value: "Elektro", label: "Elektro" },
+  { value: "Sanitär", label: "Sanitär" },
+  { value: "Ausbau", label: "Ausbau" },
+  { value: "Reinigung", label: "Reinigung" },
+  { value: "Facility", label: "Facility" },
 ] as const;
 
 /** Platzhalter: spätere E-Mail-Logik. */
@@ -436,6 +469,46 @@ function formatTicketDate(createdAt: string | null): string {
   return `${datePart}, ${timePart}`;
 }
 
+/** Kurzes Datum+Zeit für Timeline, z. B. "17.02, 10:30". */
+function formatTimelineDateTime(iso: string | null | undefined): string {
+  if (!iso) return "–";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "–";
+  const datePart = d.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit" });
+  const timePart = d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+  return `${datePart}, ${timePart}`;
+}
+
+/** true, wenn termin_ende in der Vergangenheit liegt. */
+function isTerminEndeInPast(ticket: Ticket): boolean {
+  const end = (ticket.termin_ende ?? "").trim();
+  if (!end) return false;
+  const d = new Date(end);
+  if (isNaN(d.getTime())) return false;
+  return d.getTime() < Date.now();
+}
+
+/** true, wenn now() zwischen termin_start und termin_ende liegt. */
+function isTerminOngoing(ticket: Ticket): boolean {
+  const start = (ticket.termin_start ?? "").trim();
+  const end = (ticket.termin_ende ?? "").trim();
+  if (!start || !end) return false;
+  const ds = new Date(start);
+  const de = new Date(end);
+  if (isNaN(ds.getTime()) || isNaN(de.getTime())) return false;
+  const now = Date.now();
+  return ds.getTime() <= now && now <= de.getTime();
+}
+
+/**
+ * Fällige Kalkulation:
+ * Besichtigung ist erst "abgeschlossen", wenn termin_ende überschritten ist.
+ * Solange now() zwischen start und ende liegt, bleibt es im Kalender/Besichtigungs-Modus.
+ */
+function isKalkulationFaellig(ticket: Ticket): boolean {
+  return (ticket.status ?? "").trim() === STATUS.BESICHTIGUNG && isTerminEndeInPast(ticket);
+}
+
 /** Kartentyp für visuelle Hierarchie: PARTNER (Blauer Glow) | ANFRAGE (Grau) | TICKET (Blau). */
 function getCardType(t: Ticket): "PARTNER" | "ANFRAGE" | "TICKET" {
   if (!!t.is_partner) return "PARTNER";
@@ -493,6 +566,20 @@ function getGewerkBadgeClasses(gewerk: string | null, isLight: boolean): string 
   }
 }
 
+/** Normalisiert Gewerk-Werte (String oder Array) in ein bereinigtes String-Array. */
+function normalizeGewerke(value: string[] | string | null | undefined): string[] {
+  if (Array.isArray(value)) {
+    return value
+      .map((g) => (g ?? "").trim())
+      .filter((g) => g.length > 0);
+  }
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed ? [trimmed] : [];
+  }
+  return [];
+}
+
 /** Sortierung innerhalb einer Spalte: zuerst nach position (aufsteigend), dann nach created_at (neuere zuerst). */
 function sortByPositionThenCreatedAt(a: Ticket, b: Ticket): number {
   const posA = typeof a.position === "number" ? a.position : Number.MAX_SAFE_INTEGER;
@@ -525,8 +612,7 @@ export default function AdminDashboardPage() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [inserting, setInserting] = useState(false);
-  const [insertingAusbau, setInsertingAusbau] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const [convertingId, setConvertingId] = useState<string | null>(null);
   const [rejectionTicket, setRejectionTicket] = useState<Ticket | null>(null);
   const [rejectionReason, setRejectionReason] = useState<string>("no_capacity");
@@ -535,11 +621,16 @@ export default function AdminDashboardPage() {
   const [detailTicket, setDetailTicket] = useState<Ticket | null>(null);
   const [detailKommentare, setDetailKommentare] = useState<Kommentar[]>([]);
   const [newKommentarText, setNewKommentarText] = useState("");
+  /** Timeline: Einträge aus ticket_history (zusätzlich zu tickets.historie). */
+  const [detailHistoryRows, setDetailHistoryRows] = useState<TicketHistoryRow[]>([]);
+  const [detailHistoryLoading, setDetailHistoryLoading] = useState(false);
   const [detailAssignedTo, setDetailAssignedTo] = useState("");
   const [detailTerminStart, setDetailTerminStart] = useState("");
   const [detailTerminEnde, setDetailTerminEnde] = useState("");
   const [detailHistorieNewDate, setDetailHistorieNewDate] = useState("");
   const [detailHistorieNewText, setDetailHistorieNewText] = useState("");
+  /** Bearbeitbare Gewerke im Detail-Modal (Array). */
+  const [detailGewerke, setDetailGewerke] = useState<string[]>([]);
   const [detailSaving, setDetailSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
@@ -587,6 +678,18 @@ export default function AdminDashboardPage() {
   const [quoteLines, setQuoteLines] = useState<{ menge: number; text: string; preis: number }[]>([
     { menge: 1, text: "Beispielposition", preis: 150 },
   ]);
+
+  /** Auto-Historisierung: verhindert doppelte Inserts innerhalb einer Session. */
+  const historizedBesichtigungKeysRef = useRef<Set<string>>(new Set());
+  /** Falls ticket_history nicht existiert / Schema abweicht: nicht weiter spammen. */
+  const ticketHistoryDisabledRef = useRef(false);
+  /** Blauer Punkt im Angebote-Tab: Tickets, die Aufmerksamkeit brauchen (Kalkulation fällig). */
+  const [offerAttentionIds, setOfferAttentionIds] = useState<Set<string>>(new Set());
+
+  // Verhindert Hydration-Mismatch (Tabs, Badges, DnD) – UI erst nach Mount rendern
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   /** Theme aus localStorage laden (nur Client). */
   useEffect(() => {
@@ -677,13 +780,19 @@ export default function AdminDashboardPage() {
       return;
     }
     const list = data ?? [];
+    console.log(`✅ Tickets geladen: ${list.length} Tickets`);
     const now = new Date().toISOString();
-    const toMove = list.filter(
-      (t: Ticket) =>
+    const toMove = list.filter((t: Ticket) => {
+      const s = (t.status ?? "").trim();
+      return (
         t.termin_ende &&
         t.termin_ende < now &&
-        ((t.status ?? "").trim() === STATUS.EINGETEILT || (t.status ?? "").trim() === "Ticket")
-    );
+        // Nach Ablauf des Termins in „Nachbereitung & Doku“ verschieben:
+        // Tickets, die im Kalender unter „Ausführung“ laufen (STATUS.AUSFUEHRUNG),
+        // plus die bisherigen Fälle zur Abwärtskompatibilität.
+        (s === STATUS.AUSFUEHRUNG || s === STATUS.EINGETEILT || s === "Ticket")
+      );
+    });
     if (toMove.length > 0) {
       console.log(`[AutoMove] ${toMove.length} Ticket(s) mit abgelaufenem termin_ende → Nachbereitung:`,
         toMove.map(t => ({ id: t.id.slice(0, 8), status: t.status, termin_ende: t.termin_ende })));
@@ -693,9 +802,9 @@ export default function AdminDashboardPage() {
       const updated = list.map((t: Ticket) =>
         toMove.some((m) => m.id === t.id) ? { ...t, status: STATUS.NACHBEREITUNG } : t
       );
-      startTransition(() => setTickets(updated));
+      setTickets(updated);
     } else {
-      startTransition(() => setTickets(list));
+      setTickets(list);
     }
     setLoading(false);
   };
@@ -704,67 +813,132 @@ export default function AdminDashboardPage() {
     loadTickets();
   }, []);
 
-  /** Test-Ticket: Status exakt 'Anfrage' (wie in der DB), historie: [] zwingend. */
-  const createDummyTicket = async () => {
-    setInserting(true);
-    setError(null);
-    const year = new Date().getFullYear();
-    const { data: existing } = await supabase.from("tickets").select("id").limit(1);
-    const count = (existing?.length ?? 0) + Math.floor(Math.random() * 9000) + 1000;
-    const ticketDisplayId = `HM-${year}-${count}`;
-    const isPartner = Math.random() > 0.5;
-    const partnerName = "Muster-Partner GmbH";
-    const kundeName = "Max Mustermann";
-    const { error } = await supabase.from("tickets").insert([
-      {
-        ticket_display_id: ticketDisplayId,
-        is_partner: isPartner,
-        partner_name: isPartner ? partnerName : null,
-        kunde_name: isPartner ? partnerName : kundeName,
-        kontakt_email: "dummy@example.com",
-        objekt_adresse: "Musterstraße 42, 80331 München",
-        beschreibung: "Dummy-Ticket zum Testen des Dashboards. Elektro-Check und Beleuchtung prüfen.",
-        gewerk: "Elektro",
-        status: "Anfrage",
-        historie: [],
-      },
-    ]);
-    if (error) {
-      setError(error.message);
-    } else {
-      await loadTickets();
-    }
-    setInserting(false);
-  };
+  /** Lädt Timeline-Einträge aus ticket_history für das aktuell geöffnete Ticket. */
+  const loadTicketHistoryRows = useCallback(
+    async (ticketId: string) => {
+      if (!ticketId) return;
+      setDetailHistoryLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from("ticket_history")
+          .select("*")
+          .eq("ticket_id", ticketId)
+          .order("erstellt_at", { ascending: false });
+        if (error) {
+          // Nicht hart failen: Timeline ist ein Zusatz.
+          console.warn("[ticket_history] load failed:", error.message);
+          setDetailHistoryRows([]);
+        } else {
+          setDetailHistoryRows((data ?? []) as TicketHistoryRow[]);
+        }
+      } catch (e) {
+        console.warn("[ticket_history] load exception:", e);
+        setDetailHistoryRows([]);
+      } finally {
+        setDetailHistoryLoading(false);
+      }
+    },
+    []
+  );
 
-  /** Test-Ticket Ausbau: Status exakt 'Anfrage', historie: [] zwingend. */
-  const createAusbauDummyTicket = async () => {
-    setInsertingAusbau(true);
-    setError(null);
-    const year = new Date().getFullYear();
-    const { error } = await supabase.from("tickets").insert([
-      {
-        ticket_display_id: null,
-        is_partner: false,
-        partner_name: null,
-        kunde_name: "Thomas Weber",
-        kontakt_email: "thomas.weber@example.com",
-        kontakt_telefon: "+49 151 99887766",
-        objekt_adresse: "Rosenheimer Platz 3, 81667 München",
-        beschreibung:
-          "Wanddurchbruch zwischen Küche und Wohnzimmer geplant. Trockenbauwand muss gestellt und verspachtelt werden.",
-        gewerk: "Ausbau",
-        status: "Anfrage",
-        historie: [],
-      },
-    ]);
-    if (error) {
-      setError(error.message);
-    } else {
-      await loadTickets();
+  /** Detail-Modal geöffnet → Timeline laden. */
+  useEffect(() => {
+    if (!detailTicket?.id) return;
+    loadTicketHistoryRows(detailTicket.id);
+  }, [detailTicket?.id, loadTicketHistoryRows]);
+
+  /**
+   * Automatische Historisierung:
+   * Wenn Besichtigungstermin in die Vergangenheit rückt (Kalkulation fällig),
+   * wird ein Eintrag in ticket_history erzeugt (einmalig pro ticketId+termin_ende).
+   *
+   * Erwartetes Schema in Supabase:
+   * - ticket_history(ticket_id uuid, aktion text, details jsonb, erstellt_at timestamptz default now())
+   */
+  useEffect(() => {
+    if (ticketHistoryDisabledRef.current) return;
+    const candidates = tickets.filter(isKalkulationFaellig);
+    if (candidates.length === 0) return;
+
+    let cancelled = false;
+    const run = async () => {
+      for (const t of candidates) {
+        if (cancelled) return;
+        const key = `${t.id}:${(t.termin_ende ?? "").trim()}`;
+        if (!t.termin_ende || t.termin_ende.trim() === "") continue;
+        if (!t.termin_start || t.termin_start.trim() === "") continue;
+        if (historizedBesichtigungKeysRef.current.has(key)) continue;
+
+        // Best effort: erst prüfen, ob es den Eintrag schon gibt (verhindert Duplikate über Sessions hinweg).
+        try {
+          const { data: existing, error: selErr } = await supabase
+            .from("ticket_history")
+            .select("id")
+            .eq("ticket_id", t.id)
+            .eq("aktion", "Besichtigung abgeschlossen")
+            .contains("details", { von: t.termin_start, bis: t.termin_ende })
+            .limit(1);
+          if (selErr) {
+            // Schema evtl. anders → weiter unten Insert versuchen; falls es knallt, deaktivieren wir.
+            console.warn("[ticket_history] select failed:", selErr.message);
+          } else if ((existing ?? []).length > 0) {
+            historizedBesichtigungKeysRef.current.add(key);
+            continue;
+          }
+
+          const { error: insErr } = await supabase.from("ticket_history").insert([
+            {
+              ticket_id: t.id,
+              aktion: "Besichtigung abgeschlossen",
+              details: { von: t.termin_start, bis: t.termin_ende },
+              erstellt_at: new Date().toISOString(),
+            },
+          ]);
+          if (insErr) {
+            // Wenn Tabelle oder Spalten fehlen: einmal melden und weitere Versuche stoppen (sonst Spam).
+            console.warn("[ticket_history] insert failed:", insErr.message);
+            if (
+              /relation .*ticket_history.* does not exist/i.test(insErr.message) ||
+              /column .* does not exist/i.test(insErr.message)
+            ) {
+              ticketHistoryDisabledRef.current = true;
+              setError((prev) => prev ?? "Hinweis: ticket_history Tabelle/Spalten fehlen – Timeline kann nicht gespeichert werden.");
+              return;
+            }
+            // Sonstige Fehler: nicht endlos spammen, aber Ticket nicht als historized markieren.
+            continue;
+          }
+
+          historizedBesichtigungKeysRef.current.add(key);
+          // Wenn gerade dieses Ticket offen ist → Timeline refresh (best effort)
+          if (detailTicket?.id === t.id) {
+            loadTicketHistoryRows(t.id);
+          }
+        } catch (e) {
+          console.warn("[ticket_history] auto-historize exception:", e);
+        }
+      }
+    };
+
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [tickets, detailTicket?.id, loadTicketHistoryRows]);
+
+  /** Neue fällige Kalkulationen markieren → blauer Punkt im Angebote-Tab. */
+  useEffect(() => {
+    const next = new Set(offerAttentionIds);
+    tickets.forEach((t) => {
+      if (isKalkulationFaellig(t)) {
+        next.add(t.id);
+      }
+    });
+    if (next.size !== offerAttentionIds.size) {
+      setOfferAttentionIds(next);
     }
-    setInsertingAusbau(false);
-  };
+  }, [tickets, offerAttentionIds]);
+
 
   /** Nächste ticket_display_id: höchste HM-YYYY-NNNN Nummer + 1 (pro Jahr). */
   const getNextTicketDisplayId = async (): Promise<string> => {
@@ -836,27 +1010,44 @@ export default function AdminDashboardPage() {
     setDetailTicket(ticket);
     setDetailKommentare(Array.isArray(ticket?.kommentare) ? ticket.kommentare : []);
     setNewKommentarText("");
+    setDetailHistoryRows([]);
     setDetailAssignedTo(ticket?.assigned_to != null ? String(ticket.assigned_to) : "");
     setDetailTerminStart(toDateTimeLocal(ticket?.termin_start ?? null));
     setDetailTerminEnde(toDateTimeLocal(ticket?.termin_ende ?? null));
     setDetailHistorieNewDate(format(new Date(), "yyyy-MM-dd"));
     setDetailHistorieNewText("");
+    // Gewerke: aus gewerk-Array ableiten
+    const gewerkeArray = normalizeGewerke(ticket?.gewerk ?? null);
+    setDetailGewerke(gewerkeArray);
   };
 
   const closeDetailModal = () => {
     if (detailTicket) {
       persistAssignedTo(detailTicket.id, detailAssignedTo);
       persistTermin(detailTicket.id, detailTerminStart || null, detailTerminEnde || null);
+      persistGewerke(detailTicket.id, detailGewerke);
     }
     setDetailTicket(null);
     setDetailKommentare([]);
     setNewKommentarText("");
+    setDetailHistoryRows([]);
     setDetailAssignedTo("");
     setDetailTerminStart("");
     setDetailTerminEnde("");
     setDetailHistorieNewDate("");
     setDetailHistorieNewText("");
+    setDetailGewerke([]);
   };
+
+  /** Markiert ein Ticket als „gesehen“ (blauer Punkt verschwindet). */
+  const markOfferSeen = useCallback((ticketId: string) => {
+    setOfferAttentionIds((prev) => {
+      if (!prev.has(ticketId)) return prev;
+      const next = new Set(prev);
+      next.delete(ticketId);
+      return next;
+    });
+  }, []);
 
   /** Historie-Eintrag manuell hinzufügen (DB + State). */
   const addHistorieEntry = async () => {
@@ -962,6 +1153,27 @@ export default function AdminDashboardPage() {
       );
       if (detailTicket?.id === ticketId) {
         setDetailTicket((prev) => (prev ? { ...prev, termin_start: startIso, termin_ende: endIso } : null));
+      }
+    } else {
+      setError(error.message);
+    }
+  };
+
+  /** Gewerke speichern (Array in gewerk Spalte, DB: text[]). */
+  const persistGewerke = async (ticketId: string, gewerke: string[]) => {
+    const gewerkValue: string[] | null = gewerke.length > 0 ? gewerke : null;
+    const { error } = await supabase
+      .from("tickets")
+      .update({ gewerk: gewerkValue })
+      .eq("id", ticketId);
+    if (!error) {
+      setTickets((prev) =>
+        prev.map((t) =>
+          t.id === ticketId ? { ...t, gewerk: gewerkValue } : t
+        )
+      );
+      if (detailTicket?.id === ticketId) {
+        setDetailTicket((prev) => (prev ? { ...prev, gewerk: gewerkValue } : null));
       }
     } else {
       setError(error.message);
@@ -1142,7 +1354,8 @@ export default function AdminDashboardPage() {
         .filter((t) => {
           const s = (t.status ?? "").trim();
           const hasTermin = (t.termin_start ?? "").trim() !== "";
-          const inCol2 = hasTermin && calendarStatuses.includes(s);
+          // Besichtigung in der Vergangenheit → wird visuell aus dem Kalender in "Angebote" überführt
+          const inCol2 = hasTermin && calendarStatuses.includes(s) && !isKalkulationFaellig(t);
           const inCol3 = s === colNachbereitungCfg.status;
           const inCol4 = s === colAbrechnungCfg.status;
           const inCol5 = s === colAbgelehntCfg.status;
@@ -1161,17 +1374,42 @@ export default function AdminDashboardPage() {
     ]
   );
 
-  /** Spalte 1 Tab "Eingang": nur status Anfrage. */
+  /** Spalte 1 Tab "Eingang": status Anfrage ODER Eingeteilt (ohne Termin). */
   const col1EingangTickets = useMemo(
-    () => col1Tickets.filter((t) => (t.status ?? "").trim() === STATUS.ANFRAGE),
+    () =>
+      col1Tickets.filter(
+        (t) => {
+          const s = (t.status ?? "").trim();
+          const hasTermin = (t.termin_start ?? "").trim() !== "";
+          // Zeige Anfragen und Eingeteilt-Tickets ohne Termin (die noch nicht im Kalender sind)
+          return s === STATUS.ANFRAGE || (s === STATUS.EINGETEILT && !hasTermin);
+        }
+      ),
     [col1Tickets]
   );
 
-  /** Spalte 1 Tab "Angebote": nur status Angebot_erstellt. */
-  const col1AngeboteTickets = useMemo(
-    () => col1Tickets.filter((t) => (t.status ?? "").trim() === STATUS.ANGEBOT_ERSTELLT),
-    [col1Tickets]
-  );
+  /** Spalte 1 Tab "Angebote": status Angebot_erstellt ODER Besichtigung mit abgelaufenem Termin. */
+  const col1AngeboteTickets = useMemo(() => {
+    const filtered = col1Tickets.filter(
+      (t) =>
+        (t.status ?? "").trim() === STATUS.ANGEBOT_ERSTELLT || isKalkulationFaellig(t)
+    );
+    // Sortierung: Fällige Kalkulationen (abgelaufene Termine) zuerst
+    return filtered.sort((a, b) => {
+      const aFaellig = isKalkulationFaellig(a);
+      const bFaellig = isKalkulationFaellig(b);
+      if (aFaellig && !bFaellig) return -1;
+      if (!aFaellig && bFaellig) return 1;
+      // Bei fälligen: die "gerade abgelaufenen" zuerst (termin_ende am nächsten zu now)
+      if (aFaellig && bFaellig) {
+        const ae = a.termin_ende ? new Date(a.termin_ende).getTime() : 0;
+        const be = b.termin_ende ? new Date(b.termin_ende).getTime() : 0;
+        return be - ae;
+      }
+      // Sonst: nach Position/Created-At sortieren
+      return sortByPositionThenCreatedAt(a, b);
+    });
+  }, [col1Tickets]);
 
   /** Spalte 2: Terminplaner – Tickets mit Termin (Eingeteilt, Besichtigung, Ausführung). */
   const col2Tickets = useMemo(
@@ -1179,7 +1417,8 @@ export default function AdminDashboardPage() {
       tickets.filter((t) => {
         const hasTermin = (t.termin_start ?? "").trim() !== "";
         const s = (t.status ?? "").trim();
-        return hasTermin && calendarStatuses.includes(s);
+        // Abgelaufene Besichtigungen werden im UI nicht mehr im Kalender geführt
+        return hasTermin && calendarStatuses.includes(s) && !isKalkulationFaellig(t);
       }),
     [tickets, calendarStatuses]
   );
@@ -1661,7 +1900,8 @@ export default function AdminDashboardPage() {
   /** Pill-Farbe/Border für Kalender-Events: Besichtigung = grau, Ausführung = Gewerk/Blau. */
   const eventPillBg = (t: Ticket | undefined) => {
     if ((t?.termin_typ ?? "").trim() === TERMIN_TYP.BESICHTIGUNG) return "bg-slate-500/90 border border-slate-400";
-    switch (t?.gewerk?.trim()) {
+    const firstGewerk = normalizeGewerke(t?.gewerk ?? null)[0] ?? "";
+    switch (firstGewerk) {
       case "Elektro": return "bg-amber-600/90";
       case "Sanitär": return "bg-blue-600/90";
       case "Ausbau": return "bg-orange-600/90";
@@ -1692,6 +1932,52 @@ export default function AdminDashboardPage() {
     return Math.max(1, Math.ceil(slots));
   };
 
+  /**
+   * Berechnet für überlappende Events die Breite und Position (Apple-Kalender-Style).
+   * Events, die am gleichen Tag zur gleichen Zeit starten, werden nebeneinander angezeigt.
+   */
+  const getOverlappingEventsLayout = useMemo(() => {
+    const weekEvents = calendarEvents.filter((ev) => isEventInWeek(ev.start));
+    const layoutMap = new Map<string, { width: number; left: number; index: number; total: number }>();
+
+    // Gruppiere Events nach Tag und Start-Slot
+    const eventsByDayAndSlot = new Map<string, WeekEvent[]>();
+    weekEvents.forEach((ev) => {
+      const dayIndex = getDayOffset(ev.start);
+      const slotIndex = getSlotIndex(ev.start);
+      if (dayIndex < 0 || dayIndex > 6 || slotIndex < 0 || slotIndex >= TOTAL_SLOTS) return;
+      const key = `${dayIndex}-${slotIndex}`;
+      if (!eventsByDayAndSlot.has(key)) {
+        eventsByDayAndSlot.set(key, []);
+      }
+      eventsByDayAndSlot.get(key)!.push(ev);
+    });
+
+    // Für jede Gruppe: berechne Breite und Position für jedes Event
+    eventsByDayAndSlot.forEach((events, key) => {
+      if (events.length === 1) {
+        // Keine Überlappung → volle Breite
+        layoutMap.set(events[0].id, { width: 100, left: 0, index: 0, total: 1 });
+      } else {
+        // Überlappung: Events nebeneinander (mit kleinem Gap wie Apple Kalender)
+        const total = events.length;
+        const gapPercent = 1; // 1% Gap zwischen Events
+        const availableWidth = 100 - (total - 1) * gapPercent;
+        const widthPercent = availableWidth / total;
+        events.forEach((ev, idx) => {
+          layoutMap.set(ev.id, {
+            width: widthPercent,
+            left: idx * (widthPercent + gapPercent),
+            index: idx,
+            total,
+          });
+        });
+      }
+    });
+
+    return layoutMap;
+  }, [calendarEvents, weekStart]);
+
   /** Drop-Indicator-Linie (blaue Linie zeigt Einfügeposition). */
   const DropIndicatorLine = () => (
     <div className="flex items-center gap-1 py-0.5">
@@ -1705,7 +1991,7 @@ export default function AdminDashboardPage() {
     list: Ticket[],
     emptyLabel: string,
     colId?: string,
-    options?: { isAngeboteTab?: boolean; onOpenQuoteBuilder?: (t: Ticket) => void }
+    options?: { isAngeboteTab?: boolean; onOpenQuoteBuilder?: (t: Ticket) => void; offerAttentionIds?: Set<string> }
   ) => {
     if (loading) return <p className="text-sm text-slate-400">Lade Tickets…</p>;
     if (list.length === 0) {
@@ -1722,7 +2008,9 @@ export default function AdminDashboardPage() {
           const hasPhone = !!(ticket.kontakt_telefon ?? "").trim();
           const isAnfrageStatus = (ticket.status ?? "").trim() === STATUS.ANFRAGE;
           const isConverting = convertingId === ticket.id;
-          const GewerkIcon = getGewerkIcon(ticket.gewerk);
+          // Gewerk-Icon: erstes Gewerk aus Gewerk-Array
+          const firstGewerk = normalizeGewerke(ticket.gewerk ?? null)[0] ?? null;
+          const GewerkIcon = getGewerkIcon(firstGewerk);
           const urgencyLevel = getUrgencyLevel(ticket);
           const isOver24h = urgencyLevel === "24h";
           const urgencyHeatmapClasses =
@@ -1799,9 +2087,27 @@ export default function AdminDashboardPage() {
                       Ausführung
                     </span>
                   )}
+                  {options?.isAngeboteTab && isKalkulationFaellig(ticket) && (
+                    <span className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${
+                      isLightTheme
+                        ? "bg-amber-100 text-amber-800 border border-amber-300"
+                        : "bg-amber-500/20 text-amber-300 border border-amber-500/40"
+                    }`}>
+                      Kalkulation fällig
+                    </span>
+                  )}
                 </div>
-                <span className={`shrink-0 text-xs tabular-nums ${isLightTheme ? "text-slate-500" : "text-slate-400"}`}>
-                  {(ticket.status ?? "").trim() === STATUS.ANFRAGE ? "–" : (ticket.ticket_display_id ?? "–")}
+                <span className="flex items-center gap-1">
+                  <span className={`shrink-0 text-xs tabular-nums ${isLightTheme ? "text-slate-500" : "text-slate-400"}`}>
+                    {(ticket.status ?? "").trim() === STATUS.ANFRAGE ? "–" : (ticket.ticket_display_id ?? "–")}
+                  </span>
+                  {options?.isAngeboteTab && options.offerAttentionIds?.has(ticket.id) && (
+                    <span
+                      className={`inline-flex h-2 w-2 rounded-full ${
+                        isLightTheme ? "bg-blue-500" : "bg-blue-400"
+                      }`}
+                    />
+                  )}
                 </span>
               </div>
               <div className="mb-1 flex items-start justify-between gap-2">
@@ -1834,11 +2140,23 @@ export default function AdminDashboardPage() {
                 </p>
               )}
               <div className="mt-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
-                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                  <span className={`inline-flex items-center gap-1 ${getGewerkBadgeClasses(ticket.gewerk, isLightTheme)}`}>
-                    {GewerkIcon && <GewerkIcon className="h-3 w-3 shrink-0" strokeWidth={2} />}
-                    {ticket.gewerk || "–"}
-                  </span>
+                <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+                  {(() => {
+                    const gewerkeList = normalizeGewerke(ticket.gewerk ?? null);
+                    return gewerkeList.length > 0 ? (
+                      gewerkeList.map((g, idx) => {
+                        const Icon = getGewerkIcon(g);
+                        return (
+                          <span key={`${g}-${idx}`} className={`inline-flex items-center gap-1 ${getGewerkBadgeClasses(g, isLightTheme)}`}>
+                            {Icon && <Icon className="h-3 w-3 shrink-0" strokeWidth={2} />}
+                            {g}
+                          </span>
+                        );
+                      })
+                    ) : (
+                      <span className={`text-[11px] ${isLightTheme ? "text-slate-500" : "text-slate-400"}`}>–</span>
+                    );
+                  })()}
                   <span className={`text-[11px] ${isLightTheme ? "text-slate-600" : "text-slate-500"}`}>
                     {ticket.status || "Ticket"}
                   </span>
@@ -1889,40 +2207,60 @@ export default function AdminDashboardPage() {
                     isLightTheme ? "border-slate-200" : "border-slate-700"
                   }`}
                 >
-                  {options.onOpenQuoteBuilder && (
+                  {/* A) Kalkulation fällig: Button "Angebot erstellen" */}
+                  {isKalkulationFaellig(ticket) && options.onOpenQuoteBuilder && (
                     <button
                       type="button"
                       onClick={(e) => { e.preventDefault(); e.stopPropagation(); options.onOpenQuoteBuilder?.(ticket); }}
-                      className={`inline-flex w-full items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-medium transition-all hover:opacity-90 ${
+                      className={`inline-flex w-full items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-xs font-medium transition-all hover:opacity-90 ${
                         isLightTheme
-                          ? "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                          : "bg-slate-800/80 text-slate-300 hover:bg-slate-700"
+                          ? "bg-blue-600 text-white shadow-sm hover:bg-blue-700"
+                          : "bg-blue-600 text-white shadow-sm hover:bg-blue-700"
                       }`}
                     >
                       <FileText className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
-                      Angebot bearbeiten
+                      Angebot erstellen
                     </button>
                   )}
-                  <div className="flex w-full gap-2">
-                    <button
-                      type="button"
-                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); /* Angenommen – UI only */ }}
-                      className="flex flex-1 items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-xs font-medium transition-all hover:opacity-90"
-                      style={isLightTheme ? { backgroundColor: "#bbf7d0", color: "#166534" } : { backgroundColor: "rgba(34,197,94,0.2)", color: "#86efac" }}
-                    >
-                      <CheckCircle className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
-                      Angenommen
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); /* Abgelehnt – UI only */ }}
-                      className="flex flex-1 items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-xs font-medium transition-all hover:opacity-90"
-                      style={isLightTheme ? { backgroundColor: "#fecaca", color: "#991b1b" } : { backgroundColor: "rgba(239,68,68,0.2)", color: "#fca5a5" }}
-                    >
-                      <X className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
-                      Abgelehnt
-                    </button>
-                  </div>
+                  {/* B) Angebot versendet: Buttons Angenommen/Abgelehnt */}
+                  {(ticket.status ?? "").trim() === STATUS.ANGEBOT_ERSTELLT && (
+                    <>
+                      {options.onOpenQuoteBuilder && (
+                        <button
+                          type="button"
+                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); options.onOpenQuoteBuilder?.(ticket); }}
+                          className={`inline-flex w-full items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-medium transition-all hover:opacity-90 ${
+                            isLightTheme
+                              ? "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                              : "bg-slate-800/80 text-slate-300 hover:bg-slate-700"
+                          }`}
+                        >
+                          <FileText className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
+                          Angebot bearbeiten
+                        </button>
+                      )}
+                      <div className="flex w-full gap-2">
+                        <button
+                          type="button"
+                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); /* Angenommen – UI only */ }}
+                          className="flex flex-1 items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-xs font-medium transition-all hover:opacity-90"
+                          style={isLightTheme ? { backgroundColor: "#bbf7d0", color: "#166534" } : { backgroundColor: "rgba(34,197,94,0.2)", color: "#86efac" }}
+                        >
+                          <CheckCircle className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
+                          Angenommen
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); /* Abgelehnt – UI only */ }}
+                          className="flex flex-1 items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-xs font-medium transition-all hover:opacity-90"
+                          style={isLightTheme ? { backgroundColor: "#fecaca", color: "#991b1b" } : { backgroundColor: "rgba(239,68,68,0.2)", color: "#fca5a5" }}
+                        >
+                          <X className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
+                          Abgelehnt
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
             </SortableTicketCard>
@@ -1933,6 +2271,45 @@ export default function AdminDashboardPage() {
       </>
     );
   };
+
+  /** Detail-Modal Timeline: kombiniert ticket_history + legacy tickets.historie. */
+  const detailTimelineItems = useMemo(() => {
+    const items: { key: string; action: string; at: string | null; Icon: React.ElementType }[] = [];
+
+    for (const r of detailHistoryRows) {
+      const actionRaw = (r.aktion ?? "Historie") ?? "Historie";
+      const action = String(actionRaw).trim() || "Historie";
+      const at = (r.erstellt_at ?? null) as string | null;
+      const isTermin = /besichtigung|termin/i.test(action);
+      items.push({
+        key: String(r.id ?? `${r.ticket_id ?? "row"}:${action}:${at ?? "na"}`),
+        action,
+        at,
+        Icon: isTermin ? CalendarIcon : CheckCircle,
+      });
+    }
+
+    const legacy = (detailTicket?.historie ?? []) as HistorieEintrag[];
+    legacy.forEach((e, i) => {
+      const action = (e?.text ?? "").trim() || "Historie";
+      // legacy date ist meist YYYY-MM-DD → als ISO interpretieren (ohne Uhrzeit)
+      const at = (e?.date ?? "").trim() ? `${e.date}T00:00:00.000Z` : null;
+      items.push({
+        key: `legacy-${detailTicket?.id ?? "ticket"}-${i}`,
+        action,
+        at,
+        Icon: CheckCircle,
+      });
+    });
+
+    items.sort((a, b) => {
+      const ta = a.at ? new Date(a.at).getTime() : 0;
+      const tb = b.at ? new Date(b.at).getTime() : 0;
+      return tb - ta;
+    });
+
+    return items;
+  }, [detailHistoryRows, detailTicket?.historie, detailTicket?.id]);
 
   const weekDays = useMemo(() => Array.from({ length: 7 }, (_, i) => add(weekStart, { days: i })), [weekStart]);
 
@@ -2045,6 +2422,13 @@ export default function AdminDashboardPage() {
           const slotIndex = getSlotIndex(ev.start);
           const span = getSlotSpan(ev.start, ev.end);
           if (dayIndex < 0 || dayIndex > 6 || slotIndex < 0 || slotIndex >= TOTAL_SLOTS) return null;
+          
+          // Layout für überlappende Events (Apple-Kalender-Style)
+          const layout = getOverlappingEventsLayout.get(ev.id);
+          const width = layout ? `${layout.width}%` : "100%";
+          const left = layout ? `${layout.left}%` : "0%";
+          const zIndex = layout && layout.total > 1 ? layout.index + 1 : 1;
+          
           return (
             <DraggableEventPill
               key={ev.id}
@@ -2052,8 +2436,11 @@ export default function AdminDashboardPage() {
               style={{
                 gridColumn: dayIndex + 2,
                 gridRow: `${slotIndex + 2} / span ${span}`,
-                zIndex: 1,
+                zIndex,
                 minHeight: "44px",
+                width,
+                left,
+                position: "relative",
               }}
               className={`mx-0.5 rounded-lg border px-0 py-0 text-left text-[11px] font-medium shadow hover:opacity-90 ${
                 (ev.resource?.termin_typ ?? "").trim() === TERMIN_TYP.BESICHTIGUNG
@@ -2171,42 +2558,11 @@ export default function AdminDashboardPage() {
           isLightTheme ? "border-slate-200/80 bg-white/95 shadow-[0_1px_0_0_rgba(0,0,0,0.04)]" : "border-slate-800 bg-slate-950/95"
         }`}
       >
-        <Link
-          href="/"
-          className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium no-underline transition-all hover:opacity-90 ${
-            isLightTheme
-              ? "border-slate-200 bg-white text-slate-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:border-slate-300"
-              : "border-slate-600 bg-slate-900/80 text-slate-100 hover:border-slate-500 hover:bg-slate-800/80"
-          }`}
-          aria-label="Zur Startseite"
-        >
-          <span className="tracking-tight">Logo</span>
-        </Link>
+        <Logo
+          variant={isLightTheme ? "footer" : "header"}
+          className="h-8"
+        />
         <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={createDummyTicket}
-            disabled={inserting}
-            className={`rounded-full border px-4 py-2 text-sm font-medium transition-all hover:opacity-90 disabled:opacity-50 ${
-              isLightTheme
-                ? "border-slate-200 bg-white text-slate-800 shadow-sm hover:border-slate-300 hover:bg-slate-50"
-                : "border-slate-600 bg-slate-800 text-slate-200 hover:border-slate-500 hover:bg-slate-700"
-            }`}
-          >
-            {inserting ? "Wird erstellt…" : "Dummy-Ticket anlegen"}
-          </button>
-          <button
-            type="button"
-            onClick={createAusbauDummyTicket}
-            disabled={insertingAusbau}
-            className={`rounded-full border px-4 py-2 text-sm font-medium transition-all hover:opacity-90 disabled:opacity-50 ${
-              isLightTheme
-                ? "border-orange-200 bg-orange-50/80 text-orange-700 shadow-sm hover:bg-orange-100"
-                : "border-orange-500/60 bg-orange-500/20 text-orange-200 hover:border-orange-400 hover:bg-orange-500/30"
-            }`}
-          >
-            {insertingAusbau ? "Wird erstellt…" : "Ausbau-Test anlegen"}
-          </button>
           <button
             type="button"
             onClick={toggleDashboardTheme}
@@ -2237,6 +2593,7 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
+        {isMounted && (
         <DndContext
           sensors={sensors}
           collisionDetection={kanbanCollisionDetection}
@@ -2304,7 +2661,9 @@ export default function AdminDashboardPage() {
                               onOpenQuoteBuilder: (t) => {
                                 setQuoteBuilderTicketId(t.id);
                                 setQuoteBuilderOpen(true);
+                                markOfferSeen(t.id);
                               },
+                              offerAttentionIds,
                             }
                           : undefined
                       )}
@@ -2347,12 +2706,12 @@ export default function AdminDashboardPage() {
               >
                 <div className="mb-2 flex shrink-0 items-center justify-between gap-2">
                   <h2 className="text-xs font-medium uppercase tracking-wider text-slate-500">
-                    1. Neue Anfragen
+                    {incomingTab === "Eingang" ? "1. Neue Anfragen" : "1. Angebote & Kalkulationen"}
                   </h2>
                   <span className={`rounded-full px-2 py-0.5 text-xs ${
                     isLightTheme ? "bg-slate-100 text-slate-700" : "bg-slate-800 text-slate-300"
                   }`}>
-                    {loading ? "…" : col1Tickets.length}
+                    {loading ? "…" : (incomingTab === "Eingang" ? col1EingangTickets.length : col1AngeboteTickets.length)}
                   </span>
                 </div>
                 {/* Segmented Control (Apple-Style): Eingang | Angebote */}
@@ -2415,7 +2774,9 @@ export default function AdminDashboardPage() {
                             onOpenQuoteBuilder: (t) => {
                               setQuoteBuilderTicketId(t.id);
                               setQuoteBuilderOpen(true);
+                              markOfferSeen(t.id);
                             },
+                            offerAttentionIds,
                           }
                         : undefined
                     )}
@@ -2457,7 +2818,11 @@ export default function AdminDashboardPage() {
                   style={{ minHeight: `${overlayHeight}px` }}
                 >
                   <div className="flex items-center gap-1">
-                    {(() => { const Icon = getGewerkIcon(ev.resource?.gewerk ?? null); return Icon ? <Icon className="h-3 w-3 shrink-0" strokeWidth={2} /> : null; })()}
+                    {(() => {
+                      const gewerkeList = normalizeGewerke((ev.resource as Ticket | undefined)?.gewerk ?? null);
+                      const Icon = getGewerkIcon(gewerkeList[0] ?? null);
+                      return Icon ? <Icon className="h-3 w-3 shrink-0" strokeWidth={2} /> : null;
+                    })()}
                     <span className="line-clamp-1">{ev.resource?.ticket_display_id ?? ev.id.slice(0, 8)}</span>
                   </div>
                   <span className="line-clamp-1 block text-[10px] opacity-90">{getTicketDisplayName(ev.resource ?? {} as Ticket)}</span>
@@ -2477,6 +2842,7 @@ export default function AdminDashboardPage() {
             })() : null}
           </DragOverlay>
         </DndContext>
+        )}
       </div>
 
       {/* ─── Schritt 1: Was für ein Termin? (Apple-Style Glassmorphism) ─── */}
@@ -2987,12 +3353,105 @@ export default function AdminDashboardPage() {
                         <dd className="text-slate-900">{getTicketDisplayName(detailTicket)}</dd>
                       </div>
                       <div>
+                        <dt className="text-slate-500">E-Mail</dt>
+                        <dd className="text-slate-900">
+                          {detailTicket?.kontakt_email != null &&
+                          String(detailTicket.kontakt_email).trim() !== "" ? (
+                            <a
+                              href={`mailto:${String(detailTicket.kontakt_email).trim()}`}
+                              className="text-blue-600 hover:underline"
+                            >
+                              {String(detailTicket.kontakt_email).trim()}
+                            </a>
+                          ) : (
+                            "–"
+                          )}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-slate-500">Telefon</dt>
+                        <dd className="text-slate-900">
+                          {detailTicket?.kontakt_telefon != null &&
+                          String(detailTicket.kontakt_telefon).trim() !== "" ? (
+                            <a
+                              href={`tel:${String(detailTicket.kontakt_telefon).trim()}`}
+                              className="text-blue-600 hover:underline"
+                            >
+                              {String(detailTicket.kontakt_telefon).trim()}
+                            </a>
+                          ) : (
+                            "–"
+                          )}
+                        </dd>
+                      </div>
+                      <div>
                         <dt className="text-slate-500">Adresse</dt>
                         <dd className="text-slate-900">
                           {detailTicket?.objekt_adresse != null && String(detailTicket.objekt_adresse).trim() !== ""
                             ? detailTicket.objekt_adresse
                             : "–"}
                         </dd>
+                      </div>
+                      <div>
+                        <dt className="text-slate-500">Gewerke</dt>
+                        <dd className="flex flex-wrap gap-1.5">
+                          {(() => {
+                            // Anzeige im Detail-Panel: direkt aus dem bearbeitbaren State,
+                            // damit Änderungen im Multi-Select sofort als Badges sichtbar sind.
+                            const gewerkeList =
+                              detailGewerke.length > 0
+                                ? detailGewerke
+                                : normalizeGewerke((detailTicket as Ticket | null)?.gewerk ?? null);
+                            return gewerkeList.length > 0 ? (
+                              gewerkeList.map((g, idx) => (
+                                <span key={`${g}-${idx}`} className={getGewerkBadgeClasses(g, isLightTheme)}>
+                                  {g}
+                                </span>
+                              ))
+                            ) : (
+                              <span className="text-slate-500">–</span>
+                            );
+                          })()}
+                        </dd>
+                      </div>
+                      {/* Bearbeitbares Multi-Select für Gewerke */}
+                      <div className="mt-3 rounded-lg border border-slate-200 bg-white p-3">
+                        <label className="mb-2 block text-xs font-medium text-slate-700">
+                          Gewerke zuweisen
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                          {GEWERKE_OPTIONS.map((opt) => {
+                            const isChecked = detailGewerke.includes(opt.value);
+                            return (
+                              <label
+                                key={opt.value}
+                                className={`inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
+                                  isChecked
+                                    ? isLightTheme
+                                      ? "border-blue-500 bg-blue-50 text-blue-700"
+                                      : "border-blue-500 bg-blue-500/20 text-blue-200"
+                                    : isLightTheme
+                                      ? "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                                      : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500"
+                                }`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={isChecked}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      setDetailGewerke((prev) => [...prev, opt.value]);
+                                    } else {
+                                      setDetailGewerke((prev) => prev.filter((g) => g !== opt.value));
+                                    }
+                                  }}
+                                  className="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                                />
+                                <span>{opt.label}</span>
+                              </label>
+                            );
+                          })}
+                        </div>
                       </div>
                       <div>
                         <dt className="text-slate-500">Anfragetext</dt>
@@ -3196,29 +3655,68 @@ export default function AdminDashboardPage() {
                     </div>
                   </section>
 
-                  {/* Historie: Verlauf (z. B. abgeschlossene Termine, manuelle Einträge) */}
-                  <section className="rounded-lg border border-slate-200 bg-slate-50/80 p-4">
-                    <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                      Historie
-                    </h3>
-                    <ul className="mb-4 space-y-1.5 text-sm">
-                      {((detailTicket?.historie ?? []) as HistorieEintrag[]).length === 0 ? (
-                        <li className="text-slate-500">Noch keine Einträge.</li>
+                  {/* Historie: Timeline (ticket_history + legacy tickets.historie) */}
+                  <section
+                    className={`rounded-2xl border p-4 ${
+                      isLightTheme
+                        ? "border-slate-200 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
+                        : "border-slate-700 bg-slate-900/60"
+                    }`}
+                  >
+                    <div className="mb-3 flex items-center justify-between gap-2">
+                      <h3 className={`text-xs font-semibold uppercase tracking-wider ${
+                        isLightTheme ? "text-slate-500" : "text-slate-500"
+                      }`}>
+                        Historie
+                      </h3>
+                      {detailHistoryLoading && (
+                        <span className="text-xs text-slate-500">Lädt …</span>
+                      )}
+                    </div>
+
+                    <ul className="mb-4 space-y-2">
+                      {detailTimelineItems.length === 0 ? (
+                        <li className="text-xs text-slate-500">Noch keine Einträge.</li>
                       ) : (
-                        ((detailTicket?.historie ?? []) as HistorieEintrag[]).map((e, i) => (
-                          <li key={i} className="flex gap-2">
-                            <span className="font-medium text-slate-600">{e.date}</span>
-                            <span className="text-slate-800">{e.text}</span>
+                        detailTimelineItems.map((it, idx) => (
+                          <li key={it.key} className="relative pl-6">
+                            <span
+                              className={`absolute left-0 top-[7px] h-2 w-2 rounded-full ${
+                                isLightTheme ? "bg-slate-300" : "bg-slate-600"
+                              }`}
+                            />
+                            {idx !== detailTimelineItems.length - 1 && (
+                              <span
+                                className={`absolute left-[3px] top-3 h-[calc(100%+6px)] w-px ${
+                                  isLightTheme ? "bg-slate-200" : "bg-slate-700"
+                                }`}
+                              />
+                            )}
+                            <div className="flex items-start gap-2 text-xs text-slate-500">
+                              <it.Icon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" strokeWidth={2} />
+                              <span className={`${isLightTheme ? "text-slate-700" : "text-slate-200"}`}>
+                                {it.action}
+                              </span>
+                              <span className="text-slate-400">
+                                – {formatTimelineDateTime(it.at)}
+                              </span>
+                            </div>
                           </li>
                         ))
                       )}
                     </ul>
+
+                    {/* Manuell hinzufügen (bleibt auf tickets.historie, Timeline zeigt es trotzdem) */}
                     <div className="flex flex-wrap gap-2">
                       <input
                         type="date"
                         value={detailHistorieNewDate}
                         onChange={(e) => setDetailHistorieNewDate(e.target.value)}
-                        className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
+                        className={`rounded-xl border px-3 py-2 text-sm ${
+                          isLightTheme
+                            ? "border-slate-200 bg-slate-50 text-slate-900"
+                            : "border-slate-600 bg-slate-800/60 text-slate-100"
+                        }`}
                       />
                       <input
                         type="text"
@@ -3226,13 +3724,21 @@ export default function AdminDashboardPage() {
                         value={detailHistorieNewText}
                         onChange={(e) => setDetailHistorieNewText(e.target.value)}
                         onKeyDown={(e) => e.key === "Enter" && addHistorieEntry()}
-                        className="min-w-[180px] flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400"
+                        className={`min-w-[180px] flex-1 rounded-xl border px-3 py-2 text-sm placeholder:text-slate-400 ${
+                          isLightTheme
+                            ? "border-slate-200 bg-slate-50 text-slate-900"
+                            : "border-slate-600 bg-slate-800/60 text-slate-100 placeholder:text-slate-500"
+                        }`}
                       />
                       <button
                         type="button"
                         onClick={addHistorieEntry}
                         disabled={!detailHistorieNewText.trim()}
-                        className="rounded-lg bg-slate-700 px-3 py-2 text-sm font-medium text-white hover:bg-slate-600 disabled:opacity-50"
+                        className={`rounded-full px-4 py-2 text-sm font-medium transition-all hover:opacity-90 disabled:opacity-50 ${
+                          isLightTheme
+                            ? "bg-slate-900 text-white"
+                            : "bg-slate-100 text-slate-900"
+                        }`}
                       >
                         Eintrag hinzufügen
                       </button>

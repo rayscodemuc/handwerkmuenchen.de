@@ -25,9 +25,9 @@ const contactInfo = [
   {
     icon: Mail,
     title: "E-Mail",
-    content: BUSINESS.email || "kontakt@handwerkmuenchen.de",
+    content: BUSINESS.email || "info@handwerkmuenchen.de",
     subContent: "Antwort innerhalb 24h",
-    href: `mailto:${BUSINESS.email || "kontakt@handwerkmuenchen.de"}`,
+    href: `mailto:${BUSINESS.email || "info@handwerkmuenchen.de"}`,
   },
   {
     icon: MapPin,

@@ -529,10 +529,10 @@ export default function PartnerWerden() {
                 +49 (0)123 4567890
               </a>
               <a 
-                href="mailto:partner@handwerkmuenchen.de"
+                href="mailto:info@handwerkmuenchen.de"
                 className="inline-flex h-14 items-center justify-center rounded-full border border-white/30 px-10 text-base font-medium text-primary-foreground transition-colors hover:bg-white/10"
               >
-                partner@handwerkmuenchen.de
+                info@handwerkmuenchen.de
               </a>
             </div>
           </div>

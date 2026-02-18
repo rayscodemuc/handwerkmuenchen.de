@@ -6,14 +6,14 @@ export type MeisterleistungenHeroProps = {
   eyebrow?: string;
   /** Hauptüberschrift. Ohne Angabe: "Referenzen, die man belegen kann." */
   title?: string;
-  /** Untertitel. Ohne Angabe: "Ausgewählte Projekte für Hausverwaltungen und Gewerbe in München." */
+  /** Untertitel. Ohne Angabe: "Unsere aktuellsten Projekte für Hausverwaltungen, Gewerbe und Privat in München." */
   subline?: string;
 };
 
 const defaultEyebrow = "MEISTERLEISTUNGEN";
 const defaultTitle = "Referenzen, die man belegen kann.";
 const defaultSubline =
-  "Ausgewählte Projekte für Hausverwaltungen und Gewerbe in München.";
+  "Unsere aktuellsten Projekte für Hausverwaltungen, Gewerbe und Privat in München.";
 
 export function MeisterleistungenHero({
   eyebrow = defaultEyebrow,

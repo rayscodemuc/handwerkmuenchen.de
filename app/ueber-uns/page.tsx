@@ -27,15 +27,18 @@ function PersonPortrait({
   name,
   size = "medium",
   className,
+  objectPosition = "center",
 }: {
   src: string;
   name: string;
   size?: "large" | "medium";
   className?: string;
+  objectPosition?: "center" | "right";
 }) {
   const [failed, setFailed] = useState(false);
   const avatarSize = size === "large" ? "h-32 w-32 md:h-40 md:w-40" : "h-24 w-24 sm:h-28 sm:w-28";
   const fallbackText = size === "large" ? "text-3xl md:text-4xl" : "text-2xl";
+  const objectPositionClass = objectPosition === "right" ? "object-[60%_center]" : "object-center";
   return (
     <div className={`relative bg-muted shrink-0 ${className ?? ""}`}>
       {!failed && (
@@ -43,7 +46,7 @@ function PersonPortrait({
           src={src}
           alt={name}
           fill
-          className="object-cover"
+          className={`object-cover ${objectPositionClass}`}
           sizes={size === "large" ? "(max-width: 768px) 100vw, 320px" : "(max-width: 640px) 100vw, 224px"}
           unoptimized
           onError={() => setFailed(true)}
@@ -223,6 +226,7 @@ export default function UeberUnsPage() {
                       name={person.name}
                       size="medium"
                       className="w-full sm:w-56 sm:min-h-[260px] aspect-[4/5] sm:aspect-auto"
+                      objectPosition={person.slug === "innenausbau" ? "right" : "center"}
                     />
                     <div className="flex-1 p-5 sm:p-6 flex flex-col">
                       <p className="text-lg font-semibold text-[#3E505B]">{person.name}</p>

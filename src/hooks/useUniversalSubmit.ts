@@ -33,7 +33,28 @@ const STANDARD_KEYS = new Set([
   "address",
   "objekt_adresse",
   "city",
+  "service_type",
+  "gewerk",
 ]);
+
+/** Mappt service_type aus Formularen zu Gewerk-Namen (DB-kompatibel). */
+function mapServiceTypeToGewerk(serviceType: string | undefined | null): string | null {
+  if (!serviceType || typeof serviceType !== "string") return null;
+  const s = serviceType.trim().toLowerCase();
+  const mapping: Record<string, string> = {
+    "elektrotechnik": "Elektro",
+    "sanitaer_heizung": "Sanitär",
+    "sanitär": "Sanitär",
+    "sanitaer": "Sanitär",
+    "innenausbau": "Ausbau",
+    "ausbau": "Ausbau",
+    "reinigung": "Reinigung",
+    "facility": "Facility",
+    // Fallback: wenn schon korrekt formatiert
+    "elektro": "Elektro",
+  };
+  return mapping[s] || (s.charAt(0).toUpperCase() + s.slice(1)); // Fallback: erste Buchstabe groß
+}
 
 /** Status-Wert, den die DB akzeptiert (Constraint). Andere Werte führen zu 23514. */
 const STATUS_ANFRAGE = "Anfrage";
@@ -101,10 +122,16 @@ export function useUniversalSubmit() {
           (raw["address"] as string | undefined)?.trim() ||
           (raw["city"] as string | undefined)?.trim() ||
           "Keine Angabe";
+        
+        // Gewerk: aus service_type (gemappt) oder gewerk (als Array für DB-Spalte text[])
+        const serviceTypeRaw = raw["service_type"] as string | undefined;
+        const gewerkFromServiceType = mapServiceTypeToGewerk(serviceTypeRaw);
+        const gewerkRaw = (raw["gewerk"] as string | undefined)?.trim() || gewerkFromServiceType;
+        const gewerk = gewerkRaw ? [gewerkRaw] : null;
 
         // 3) Alle Felder, die nicht in DB-Spalten gehen → additional_data (JSONB)
         const additionalEntries = Object.entries(raw).filter(
-          ([key]) => !STANDARD_KEYS.has(key) && key !== "company_id"
+          ([key]) => !STANDARD_KEYS.has(key) && key !== "company_id" && key !== "gewerk" && key !== "service_type"
         );
         const additional_data =
           additionalEntries.length > 0 ? Object.fromEntries(additionalEntries) : null;
@@ -116,6 +143,7 @@ export function useUniversalSubmit() {
           kontakt_telefon,
           objekt_adresse,
           beschreibung,
+          gewerk,
           status: STATUS_ANFRAGE,
           additional_data,
         };

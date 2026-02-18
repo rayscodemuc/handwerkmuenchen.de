@@ -37,7 +37,7 @@ export function getHotlineDisplay(): string {
  * Gibt die E-Mail-Adresse zurück
  */
 export function getEmail(): string {
-  return BUSINESS.email || "kontakt@handwerkmuenchen.de";
+  return BUSINESS.email || "info@handwerkmuenchen.de";
 }
 
 /**

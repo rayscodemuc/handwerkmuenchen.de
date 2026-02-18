@@ -13,20 +13,22 @@ export default function Datenschutz() {
   return (
     <>
         {/* Hero Section */}
-        <section className="bg-primary py-16 lg:py-20">
-          <div className="container mx-auto px-4 lg:px-8">
-            <h1 className="text-3xl font-black tracking-tight text-primary-foreground lg:text-5xl">
-              Datenschutzerklärung
-            </h1>
+        <section className="relative flex min-h-[320px] sm:min-h-[380px] items-center bg-[#26413C] py-10 sm:py-14 lg:min-h-[480px] lg:py-20">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-3xl text-center">
+              <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl md:text-5xl lg:text-6xl text-balance">
+                Datenschutzerklärung
+              </h1>
+            </div>
           </div>
         </section>
 
         {/* Content */}
-        <section className="bg-background py-16 lg:py-20">
-          <div className="container mx-auto px-4 lg:px-8">
-            <div className="prose prose-lg max-w-4xl text-foreground">
+        <section className="bg-background py-10 sm:py-14 lg:py-28">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="prose prose-lg max-w-4xl mx-auto text-foreground">
 
-              <h2 className="text-2xl font-bold mt-10 mb-4">1. Allgemeine Hinweise</h2>
+              <h2 className="text-2xl font-bold mt-10 mb-4 first:mt-0">1. Allgemeine Hinweise</h2>
               <p className="text-muted-foreground mb-6">
                 Der Schutz Ihrer personenbezogenen Daten ist uns ein wichtiges Anliegen. Wir behandeln 
                 Ihre personenbezogenen Daten vertraulich und entsprechend den gesetzlichen Datenschutzvorschriften 
@@ -42,14 +44,15 @@ export default function Datenschutz() {
                 Verantwortlich für die Datenverarbeitung auf dieser Website ist:
               </p>
               <p className="text-foreground mb-6">
-                Musterfirma GmbH<br />
-                Musterstraße 1<br />
-                DE-80331 München<br />
+                handwerkmuenchen.de<br />
+                <br />
+                Seebruckerstraße 13<br />
+                81825 München<br />
                 Deutschland
               </p>
               <p className="text-foreground mb-6">
-                Telefon: +49 (0)123 4567890<br />
-                E-Mail: kontakt@handwerkmuenchen.de<br />
+                Vertreten durch: Eray Özcan<br />
+                E-Mail: info@handwerkmuenchen.de<br />
                 Website: handwerkmuenchen.de
               </p>
 

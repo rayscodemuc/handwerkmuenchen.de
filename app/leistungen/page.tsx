@@ -19,7 +19,7 @@ const GEWERKE = [
     teaser: "Von der Hausinstallation bis zur Gebäudeautomation – ein Ansprechpartner für alle elektrotechnischen Anforderungen.",
     tags: ["Zähler/UV", "E-Check", "Beleuchtung"],
     icon: Zap,
-    image: "/images/leistungen/leistungen-elektrotechnik.jpg",
+    image: "/images/leistungen/leistungen-elektrotechnik-schaltanlage-verteilung-muenchen.png",
   },
   {
     name: "Sanitär & Heizung",
@@ -27,7 +27,7 @@ const GEWERKE = [
     teaser: "SHK und HLK aus einer Hand: Planung, Installation, Wartung und Havarie-Service für Gewerbe und Wohnanlagen.",
     tags: ["Trinkwasser", "Heizung", "HLK"],
     icon: Droplets,
-    image: "/images/leistungen/leistungen-sanitaer-heizung.jpg",
+    image: "/images/leistungen/leistungen-sanitaer-heizung-badsanierung-vorwandinstallation-muenchen.png",
   },
   {
     name: "Innenausbau",
@@ -35,7 +35,7 @@ const GEWERKE = [
     teaser: "Malerei, Fassade, Bodenbeläge und Fliesen – Innenausbau aus einer Hand, termingerecht und abnahmesicher.",
     tags: ["Malerei", "Boden", "Fliesen"],
     icon: Paintbrush,
-    image: "/images/leistungen/leistungen-innenausbau.jpg",
+    image: "/images/leistungen/leistungen-innenausbau-badsanierung-muenchen.png",
   },
   {
     name: "Reinigung & Facility",
@@ -43,7 +43,7 @@ const GEWERKE = [
     teaser: "Reinigung, Hausmeisterservice, Winterdienst und Objektmanagement – Betrieb und Werterhalt aus einer Hand.",
     tags: ["Reinigung", "Hausmeister", "Winterdienst"],
     icon: Building2,
-    image: "/images/leistungen/leistungen-reinigung-facility.jpg",
+    image: "/images/leistungen/leistungen-reinigung-facility-hausmeisterservice-winterdienst-muenchen.jpg",
   },
 ];
 

@@ -7,7 +7,7 @@ import { ProjectsIndex } from "@/components/blocks/referenzen/ProjectsIndex";
 export const metadata: Metadata = buildMetadata({
   title: "Projekte | handwerkmuenchen.de",
   description:
-    "Ausgewählte Referenzprojekte für Hausverwaltungen und Gewerbe in München: Elektrotechnik, Sanitär, Innenausbau, Reinigung und Facility. Belegbare Qualität.",
+    "Unsere aktuellsten Referenzprojekte für Hausverwaltungen, Gewerbe und Privat in München: Elektrotechnik, Sanitär, Innenausbau, Reinigung und Facility. Belegbare Qualität.",
   canonicalPath: "/projekte",
 });
 
@@ -17,7 +17,7 @@ export default function ProjektePage() {
       <MeisterleistungenHero
         eyebrow="PROJEKTE"
         title="Referenzen, die man belegen kann."
-        subline="Ausgewählte Projekte für Hausverwaltungen und Gewerbe in München."
+        subline="Unsere aktuellsten Projekte für Hausverwaltungen, Gewerbe und Privat in München."
       />
       <ProjectsIndex projects={projects} />
     </>

@@ -52,7 +52,7 @@ export interface BusinessConfig {
  * - sameAs: Google Business Profile URL und Social Media Links
  */
 export const BUSINESS: BusinessConfig = {
-  name: "Musterfirma",
+  name: "handwerkmuenchen.de",
   // TODO: Rechtlichen Firmennamen eintragen, falls abweichend
   // legalName: "Musterfirma GmbH",
   
@@ -62,12 +62,12 @@ export const BUSINESS: BusinessConfig = {
   phoneDisplay: "+49 (0)123 4567890", // Human-readable format
   hotlinePhone: "+491234567891", // E.164 format for 24/7 hotline
   hotlinePhoneDisplay: "+49 (0)123 4567891", // Human-readable format for hotline
-  email: "kontakt@handwerkmuenchen.de",
+  email: "info@handwerkmuenchen.de",
   
   // Adresse (öffentlich)
   address: {
-    street: "Musterstraße 1",
-    zip: "80331",
+    street: "Friedrichstraße 11",
+    zip: "80801",
     city: "München",
     region: "Bayern",
     country: "DE",
