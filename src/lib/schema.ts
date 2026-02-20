@@ -38,6 +38,19 @@ export function buildLocalBusinessSchema(config: BusinessConfig) {
     schema.legalName = config.legalName;
   }
 
+  /**
+   * Kern-Gewerke für LLMs & Local SEO:
+   * Elektro, Sanitär, Innenausbau, Reinigung, Facility sowie Wärmepumpen-Fokus.
+   * Wird über knowsAbout ausgespielt, damit Suchmaschinen die Leistungsbereiche verstehen.
+   */
+  schema.knowsAbout = [
+    "Elektrotechnik in München",
+    "Sanitär & Heizung in München",
+    "Innenausbau in München",
+    "Reinigung & Facility Services in München",
+    "Fachbetrieb für Wärmepumpen in München",
+  ];
+
   // Optional: Email
   if (config.email) {
     schema.email = config.email;

@@ -96,6 +96,7 @@ export const projects: ProjectItem[] = [
       "/referenzen/neubau-gebaeudetechnik-muenchen/neubau-gebaeudetechnik-muenchen-elektro-verkabelung-installation-1.jpg",
       "/referenzen/neubau-gebaeudetechnik-muenchen/neubau-gebaeudetechnik-muenchen-elektro-zaehlerschrank-verteilung-2.jpg",
       "/referenzen/neubau-gebaeudetechnik-muenchen/neubau-gebaeudetechnik-muenchen-knx-gebaeudeautomation-4.jpg",
+      "/referenzen/neubau-gebaeudetechnik-muenchen/neubau-gebaeudetechnik-muenchen-knx-verteilerschrank-gebaeudeautomation-muenchen.png",
       "/referenzen/neubau-gebaeudetechnik-muenchen/neubau-gebaeudetechnik-muenchen-klimaanlage-lueftung-5.jpg",
       "/referenzen/neubau-gebaeudetechnik-muenchen/neubau-gebaeudetechnik-muenchen-server-netzwerktechnik-6.jpg",
       "/referenzen/neubau-gebaeudetechnik-muenchen/neubau-gebaeudetechnik-muenchen-sanitaer-installation-7.jpg",

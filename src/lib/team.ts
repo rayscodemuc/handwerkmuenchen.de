@@ -20,7 +20,7 @@ export const meisterrunde = [
     claim: "Elektrotechnik aus einer Hand – von Planung bis Abnahme, dokumentiert und abnahmesicher.",
     tags: ["Elektro", "Abnahme", "GU-Abwicklung"],
     badges: ["Meisterbetrieb", "Abnahme & Doku", "GU-Abwicklung"],
-    image: "/images/team/elektromeister-elektro-muenchen.png",
+    image: "/images/team/elektromeister-messung-elektroverteilung-muenchen.png",
     href: "/leistungen/elektrotechnik",
   },
   {

@@ -46,8 +46,8 @@ export default function Datenschutz() {
               <p className="text-foreground mb-6">
                 handwerkmuenchen.de<br />
                 <br />
-                Seebruckerstraße 13<br />
-                81825 München<br />
+                Friedrichstraße 11<br />
+                80801 München<br />
                 Deutschland
               </p>
               <p className="text-foreground mb-6">

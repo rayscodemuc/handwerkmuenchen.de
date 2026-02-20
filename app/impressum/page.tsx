@@ -32,8 +32,8 @@ export default function Impressum() {
               <p className="text-foreground mb-6">
                 handwerkmuenchen.de<br />
                 <br />
-                Seebruckerstraße 13<br />
-                81825 München
+                Friedrichstraße 11<br />
+                80801 München
               </p>
 
               <h2 className="text-2xl font-bold mt-10 mb-4">Vertreten durch</h2>

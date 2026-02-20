@@ -1,3 +1,46 @@
+import type { MetadataRoute } from "next";
+import { projects } from "@/lib/referenzen/projects";
+
+const getBaseUrl = (): string => {
+  return (
+    process.env.SITE_URL ||
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    "https://handwerkmuenchen.de"
+  );
+};
+
+export default function sitemap(): MetadataRoute.Sitemap {
+  const baseUrl = getBaseUrl().replace(/\/+$/, "");
+
+  const staticRoutes: string[] = [
+    "/",
+    "/leistungen",
+    "/leistungen/elektrotechnik",
+    "/leistungen/sanitaer-heizung",
+    "/leistungen/innenausbau",
+    "/leistungen/reinigung-facility",
+    "/projekte",
+    "/anfrage",
+    "/kontakt",
+    "/impressum",
+    "/datenschutz",
+    "/partner-werden",
+  ];
+
+  const projectRoutes = projects.map((project) => `/projekte/${project.slug}`);
+
+  const allRoutes = [...staticRoutes, ...projectRoutes];
+
+  const now = new Date().toISOString();
+
+  return allRoutes.map((path) => ({
+    url: `${baseUrl}${path}`,
+    lastModified: now,
+    changeFrequency: "weekly",
+    priority: path === "/" ? 1.0 : path.startsWith("/leistungen") ? 0.9 : 0.8,
+  }));
+}
+
 import { MetadataRoute } from "next";
 import { BASE_URL } from "@/lib/seo";
 

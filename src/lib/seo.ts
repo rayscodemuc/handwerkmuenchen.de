@@ -23,7 +23,7 @@ export function buildMetadata(options: BuildMetadataOptions): Metadata {
     ogDescription = description,
   } = options;
   const canonicalUrl = `${BASE_URL}${canonicalPath.startsWith("/") ? canonicalPath : `/${canonicalPath}`}`;
-  return {
+  const base: Metadata = {
     title,
     description,
     alternates: { canonical: canonicalPath },
@@ -31,15 +31,23 @@ export function buildMetadata(options: BuildMetadataOptions): Metadata {
       title: ogTitle,
       description: ogDescription,
       url: canonicalUrl,
-      siteName: "Handwerk München",
+      siteName: "handwerkmuenchen.de",
       type: "website",
+      images: [
+        {
+          url: `${BASE_URL}/images/elektromeister-elektro-meisterbetrieb-muenchen.png`,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title: ogTitle,
       description: ogDescription,
+      images: [`${BASE_URL}/images/elektromeister-elektro-meisterbetrieb-muenchen.png`],
     },
   };
+
+  return base;
 }
 
 export type ProfessionalServiceJsonLdOptions = {

@@ -67,8 +67,9 @@ const NETZWERK_CARDS_SHARED: NetzwerkCard[] = [
 
 export const elektrotechnik: GewerkConfig = {
   slug: "elektrotechnik",
-  metaTitle: "Elektrotechnik München – E-Check, Wartung & Installation | Meisterrunde",
-  metaDescription: "Elektrotechnik für Hausverwaltungen und Gewerbe in München: E-Check, Wartung, Störung, Umbau. Feste Meisterbetriebe, ein Ansprechpartner, saubere Dokumentation.",
+  metaTitle: "Elektrotechnik München – Meisterbetrieb für Elektroinstallation & Wärmepumpen",
+  metaDescription:
+    "Elektrotechnik in München für Hausverwaltungen und Gewerbe: E-Check, Wartung, Störung, Umbau und Elektroanschlüsse für Wärmepumpen. Meisterbetrieb mit klarer Verantwortung, sauber dokumentiert.",
   eyebrow: "Elektrotechnik in München",
   h1: "Ein Ansprechpartner. Klare Verantwortung.",
   subline: "Feste Meisterbetriebe im Netzwerk. Keine Subunternehmerkette. Saubere Abstimmung – inklusive Dokumentation, Protokoll und klarer Zuständigkeit für Hausverwaltungen und Gewerbe.",
@@ -127,8 +128,9 @@ export const elektrotechnik: GewerkConfig = {
 
 export const sanitaerHeizung: GewerkConfig = {
   slug: "sanitaer-heizung",
-  metaTitle: "Sanitär & Heizung München für Hausverwaltungen & Gewerbe | Meisterrunde",
-  metaDescription: "Sanitär- und Heizungstechnik für Hausverwaltungen und Gewerbe in München: Wartung, Legionellenprüfung, hydraulischer Abgleich. Zertifiziert, dokumentiert, ein Ansprechpartner.",
+  metaTitle: "Sanitär & Heizung München – Fachbetrieb für Wärmepumpen & SHK",
+  metaDescription:
+    "Sanitär- und Heizungstechnik in München: Fachbetrieb für Wärmepumpen, Wartung, Legionellenprüfung und hydraulischen Abgleich. Dokumentierte SHK-Leistungen für Hausverwaltungen & Gewerbe.",
   eyebrow: "Sanitär & Heizung in München",
   h1: "Versorgungssicherheit & Asset-Schutz.",
   subline: "Zertifizierte Wartung und Instandhaltung technischer Gebäudeanlagen. Wir schützen Ihre Assets gegen Systemausfälle und Wasserschäden – ein Ansprechpartner, dokumentierte Abnahme.",
