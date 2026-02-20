@@ -51,7 +51,7 @@ export const meisterrunde = [
     claim: "Reinigung und Facility aus einer Hand – Qualitätsstandards und dokumentierte Leistung, ohne Meistertitel.",
     tags: ["Reinigung", "Facility", "Dokumentation"],
     badges: ["Fachbetrieb", "Qualitätsstandards", "Dokumentierte Leistung"],
-    image: "/images/team/reinigung-facility.jpg",
+    image: "/images/team/reinigung-facility-gebaeudereinigung-hygiene-muenchen.png",
     href: "/leistungen/reinigung",
   },
 ] as const;

@@ -1,270 +1,86 @@
 import type { MetadataRoute } from "next";
-import { projects } from "@/lib/referenzen/projects";
+import { projects, ALLOWED_GEWERK_SLUGS } from "@/lib/referenzen/projects";
 
 const getBaseUrl = (): string => {
   return (
     process.env.SITE_URL ||
     process.env.NEXT_PUBLIC_SITE_URL ||
     "https://handwerkmuenchen.de"
-  );
+  ).replace(/\/+$/, "");
 };
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = getBaseUrl().replace(/\/+$/, "");
-
-  const staticRoutes: string[] = [
-    "/",
-    "/leistungen",
-    "/leistungen/elektrotechnik",
-    "/leistungen/sanitaer-heizung",
-    "/leistungen/innenausbau",
-    "/leistungen/reinigung-facility",
-    "/projekte",
-    "/anfrage",
-    "/kontakt",
-    "/impressum",
-    "/datenschutz",
-    "/partner-werden",
-  ];
-
-  const projectRoutes = projects.map((project) => `/projekte/${project.slug}`);
-
-  const allRoutes = [...staticRoutes, ...projectRoutes];
-
-  const now = new Date().toISOString();
-
-  return allRoutes.map((path) => ({
-    url: `${baseUrl}${path}`,
-    lastModified: now,
-    changeFrequency: "weekly",
-    priority: path === "/" ? 1.0 : path.startsWith("/leistungen") ? 0.9 : 0.8,
-  }));
+function entry(
+  path: string,
+  priority: number,
+  changeFrequency: "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never" = "weekly"
+): MetadataRoute.Sitemap[number] {
+  return {
+    url: `${getBaseUrl()}${path}`,
+    lastModified: new Date(),
+    changeFrequency,
+    priority,
+  };
 }
 
-import { MetadataRoute } from "next";
-import { BASE_URL } from "@/lib/seo";
-
-const getBaseUrl = (): string => {
-  return process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || BASE_URL;
-};
-
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = getBaseUrl()
-  const lastModified = new Date()
+  const entries: MetadataRoute.Sitemap = [];
 
-  return [
-    {
-      url: `${baseUrl}/`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/kontakt`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/ueber-uns`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/impressum`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/datenschutz`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/anfrage`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/rechner`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/partner-werden`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/leistungen`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/leistungen/reinigung-facility`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/leistungen/reinigung-facility/reinigung`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/leistungen/reinigung-facility/facility`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/leistungen/reinigung`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/leistungen/facility`,
-      lastModified,
-    },
-    // Kategorie-Landingpages
-    {
-      url: `${baseUrl}/leistungen/facility`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/leistungen/innenausbau`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/aussenanlagen`,
-      lastModified,
-    },
-    // Leistungen: Elektrotechnik
-    {
-      url: `${baseUrl}/leistungen/elektrotechnik`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/leistungen/elektrotechnik/e-mobility`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/leistungen/elektrotechnik/hauselektrik`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/leistungen/elektrotechnik/klingelanlagen`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/leistungen/elektrotechnik/led`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/leistungen/elektrotechnik/messsysteme`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/leistungen/elektrotechnik/neubau`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/leistungen/elektrotechnik/reparaturen`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/leistungen/elektrotechnik/sanierung`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/leistungen/elektrotechnik/sicherheitstechnik`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/leistungen/elektrotechnik/smart-home`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/leistungen/sanitaer-heizung`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/leistungen/service-wartung`,
-      lastModified,
-    },
-    // Reinigung: /leistungen/* und /reinigung/* (Unterseiten)
-    {
-      url: `${baseUrl}/leistungen/unterhaltsreinigung`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/leistungen/grundreinigung`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/leistungen/fensterreinigung`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/leistungen/glas-fassade`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/leistungen/sonderreinigung`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/leistungen/grauflaechenreinigung`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/leistungen/tiefgaragenreinigung`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/leistungen/bueroreinigung`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/reinigung/unterhaltsreinigung`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/reinigung/grundreinigung`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/reinigung/fensterreinigung`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/reinigung/glas-fassade`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/reinigung/sonderreinigung`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/reinigung/grauflaechenreinigung`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/reinigung/tiefgaragenreinigung`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/reinigung/bueroreinigung`,
-      lastModified,
-    },
-    // Facility Management
-    {
-      url: `${baseUrl}/leistungen/hausmeisterservice`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/leistungen/objektmanagement`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/leistungen/winterdienst`,
-      lastModified,
-    },
-    // Außenanlagen
-    {
-      url: `${baseUrl}/aussenanlagen/gruenpflege`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/aussenanlagen/baumpflege`,
-      lastModified,
-    },
-    {
-      url: `${baseUrl}/aussenanlagen/winterdienst-aussen`,
-      lastModified,
-    },
-  ]
+  // Statische Seiten
+  entries.push(entry("/", 1.0));
+  entries.push(entry("/ueber-uns", 0.9));
+  entries.push(entry("/kontakt", 0.9));
+  entries.push(entry("/anfrage", 0.9));
+  entries.push(entry("/impressum", 0.6));
+  entries.push(entry("/datenschutz", 0.6));
+  entries.push(entry("/partner-werden", 0.8));
+  entries.push(entry("/rechner", 0.8));
+
+  // Leistungen Hub
+  entries.push(entry("/leistungen", 0.95));
+
+  // Gewerke
+  entries.push(entry("/leistungen/elektrotechnik", 0.9));
+  entries.push(entry("/leistungen/sanitaer-heizung", 0.9));
+  entries.push(entry("/leistungen/innenausbau", 0.9));
+  entries.push(entry("/leistungen/reinigung", 0.9));
+  entries.push(entry("/leistungen/reinigung-facility", 0.9));
+  entries.push(entry("/leistungen/reinigung-facility/reinigung", 0.85));
+  entries.push(entry("/leistungen/reinigung-facility/facility", 0.85));
+  entries.push(entry("/leistungen/facility", 0.9));
+
+  // Elektrotechnik Unterseiten
+  const elektroSub = [
+    "e-mobility", "hauselektrik", "klingelanlagen", "led", "messsysteme",
+    "neubau", "reparaturen", "sanierung", "sicherheitstechnik", "smart-home",
+  ];
+  elektroSub.forEach((slug) => entries.push(entry(`/leistungen/elektrotechnik/${slug}`, 0.85)));
+
+  // Reinigung (unter /leistungen)
+  const reinigungLeistungen = [
+    "unterhaltsreinigung", "grundreinigung", "fensterreinigung", "glas-fassade",
+    "sonderreinigung", "grauflaechenreinigung", "tiefgaragenreinigung", "bueroreinigung",
+  ];
+  reinigungLeistungen.forEach((slug) => entries.push(entry(`/leistungen/${slug}`, 0.85)));
+
+  // Facility / weitere Leistungen
+  entries.push(entry("/leistungen/hausmeisterservice", 0.85));
+  entries.push(entry("/leistungen/objektmanagement", 0.85));
+  entries.push(entry("/leistungen/winterdienst", 0.85));
+  entries.push(entry("/leistungen/winterdienst-aussen", 0.85));
+  entries.push(entry("/leistungen/service-wartung", 0.85));
+  entries.push(entry("/leistungen/gruenpflege", 0.85));
+  entries.push(entry("/leistungen/baumpflege", 0.85));
+
+  // Reinigung (unter /reinigung – parallele Struktur)
+  reinigungLeistungen.forEach((slug) => entries.push(entry(`/reinigung/${slug}`, 0.85)));
+
+  // Projekte
+  entries.push(entry("/projekte", 0.95));
+  ALLOWED_GEWERK_SLUGS.forEach((gewerk) => entries.push(entry(`/projekte/${gewerk}`, 0.9)));
+
+  // Meisterleistungen (Projekt-Details: /meisterleistungen/[slug])
+  entries.push(entry("/meisterleistungen", 0.95));
+  projects.forEach((p) => entries.push(entry(`/meisterleistungen/${p.slug}`, 0.9)));
+
+  return entries;
 }
