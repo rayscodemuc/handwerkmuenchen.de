@@ -9,15 +9,7 @@ import { useState, useEffect } from "react";
 /** Nur auf Reinigung- und Facility-Seiten anzeigen (außer Hub, der eigenen Sticky hat) */
 function isReinigungOrFacilityPage(pathname: string) {
   if (pathname === "/leistungen/reinigung-facility" || pathname.startsWith("/leistungen/reinigung-facility/")) return false;
-  return (
-    pathname.startsWith("/leistungen/reinigung") ||
-    pathname.startsWith("/leistungen/facility") ||
-    pathname.startsWith("/reinigung") ||
-    pathname.startsWith("/leistungen/facility") ||
-    pathname.startsWith("/leistungen/hausmeisterservice") ||
-    pathname.startsWith("/leistungen/objektmanagement") ||
-    pathname.startsWith("/leistungen/winterdienst")
-  );
+  return pathname.startsWith("/leistungen/reinigung-facility") || pathname.startsWith("/reinigung");
 }
 
 export function StickyCTA() {

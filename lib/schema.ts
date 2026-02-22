@@ -30,7 +30,6 @@ export function buildLocalBusinessSchema(config: BusinessConfig) {
     "@id": `${config.url}/#business`,
     name: config.name,
     url: config.url,
-    telephone: config.phone,
   };
 
   // Optional: Legal Name

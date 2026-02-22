@@ -14,7 +14,7 @@ export const projects: ProjectItem[] = [
     title: "Unterschleißheim – Sanierungsprojekt",
     location: "Unterschleißheim",
     objectType: "Hausverwaltung",
-    trades: ["elektrotechnik", "sanitaer-heizung", "innenausbau", "reinigung"],
+    trades: ["elektrotechnik", "sanitaer-heizung", "innenausbau", "reinigung-facility"],
     services: ["Elektroinstallation", "Sanitärinstallation", "Innenausbau", "Malerarbeiten", "Baufeinreinigung"],
     excerpt:
       "Komplettsanierung mit Elektro, Sanitär, Innenausbau und Malerarbeiten – koordiniert aus einer Hand. Projekt läuft noch, Abschluss voraussichtlich Ende Februar 2026.",
@@ -79,7 +79,7 @@ export const projects: ProjectItem[] = [
     title: "München – Neubau mit kompletter Gebäudetechnik",
     location: "München",
     objectType: "Privat",
-    trades: ["elektrotechnik", "sanitaer-heizung", "innenausbau", "reinigung"],
+    trades: ["elektrotechnik", "sanitaer-heizung", "innenausbau", "reinigung-facility"],
     services: [
       "Komplette Elektroinstallation mit Zählerschrank",
       "Verkabelung und KNX-Gebäudeautomation",
@@ -241,8 +241,7 @@ export const tradeLabels: Record<Trade, string> = {
   elektrotechnik: "Elektrotechnik",
   "sanitaer-heizung": "Sanitär & Heizung",
   innenausbau: "Innenausbau",
-  reinigung: "Reinigung",
-  facility: "Facility",
+  "reinigung-facility": "Reinigung & Facility",
 };
 
 /** Labels für Objekttyp */
@@ -264,13 +263,11 @@ export const allObjectTypesFromProjects: ObjectType[] = Array.from(
   new Set(projects.map((p) => p.objectType))
 );
 
-/** Erlaubte Gewerk-Slugs für Route /projekte/[gewerk]. reinigung-facility = Projekte mit reinigung ODER facility. */
+/** Erlaubte Gewerk-Slugs für Route /projekte/[gewerk]. */
 export const ALLOWED_GEWERK_SLUGS = [
   "elektrotechnik",
   "sanitaer-heizung",
   "innenausbau",
-  "reinigung",
-  "facility",
   "reinigung-facility",
 ] as const;
 
@@ -281,8 +278,6 @@ export const gewerkSlugToLabel: Record<GewerkSlug, string> = {
   elektrotechnik: "Elektrotechnik",
   "sanitaer-heizung": "Sanitär & Heizung",
   innenausbau: "Innenausbau",
-  reinigung: "Reinigung",
-  facility: "Facility",
   "reinigung-facility": "Reinigung & Facility",
 };
 
@@ -309,18 +304,6 @@ export const gewerkHeroHeadings: Record<
     subline:
       "Malerarbeiten, Trockenbau, Boden – termingerecht und abgenommen.",
   },
-  reinigung: {
-    eyebrow: "REINIGUNG",
-    title: "Referenzprojekte Reinigung",
-    subline:
-      "Unterhaltsreinigung, Grundreinigung, Sonderreinigung – dokumentierte Qualität.",
-  },
-  facility: {
-    eyebrow: "FACILITY",
-    title: "Referenzprojekte Facility",
-    subline:
-      "Hausmeisterservice, Winterdienst, Grünpflege – ein Ansprechpartner für alle Gewerke.",
-  },
   "reinigung-facility": {
     eyebrow: "REINIGUNG & FACILITY",
     title: "Referenzprojekte Reinigung & Facility",
@@ -334,13 +317,8 @@ export function isAllowedGewerkSlug(slug: string): slug is GewerkSlug {
   return (ALLOWED_GEWERK_SLUGS as readonly string[]).includes(slug);
 }
 
-/** Projekte nach Gewerk filtern (für /projekte/[gewerk]). reinigung-facility = reinigung ODER facility. */
+/** Projekte nach Gewerk filtern (für /projekte/[gewerk]). */
 export function getProjectsByGewerk(gewerkSlug: GewerkSlug): ProjectItem[] {
-  if (gewerkSlug === "reinigung-facility") {
-    return projects.filter(
-      (p) => p.trades.includes("reinigung") || p.trades.includes("facility")
-    );
-  }
   return projects.filter((p) => p.trades.includes(gewerkSlug as Trade));
 }
 

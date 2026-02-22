@@ -52,6 +52,6 @@ export const meisterrunde = [
     tags: ["Reinigung", "Facility", "Dokumentation"],
     badges: ["Fachbetrieb", "Qualitätsstandards", "Dokumentierte Leistung"],
     image: "/images/team/reinigung-facility.jpg",
-    href: "/leistungen/reinigung",
+    href: "/leistungen/reinigung-facility/reinigung",
   },
 ] as const;

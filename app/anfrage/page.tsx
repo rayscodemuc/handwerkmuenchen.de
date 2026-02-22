@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { z } from "zod";
-import { Send, Phone, Mail, MapPin, Clock, CheckCircle2, RotateCcw } from "lucide-react";
+import { Send, Mail, MapPin, Clock, CheckCircle2, RotateCcw } from "lucide-react";
 import type { InquiryFormFields } from "@/hooks/useFormSubmit";
 import { useUniversalSubmit } from "@/hooks/useUniversalSubmit";
 import { DEFAULT_COMPANY_ID } from "@/src/config/businessConfig";
@@ -38,12 +38,6 @@ const serviceOptions = [
 ];
 
 const contactInfo = [
-  {
-    icon: Phone,
-    title: "Telefon",
-    content: BUSINESS.phoneDisplay || BUSINESS.phone,
-    href: `tel:${BUSINESS.phone}`,
-  },
   {
     icon: Mail,
     title: "E-Mail",
@@ -189,7 +183,7 @@ function AnfrageInner() {
                   Kontaktdaten
                 </h2>
                 <p className="mt-3 text-[#3E505B]">
-                  Sie erreichen uns auch direkt per Telefon oder E-Mail.
+                  Sie erreichen uns per E-Mail oder über das Kontaktformular.
                 </p>
 
                 <div className="mt-10 space-y-6">

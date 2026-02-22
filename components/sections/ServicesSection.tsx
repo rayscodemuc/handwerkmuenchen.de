@@ -31,14 +31,14 @@ const services = [
     id: "reinigung",
     title: "Reinigung",
     description: "Unterhalts-, Büro- und Fensterreinigung sowie Sonder- und Grundreinigung für glänzende Ergebnisse.",
-    href: "/leistungen/reinigung",
+    href: "/leistungen/reinigung-facility/reinigung",
     icon: Sparkles,
   },
   {
     id: "facility",
     title: "Facility",
     description: "Hausmeisterservice, Winterdienst, Objektmanagement und Außenanlagen – Betrieb und Werterhalt aus einer Hand.",
-    href: "/leistungen/facility",
+    href: "/leistungen/reinigung-facility/facility",
     icon: Building2,
   },
 ];

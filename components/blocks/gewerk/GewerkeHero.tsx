@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Phone } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import { AnimatedButton } from "@/components/ui/animated-button";
 import type { GewerkCtas } from "@/lib/leistungen/config";
 
@@ -23,18 +23,21 @@ export function GewerkeHero({ eyebrow, h1, subline, ctas, chips }: GewerkeHeroPr
           <p className="mt-7 mx-auto max-w-[60ch] text-base sm:text-lg text-[#FCFCFC]/75 leading-relaxed text-balance">
             {subline}
           </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-4">
-            <Link href={ctas.primary.href}>
-              <AnimatedButton className="bg-[#8AB0AB] text-[#26413C] hover:bg-[#8AB0AB]/90 border-0">
+          <div className="mt-8 flex flex-wrap justify-center items-stretch gap-4">
+            <Link
+              href={ctas.primary.href}
+              className="inline-flex min-w-[180px] h-12 items-center justify-center rounded-lg"
+            >
+              <AnimatedButton className="w-full h-full min-h-12 min-w-[180px] bg-[#8AB0AB] text-[#26413C] hover:bg-[#8AB0AB]/90 border-0 px-6 py-3 text-base font-semibold">
                 {ctas.primary.label}
               </AnimatedButton>
             </Link>
             {ctas.secondary && (
               <Link
                 href={ctas.secondary.href}
-                className="inline-flex items-center justify-center rounded-lg border border-[#FCFCFC]/35 bg-transparent px-6 py-3 text-base font-semibold text-[#FCFCFC] transition-colors hover:bg-[#FCFCFC]/10"
+                className="inline-flex min-w-[180px] h-12 items-center justify-center gap-2 rounded-lg border border-[#FCFCFC]/35 bg-transparent px-6 py-3 text-base font-semibold text-[#FCFCFC] transition-colors hover:bg-[#FCFCFC]/10"
               >
-                <Phone className="mr-2 h-4 w-4" aria-hidden />
+                <MessageSquare className="h-4 w-4 shrink-0" aria-hidden />
                 {ctas.secondary.label}
               </Link>
             )}

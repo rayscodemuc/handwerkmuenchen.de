@@ -1,6 +1,6 @@
 "use client";
 
-import { Phone, Mail, MapPin } from "lucide-react";
+import { Mail, MapPin } from "lucide-react";
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { BUSINESS } from "@/lib/business";
@@ -14,7 +14,7 @@ const footerLinks = {
     { name: "Reinigung & Facility", href: "/leistungen/reinigung-facility" },
   ],
   unternehmen: [
-    { name: "Projekte", href: "/meisterleistungen" },
+    { name: "Projekte", href: "/projekte" },
     { name: "Über uns", href: "/ueber-uns" },
     { name: "Kontakt", href: "/kontakt" },
     { name: "Anfrage", href: "/anfrage" },
@@ -37,12 +37,6 @@ export function Footer() {
               Meistergewerke in München – unter einem Dach koordiniert, Reinigung &amp; Facility als Fachbetrieb.
             </p>
             <div className="mt-6 space-y-3">
-              <div className="flex items-center gap-3 text-muted-foreground">
-                <Phone className="h-5 w-5 text-primary" strokeWidth={1.5} />
-                <a href={`tel:${BUSINESS.phone}`} className="hover:text-foreground transition-colors">
-                  {BUSINESS.phoneDisplay || BUSINESS.phone}
-                </a>
-              </div>
               <div className="flex items-center gap-3 text-muted-foreground">
                 <Mail className="h-5 w-5 text-primary" strokeWidth={1.5} />
                 <a href={`mailto:${BUSINESS.email}`} className="hover:text-foreground transition-colors">

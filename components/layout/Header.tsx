@@ -18,12 +18,12 @@ const primaryNav = [
   { name: "Kontakt", href: "/kontakt" },
 ];
 
-/** Zeige Gewerke-Leiste nur unter /leistungen und /leistungen/* bzw. /meisterleistungen und /meisterleistungen/* (bzw. /projekte wenn vorhanden). */
+/** Zeige Gewerke-Leiste nur unter /leistungen und /projekte. */
 function showGewerkeBar(pathname: string): boolean {
-  return pathname.startsWith("/leistungen") || pathname.startsWith("/meisterleistungen") || pathname.startsWith("/projekte");
+  return pathname.startsWith("/leistungen") || pathname.startsWith("/projekte");
 }
 
-/** Basis-Pfad für Gewerke-Links: /leistungen oder /projekte. Unter /meisterleistungen verlinken wir auf /leistungen/<slug>, da Meisterleistungen-[slug] Referenzprojekte sind. */
+/** Basis-Pfad für Gewerke-Links: /leistungen oder /projekte */
 function getGewerkeBasePath(pathname: string): string {
   if (pathname.startsWith("/leistungen")) return "/leistungen";
   if (pathname.startsWith("/projekte")) return "/projekte";

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { ContactForm } from "@/components/ContactForm";
 import { EinsatzgebietMapLoader } from "@/components/EinsatzgebietMapLoader";
-import { Phone, Mail, MapPin } from "lucide-react";
+import { Mail, MapPin } from "lucide-react";
 import Link from "next/link";
 import { BUSINESS } from "@/lib/business";
 import { BadgeRow } from "@/components/BadgeRow";
@@ -15,13 +15,6 @@ export const metadata: Metadata = {
 };
 
 const contactInfo = [
-  {
-    icon: Phone,
-    title: "Telefon",
-    content: BUSINESS.phoneDisplay || BUSINESS.phone,
-    subContent: "Mo-Fr 8:00-18:00 Uhr",
-    href: `tel:${BUSINESS.phone}`,
-  },
   {
     icon: Mail,
     title: "E-Mail",

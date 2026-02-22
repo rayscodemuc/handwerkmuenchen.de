@@ -68,14 +68,14 @@ export function HeroSection() {
               <p className="mt-2 sm:mt-3 text-center text-xs sm:text-sm text-white/90">
                 <span>+ </span>
                 <Link
-                  href="/leistungen/reinigung"
+                  href="/leistungen/reinigung-facility/reinigung"
                   className="text-[#8AB0AB] hover:text-[#8AB0AB] underline-offset-2 hover:underline"
                 >
                   Reinigung
                 </Link>
                 <span> & </span>
                 <Link
-                  href="/leistungen/facility"
+                  href="/leistungen/reinigung-facility/facility"
                   className="text-[#8AB0AB] hover:text-[#8AB0AB] underline-offset-2 hover:underline"
                 >
                   Facility

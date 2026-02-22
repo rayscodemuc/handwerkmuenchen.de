@@ -24,7 +24,7 @@ export function ReferenzenGrid({ projects, emptyMessage }: ReferenzenGridProps) 
       {projects.map((project) => (
         <Link
           key={project.slug}
-          href={`/meisterleistungen/${project.slug}`}
+          href={`/projekte/${project.slug}`}
           className="group flex flex-col overflow-hidden rounded-xl border border-[#E5E7EB] bg-[#FFFFFF] transition-shadow hover:shadow-lg hover:border-[#73628A]/30"
         >
           <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#FCFCFC]">

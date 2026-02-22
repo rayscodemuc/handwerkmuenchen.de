@@ -48,7 +48,6 @@ Die `leads` Tabelle hat folgende Felder:
 - **Kontaktformular** (`/kontakt`): `form_id = 'contact_form'`
 - **Anfrageformular** (`/anfrage`): `form_id = 'inquiry_form'`
 - **Rechner** (`/rechner`): `form_id = 'service_calculator'`
-- **Partner-Formular** (`/partner-werden`): `form_id = 'partner_form'`
 
 ## 6. Fehlerbehebung
 

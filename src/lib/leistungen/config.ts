@@ -73,7 +73,7 @@ export const elektrotechnik: GewerkConfig = {
   eyebrow: "Elektrotechnik in München",
   h1: "Ein Ansprechpartner. Klare Verantwortung.",
   subline: "Feste Meisterbetriebe im Netzwerk. Keine Subunternehmerkette. Saubere Abstimmung – inklusive Dokumentation, Protokoll und klarer Zuständigkeit für Hausverwaltungen und Gewerbe.",
-  ctas: { primary: { label: "Projekt anfragen", href: "/anfrage" }, secondary: { label: "Rückruf anfordern", href: "/kontakt" } },
+  ctas: { primary: { label: "Projekt anfragen", href: "/anfrage" }, secondary: { label: "Kontakt aufnehmen", href: "/kontakt" } },
   chips: ["Feste Meister", "E-Check inkl. Protokoll", "Koordination im Netzwerk", "München & Umland"],
   leistungenHeading: "Elektrotechnik-Leistungen für Hausverwaltungen & Gewerbe",
   leistungenSubline: "Wartung, Störung, Umbau oder Prüfung – wir übernehmen sauber koordiniert und dokumentiert.",
@@ -121,7 +121,7 @@ export const elektrotechnik: GewerkConfig = {
   ctaSubline: "Für Hausverwaltungen und Gewerbe: kurze Abstimmung, klare Zuständigkeit, saubere Dokumentation.",
   ctaPrimaryLabel: "Projekt anfragen",
   ctaPrimaryHref: "/anfrage",
-  ctaSecondaryLabel: "Rückruf anfordern",
+  ctaSecondaryLabel: "Kontakt aufnehmen",
   ctaSecondaryHref: "/kontakt",
   ctaTrustLine: "Antwort in der Regel innerhalb von 24h (werktags) · München & Umland",
 };
@@ -134,7 +134,7 @@ export const sanitaerHeizung: GewerkConfig = {
   eyebrow: "Sanitär & Heizung in München",
   h1: "Versorgungssicherheit & Asset-Schutz.",
   subline: "Zertifizierte Wartung und Instandhaltung technischer Gebäudeanlagen. Wir schützen Ihre Assets gegen Systemausfälle und Wasserschäden – ein Ansprechpartner, dokumentierte Abnahme.",
-  ctas: { primary: { label: "Projekt anfragen", href: "/anfrage" }, secondary: { label: "Rückruf anfordern", href: "/kontakt" } },
+  ctas: { primary: { label: "Projekt anfragen", href: "/anfrage" }, secondary: { label: "Kontakt aufnehmen", href: "/kontakt" } },
   chips: ["Meisterbetrieb", "TrinkwV / Legionellen", "GU-Abwicklung", "München & Umland"],
   leistungenHeading: "Sanitär & Heizung für Hausverwaltungen & Gewerbe",
   leistungenSubline: "Störung, Wartung oder Umbau im Bestand – wir koordinieren sauber und dokumentieren nachvollziehbar.",
@@ -179,7 +179,7 @@ export const sanitaerHeizung: GewerkConfig = {
   ctaSubline: "Für Hausverwaltungen und Gewerbe: kurze Abstimmung, klare Zuständigkeit, dokumentierte Wartung und Prüfung.",
   ctaPrimaryLabel: "Projekt anfragen",
   ctaPrimaryHref: "/anfrage",
-  ctaSecondaryLabel: "Rückruf anfordern",
+  ctaSecondaryLabel: "Kontakt aufnehmen",
   ctaSecondaryHref: "/kontakt",
   ctaTrustLine: "Antwort in der Regel innerhalb von 24h (werktags) · München & Umland",
 };
@@ -192,7 +192,7 @@ export const innenausbau: GewerkConfig = {
   h1: "Sauber koordiniert. Hochwertig umgesetzt.",
   subline:
     "Maler, Boden, Fliesen, Estrich und Fassade – mit klarer Zuständigkeit, sauberer Koordination und dokumentierter Übergabe.",
-  ctas: { primary: { label: "Projekt anfragen", href: "/anfrage" }, secondary: { label: "Projekt anfragen", href: "/anfrage" } },
+  ctas: { primary: { label: "Projekt anfragen", href: "/anfrage" }, secondary: { label: "Kontakt aufnehmen", href: "/kontakt" } },
   chips: [
     "Sanierung & Modernisierung",
     "Spachteltechniken",
@@ -306,6 +306,8 @@ export const innenausbau: GewerkConfig = {
   ctaSubline: "Ein Ansprechpartner, klare Zuständigkeit, dokumentierte Übergabe.",
   ctaPrimaryLabel: "Projekt anfragen",
   ctaPrimaryHref: "/anfrage",
+  ctaSecondaryLabel: "Kontakt aufnehmen",
+  ctaSecondaryHref: "/kontakt",
   ctaTrustLine: "München & Umgebung · Antwort in der Regel innerhalb von 24h (werktags)",
 };
 
@@ -316,7 +318,7 @@ export const reinigung: GewerkConfig = {
   eyebrow: "Reinigung München",
   h1: "Sauberkeit schafft Werte.",
   subline: "Unterhalts-, Büro- und Praxisreinigung, Fensterreinigung, Bauend- und Sonderreinigung – mit dokumentierter Qualität und festen Ansprechpartnern.",
-  ctas: { primary: { label: "Projekt anfragen", href: "/anfrage" }, secondary: { label: "Anrufen", href: "tel:+491234567890" } },
+  ctas: { primary: { label: "Projekt anfragen", href: "/anfrage" }, secondary: { label: "Kontakt aufnehmen", href: "/kontakt" } },
   chips: ["Feste Teams", "Checklisten & Abnahme", "München & Umgebung", "Dokumentierte Qualität"],
   leistungenHeading: "Unsere Reinigungsleistungen",
   leistungenSubline: "Von Unterhalts- bis Sonderreinigung – Turnus und Umfang passen wir an Ihre Nutzung und Ihr Budget an.",
@@ -337,7 +339,7 @@ export const reinigung: GewerkConfig = {
         title: "Objektleitung & Ansprechpartner",
         body: "Ein Ansprechpartner für Turnus, Sondereinsätze und Qualitätsfragen – keine anonymen Hotlines.",
         bullets: ["Objektleitung & Ansprechpartner", "Turnus & Sonderwünsche", "Transparente Kommunikation"],
-        schnittstellenLinks: [{ label: "Facility & Objektservice", href: "/leistungen/facility" }],
+        schnittstellenLinks: [{ label: "Facility & Objektservice", href: "/leistungen/reinigung-facility/facility" }],
       },
       {
         title: "Qualitätssicherung",
@@ -357,8 +359,8 @@ export const reinigung: GewerkConfig = {
   ctaSubline: "München & Umgebung · Dokumentierte Qualität · Feste Teams.",
   ctaPrimaryLabel: "Projekt anfragen",
   ctaPrimaryHref: "/anfrage",
-  ctaSecondaryLabel: "Anrufen",
-  ctaSecondaryHref: "tel:+491234567890",
+  ctaSecondaryLabel: "Kontakt aufnehmen",
+  ctaSecondaryHref: "/kontakt",
   ctaTrustLine: "München & Umgebung · Antwort in der Regel innerhalb von 24h (werktags)",
 };
 
@@ -369,7 +371,7 @@ export const facility: GewerkConfig = {
   eyebrow: "Facility & Objektservice München",
   h1: "Facility / Objektservice.",
   subline: "Hausmeisterservice, Winterdienst, Objektkontrolle, Außenanlagen – ein Ansprechpartner für den laufenden Betrieb und Werterhalt Ihres Objekts.",
-  ctas: { primary: { label: "Projekt anfragen", href: "/anfrage" }, secondary: { label: "Anrufen", href: "tel:+491234567890" } },
+  ctas: { primary: { label: "Projekt anfragen", href: "/anfrage" }, secondary: { label: "Kontakt aufnehmen", href: "/kontakt" } },
   chips: ["Fester Ansprechpartner", "Reporting & Protokolle", "München & Umgebung", "Klare Prozesse"],
   leistungenHeading: "Unsere Facility-Leistungen",
   leistungenSubline: "Vom Hausmeisterservice über Winterdienst bis Objektkontrolle – planbar, dokumentiert, ein Ansprechpartner.",
@@ -391,7 +393,7 @@ export const facility: GewerkConfig = {
         body: "Ein Ansprechpartner für Kontrollen, Meldungen und die Koordination von Handwerkern – bei Notfällen schnelle Eskalation.",
         bullets: ["Fester Ansprechpartner", "Meldungen & Eskalation", "Koordination Handwerker"],
         schnittstellenLinks: [
-          { label: "Reinigung", href: "/leistungen/reinigung" },
+          { label: "Reinigung", href: "/leistungen/reinigung-facility/reinigung" },
           { label: "Elektrotechnik", href: "/leistungen/elektrotechnik" },
           { label: "Sanitär & Heizung", href: "/leistungen/sanitaer-heizung" },
         ],
@@ -414,8 +416,8 @@ export const facility: GewerkConfig = {
   ctaSubline: "München & Umgebung · Ein Ansprechpartner · Klare Prozesse.",
   ctaPrimaryLabel: "Projekt anfragen",
   ctaPrimaryHref: "/anfrage",
-  ctaSecondaryLabel: "Anrufen",
-  ctaSecondaryHref: "tel:+491234567890",
+  ctaSecondaryLabel: "Kontakt aufnehmen",
+  ctaSecondaryHref: "/kontakt",
   ctaTrustLine: "München & Umgebung · Antwort in der Regel innerhalb von 24h (werktags)",
 };
 
@@ -477,7 +479,7 @@ export const reinigungFacilityHub: ReinigungFacilityHubConfig = {
   subline: "Reinigung und Facility aus einer Hand – für Hausverwaltungen und Gewerbe.",
   ctas: {
     primary: { label: "Richtpreis berechnen", href: "/rechner?service=reinigung-facility" },
-    secondary: { label: "Projekt anfragen", href: "/anfrage" },
+    secondary: { label: "Kontakt aufnehmen", href: "/kontakt" },
   },
   chips: ["Hausverwaltungen & Gewerbe", "Dokumentierte Qualität", "Feste Ansprechpartner"],
   hubChoices: [
@@ -489,7 +491,7 @@ export const reinigungFacilityHub: ReinigungFacilityHubConfig = {
         "Grund- & Sonderreinigung",
         "Qualitätskontrolle mit Protokoll",
       ],
-      href: "/leistungen/reinigung",
+      href: "/leistungen/reinigung-facility/reinigung",
     },
     {
       title: "Facility Management",
@@ -499,7 +501,7 @@ export const reinigungFacilityHub: ReinigungFacilityHubConfig = {
         "Winterdienst & Außenanlagen",
         "Koordination & feste Ansprechpartner",
       ],
-      href: "/leistungen/facility",
+      href: "/leistungen/reinigung-facility/facility",
     },
   ],
   netzwerkCards: [
@@ -534,6 +536,6 @@ export const reinigungFacilityHub: ReinigungFacilityHubConfig = {
   ctaSubline: "Ein Ansprechpartner für Reinigung und Facility – München & Umgebung.",
   ctaPrimaryLabel: "Richtpreis berechnen",
   ctaPrimaryHref: "/rechner?service=reinigung-facility",
-  ctaSecondaryLabel: "Projekt anfragen",
-  ctaSecondaryHref: "/anfrage",
+  ctaSecondaryLabel: "Kontakt aufnehmen",
+  ctaSecondaryHref: "/kontakt",
 };

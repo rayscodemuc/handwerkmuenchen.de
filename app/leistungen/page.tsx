@@ -314,7 +314,7 @@ export default function LeistungenHubPage() {
                 Ausgewählte Referenzprojekte für Hausverwaltungen und Gewerbe: Elektrotechnik, Sanitär, Innenausbau, Reinigung und Facility. Belegbare Qualität, ein Ansprechpartner.
               </p>
               <div className="flex flex-wrap gap-4">
-                <Link href="/meisterleistungen">
+                <Link href="/projekte">
                   <AnimatedButton className="px-6 py-3 text-sm">
                     Meisterleistungen ansehen
                   </AnimatedButton>

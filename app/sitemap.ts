@@ -32,7 +32,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   entries.push(entry("/anfrage", 0.9));
   entries.push(entry("/impressum", 0.6));
   entries.push(entry("/datenschutz", 0.6));
-  entries.push(entry("/partner-werden", 0.8));
   entries.push(entry("/rechner", 0.8));
 
   // Leistungen Hub
@@ -42,45 +41,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
   entries.push(entry("/leistungen/elektrotechnik", 0.9));
   entries.push(entry("/leistungen/sanitaer-heizung", 0.9));
   entries.push(entry("/leistungen/innenausbau", 0.9));
-  entries.push(entry("/leistungen/reinigung", 0.9));
   entries.push(entry("/leistungen/reinigung-facility", 0.9));
   entries.push(entry("/leistungen/reinigung-facility/reinigung", 0.85));
   entries.push(entry("/leistungen/reinigung-facility/facility", 0.85));
-  entries.push(entry("/leistungen/facility", 0.9));
 
-  // Elektrotechnik Unterseiten
-  const elektroSub = [
-    "e-mobility", "hauselektrik", "klingelanlagen", "led", "messsysteme",
-    "neubau", "reparaturen", "sanierung", "sicherheitstechnik", "smart-home",
-  ];
-  elektroSub.forEach((slug) => entries.push(entry(`/leistungen/elektrotechnik/${slug}`, 0.85)));
-
-  // Reinigung (unter /leistungen)
-  const reinigungLeistungen = [
-    "unterhaltsreinigung", "grundreinigung", "fensterreinigung", "glas-fassade",
-    "sonderreinigung", "grauflaechenreinigung", "tiefgaragenreinigung", "bueroreinigung",
-  ];
-  reinigungLeistungen.forEach((slug) => entries.push(entry(`/leistungen/${slug}`, 0.85)));
-
-  // Facility / weitere Leistungen
-  entries.push(entry("/leistungen/hausmeisterservice", 0.85));
-  entries.push(entry("/leistungen/objektmanagement", 0.85));
-  entries.push(entry("/leistungen/winterdienst", 0.85));
-  entries.push(entry("/leistungen/winterdienst-aussen", 0.85));
-  entries.push(entry("/leistungen/service-wartung", 0.85));
-  entries.push(entry("/leistungen/gruenpflege", 0.85));
-  entries.push(entry("/leistungen/baumpflege", 0.85));
-
-  // Reinigung (unter /reinigung – parallele Struktur)
-  reinigungLeistungen.forEach((slug) => entries.push(entry(`/reinigung/${slug}`, 0.85)));
-
-  // Projekte
+  // Projekte (Übersicht, Gewerk-Filter, Projekt-Details)
   entries.push(entry("/projekte", 0.95));
   ALLOWED_GEWERK_SLUGS.forEach((gewerk) => entries.push(entry(`/projekte/${gewerk}`, 0.9)));
-
-  // Meisterleistungen (Projekt-Details: /meisterleistungen/[slug])
-  entries.push(entry("/meisterleistungen", 0.95));
-  projects.forEach((p) => entries.push(entry(`/meisterleistungen/${p.slug}`, 0.9)));
+  projects.forEach((p) => entries.push(entry(`/projekte/${p.slug}`, 0.9)));
 
   return entries;
 }

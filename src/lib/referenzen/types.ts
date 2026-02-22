@@ -2,8 +2,7 @@ export type Trade =
   | "elektrotechnik"
   | "sanitaer-heizung"
   | "innenausbau"
-  | "reinigung"
-  | "facility";
+  | "reinigung-facility";
 
 export type ObjectType =
   | "Hausverwaltung"

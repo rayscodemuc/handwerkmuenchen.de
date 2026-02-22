@@ -62,6 +62,8 @@ export default function InnenausbauPage() {
         subline={config.ctaSubline}
         primaryLabel={config.ctaPrimaryLabel}
         primaryHref={config.ctaPrimaryHref}
+        secondaryLabel={config.ctaSecondaryLabel}
+        secondaryHref={config.ctaSecondaryHref}
         trustLine={config.ctaTrustLine}
       />
     </>

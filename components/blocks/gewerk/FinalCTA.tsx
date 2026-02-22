@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Phone } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import { AnimatedButton } from "@/components/ui/animated-button";
 
 type FinalCTAProps = {
@@ -31,18 +31,21 @@ export function FinalCTA({
           <p className="mt-4 text-white/75 text-base sm:text-lg leading-relaxed">
             {subline}
           </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-4">
-            <Link href={primaryHref}>
-              <AnimatedButton className="bg-[#8AB0AB] text-[#26413C] hover:bg-[#8AB0AB]/90 border-0">
+          <div className="mt-8 flex flex-wrap justify-center items-stretch gap-4">
+            <Link
+              href={primaryHref}
+              className="inline-flex min-w-[180px] h-12 items-center justify-center rounded-lg"
+            >
+              <AnimatedButton className="w-full h-full min-h-12 min-w-[180px] bg-[#8AB0AB] text-[#26413C] hover:bg-[#8AB0AB]/90 border-0 px-6 py-3 text-base font-semibold">
                 {primaryLabel}
               </AnimatedButton>
             </Link>
             {secondaryLabel && secondaryHref && (
               <Link
                 href={secondaryHref}
-                className="inline-flex items-center justify-center rounded-lg border border-white/35 bg-transparent px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-white/10"
+                className="inline-flex min-w-[180px] h-12 items-center justify-center gap-2 rounded-lg border border-white/35 bg-transparent px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-white/10"
               >
-                <Phone className="mr-2 h-4 w-4" aria-hidden />
+                <MessageSquare className="h-4 w-4 shrink-0" aria-hidden />
                 {secondaryLabel}
               </Link>
             )}
