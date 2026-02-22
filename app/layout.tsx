@@ -14,17 +14,11 @@ import { QueryProvider } from "@/components/providers/QueryProvider";
 import { generateAllSchemas } from "@/lib/schema";
 import "./globals.css";
 
-// Base URL aus Environment Variable, Fallback zu Production Domain
-const getBaseUrl = (): string => {
-  return (
-    process.env.SITE_URL ||
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    'https://handwerkmuenchen.de'
-  )
-}
+// SEO: Canonical und OpenGraph immer ohne www – feste Production-Domain
+const METADATA_BASE = "https://handwerkmuenchen.de";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(getBaseUrl()),
+  metadataBase: new URL(METADATA_BASE),
   title: {
     default: "handwerkmuenchen.de | Ihr Meisterbetrieb für Sanitär, Elektro & Ausbau in München",
     template: "%s | handwerkmuenchen.de",

@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     "Hausverwaltung Handwerker",
   ],
   alternates: {
-    canonical: "https://handwerkmuenchen.de",
+    canonical: "/",
   },
 };
 
