@@ -5,6 +5,12 @@
 -- RLS ist vermutlich bereits aktiv. Falls nicht, aktivieren:
 ALTER TABLE tickets ENABLE ROW LEVEL SECURITY;
 
+-- Bestehende Policies entfernen (idempotent)
+DROP POLICY IF EXISTS "tickets_select_anon_authenticated" ON tickets;
+DROP POLICY IF EXISTS "tickets_insert_anon_authenticated" ON tickets;
+DROP POLICY IF EXISTS "tickets_update_anon_authenticated" ON tickets;
+DROP POLICY IF EXISTS "tickets_delete_anon_authenticated" ON tickets;
+
 -- Policy: Lese-Zugriff für anon und authenticated (Dashboard, API)
 CREATE POLICY "tickets_select_anon_authenticated"
   ON tickets FOR SELECT

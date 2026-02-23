@@ -26,84 +26,36 @@ VITE_SUPABASE_ANON_KEY=ihr-anon-key
 4. Führen Sie das SQL-Script aus
 
 Das Script erstellt:
-- Die `leads` Tabelle für alle Formular-Einreichungen
-- Notwendige Indizes für Performance
-- Row Level Security (RLS) Policies für Sicherheit
+- Die `tickets` Tabelle (Anfragen, Kontakt, Rechner)
+- Die `companies` Tabelle
+- Die `profiles` Tabelle (Auth-Erweiterung)
+- Notwendige Indizes und RLS Policies
 
-## 4. Tabellenstruktur
+## 4. Formulare → tickets
 
-Die `leads` Tabelle hat folgende Felder:
+Alle Formulare (Anfrage, Kontakt, Rechner) speichern über `useUniversalSubmit` in die Tabelle **`tickets`**:
 
-| Feld | Typ | Beschreibung |
-|------|-----|--------------|
-| `id` | UUID | Eindeutige ID (automatisch generiert) |
-| `customer_name` | TEXT | Vollständiger Name des Kunden |
-| `email` | TEXT | E-Mail-Adresse |
-| `phone` | TEXT | Telefonnummer (optional) |
-| `message` | TEXT | Nachricht vom Kunden |
-| `service_type` | TEXT | Art der Leistung |
-| `city` | TEXT | Stadt/Standort |
-| `form_id` | TEXT | ID des Formulars (z.B. `inquiry_form`, `contact_form`) |
-| `page_url` | TEXT | URL der Seite |
-| `additional_data` | JSONB | Zusätzliche Daten (company_name, etc.) |
-| `created_at` | TIMESTAMP | Zeitstempel (automatisch) |
+- **Kontaktformular:** Vorname, Nachname, E-Mail, Telefon, Gewerk, Nachricht → `kunde_name`, `kontakt_email`, `kontakt_telefon`, `beschreibung`, `gewerk`
+- **Anfrageformular:** Name, Firma, E-Mail, Telefon, Leistung, Nachricht → wie oben + `additional_data` für Firma, Datenschutz
+- **Rechner:** Name, E-Mail, Telefon, Stadt, Leistung, Details, Richtpreis → wie oben + Rechner-Daten in `additional_data`
 
-## 5. Formular-Typen
-
-Die folgenden Formulare speichern Daten in Supabase:
-
-### Kontaktformular (`ContactForm`)
-- **Form ID:** `contact_form`
-- **Felder:** Vorname, Nachname, E-Mail, Telefon, Standort, Gewerk, Nachricht
-- **Speichert in:** `customer_name`, `email`, `phone`, `message`, `service_type`, `city`
-
-### Anfrageformular (`Anfrage`)
-- **Form ID:** `inquiry_form`
-- **Felder:** Name, Firma, E-Mail, Telefon, Leistung, Nachricht, Datenschutz
-- **Speichert in:** `customer_name`, `email`, `phone`, `message`, `service_type`
-- **Zusätzlich in `additional_data`:** `company_name`, `privacy_accepted`
-
-### Partner-Formular (`PartnerWerden`)
-- **Form ID:** `partner_form`
-- **Felder:** Firmenname, Ansprechpartner, E-Mail, Telefon, Kategorie, Region, Nachricht
-- **Speichert in:** `customer_name` (Ansprechpartner), `email`, `phone`, `message`, `service_type` (Kategorie), `city` (Region)
-- **Zusätzlich in `additional_data`:** `company_name`
-
-### Rechner-Formular (`Rechner`)
-- **Form ID:** `calculator_form`
-- **Felder:** Name, E-Mail, Telefon, Stadt, Leistung, Details, geschätzter Preis
-- **Speichert in:** `customer_name`, `email`, `phone`, `message`, `service_type`, `city`
-- **Zusätzlich in `additional_data`:** Alle Rechner-spezifischen Felder
-
-## 6. Daten abrufen
-
-Sie können die Leads in Supabase auf verschiedene Weise abrufen:
+## 5. Daten abrufen
 
 ### Über das Dashboard
 1. Gehen Sie zu **Table Editor** im Supabase Dashboard
-2. Wählen Sie die `leads` Tabelle
-3. Alle Einreichungen werden dort angezeigt
+2. Wählen Sie die `tickets` Tabelle
+3. Alle Formular-Einreichungen werden dort angezeigt (status = 'Anfrage')
 
 ### Über SQL
 ```sql
--- Alle Leads abrufen
-SELECT * FROM leads ORDER BY created_at DESC;
+-- Alle Anfragen
+SELECT * FROM tickets ORDER BY created_at DESC;
 
--- Leads nach Formular-Typ filtern
-SELECT * FROM leads WHERE form_id = 'inquiry_form';
+-- Nach Status filtern
+SELECT * FROM tickets WHERE status = 'Anfrage';
 
--- Leads nach Stadt filtern
-SELECT * FROM leads WHERE city = 'muenchen';
-
--- Leads mit zusätzlichen Daten
-SELECT 
-  customer_name,
-  email,
-  service_type,
-  city,
-  additional_data->>'company_name' as company_name
-FROM leads
-WHERE additional_data->>'company_name' IS NOT NULL;
+-- Zusätzliche Daten aus JSONB
+SELECT kunde_name, kontakt_email, additional_data FROM tickets;
 ```
 
 ## 7. Fehlerbehebung
@@ -116,8 +68,8 @@ WHERE additional_data->>'company_name' IS NOT NULL;
 ### RLS Policy Fehler
 Wenn Sie Fehler bei der Dateneingabe erhalten:
 1. Gehen Sie zu **Authentication > Policies** im Supabase Dashboard
-2. Stellen Sie sicher, dass die Policy "Allow public insert" aktiv ist
-3. Überprüfen Sie, dass RLS für die `leads` Tabelle aktiviert ist
+2. Stellen Sie sicher, dass die entsprechenden Policies für `tickets` aktiv sind
+3. Überprüfen Sie, dass RLS für die `tickets` Tabelle korrekt konfiguriert ist
 
 ### Daten werden nicht angezeigt
 1. Überprüfen Sie, ob Sie als authentifizierter Benutzer eingeloggt sind (für SELECT)

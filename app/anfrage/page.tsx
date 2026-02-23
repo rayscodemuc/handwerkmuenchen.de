@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { z } from "zod";
 import { Send, Mail, MapPin, Clock, CheckCircle2, RotateCcw } from "lucide-react";
-import type { InquiryFormFields } from "@/hooks/useFormSubmit";
+import type { InquiryFormFields } from "@/src/types/form-fields";
 import { useUniversalSubmit } from "@/hooks/useUniversalSubmit";
 import { DEFAULT_COMPANY_ID } from "@/src/config/businessConfig";
 import Link from "next/link";
@@ -23,6 +23,7 @@ const anfrageSchema = z.object({
   company_name: z.string().trim().max(100).optional(),
   customer_email: z.string().trim().email("Ungültige E-Mail-Adresse").max(255),
   customer_phone: z.string().trim().max(30).optional(),
+  plz: z.string().trim().min(1, "PLZ ist erforderlich").max(10),
   service_type: z.string().min(1, "Bitte wählen Sie eine Leistung"),
   message: z.string().trim().min(1, "Nachricht ist erforderlich").max(2000),
   privacy_accepted: z.boolean().refine((val) => val === true, "Bitte stimmen Sie der Datenschutzerklärung zu"),
@@ -72,6 +73,7 @@ function AnfrageInner() {
     company_name: "",
     customer_email: "",
     customer_phone: "",
+    plz: "",
     service_type: "",
     message: "",
     privacy_accepted: false,
@@ -99,6 +101,7 @@ function AnfrageInner() {
       company_name: "",
       customer_email: "",
       customer_phone: "",
+      plz: "",
       service_type: "",
       message: "",
       privacy_accepted: false,
@@ -130,6 +133,7 @@ function AnfrageInner() {
       customer_name: formData.customer_name,
       email: formData.customer_email,
       phone: formData.customer_phone || undefined,
+      plz: formData.plz.trim(),
       subject: `Anfrage – ${serviceLabel}`,
       company_name: formData.company_name || undefined,
       service_type: formData.service_type,
@@ -146,6 +150,7 @@ function AnfrageInner() {
         company_name: "",
         customer_email: "",
         customer_phone: "",
+        plz: "",
         service_type: "",
         message: "",
         privacy_accepted: false,
@@ -308,31 +313,49 @@ function AnfrageInner() {
                       </div>
                     </div>
 
-                    <div className="mt-6 space-y-2">
-                      <Label htmlFor="service_type" className="text-white">Gewünschte Leistung *</Label>
-                      <Select
-                        name="service_type"
-                        value={formData.service_type}
-                        onValueChange={(value) => handleChange("service_type", value)}
-                      >
-                        <SelectTrigger className={`text-[#3E505B] [&_[data-placeholder]]:text-[#3E505B] ${errors.service_type ? "border-destructive bg-white" : "bg-white"}`}>
-                          <SelectValue placeholder="Leistung auswählen" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {serviceOptions.map((option) => (
-                            <SelectItem
-                              key={option.value}
-                              value={option.value}
-                              className="hover:bg-[#8AB0AB] hover:text-[#3E505B] focus:bg-[#8AB0AB] focus:text-[#3E505B]"
-                            >
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {errors.service_type && (
-                        <p className="text-sm text-destructive">{errors.service_type}</p>
-                      )}
+                    <div className="mt-6 grid gap-6 md:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="plz" className="text-white">PLZ *</Label>
+                        <Input
+                          id="plz"
+                          name="plz"
+                          value={formData.plz}
+                          onChange={(e) => handleChange("plz", e.target.value)}
+                          placeholder="80331"
+                          maxLength={10}
+                          className={`text-[#3E505B] placeholder:text-[#3E505B]/60 bg-white ${errors.plz ? "border-destructive" : ""}`}
+                        />
+                        {errors.plz && (
+                          <p className="text-sm text-destructive">{errors.plz}</p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="service_type" className="text-white">Gewünschte Leistung *</Label>
+                        <Select
+                          name="service_type"
+                          value={formData.service_type}
+                          onValueChange={(value) => handleChange("service_type", value)}
+                        >
+                          <SelectTrigger className={`text-[#3E505B] [&_[data-placeholder]]:text-[#3E505B] ${errors.service_type ? "border-destructive bg-white" : "bg-white"}`}>
+                            <SelectValue placeholder="Leistung auswählen" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {serviceOptions.map((option) => (
+                              <SelectItem
+                                key={option.value}
+                                value={option.value}
+                                className="hover:bg-[#8AB0AB] hover:text-[#3E505B] focus:bg-[#8AB0AB] focus:text-[#3E505B]"
+                              >
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {errors.service_type && (
+                          <p className="text-sm text-destructive">{errors.service_type}</p>
+                        )}
+                      </div>
                     </div>
 
                     <div className="mt-6 space-y-2">
@@ -351,7 +374,7 @@ function AnfrageInner() {
                       )}
                     </div>
 
-                    <div className="mt-6 flex itemscenter gap-3">
+                    <div className="mt-6 flex items-center gap-3">
                       <Checkbox
                         id="privacy_accepted"
                         name="privacy_accepted"

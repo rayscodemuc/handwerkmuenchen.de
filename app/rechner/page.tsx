@@ -30,7 +30,9 @@ import {
   Repeat,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useFormSubmit, type CalculatorFormFields } from "@/hooks/useFormSubmit";
+import type { CalculatorFormFields } from "@/src/types/form-fields";
+import { useUniversalSubmit } from "@/hooks/useUniversalSubmit";
+import { DEFAULT_COMPANY_ID } from "@/src/config/businessConfig";
 import { calculateGlassCleaningPrice, type GlassCleaningParams } from "@/lib/pricing/glass";
 import { calculateDeepCleaningPrice, type DeepCleaningParams } from "@/lib/pricing/deep";
 
@@ -151,10 +153,11 @@ const preisfaktoren = {
 };
 
 export default function Rechner() {
-  const { submitForm } = useFormSubmit();
+  const { submit, loading } = useUniversalSubmit();
   const [step, setStep] = useState(1);
   const [state, setState] = useState<CalculatorState>(initialState);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isSubmittingState = isSubmitting || loading;
   const [isSuccess, setIsSuccess] = useState(false);
   const stepsContainerRef = useRef<HTMLDivElement>(null);
 
@@ -526,33 +529,35 @@ export default function Rechner() {
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    
+
     const { price, isMonthly } = calculatePrice();
-    
-    const formData: CalculatorFormFields = {
+    const priceLabel = isMonthly ? `ca. ${price}€/Monat` : `ca. ${price}€ einmalig`;
+
+    const payload = {
       customer_name: state.customer_name,
-      customer_email: state.customer_email,
-      customer_phone: state.customer_phone,
-      city: state.city,
-      service_type: state.service_type || "",
-      service_subtype: state.service_subtype || undefined,
-      object_type: state.object_type || undefined,
-      order_type: state.order_type || undefined,
+      email: state.customer_email,
+      phone: state.customer_phone,
+      city: state.city || "Keine Angabe",
+      service_type: state.service_type || "Reinigung",
+      message: state.additional_message || `Rechner-Anfrage: Richtpreis ${priceLabel}`,
+      form_id: FORM_ID,
+      service_subtype: state.service_subtype,
+      object_type: state.object_type,
+      order_type: state.order_type,
       area_sqm: state.area_sqm,
       parking_spaces: state.parking_spaces,
       frequency_per_week: state.frequency_per_week,
       estimated_price: price,
       is_monthly_price: isMonthly,
-      additional_message: state.additional_message || undefined,
+      additional_message: state.additional_message,
     };
 
-    await submitForm(FORM_ID, formData, {
-      successTitle: "Anfrage erfolgreich gesendet",
-      successDescription: "Wir melden uns innerhalb von 24 Stunden bei Ihnen.",
-    });
-    
+    const result = await submit(payload, DEFAULT_COMPANY_ID);
+
     setIsSubmitting(false);
-    setIsSuccess(true);
+    if (result.success) {
+      setIsSuccess(true);
+    }
   };
 
   const serviceOptions = [
@@ -1949,10 +1954,10 @@ export default function Rechner() {
                         ) : (
                           <Button
                             onClick={handleSubmit}
-                            disabled={!canProceed() || isSubmitting}
+                            disabled={!canProceed() || isSubmittingState}
                             className="gap-2"
                           >
-                            {isSubmitting ? (
+                            {isSubmittingState ? (
                               <>
                                 <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
                                 Wird gesendet...

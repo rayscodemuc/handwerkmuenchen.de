@@ -54,6 +54,7 @@ export function ContactForm({
     customer_last_name: "",
     customer_email: "",
     customer_phone: "",
+    plz: "",
     message: "",
     city: presetLocation || "muenchen",
     service_type: presetService || "",
@@ -77,6 +78,7 @@ export function ContactForm({
       customer_last_name: "",
       customer_email: "",
       customer_phone: "",
+      plz: "",
       message: "",
       city: presetLocation || "muenchen",
       service_type: "",
@@ -85,21 +87,8 @@ export function ContactForm({
     reset();
   };
 
-  const getSuccessMessage = () => {
-    const locationLabel = locationOptions.find((l) => l.value === formData.city)?.label;
-    const serviceLabel = serviceOptions.find((s) => s.value === formData.service_type)?.label;
-
-    if (locationLabel && serviceLabel) {
-      return `Vielen Dank! Ihr Ansprechpartner für ${serviceLabel} in ${locationLabel} wird sich in Kürze bei Ihnen melden.`;
-    }
-    if (locationLabel) {
-      return `Vielen Dank! Ihr Ansprechpartner in ${locationLabel} wird sich in Kürze bei Ihnen melden.`;
-    }
-    if (serviceLabel) {
-      return `Vielen Dank! Ihr Ansprechpartner für ${serviceLabel} wird sich in Kürze bei Ihnen melden.`;
-    }
-    return "Vielen Dank! Wir werden uns in Kürze bei Ihnen melden.";
-  };
+  const getSuccessMessage = () =>
+    "Vielen Dank! Wir haben Ihre Nachricht erhalten und melden uns zeitnah bei Ihnen.";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,6 +98,7 @@ export function ContactForm({
     if (!formData.customer_first_name) newErrors.customer_first_name = "Vorname ist erforderlich";
     if (!formData.customer_last_name) newErrors.customer_last_name = "Nachname ist erforderlich";
     if (!formData.customer_email) newErrors.customer_email = "E-Mail ist erforderlich";
+    if (!formData.plz?.trim()) newErrors.plz = "PLZ ist erforderlich";
     if (!formData.message) newErrors.message = "Nachricht ist erforderlich";
 
     if (Object.keys(newErrors).length > 0) {
@@ -126,7 +116,7 @@ export function ContactForm({
       customer_name,
       email: formData.customer_email,
       phone: formData.customer_phone || undefined,
-      // subject bleibt optional – könnte z.B. aus service_type generiert werden
+      plz: formData.plz.trim(),
       message: formData.message,
       city: locationLabel,
       service_type: formData.service_type || undefined,
@@ -141,6 +131,7 @@ export function ContactForm({
         customer_last_name: "",
         customer_email: "",
         customer_phone: "",
+        plz: "",
         message: "",
         city: presetLocation || "muenchen",
         service_type: "",
@@ -290,7 +281,7 @@ export function ContactForm({
           </div>
         </div>
 
-        {/* Dynamic dropdowns for /kontakt page */}
+        {/* PLZ (Pflichtfeld) und Gewerk wählen */}
         {(showLocationDropdown || showServiceDropdown) && (
           <div className="grid gap-6 sm:grid-cols-2">
             {showLocationDropdown && (
@@ -313,6 +304,20 @@ export function ContactForm({
                 </Select>
               </div>
             )}
+            <div className="space-y-2">
+              <Label htmlFor="plz" className={labelClasses}>PLZ *</Label>
+              <Input
+                id="plz"
+                value={formData.plz}
+                onChange={(e) => handleChange("plz", e.target.value)}
+                placeholder="80331"
+                maxLength={10}
+                className={cn(inputClasses, errors.plz && "border-destructive")}
+              />
+              {errors.plz && (
+                <p className="text-sm text-destructive">{errors.plz}</p>
+              )}
+            </div>
             {showServiceDropdown && (
               <div className="space-y-2">
                 <Label htmlFor="service" className={labelClasses}>Welches Gewerk?</Label>

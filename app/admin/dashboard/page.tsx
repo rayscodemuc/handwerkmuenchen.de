@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import Link from "next/link";
-import { Phone, Paintbrush, SprayCan, Building, Zap, Droplets, Hourglass, CheckCircle, X, ChevronLeft, ChevronRight, GripVertical, Trash2, MessageSquare, Send, Sun, Moon, CalendarIcon, Plus, FileText } from "lucide-react";
+import { Phone, Paintbrush, SprayCan, Building, Zap, Droplets, Hourglass, CheckCircle, X, ChevronLeft, ChevronRight, GripVertical, Trash2, MessageSquare, Send, Sun, Moon, CalendarIcon, Plus, FileText, Settings, LayoutDashboard, Users, LogOut, Pencil, Save } from "lucide-react";
 import { format, add, setHours, setMinutes, startOfWeek as startOfWeekDf } from "date-fns";
 import { de } from "date-fns/locale";
 import { DndContext, DragOverlay, useDraggable, useDroppable, closestCorners, pointerWithin, rectIntersection, MeasuringStrategy, PointerSensor, useSensor, useSensors, type DragEndEvent, type DragStartEvent, type DragOverEvent, type CollisionDetection } from "@dnd-kit/core";
@@ -10,6 +10,8 @@ import { snapCenterToCursor } from "@dnd-kit/modifiers";
 import { SortableContext, verticalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { supabase } from "@/lib/supabase";
+import { useToast } from "@/hooks/use-toast";
+import { useAdminUser } from "../AdminUserContext";
 import {
   Dialog,
   DialogContent,
@@ -643,6 +645,15 @@ export default function AdminDashboardPage() {
   const [detailHistorieNewText, setDetailHistorieNewText] = useState("");
   /** Bearbeitbare Gewerke im Detail-Modal (Array). */
   const [detailGewerke, setDetailGewerke] = useState<string[]>([]);
+  /** Bearbeitbare Kunden-Daten im Detail-Modal. */
+  const [detailKundeName, setDetailKundeName] = useState("");
+  const [detailPartnerName, setDetailPartnerName] = useState("");
+  const [detailEmail, setDetailEmail] = useState("");
+  const [detailTelefon, setDetailTelefon] = useState("");
+  const [detailAdresse, setDetailAdresse] = useState("");
+  const [detailBeschreibung, setDetailBeschreibung] = useState("");
+  /** Bearbeitungsmodus für Kunden-Daten: Stift = aktivieren, Kassette = speichern. */
+  const [detailKundenEditMode, setDetailKundenEditMode] = useState(false);
   const [detailSaving, setDetailSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
@@ -703,6 +714,10 @@ export default function AdminDashboardPage() {
   const [quoteLines, setQuoteLines] = useState<{ menge: number; text: string; preis: number }[]>([
     { menge: 1, text: "Beispielposition", preis: 150 },
   ]);
+
+  /** Aktuell angemeldeter Nutzer (vom Layout/Server). */
+  const adminUser = useAdminUser();
+  const { toast } = useToast();
 
   /** Auto-Historisierung: verhindert doppelte Inserts innerhalb einer Session. */
   const historizedBesichtigungKeysRef = useRef<Set<string>>(new Set());
@@ -837,6 +852,35 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     loadTickets();
   }, []);
+
+  /** Supabase Realtime: neue Tickets sofort anzeigen. */
+  useEffect(() => {
+    const channel = supabase
+      .channel("tickets-insert")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "tickets" },
+        (payload) => {
+          const row = payload.new as Record<string, unknown>;
+          if (String(row?.company_id ?? "") !== DEFAULT_COMPANY_ID) return;
+          const newTicket = row as unknown as Ticket;
+          setTickets((prev) => {
+            if (prev.some((t) => t.id === newTicket.id)) return prev;
+            return [newTicket, ...prev];
+          });
+          const name = (newTicket.kunde_name ?? newTicket.partner_name ?? "").toString().trim() || "Neue Anfrage";
+          toast({
+            title: "Neue Anfrage",
+            description: name,
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [toast]);
 
   /** Lädt Timeline-Einträge aus ticket_history für das aktuell geöffnete Ticket. */
   const loadTicketHistoryRows = useCallback(
@@ -1161,6 +1205,14 @@ export default function AdminDashboardPage() {
     // Gewerke: aus gewerk-Array ableiten
     const gewerkeArray = normalizeGewerke(ticket?.gewerk ?? null);
     setDetailGewerke(gewerkeArray);
+    // Bearbeitbare Kunden-Daten
+    setDetailKundeName(ticket?.kunde_name ?? "");
+    setDetailPartnerName(ticket?.partner_name ?? "");
+    setDetailEmail(ticket?.kontakt_email ?? "");
+    setDetailTelefon(ticket?.kontakt_telefon ?? "");
+    setDetailAdresse(ticket?.objekt_adresse ?? "");
+    setDetailBeschreibung(ticket?.beschreibung ?? "");
+    setDetailKundenEditMode(false);
   };
 
   const closeDetailModal = () => {
@@ -1168,6 +1220,9 @@ export default function AdminDashboardPage() {
       persistAssignedTo(detailTicket.id, detailAssignedTo);
       persistTermin(detailTicket.id, detailTerminStart || null, detailTerminEnde || null);
       persistGewerke(detailTicket.id, detailGewerke);
+      if (detailKundenEditMode) {
+        persistKundenInfo(detailTicket.id);
+      }
     }
     setDetailTicket(null);
     setDetailKommentare([]);
@@ -1179,6 +1234,22 @@ export default function AdminDashboardPage() {
     setDetailHistorieNewDate("");
     setDetailHistorieNewText("");
     setDetailGewerke([]);
+    setDetailKundeName("");
+    setDetailPartnerName("");
+    setDetailEmail("");
+    setDetailTelefon("");
+    setDetailAdresse("");
+    setDetailBeschreibung("");
+    setDetailKundenEditMode(false);
+  };
+
+  /** Kunden-Daten speichern (auf Kassette-Klick) und Bearbeitungsmodus beenden. */
+  const handleKundenSpeichern = async () => {
+    if (!detailTicket?.id) return;
+    setDetailSaving(true);
+    await persistKundenInfo(detailTicket.id);
+    setDetailKundenEditMode(false);
+    setDetailSaving(false);
   };
 
   /** Markiert ein Ticket als „gesehen“ (blauer Punkt verschwindet). */
@@ -1316,6 +1387,34 @@ export default function AdminDashboardPage() {
       );
       if (detailTicket?.id === ticketId) {
         setDetailTicket((prev) => (prev ? { ...prev, gewerk: gewerkValue } : null));
+      }
+    } else {
+      setError(error.message);
+    }
+  };
+
+  /** Kunden-Daten speichern (kunde_name, partner_name, kontakt_email, kontakt_telefon, objekt_adresse, beschreibung). */
+  const persistKundenInfo = async (ticketId: string) => {
+    const payload = {
+      kunde_name: detailKundeName.trim() || null,
+      partner_name: detailPartnerName.trim() || null,
+      kontakt_email: detailEmail.trim() || null,
+      kontakt_telefon: detailTelefon.trim() || null,
+      objekt_adresse: detailAdresse.trim() || null,
+      beschreibung: detailBeschreibung.trim() || null,
+    };
+    const { error } = await supabase
+      .from("tickets")
+      .update(payload)
+      .eq("id", ticketId);
+    if (!error) {
+      setTickets((prev) =>
+        prev.map((t) =>
+          t.id === ticketId ? { ...t, ...payload } : t
+        )
+      );
+      if (detailTicket?.id === ticketId) {
+        setDetailTicket((prev) => (prev ? { ...prev, ...payload } : null));
       }
     } else {
       setError(error.message);
@@ -2053,12 +2152,12 @@ export default function AdminDashboardPage() {
     }
   };
 
-  /** Event in aktueller Kalenderwoche (Montag–Sonntag)? */
+  /** Event in aktueller Kalenderwoche (Montag–Samstag)? */
   const isEventInWeek = (d: Date) => {
     const mon = startOfWeekDf(weekStart, { weekStartsOn: 1 }).getTime();
-    const sun = mon + 7 * 24 * 60 * 60 * 1000;
+    const sat = mon + 6 * 24 * 60 * 60 * 1000;
     const t = d.getTime();
-    return t >= mon && t < sun;
+    return t >= mon && t < sat;
   };
   const getDayOffset = (d: Date) => {
     const mon = startOfWeekDf(weekStart, { weekStartsOn: 1 });
@@ -2087,7 +2186,7 @@ export default function AdminDashboardPage() {
     weekEvents.forEach((ev) => {
       const dayIndex = getDayOffset(ev.start);
       const slotIndex = getSlotIndex(ev.start);
-      if (dayIndex < 0 || dayIndex > 6 || slotIndex < 0 || slotIndex >= TOTAL_SLOTS) return;
+      if (dayIndex < 0 || dayIndex > 5 || slotIndex < 0 || slotIndex >= TOTAL_SLOTS) return;
       const key = `${dayIndex}-${slotIndex}`;
       if (!eventsByDayAndSlot.has(key)) {
         eventsByDayAndSlot.set(key, []);
@@ -2453,11 +2552,11 @@ export default function AdminDashboardPage() {
     return items;
   }, [detailHistoryRows, detailTicket?.historie, detailTicket?.id]);
 
-  const weekDays = useMemo(() => Array.from({ length: 7 }, (_, i) => add(weekStart, { days: i })), [weekStart]);
+  const weekDays = useMemo(() => Array.from({ length: 6 }, (_, i) => add(weekStart, { days: i })), [weekStart]);
 
   const renderWeekCalendar = () => (
     <>
-      <div className="mb-3 flex items-center justify-between gap-2">
+      <div className="mb-3 shrink-0 flex items-center justify-between gap-2">
         <h2 className={`text-xs font-medium uppercase tracking-wider ${
           isLightTheme ? "text-slate-500" : "text-slate-500"
         }`}>
@@ -2481,7 +2580,7 @@ export default function AdminDashboardPage() {
               isLightTheme ? "text-slate-700" : "text-slate-200"
             }`}
           >
-            {format(weekDays[0], "d. MMM", { locale: de })} – {format(weekDays[6], "d. MMM yyyy", { locale: de })}
+            {format(weekDays[0], "d. MMM", { locale: de })} – {format(weekDays[5], "d. MMM yyyy", { locale: de })}
           </span>
           <button
             type="button"
@@ -2497,23 +2596,24 @@ export default function AdminDashboardPage() {
           </button>
         </div>
       </div>
-      <p className="mb-2 text-[11px] text-slate-500">
+      <p className="mb-2 shrink-0 text-[11px] text-slate-500">
         Ganze Stunden 07:00–20:00. Karte links in eine Zelle ziehen → Termin + Status „Ticket“.
       </p>
+      <div className="min-h-0 flex-1 overflow-auto">
       <div
-        className={`overflow-auto rounded-2xl border ${
+        className={`min-h-[600px] rounded-2xl border ${
           isLightTheme ? "border-slate-200/80 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)]" : "border-slate-800 bg-[#1e293b]"
         }`}
         style={{
           display: "grid",
-          gridTemplateColumns: "56px repeat(7, 1fr)",
+          gridTemplateColumns: "64px repeat(6, 1fr)",
           gridTemplateRows: `36px repeat(${TOTAL_SLOTS}, 48px)`,
           minHeight: "680px",
         }}
       >
         <div
-          className={`sticky top-0 z-10 col-start-1 row-start-1 border-b border-r ${
-            isLightTheme ? "border-slate-200 bg-slate-100" : "border-slate-800 bg-slate-800"
+          className={`sticky top-0 z-10 col-start-1 row-start-1 rounded-tl-xl border-b border-r ${
+            isLightTheme ? "border-slate-200/80 bg-slate-100" : "border-slate-700/80 bg-slate-800"
           }`}
         />
         {weekDays.map((day, dayIndex) => (
@@ -2536,8 +2636,10 @@ export default function AdminDashboardPage() {
           return (
             <div
               key={`time-${slotIndex}`}
-              className={`border-b pr-1 text-right text-[10px] ${
-                isLightTheme ? "border-slate-200 text-slate-400" : "border-slate-800 text-slate-500"
+              className={`flex items-center justify-end border-b border-r py-0.5 pr-3 pl-2 text-xs tabular-nums ${
+                isLightTheme
+                  ? "border-slate-200/80 bg-slate-50/50 text-slate-500"
+                  : "border-slate-700/80 bg-slate-800/30 text-slate-400"
               }`}
               style={{ gridColumn: 1, gridRow: slotIndex + 2 }}
             >
@@ -2563,7 +2665,7 @@ export default function AdminDashboardPage() {
           const dayIndex = getDayOffset(ev.start);
           const slotIndex = getSlotIndex(ev.start);
           const span = getSlotSpan(ev.start, ev.end);
-          if (dayIndex < 0 || dayIndex > 6 || slotIndex < 0 || slotIndex >= TOTAL_SLOTS) return null;
+          if (dayIndex < 0 || dayIndex > 5 || slotIndex < 0 || slotIndex >= TOTAL_SLOTS) return null;
           
           // Layout für überlappende Events (Apple-Kalender-Style)
           const layout = getOverlappingEventsLayout.get(ev.id);
@@ -2596,6 +2698,7 @@ export default function AdminDashboardPage() {
             />
           );
         })}
+      </div>
       </div>
     </>
   );
@@ -2704,43 +2807,79 @@ export default function AdminDashboardPage() {
           variant={isLightTheme ? "footer" : "header"}
           className="h-8"
         />
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={() => {
-              setCreateTicketOpen(true);
-              resetCreateTicketForm();
-            }}
-            className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-2 text-xs font-medium transition-all hover:opacity-90 ${
-              isLightTheme
-                ? "border-slate-200 bg-slate-100 text-slate-800 shadow-sm hover:border-slate-300 hover:bg-slate-200"
-                : "border-blue-500/60 bg-blue-500/20 text-blue-200 shadow-sm hover:bg-blue-500/30"
-            }`}
-          >
-            <Plus className="h-3.5 w-3.5" />
-            Ticket erstellen
-          </button>
+        <div className="flex flex-col items-end gap-1.5">
+          {adminUser?.email && (
+            <span className={`text-xs ${isLightTheme ? "text-slate-500" : "text-slate-500"}`}>
+              {adminUser.email}
+            </span>
+          )}
+          <div className="flex flex-wrap items-center justify-end gap-2">
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                title="Einstellungen"
+                className={`inline-flex items-center justify-center rounded-full border p-2 text-xs font-medium transition-all hover:opacity-90 ${
+                  isLightTheme
+                    ? "border-slate-200 bg-white text-slate-700 shadow-sm hover:border-slate-300"
+                    : "border-slate-600 bg-slate-900/80 text-slate-100 hover:border-slate-500 hover:bg-slate-800/80"
+                }`}
+              >
+                <Settings className="h-4 w-4" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent
+              align="end"
+              className={`w-52 p-2 ${isLightTheme ? "border-slate-200 bg-white" : "border-slate-700 bg-slate-900"}`}
+            >
+              <nav className="flex flex-col gap-0.5">
+                <Link
+                  href="/admin/dashboard"
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                    isLightTheme ? "text-slate-700 hover:bg-slate-100" : "text-slate-300 hover:bg-slate-800 hover:text-slate-100"
+                  }`}
+                >
+                  <LayoutDashboard className="h-4 w-4 shrink-0" />
+                  Dashboard
+                </Link>
+                <Link
+                  href="/admin/benutzer"
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                    isLightTheme ? "text-slate-700 hover:bg-slate-100" : "text-slate-300 hover:bg-slate-800 hover:text-slate-100"
+                  }`}
+                >
+                  <Users className="h-4 w-4 shrink-0" />
+                  Benutzerverwaltung
+                </Link>
+              </nav>
+            </PopoverContent>
+          </Popover>
           <button
             type="button"
             onClick={toggleDashboardTheme}
-            className={`inline-flex items-center gap-1 rounded-full border px-3 py-2 text-xs font-medium transition-all hover:opacity-90 ${
+            title={isLightTheme ? "Dunkel" : "Hell"}
+            className={`inline-flex items-center justify-center rounded-full border p-2 text-xs font-medium transition-all hover:opacity-90 ${
               isLightTheme
                 ? "border-slate-200 bg-white text-slate-700 shadow-sm hover:border-slate-300"
                 : "border-slate-600 bg-slate-900/80 text-slate-100 hover:border-slate-500 hover:bg-slate-800/80"
             }`}
           >
-            {isLightTheme ? (
-              <>
-                <Moon className="h-3.5 w-3.5" />
-                <span>Dunkel</span>
-              </>
-            ) : (
-              <>
-                <Sun className="h-3.5 w-3.5" />
-                <span>Hell</span>
-              </>
-            )}
+            {isLightTheme ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
           </button>
+          <form action="/auth/signout" method="post" className="inline">
+            <button
+              type="submit"
+              title="Abmelden"
+              className={`inline-flex items-center justify-center rounded-full border p-2 text-xs font-medium transition-all hover:opacity-90 ${
+                isLightTheme
+                  ? "border-slate-200 bg-white text-slate-700 shadow-sm hover:border-slate-300 hover:bg-slate-100"
+                  : "border-slate-600 bg-slate-900/80 text-slate-100 hover:border-slate-500 hover:bg-slate-800/80"
+              }`}
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+          </form>
+          </div>
         </div>
       </div>
       <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
@@ -2771,7 +2910,18 @@ export default function AdminDashboardPage() {
                   Kalender
                 </TabsTrigger>
               </TabsList>
-              <TabsContent value="list" className="mt-0">
+              <TabsContent value="list" className="mt-0 space-y-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCreateTicketOpen(true);
+                    resetCreateTicketForm();
+                  }}
+                  className="w-full inline-flex items-center justify-center gap-1.5 rounded-full border border-blue-500/60 bg-blue-500/20 px-3 py-2.5 text-xs font-medium text-blue-200 shadow-sm transition-all hover:opacity-90 hover:bg-blue-500/30"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Ticket erstellen
+                </button>
                 <section
                   ref={setCol1MobileListRef}
                   className={`flex flex-col rounded-2xl border p-4 transition-colors ${
@@ -2847,11 +2997,27 @@ export default function AdminDashboardPage() {
           {/* Desktop: 6-Spalten – Obere Sektion (Planung): Spalte 1 + 2 gleiche Höhe */}
           <div className="hidden lg:block space-y-4">
             <div className="flex gap-4" style={{ height: "720px" }}>
-              {/* Spalte 1: Neue Anfragen – flex column, Droppable-Container füllt Restfläche */}
+              {/* Spalte 1: Ticket erstellen + Neue Anfragen */}
+              <div className="flex w-[28%] min-w-0 flex-col gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCreateTicketOpen(true);
+                    resetCreateTicketForm();
+                  }}
+                  className={`shrink-0 w-full inline-flex items-center justify-center gap-1.5 rounded-full border px-3 py-2.5 text-xs font-medium transition-all hover:opacity-90 ${
+                    isLightTheme
+                      ? "border-slate-200 bg-slate-100 text-slate-800 shadow-sm hover:border-slate-300 hover:bg-slate-200"
+                      : "border-blue-500/60 bg-blue-500/20 text-blue-200 shadow-sm hover:bg-blue-500/30"
+                  }`}
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Ticket erstellen
+                </button>
               <aside
                 ref={setCol1Ref}
                 data-col-droppable="column-1"
-                className={`flex w-[28%] min-w-0 flex-col overflow-hidden rounded-2xl border p-4 backdrop-blur transition-colors ${
+                className={`flex min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border p-4 backdrop-blur transition-colors ${
                   isOverCol1 || manualOverCol === "column-1"
                     ? isLightTheme
                       ? "border-blue-500 bg-blue-50 ring-2 ring-blue-500/40 shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
@@ -2940,9 +3106,10 @@ export default function AdminDashboardPage() {
                   </SortableContext>
                 </div>
               </aside>
-              {/* Spalte 2: Terminplaner (Kalender) – gleiche Höhe */}
+              </div>
+              {/* Spalte 2: Terminplaner (Kalender) – gleiche Höhe, scrollbar */}
               <section
-                className={`flex-1 min-w-0 flex flex-col rounded-2xl border p-4 h-full overflow-hidden transition-colors ${
+                className={`flex-1 min-w-0 flex min-h-0 flex-col rounded-2xl border p-4 overflow-hidden transition-colors ${
                   isLightTheme ? "border-slate-200/80 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)]" : "border-slate-800 bg-slate-900/40"
                 }`}
               >
@@ -3012,14 +3179,18 @@ export default function AdminDashboardPage() {
           }
         }}
       >
-        <DialogContent className="rounded-3xl border border-slate-700/80 bg-slate-900/90 p-6 shadow-2xl backdrop-blur-xl sm:max-w-sm">
+        <DialogContent className={`rounded-3xl border p-6 shadow-2xl backdrop-blur-xl sm:max-w-sm ${
+          isLightTheme
+            ? "border-slate-200/80 bg-white/95 text-slate-900"
+            : "border-slate-700/80 bg-slate-900/90 text-slate-100"
+        }`}>
           <DialogHeader className="space-y-1">
-            <DialogTitle className="text-lg font-semibold tracking-tight text-slate-50">
+            <DialogTitle className={`text-lg font-semibold tracking-tight ${isLightTheme ? "text-slate-900" : "text-slate-50"}`}>
               Was für ein Termin?
             </DialogTitle>
-            <DialogDescription className="text-slate-400">
+            <DialogDescription className={isLightTheme ? "text-slate-600" : "text-slate-400"}>
               {pendingSlotDrop?.ticket && (
-                <span className="font-medium text-slate-200">{getTicketDisplayName(pendingSlotDrop.ticket)}</span>
+                <span className={`font-medium ${isLightTheme ? "text-slate-800" : "text-slate-200"}`}>{getTicketDisplayName(pendingSlotDrop.ticket)}</span>
               )}
             </DialogDescription>
           </DialogHeader>
@@ -3027,14 +3198,22 @@ export default function AdminDashboardPage() {
             <button
               type="button"
               onClick={() => setPendingTerminTyp(TERMIN_TYP.BESICHTIGUNG)}
-              className="rounded-2xl border border-slate-600/80 bg-slate-800/80 px-4 py-3.5 text-left text-sm font-medium text-slate-100 transition-colors hover:bg-slate-700/80 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+              className={`rounded-2xl border px-4 py-3.5 text-left text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/30 ${
+                isLightTheme
+                  ? "border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100"
+                  : "border-slate-600/80 bg-slate-800/80 text-slate-100 hover:bg-slate-700/80"
+              }`}
             >
               Besichtigung
             </button>
             <button
               type="button"
               onClick={() => setPendingTerminTyp(TERMIN_TYP.AUSFUEHRUNG)}
-              className="rounded-2xl border border-slate-600/80 bg-slate-800/80 px-4 py-3.5 text-left text-sm font-medium text-slate-100 transition-colors hover:bg-slate-700/80 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+              className={`rounded-2xl border px-4 py-3.5 text-left text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/30 ${
+                isLightTheme
+                  ? "border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100"
+                  : "border-slate-600/80 bg-slate-800/80 text-slate-100 hover:bg-slate-700/80"
+              }`}
             >
               Ausführung
             </button>
@@ -3044,7 +3223,7 @@ export default function AdminDashboardPage() {
                 setPendingSlotDrop(null);
                 setPendingTerminTyp(null);
               }}
-              className="mt-1 text-sm text-slate-500 hover:text-slate-300"
+              className={`mt-1 text-sm ${isLightTheme ? "text-slate-500 hover:text-slate-700" : "text-slate-500 hover:text-slate-300"}`}
             >
               Abbrechen
             </button>
@@ -3062,17 +3241,21 @@ export default function AdminDashboardPage() {
           }
         }}
       >
-        <DialogContent className="rounded-3xl border-slate-700/80 bg-slate-900/95 text-slate-100 shadow-2xl backdrop-blur-xl sm:max-w-md">
+        <DialogContent className={`rounded-3xl shadow-2xl backdrop-blur-xl sm:max-w-md ${
+          isLightTheme
+            ? "border-slate-200/80 bg-white/95 text-slate-900"
+            : "border-slate-700/80 bg-slate-900/95 text-slate-100"
+        }`}>
           <DialogHeader className="space-y-1.5">
-            <DialogTitle className="text-xl font-semibold tracking-tight text-slate-50">
+            <DialogTitle className={`text-xl font-semibold tracking-tight ${isLightTheme ? "text-slate-900" : "text-slate-50"}`}>
               Termin festlegen {pendingTerminTyp ? `· ${pendingTerminTyp}` : ""}
             </DialogTitle>
-            <DialogDescription className="text-slate-400">
+            <DialogDescription className={isLightTheme ? "text-slate-600" : "text-slate-400"}>
               {pendingSlotDrop?.ticket && (
                 <>
-                  <span className="font-medium text-slate-200">{getTicketDisplayName(pendingSlotDrop.ticket)}</span>
+                  <span className={`font-medium ${isLightTheme ? "text-slate-800" : "text-slate-200"}`}>{getTicketDisplayName(pendingSlotDrop.ticket)}</span>
                   {pendingSlotDrop.ticket.ticket_display_id && (
-                    <span className="ml-2 text-slate-500">({pendingSlotDrop.ticket.ticket_display_id})</span>
+                    <span className={`ml-2 ${isLightTheme ? "text-slate-500" : "text-slate-500"}`}>({pendingSlotDrop.ticket.ticket_display_id})</span>
                   )}
                 </>
               )}
@@ -3081,14 +3264,18 @@ export default function AdminDashboardPage() {
           <div className="space-y-5 py-1 font-sans">
             {/* Beginn: Apple-Style Popover (Kalender + Zeit, keine Browser-Defaults) */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-slate-400">Beginn</label>
+              <label className={`block text-sm font-medium ${isLightTheme ? "text-slate-600" : "text-slate-400"}`}>Beginn</label>
               <Popover>
                 <PopoverTrigger asChild>
                   <button
                     type="button"
-                    className="flex w-full items-center justify-between gap-2 rounded-2xl border border-slate-600/80 bg-slate-800/80 px-4 py-3.5 text-left text-sm text-slate-100 outline-none transition-colors hover:bg-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/25"
+                    className={`flex w-full items-center justify-between gap-2 rounded-2xl border px-4 py-3.5 text-left text-sm outline-none transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/25 ${
+                      isLightTheme
+                        ? "border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100"
+                        : "border-slate-600/80 bg-slate-800/80 text-slate-100 hover:bg-slate-800"
+                    }`}
                   >
-                    <span className={pendingTerminStart ? "text-slate-100" : "text-slate-500"}>
+                    <span className={pendingTerminStart ? (isLightTheme ? "text-slate-900" : "text-slate-100") : (isLightTheme ? "text-slate-500" : "text-slate-500")}>
                       {pendingTerminStart
                         ? format(new Date(pendingTerminStart), "EEE, dd.MM.yyyy · HH:mm", { locale: de })
                         : "Datum und Uhrzeit wählen"}
@@ -3099,7 +3286,11 @@ export default function AdminDashboardPage() {
                 <PopoverContent
                   align="start"
                   sideOffset={8}
-                  className="min-h-[450px] w-auto min-w-[300px] rounded-2xl border border-slate-800/50 bg-slate-900/90 p-0 pb-6 font-sans text-slate-100 shadow-2xl backdrop-blur-xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2"
+                  className={`min-h-[450px] w-auto min-w-[300px] rounded-2xl border p-0 pb-6 font-sans shadow-2xl backdrop-blur-xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 ${
+                    isLightTheme
+                      ? "border-slate-200 bg-white text-slate-900"
+                      : "border-slate-800/50 bg-slate-900/90 text-slate-100"
+                  }`}
                 >
                   {(() => {
                     const d = pendingTerminStart ? new Date(pendingTerminStart) : new Date();
@@ -3107,41 +3298,37 @@ export default function AdminDashboardPage() {
                     const startMin = Math.min(45, Math.round(d.getMinutes() / 15) * 15);
                     const build = (date: Date, h: number, min: number) =>
                       `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}T${String(h).padStart(2, "0")}:${String(min).padStart(2, "0")}`;
+                    const calLight = {
+                      caption_label: "text-sm font-medium text-slate-700",
+                      head_cell: "text-slate-500 rounded-md w-9 font-normal text-xs",
+                      nav_button: "inline-flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900",
+                      day: "h-9 w-9 p-0 font-normal rounded-xl text-slate-700 hover:bg-slate-100 aria-selected:opacity-100",
+                      day_today: "bg-slate-200/80 text-slate-900",
+                      day_outside: "text-slate-400 opacity-50",
+                      day_disabled: "text-slate-400 opacity-30",
+                    };
+                    const calDark = {
+                      caption_label: "text-sm font-medium text-slate-200",
+                      head_cell: "text-slate-500 rounded-md w-9 font-normal text-xs",
+                      nav_button: "inline-flex h-8 w-8 items-center justify-center rounded-xl border border-slate-800/50 bg-slate-800/50 text-slate-300 hover:bg-slate-700/80 hover:text-slate-100",
+                      day: "h-9 w-9 p-0 font-normal rounded-xl text-slate-200 hover:bg-slate-700/80 aria-selected:opacity-100",
+                      day_today: "bg-slate-700/60 text-slate-100",
+                      day_outside: "text-slate-600 opacity-50",
+                      day_disabled: "text-slate-600 opacity-30",
+                    };
+                    const calNames = { months: "flex flex-col space-y-4", month: "space-y-4", caption: "flex justify-center pt-1 relative items-center", nav_button_previous: "absolute left-1", nav_button_next: "absolute right-1", table: "w-full border-collapse space-y-1", head_row: "flex", row: "flex w-full mt-2", cell: "h-9 w-9 text-center text-sm p-0 relative", day_selected: "bg-blue-600 text-white hover:bg-blue-600 hover:text-white", day_hidden: "invisible", ...(isLightTheme ? calLight : calDark) };
                     return (
                       <div className="flex min-h-[450px] flex-col font-sans">
-                        {/* OBEN: Kalender */}
                         <div className="shrink-0 px-5 pt-5">
                           <Calendar
                             mode="single"
                             selected={d}
                             onSelect={(date) => date && setPendingTerminStart(build(date, startHour, startMin))}
                             locale={de}
-                            classNames={{
-                              months: "flex flex-col space-y-4",
-                              month: "space-y-4",
-                              caption: "flex justify-center pt-1 relative items-center",
-                              caption_label: "text-sm font-medium text-slate-200",
-                              nav: "space-x-1 flex items-center",
-                              nav_button: "inline-flex h-8 w-8 items-center justify-center rounded-xl border border-slate-800/50 bg-slate-800/50 text-slate-300 hover:bg-slate-700/80 hover:text-slate-100",
-                              nav_button_previous: "absolute left-1",
-                              nav_button_next: "absolute right-1",
-                              table: "w-full border-collapse space-y-1",
-                              head_row: "flex",
-                              head_cell: "text-slate-500 rounded-md w-9 font-normal text-xs",
-                              row: "flex w-full mt-2",
-                              cell: "h-9 w-9 text-center text-sm p-0 relative",
-                              day: "h-9 w-9 p-0 font-normal rounded-xl text-slate-200 hover:bg-slate-700/80 aria-selected:opacity-100",
-                              day_selected: "bg-blue-600 text-white hover:bg-blue-600 hover:text-white",
-                              day_today: "bg-slate-700/60 text-slate-100",
-                              day_outside: "text-slate-600 opacity-50",
-                              day_disabled: "text-slate-600 opacity-30",
-                              day_hidden: "invisible",
-                            }}
+                            classNames={calNames}
                           />
                         </div>
-                        {/* MITTE: Trennlinie */}
-                        <div className="shrink-0 border-t border-slate-800/50" />
-                        {/* UNTEN: Zeitwahl — Links Heute, Mitte Stunden-Dropdown, Rechts Minuten-Pillen */}
+                        <div className={`shrink-0 border-t ${isLightTheme ? "border-slate-200" : "border-slate-800/50"}`} />
                         <div className="flex shrink-0 flex-wrap items-center justify-between gap-4 px-5 pt-4">
                           <button
                             type="button"
@@ -3159,7 +3346,11 @@ export default function AdminDashboardPage() {
                               setPendingTerminStart(build(d, parseInt(e.target.value, 10), startMin));
                               setTimeout(() => startMinutesRef.current?.focus({ preventScroll: true }), 0);
                             }}
-                            className="rounded-xl border border-slate-800/50 bg-slate-800/50 px-3 py-2 text-center font-medium tabular-nums text-slate-100 outline-none focus:ring-2 focus:ring-blue-500/30"
+                            className={`rounded-xl border px-3 py-2 text-center font-medium tabular-nums outline-none focus:ring-2 focus:ring-blue-500/30 ${
+                              isLightTheme
+                                ? "border-slate-200 bg-slate-100 text-slate-900"
+                                : "border-slate-800/50 bg-slate-800/50 text-slate-100"
+                            }`}
                           >
                             {Array.from({ length: 24 }, (_, i) => (
                               <option key={i} value={String(i).padStart(2, "0")}>{String(i).padStart(2, "0")} Uhr</option>
@@ -3181,7 +3372,9 @@ export default function AdminDashboardPage() {
                                   className={`rounded-full px-4 py-2.5 text-sm font-medium tabular-nums transition-colors ${
                                     isActive
                                       ? "bg-blue-600 text-white"
-                                      : "bg-slate-800/50 text-slate-400 hover:bg-slate-700/60 hover:text-slate-200"
+                                      : isLightTheme
+                                        ? "bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900"
+                                        : "bg-slate-800/50 text-slate-400 hover:bg-slate-700/60 hover:text-slate-200"
                                   }`}
                                 >
                                   {m}
@@ -3196,16 +3389,19 @@ export default function AdminDashboardPage() {
                 </PopoverContent>
               </Popover>
             </div>
-            {/* Ende: Apple-Style Popover */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-slate-400">Ende</label>
+              <label className={`block text-sm font-medium ${isLightTheme ? "text-slate-600" : "text-slate-400"}`}>Ende</label>
               <Popover>
                 <PopoverTrigger asChild>
                   <button
                     type="button"
-                    className="flex w-full items-center justify-between gap-2 rounded-2xl border border-slate-600/80 bg-slate-800/80 px-4 py-3.5 text-left text-sm text-slate-100 outline-none transition-colors hover:bg-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/25"
+                    className={`flex w-full items-center justify-between gap-2 rounded-2xl border px-4 py-3.5 text-left text-sm outline-none transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/25 ${
+                      isLightTheme
+                        ? "border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100"
+                        : "border-slate-600/80 bg-slate-800/80 text-slate-100 hover:bg-slate-800"
+                    }`}
                   >
-                    <span className={pendingTerminEnde ? "text-slate-100" : "text-slate-500"}>
+                    <span className={pendingTerminEnde ? (isLightTheme ? "text-slate-900" : "text-slate-100") : (isLightTheme ? "text-slate-500" : "text-slate-500")}>
                       {pendingTerminEnde
                         ? format(new Date(pendingTerminEnde), "EEE, dd.MM.yyyy · HH:mm", { locale: de })
                         : "Datum und Uhrzeit wählen"}
@@ -3216,7 +3412,11 @@ export default function AdminDashboardPage() {
                 <PopoverContent
                   align="start"
                   sideOffset={8}
-                  className="min-h-[450px] w-auto min-w-[300px] rounded-2xl border border-slate-800/50 bg-slate-900/90 p-0 pb-6 font-sans text-slate-100 shadow-2xl backdrop-blur-xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2"
+                  className={`min-h-[450px] w-auto min-w-[300px] rounded-2xl border p-0 pb-6 font-sans shadow-2xl backdrop-blur-xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 ${
+                    isLightTheme
+                      ? "border-slate-200 bg-white text-slate-900"
+                      : "border-slate-800/50 bg-slate-900/90 text-slate-100"
+                  }`}
                 >
                   {(() => {
                     const d = pendingTerminEnde ? new Date(pendingTerminEnde) : add(new Date(), { hours: 1 });
@@ -3224,40 +3424,21 @@ export default function AdminDashboardPage() {
                     const endMin = Math.min(45, Math.round(d.getMinutes() / 15) * 15);
                     const build = (date: Date, h: number, min: number) =>
                       `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}T${String(h).padStart(2, "0")}:${String(min).padStart(2, "0")}`;
+                    const calLight2 = { caption_label: "text-sm font-medium text-slate-700", head_cell: "text-slate-500 rounded-md w-9 font-normal text-xs", nav_button: "inline-flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900", day: "h-9 w-9 p-0 font-normal rounded-xl text-slate-700 hover:bg-slate-100 aria-selected:opacity-100", day_today: "bg-slate-200/80 text-slate-900", day_outside: "text-slate-400 opacity-50", day_disabled: "text-slate-400 opacity-30" };
+                    const calDark2 = { caption_label: "text-sm font-medium text-slate-200", head_cell: "text-slate-500 rounded-md w-9 font-normal text-xs", nav_button: "inline-flex h-8 w-8 items-center justify-center rounded-xl border border-slate-800/50 bg-slate-800/50 text-slate-300 hover:bg-slate-700/80 hover:text-slate-100", day: "h-9 w-9 p-0 font-normal rounded-xl text-slate-200 hover:bg-slate-700/80 aria-selected:opacity-100", day_today: "bg-slate-700/60 text-slate-100", day_outside: "text-slate-600 opacity-50", day_disabled: "text-slate-600 opacity-30" };
+                    const calNames2 = { months: "flex flex-col space-y-4", month: "space-y-4", caption: "flex justify-center pt-1 relative items-center", nav_button_previous: "absolute left-1", nav_button_next: "absolute right-1", table: "w-full border-collapse space-y-1", head_row: "flex", row: "flex w-full mt-2", cell: "h-9 w-9 text-center text-sm p-0 relative", day_selected: "bg-blue-600 text-white hover:bg-blue-600 hover:text-white", day_hidden: "invisible", ...(isLightTheme ? calLight2 : calDark2) };
                     return (
                       <div className="flex min-h-[450px] flex-col font-sans">
-                        {/* OBEN: Kalender */}
                         <div className="shrink-0 px-5 pt-5">
                           <Calendar
                             mode="single"
                             selected={d}
                             onSelect={(date) => date && setPendingTerminEnde(build(date, endHour, endMin))}
                             locale={de}
-                            classNames={{
-                              months: "flex flex-col space-y-4",
-                              month: "space-y-4",
-                              caption: "flex justify-center pt-1 relative items-center",
-                              caption_label: "text-sm font-medium text-slate-200",
-                              nav: "space-x-1 flex items-center",
-                              nav_button: "inline-flex h-8 w-8 items-center justify-center rounded-xl border border-slate-800/50 bg-slate-800/50 text-slate-300 hover:bg-slate-700/80 hover:text-slate-100",
-                              nav_button_previous: "absolute left-1",
-                              nav_button_next: "absolute right-1",
-                              table: "w-full border-collapse space-y-1",
-                              head_row: "flex",
-                              head_cell: "text-slate-500 rounded-md w-9 font-normal text-xs",
-                              row: "flex w-full mt-2",
-                              cell: "h-9 w-9 text-center text-sm p-0 relative",
-                              day: "h-9 w-9 p-0 font-normal rounded-xl text-slate-200 hover:bg-slate-700/80 aria-selected:opacity-100",
-                              day_selected: "bg-blue-600 text-white hover:bg-blue-600 hover:text-white",
-                              day_today: "bg-slate-700/60 text-slate-100",
-                              day_outside: "text-slate-600 opacity-50",
-                              day_disabled: "text-slate-600 opacity-30",
-                              day_hidden: "invisible",
-                            }}
+                            classNames={calNames2}
                           />
                         </div>
-                        {/* MITTE: Trennlinie */}
-                        <div className="shrink-0 border-t border-slate-800/50" />
+                        <div className={`shrink-0 border-t ${isLightTheme ? "border-slate-200" : "border-slate-800/50"}`} />
                         {/* UNTEN: Zeitwahl — Links Heute, Mitte Stunden-Dropdown, Rechts Minuten-Pillen */}
                         <div className="flex shrink-0 flex-wrap items-center justify-between gap-4 px-5 pt-4">
                           <button
@@ -3276,7 +3457,11 @@ export default function AdminDashboardPage() {
                               setPendingTerminEnde(build(d, parseInt(e.target.value, 10), endMin));
                               setTimeout(() => endMinutesRef.current?.focus({ preventScroll: true }), 0);
                             }}
-                            className="rounded-xl border border-slate-800/50 bg-slate-800/50 px-3 py-2 text-center font-medium tabular-nums text-slate-100 outline-none focus:ring-2 focus:ring-blue-500/30"
+                            className={`rounded-xl border px-3 py-2 text-center font-medium tabular-nums outline-none focus:ring-2 focus:ring-blue-500/30 ${
+                              isLightTheme
+                                ? "border-slate-200 bg-slate-100 text-slate-900"
+                                : "border-slate-800/50 bg-slate-800/50 text-slate-100"
+                            }`}
                           >
                             {Array.from({ length: 24 }, (_, i) => (
                               <option key={i} value={String(i).padStart(2, "0")}>{String(i).padStart(2, "0")} Uhr</option>
@@ -3298,7 +3483,9 @@ export default function AdminDashboardPage() {
                                   className={`rounded-full px-4 py-2.5 text-sm font-medium tabular-nums transition-colors ${
                                     isActive
                                       ? "bg-blue-600 text-white"
-                                      : "bg-slate-800/50 text-slate-400 hover:bg-slate-700/60 hover:text-slate-200"
+                                      : isLightTheme
+                                        ? "bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900"
+                                        : "bg-slate-800/50 text-slate-400 hover:bg-slate-700/60 hover:text-slate-200"
                                   }`}
                                 >
                                   {m}
@@ -3321,7 +3508,7 @@ export default function AdminDashboardPage() {
                 const h = Math.floor(diffMin / 60);
                 const m = diffMin % 60;
                 return (
-                  <p className="rounded-2xl bg-slate-800/50 px-4 py-2.5 text-xs text-slate-400">
+                  <p className={`rounded-2xl px-4 py-2.5 text-xs ${isLightTheme ? "bg-slate-100 text-slate-600" : "bg-slate-800/50 text-slate-400"}`}>
                     Dauer: {h > 0 ? `${h} Std.` : ""} {m > 0 ? `${m} Min.` : ""} · {format(s, "EEE, dd.MM.yyyy", { locale: de })}
                   </p>
                 );
@@ -3333,7 +3520,11 @@ export default function AdminDashboardPage() {
             <button
               type="button"
               onClick={() => setPendingSlotDrop(null)}
-              className="rounded-2xl border border-slate-600 bg-slate-800/80 px-5 py-2.5 text-sm font-medium text-slate-300 transition-colors hover:bg-slate-700"
+              className={`rounded-2xl border px-5 py-2.5 text-sm font-medium transition-colors ${
+                isLightTheme
+                  ? "border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200"
+                  : "border-slate-600 bg-slate-800/80 text-slate-300 hover:bg-slate-700"
+              }`}
             >
               Abbrechen
             </button>
@@ -3358,10 +3549,14 @@ export default function AdminDashboardPage() {
           }
         }}
       >
-        <DialogContent className="max-w-md border-slate-700 bg-slate-900 text-slate-100">
+        <DialogContent className={`max-w-md ${
+          isLightTheme
+            ? "border-slate-200 bg-white text-slate-900"
+            : "border-slate-700 bg-slate-900 text-slate-100"
+        }`}>
           <DialogHeader>
-            <DialogTitle className="text-slate-100">Ticket erstellen</DialogTitle>
-            <DialogDescription className="text-slate-400">
+            <DialogTitle className={isLightTheme ? "text-slate-900" : "text-slate-100"}>Ticket erstellen</DialogTitle>
+            <DialogDescription className={isLightTheme ? "text-slate-600" : "text-slate-400"}>
               Neues Ticket manuell anlegen – erscheint im Eingang.
             </DialogDescription>
           </DialogHeader>
@@ -3373,7 +3568,7 @@ export default function AdminDashboardPage() {
             className="space-y-4 py-2"
           >
             {createTicketError && (
-              <div className="rounded-md border border-red-500/50 bg-red-950/40 p-2 text-sm text-red-200">
+              <div className={`rounded-md border border-red-500/50 p-2 text-sm ${isLightTheme ? "bg-red-50 text-red-800" : "bg-red-950/40 text-red-200"}`}>
                 {createTicketError}
               </div>
             )}
@@ -3382,38 +3577,38 @@ export default function AdminDashboardPage() {
                 id="create-is-partner"
                 checked={createTicketIsPartner}
                 onCheckedChange={(v) => setCreateTicketIsPartner(!!v)}
-                className="border-slate-600 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+                className={isLightTheme ? "border-slate-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600" : "border-slate-600 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"}
               />
-              <Label htmlFor="create-is-partner" className="text-sm text-slate-300 cursor-pointer">
+              <Label htmlFor="create-is-partner" className={`text-sm cursor-pointer ${isLightTheme ? "text-slate-700" : "text-slate-300"}`}>
                 Partner-Anfrage
               </Label>
             </div>
             {createTicketIsPartner ? (
               <div className="space-y-2">
-                <Label htmlFor="create-partner-name" className="text-slate-300">Partner / Firma</Label>
+                <Label htmlFor="create-partner-name" className={isLightTheme ? "text-slate-700" : "text-slate-300"}>Partner / Firma</Label>
                 <Input
                   id="create-partner-name"
                   value={createTicketPartnerName}
                   onChange={(e) => setCreateTicketPartnerName(e.target.value)}
                   placeholder="z. B. Hausverwaltung Süd GmbH"
-                  className="border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"
+                  className={isLightTheme ? "border-slate-200 bg-white text-slate-900 placeholder:text-slate-500" : "border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"}
                 />
               </div>
             ) : (
               <div className="space-y-2">
-                <Label htmlFor="create-kunde-name" className="text-slate-300">Kundenname *</Label>
+                <Label htmlFor="create-kunde-name" className={isLightTheme ? "text-slate-700" : "text-slate-300"}>Kundenname *</Label>
                 <Input
                   id="create-kunde-name"
                   value={createTicketKundeName}
                   onChange={(e) => setCreateTicketKundeName(e.target.value)}
                   placeholder="Max Mustermann"
                   required
-                  className="border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"
+                  className={isLightTheme ? "border-slate-200 bg-white text-slate-900 placeholder:text-slate-500" : "border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"}
                 />
               </div>
             )}
             <div className="space-y-2">
-              <Label htmlFor="create-email" className="text-slate-300">E-Mail *</Label>
+              <Label htmlFor="create-email" className={isLightTheme ? "text-slate-700" : "text-slate-300"}>E-Mail *</Label>
               <Input
                 id="create-email"
                 type="email"
@@ -3421,41 +3616,41 @@ export default function AdminDashboardPage() {
                 onChange={(e) => setCreateTicketEmail(e.target.value)}
                 placeholder="info@beispiel.de"
                 required
-                className="border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"
+                className={isLightTheme ? "border-slate-200 bg-white text-slate-900 placeholder:text-slate-500" : "border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="create-telefon" className="text-slate-300">Telefon (optional)</Label>
+              <Label htmlFor="create-telefon" className={isLightTheme ? "text-slate-700" : "text-slate-300"}>Telefon (optional)</Label>
               <Input
                 id="create-telefon"
                 type="tel"
                 value={createTicketTelefon}
                 onChange={(e) => setCreateTicketTelefon(e.target.value)}
                 placeholder="+49 89 …"
-                className="border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"
+                className={isLightTheme ? "border-slate-200 bg-white text-slate-900 placeholder:text-slate-500" : "border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="create-adresse" className="text-slate-300">Objektadresse *</Label>
+              <Label htmlFor="create-adresse" className={isLightTheme ? "text-slate-700" : "text-slate-300"}>Objektadresse *</Label>
               <Input
                 id="create-adresse"
                 value={createTicketAdresse}
                 onChange={(e) => setCreateTicketAdresse(e.target.value)}
                 placeholder="Musterstraße 42, 80331 München"
                 required
-                className="border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"
+                className={isLightTheme ? "border-slate-200 bg-white text-slate-900 placeholder:text-slate-500" : "border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="create-gewerk" className="text-slate-300">Gewerk (optional)</Label>
+              <Label htmlFor="create-gewerk" className={isLightTheme ? "text-slate-700" : "text-slate-300"}>Gewerk (optional)</Label>
               <Select value={createTicketGewerk || "_none"} onValueChange={(v) => setCreateTicketGewerk(v === "_none" ? "" : v)}>
-                <SelectTrigger className="border-slate-600 bg-slate-800 text-slate-100">
+                <SelectTrigger className={isLightTheme ? "border-slate-200 bg-white text-slate-900" : "border-slate-600 bg-slate-800 text-slate-100"}>
                   <SelectValue placeholder="Auswählen…" />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-900 border-slate-700">
-                  <SelectItem value="_none" className="text-slate-400">– Keins –</SelectItem>
+                <SelectContent className={isLightTheme ? "bg-white border-slate-200" : "bg-slate-900 border-slate-700"}>
+                  <SelectItem value="_none" className={isLightTheme ? "text-slate-600" : "text-slate-400"}>– Keins –</SelectItem>
                   {GEWERKE_OPTIONS.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value} className="text-slate-100">
+                    <SelectItem key={opt.value} value={opt.value} className={isLightTheme ? "text-slate-900" : "text-slate-100"}>
                       {opt.label}
                     </SelectItem>
                   ))}
@@ -3463,14 +3658,14 @@ export default function AdminDashboardPage() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="create-beschreibung" className="text-slate-300">Beschreibung (optional)</Label>
+              <Label htmlFor="create-beschreibung" className={isLightTheme ? "text-slate-700" : "text-slate-300"}>Beschreibung (optional)</Label>
               <Textarea
                 id="create-beschreibung"
                 value={createTicketBeschreibung}
                 onChange={(e) => setCreateTicketBeschreibung(e.target.value)}
                 placeholder="Kurze Beschreibung der Anfrage…"
                 rows={3}
-                className="border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500 resize-none"
+                className={`resize-none ${isLightTheme ? "border-slate-200 bg-white text-slate-900 placeholder:text-slate-500" : "border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"}`}
               />
             </div>
             <DialogFooter className="gap-2 sm:gap-0 pt-2">
@@ -3481,7 +3676,7 @@ export default function AdminDashboardPage() {
                   setCreateTicketOpen(false);
                   resetCreateTicketForm();
                 }}
-                className="border-slate-600 bg-slate-800 text-slate-200 hover:bg-slate-700"
+                className={isLightTheme ? "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100" : "border-slate-600 bg-slate-800 text-slate-200 hover:bg-slate-700"}
               >
                 Abbrechen
               </Button>
@@ -3499,7 +3694,7 @@ export default function AdminDashboardPage() {
 
       <Dialog open={!!rejectionTicket} onOpenChange={(open) => !open && closeRejectionModal()}>
         <DialogContent
-          className="border-slate-700 bg-slate-900 text-slate-100"
+          className={isLightTheme ? "border-slate-200 bg-white text-slate-900" : "border-slate-700 bg-slate-900 text-slate-100"}
           onOpenAutoFocus={(e) => {
             e.preventDefault();
             const el = e.target as HTMLElement;
@@ -3514,15 +3709,19 @@ export default function AdminDashboardPage() {
           }}
         >
           <DialogHeader>
-            <DialogTitle className="text-slate-100">Anfrage ablehnen</DialogTitle>
+            <DialogTitle className={isLightTheme ? "text-slate-900" : "text-slate-100"}>Anfrage ablehnen</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
-            <p className="text-sm text-slate-400">Grund für die Ablehnung auswählen:</p>
+            <p className={`text-sm ${isLightTheme ? "text-slate-600" : "text-slate-400"}`}>Grund für die Ablehnung auswählen:</p>
             <div className="space-y-2">
               {REJECTION_REASONS.map((r) => (
                 <label
                   key={r.value}
-                  className="flex cursor-pointer items-center gap-2 rounded-md border border-slate-700 bg-slate-800/50 px-3 py-2 hover:bg-slate-800"
+                  className={`flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 transition-colors ${
+                    isLightTheme
+                      ? "border-slate-200 bg-slate-50 hover:bg-slate-100"
+                      : "border-slate-700 bg-slate-800/50 hover:bg-slate-800"
+                  }`}
                 >
                   <input
                     type="radio"
@@ -3532,13 +3731,13 @@ export default function AdminDashboardPage() {
                     onChange={() => setRejectionReason(r.value)}
                     className="h-4 w-4 border-slate-600 text-blue-600 focus:ring-blue-500"
                   />
-                  <span className="text-sm text-slate-200">{r.label}</span>
+                  <span className={`text-sm ${isLightTheme ? "text-slate-800" : "text-slate-200"}`}>{r.label}</span>
                 </label>
               ))}
             </div>
             {rejectionReason === "other" && (
               <div>
-                <label htmlFor="rejection-other" className="mb-1 block text-xs text-slate-400">
+                <label htmlFor="rejection-other" className={`mb-1 block text-xs ${isLightTheme ? "text-slate-600" : "text-slate-400"}`}>
                   Sonstiger Grund (optional)
                 </label>
                 <input
@@ -3547,7 +3746,11 @@ export default function AdminDashboardPage() {
                   value={rejectionOtherText}
                   onChange={(e) => setRejectionOtherText(e.target.value)}
                   placeholder="Grund kurz beschreiben"
-                  className="w-full rounded-md border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className={`w-full rounded-md border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 ${
+                    isLightTheme
+                      ? "border-slate-200 bg-white text-slate-900 placeholder:text-slate-500"
+                      : "border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"
+                  }`}
                 />
               </div>
             )}
@@ -3559,7 +3762,11 @@ export default function AdminDashboardPage() {
                 e.preventDefault();
                 closeRejectionModal();
               }}
-              className="rounded-md border border-slate-600 bg-slate-800 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-slate-700"
+              className={`rounded-md border px-4 py-2 text-sm font-medium ${
+                isLightTheme
+                  ? "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                  : "border-slate-600 bg-slate-800 text-slate-200 hover:bg-slate-700"
+              }`}
             >
               Abbrechen
             </button>
@@ -3581,7 +3788,9 @@ export default function AdminDashboardPage() {
       {/* Detail-Modal (Trello-Stil): nur assigned_to + internal_notes (DB); Anzeige: ID, Datum, Kunde, Adresse, Anfragetext */}
       <Dialog open={!!detailTicket} onOpenChange={(open) => !open && closeDetailModal()}>
         <DialogContent
-          className="max-h-[90vh] w-[900px] max-w-[95vw] overflow-y-auto border-0 bg-white p-0 shadow-xl sm:rounded-xl"
+          className={`max-h-[90vh] w-[900px] max-w-[95vw] overflow-y-auto border-0 p-0 shadow-xl sm:rounded-xl ${
+            isLightTheme ? "bg-white" : "bg-slate-900"
+          }`}
           onOpenAutoFocus={(e) => e.preventDefault()}
           onCloseAutoFocus={(e) => {
             e.preventDefault();
@@ -3591,13 +3800,15 @@ export default function AdminDashboardPage() {
           {detailTicket && (
             <div className="flex flex-col">
               {/* Header: Spaltenname, Titel + Partner-Badge, Arbeitsauftrag + Schließen */}
-              <div className="relative sticky top-0 z-10 flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 bg-white px-6 py-4 pr-14 sm:rounded-t-xl">
+              <div className={`relative sticky top-0 z-10 flex flex-wrap items-center justify-between gap-2 border-b px-6 py-4 pr-14 sm:rounded-t-xl ${
+                isLightTheme ? "border-slate-200 bg-white" : "border-slate-700 bg-slate-900"
+              }`}>
                 <div className="flex flex-wrap items-center gap-2">
                   <div className="flex flex-col gap-0.5">
-                    <span className="text-xs font-medium uppercase tracking-wider text-slate-500">
+                    <span className={`text-xs font-medium uppercase tracking-wider ${isLightTheme ? "text-slate-500" : "text-slate-400"}`}>
                       {getColumnNameForTicket(detailTicket)}
                     </span>
-                    <DialogTitle className="text-lg font-semibold text-slate-900">
+                    <DialogTitle className={`text-lg font-semibold ${isLightTheme ? "text-slate-900" : "text-slate-100"}`}>
                       {detailTicket?.ticket_display_id
                         ? detailTicket.ticket_display_id
                         : (detailTicket?.status ?? "").trim() === STATUS.ANFRAGE ? "Anfrage" : "–"}{" "}
@@ -3610,7 +3821,11 @@ export default function AdminDashboardPage() {
                     href={detailTicket?.id ? `/admin/dashboard/auftrag/${detailTicket.id}` : "#"}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="shrink-0 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 no-underline hover:bg-slate-50"
+                    className={`shrink-0 rounded-lg border px-3 py-1.5 text-sm font-medium no-underline ${
+                      isLightTheme
+                        ? "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                        : "border-slate-600 bg-slate-800 text-slate-200 hover:bg-slate-700"
+                    }`}
                   >
                     Arbeitsauftrag teilen/drucken
                   </a>
@@ -3618,7 +3833,7 @@ export default function AdminDashboardPage() {
                 <button
                   type="button"
                   onClick={closeDetailModal}
-                  className="absolute right-3 top-3 rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-900"
+                  className={`absolute right-3 top-3 rounded-lg p-1.5 ${isLightTheme ? "text-slate-400 hover:bg-slate-100 hover:text-slate-900" : "text-slate-500 hover:bg-slate-800 hover:text-slate-100"}`}
                   aria-label="Schließen"
                 >
                   <X className="h-5 w-5" strokeWidth={2} />
@@ -3626,80 +3841,176 @@ export default function AdminDashboardPage() {
               </div>
 
               <div className="flex flex-col gap-0 sm:flex-row">
-                <div className="min-w-0 flex-1 space-y-6 border-r border-slate-200 px-6 py-4 sm:flex-[0_0_70%]">
-                  {/* Kunden-Informationen (read-only): nur ID, Datum, Kunde, Adresse, Anfragetext */}
-                  <section className="rounded-lg border border-slate-200 bg-slate-50/80 p-4">
-                    <div className="mb-3 flex items-center justify-between">
+                <div className={`min-w-0 flex-1 space-y-6 border-r px-6 py-4 sm:flex-[0_0_70%] ${isLightTheme ? "border-slate-200" : "border-slate-700"}`}>
+                  {/* Kunden-Informationen: Stift = Bearbeitung aktivieren, Kassette = Speichern */}
+                  <section className={`rounded-lg border p-4 ${isLightTheme ? "border-slate-200 bg-slate-50/80" : "border-slate-700 bg-slate-800/50"}`}>
+                    <div className="mb-3 flex items-center justify-between gap-2">
                       <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                         Kunden-Informationen
                       </h3>
-                      {detailTicket?.is_partner === true && (
-                        <span className="rounded-full border border-blue-500 bg-blue-500/15 px-2.5 py-0.5 text-xs font-semibold text-blue-700">
-                          Partner
-                        </span>
-                      )}
+                      <div className="flex items-center gap-1">
+                        {detailTicket?.is_partner === true && (
+                          <span className="rounded-full border border-blue-500 bg-blue-500/15 px-2.5 py-0.5 text-xs font-semibold text-blue-700">
+                            Partner
+                          </span>
+                        )}
+                        {detailKundenEditMode ? (
+                          <button
+                            type="button"
+                            onClick={handleKundenSpeichern}
+                            disabled={detailSaving}
+                            className={`rounded p-1.5 transition-colors ${
+                              isLightTheme
+                                ? "text-slate-500 hover:bg-slate-200 hover:text-slate-900"
+                                : "text-slate-400 hover:bg-slate-700 hover:text-slate-100"
+                            } disabled:opacity-50`}
+                            title="Speichern"
+                            aria-label="Speichern"
+                          >
+                            <Save className="h-4 w-4" />
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setDetailKundenEditMode(true)}
+                            className={`rounded p-1.5 transition-colors ${
+                              isLightTheme
+                                ? "text-slate-500 hover:bg-slate-200 hover:text-slate-900"
+                                : "text-slate-400 hover:bg-slate-700 hover:text-slate-100"
+                            }`}
+                            title="Bearbeiten"
+                            aria-label="Bearbeiten"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </button>
+                        )}
+                      </div>
                     </div>
                     <dl className="space-y-2 text-sm">
                       <div>
-                        <dt className="text-slate-500">ID</dt>
-                        <dd className="font-medium text-slate-900">
+                        <dt className={isLightTheme ? "text-slate-500" : "text-slate-400"}>ID</dt>
+                        <dd className={`font-medium ${isLightTheme ? "text-slate-900" : "text-slate-100"}`}>
                           {detailTicket?.ticket_display_id
                             ? detailTicket.ticket_display_id
                             : "–"}
                         </dd>
                       </div>
                       <div>
-                        <dt className="text-slate-500">Eingangsdatum</dt>
-                        <dd className="text-slate-900">
+                        <dt className={isLightTheme ? "text-slate-500" : "text-slate-400"}>Eingangsdatum</dt>
+                        <dd className={isLightTheme ? "text-slate-900" : "text-slate-100"}>
                           {detailTicket?.created_at != null ? formatTicketDate(detailTicket.created_at) : "–"}
                         </dd>
                       </div>
+                      {detailTicket?.is_partner ? (
+                        <div>
+                          <dt className={`${isLightTheme ? "text-slate-500" : "text-slate-400"} ${detailKundenEditMode ? "mb-1" : ""}`}>Partner / Firma</dt>
+                          <dd>
+                            {detailKundenEditMode ? (
+                              <Input
+                                value={detailPartnerName}
+                                onChange={(e) => setDetailPartnerName(e.target.value)}
+                                placeholder="Partner / Firma"
+                                className={`text-sm ${isLightTheme ? "border-slate-200 bg-white text-slate-900" : "border-slate-600 bg-slate-800 text-slate-100"}`}
+                              />
+                            ) : (
+                              <span className={isLightTheme ? "text-slate-900" : "text-slate-100"}>
+                                {(detailTicket?.partner_name ?? "").trim() || "–"}
+                              </span>
+                            )}
+                          </dd>
+                        </div>
+                      ) : (
+                        <div>
+                          <dt className={`${isLightTheme ? "text-slate-500" : "text-slate-400"} ${detailKundenEditMode ? "mb-1" : ""}`}>Kundenname</dt>
+                          <dd>
+                            {detailKundenEditMode ? (
+                              <Input
+                                value={detailKundeName}
+                                onChange={(e) => setDetailKundeName(e.target.value)}
+                                placeholder="Kundenname"
+                                className={`text-sm ${isLightTheme ? "border-slate-200 bg-white text-slate-900" : "border-slate-600 bg-slate-800 text-slate-100"}`}
+                              />
+                            ) : (
+                              <span className={isLightTheme ? "text-slate-900" : "text-slate-100"}>
+                                {(detailTicket?.kunde_name ?? "").trim() || "–"}
+                              </span>
+                            )}
+                          </dd>
+                        </div>
+                      )}
                       <div>
-                        <dt className="text-slate-500">Kundenname</dt>
-                        <dd className="text-slate-900">{getTicketDisplayName(detailTicket)}</dd>
-                      </div>
-                      <div>
-                        <dt className="text-slate-500">E-Mail</dt>
-                        <dd className="text-slate-900">
-                          {detailTicket?.kontakt_email != null &&
-                          String(detailTicket.kontakt_email).trim() !== "" ? (
-                            <a
-                              href={`mailto:${String(detailTicket.kontakt_email).trim()}`}
-                              className="text-blue-600 hover:underline"
-                            >
-                              {String(detailTicket.kontakt_email).trim()}
-                            </a>
+                        <dt className={`${isLightTheme ? "text-slate-500" : "text-slate-400"} ${detailKundenEditMode ? "mb-1" : ""}`}>E-Mail</dt>
+                        <dd>
+                          {detailKundenEditMode ? (
+                            <Input
+                              type="email"
+                              value={detailEmail}
+                              onChange={(e) => setDetailEmail(e.target.value)}
+                              placeholder="E-Mail"
+                              className={`text-sm ${isLightTheme ? "border-slate-200 bg-white text-slate-900" : "border-slate-600 bg-slate-800 text-slate-100"}`}
+                            />
                           ) : (
-                            "–"
+                            <span className={isLightTheme ? "text-slate-900" : "text-slate-100"}>
+                              {(detailTicket?.kontakt_email ?? "").trim() ? (
+                                <a
+                                  href={`mailto:${String(detailTicket.kontakt_email).trim()}`}
+                                  className={isLightTheme ? "text-blue-600 hover:underline" : "text-blue-400 hover:underline"}
+                                >
+                                  {String(detailTicket.kontakt_email).trim()}
+                                </a>
+                              ) : (
+                                "–"
+                              )}
+                            </span>
                           )}
                         </dd>
                       </div>
                       <div>
-                        <dt className="text-slate-500">Telefon</dt>
-                        <dd className="text-slate-900">
-                          {detailTicket?.kontakt_telefon != null &&
-                          String(detailTicket.kontakt_telefon).trim() !== "" ? (
-                            <a
-                              href={`tel:${String(detailTicket.kontakt_telefon).trim()}`}
-                              className="text-blue-600 hover:underline"
-                            >
-                              {String(detailTicket.kontakt_telefon).trim()}
-                            </a>
+                        <dt className={`${isLightTheme ? "text-slate-500" : "text-slate-400"} ${detailKundenEditMode ? "mb-1" : ""}`}>Telefon</dt>
+                        <dd>
+                          {detailKundenEditMode ? (
+                            <Input
+                              type="tel"
+                              value={detailTelefon}
+                              onChange={(e) => setDetailTelefon(e.target.value)}
+                              placeholder="Telefon"
+                              className={`text-sm ${isLightTheme ? "border-slate-200 bg-white text-slate-900" : "border-slate-600 bg-slate-800 text-slate-100"}`}
+                            />
                           ) : (
-                            "–"
+                            <span className={isLightTheme ? "text-slate-900" : "text-slate-100"}>
+                              {(detailTicket?.kontakt_telefon ?? "").trim() ? (
+                                <a
+                                  href={`tel:${String(detailTicket.kontakt_telefon).trim()}`}
+                                  className={isLightTheme ? "text-blue-600 hover:underline" : "text-blue-400 hover:underline"}
+                                >
+                                  {String(detailTicket.kontakt_telefon).trim()}
+                                </a>
+                              ) : (
+                                "–"
+                              )}
+                            </span>
                           )}
                         </dd>
                       </div>
                       <div>
-                        <dt className="text-slate-500">Adresse</dt>
-                        <dd className="text-slate-900">
-                          {detailTicket?.objekt_adresse != null && String(detailTicket.objekt_adresse).trim() !== ""
-                            ? detailTicket.objekt_adresse
-                            : "–"}
+                        <dt className={`${isLightTheme ? "text-slate-500" : "text-slate-400"} ${detailKundenEditMode ? "mb-1" : ""}`}>Adresse</dt>
+                        <dd>
+                          {detailKundenEditMode ? (
+                            <Input
+                              value={detailAdresse}
+                              onChange={(e) => setDetailAdresse(e.target.value)}
+                              placeholder="Objektadresse"
+                              className={`text-sm ${isLightTheme ? "border-slate-200 bg-white text-slate-900" : "border-slate-600 bg-slate-800 text-slate-100"}`}
+                            />
+                          ) : (
+                            <span className={isLightTheme ? "text-slate-900" : "text-slate-100"}>
+                              {(detailTicket?.objekt_adresse ?? "").trim() || "–"}
+                            </span>
+                          )}
                         </dd>
                       </div>
                       <div>
-                        <dt className="text-slate-500">Gewerke</dt>
+                        <dt className={isLightTheme ? "text-slate-500" : "text-slate-400"}>Gewerke</dt>
                         <dd className="flex flex-wrap gap-1.5">
                           {(() => {
                             // Anzeige im Detail-Panel: direkt aus dem bearbeitbaren State,
@@ -3721,8 +4032,8 @@ export default function AdminDashboardPage() {
                         </dd>
                       </div>
                       {/* Bearbeitbares Multi-Select für Gewerke */}
-                      <div className="mt-3 rounded-lg border border-slate-200 bg-white p-3">
-                        <label className="mb-2 block text-xs font-medium text-slate-700">
+                      <div className={`mt-3 rounded-lg border p-3 ${isLightTheme ? "border-slate-200 bg-white" : "border-slate-700 bg-slate-800/50"}`}>
+                        <label className={`mb-2 block text-xs font-medium ${isLightTheme ? "text-slate-700" : "text-slate-300"}`}>
                           Gewerke zuweisen
                         </label>
                         <div className="flex flex-wrap gap-2">
@@ -3760,23 +4071,37 @@ export default function AdminDashboardPage() {
                         </div>
                       </div>
                       <div>
-                        <dt className="text-slate-500">Anfragetext</dt>
-                        <dd className="mt-1 whitespace-pre-wrap rounded border border-slate-200 bg-white p-2 text-slate-900">
-                          {detailTicket?.beschreibung != null && String(detailTicket.beschreibung).trim() !== ""
-                            ? detailTicket.beschreibung
-                            : "–"}
+                        <dt className={`${isLightTheme ? "text-slate-500" : "text-slate-400"} ${detailKundenEditMode ? "mb-1" : ""}`}>Anfragetext</dt>
+                        <dd>
+                          {detailKundenEditMode ? (
+                            <Textarea
+                              value={detailBeschreibung}
+                              onChange={(e) => setDetailBeschreibung(e.target.value)}
+                              placeholder="Beschreibung der Anfrage"
+                              rows={4}
+                              className={`resize-none text-sm ${isLightTheme ? "border-slate-200 bg-white text-slate-900 placeholder:text-slate-500" : "border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"}`}
+                            />
+                          ) : (
+                            <span className={`block whitespace-pre-wrap ${isLightTheme ? "text-slate-900" : "text-slate-100"}`}>
+                              {(detailTicket?.beschreibung ?? "").trim() || "–"}
+                            </span>
+                          )}
                         </dd>
                       </div>
                     </dl>
                   </section>
 
                   {/* Bilder: zuerst */}
-                  <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+                  <section className={`rounded-lg border p-4 shadow-sm ${isLightTheme ? "border-slate-200 bg-white" : "border-slate-700 bg-slate-800/50"}`}>
                     <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
                       Bilder
                     </h3>
                     <div className="space-y-3">
-                      <label className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-300 bg-slate-50/50 py-6 transition-colors hover:border-slate-400 hover:bg-slate-50">
+                      <label className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed py-6 transition-colors ${
+                        isLightTheme
+                          ? "border-slate-300 bg-slate-50/50 hover:border-slate-400 hover:bg-slate-50"
+                          : "border-slate-600 bg-slate-800/30 hover:border-slate-500 hover:bg-slate-800/50"
+                      }`}>
                         <input
                           type="file"
                           accept="image/*"
@@ -3792,7 +4117,7 @@ export default function AdminDashboardPage() {
                             e.target.value = "";
                           }}
                         />
-                        <span className="text-sm font-medium text-slate-600">
+                        <span className={`text-sm font-medium ${isLightTheme ? "text-slate-600" : "text-slate-400"}`}>
                           {uploadingImage ? "Wird hochgeladen …" : "Bilder auswählen oder hierher ziehen"}
                         </span>
                         <span className="mt-1 text-xs text-slate-500">Direkt in Supabase Storage (ticket-images)</span>
@@ -3833,27 +4158,6 @@ export default function AdminDashboardPage() {
                       Interne Bearbeitung
                     </h3>
                     <div className="space-y-4">
-                      <div>
-                        <label htmlFor="detail-assigned" className="mb-1 block text-sm font-medium text-slate-700">
-                          Zugewiesen an
-                        </label>
-                        <select
-                          id="detail-assigned"
-                          value={detailAssignedTo}
-                          onChange={(e) => {
-                            const v = e.target.value;
-                            setDetailAssignedTo(v);
-                            if (detailTicket?.id != null) persistAssignedTo(detailTicket.id, v);
-                          }}
-                          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        >
-                          {ASSIGNEE_OPTIONS.map((opt) => (
-                            <option key={opt.value || "none"} value={opt.value}>
-                              {opt.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
                       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                         <div>
                           <label htmlFor="detail-termin-start" className="mb-1 block text-sm font-medium text-slate-700">

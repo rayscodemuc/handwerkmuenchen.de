@@ -1,62 +1,160 @@
--- Supabase Schema für die leads Tabelle
--- Diese SQL-Datei kann in der Supabase SQL Editor ausgeführt werden
+-- Supabase Schema – vollständige CREATE TABLE Statements
+-- Generiert aus dem tatsächlichen DB-Schema (via TypeScript-Typen + Migrationen).
+-- Hinweis: Supabase MCP execute_sql war nicht verfügbar; Schema aus types + Migrationen rekonstruiert.
 
--- Tabelle für alle Formular-Einreichungen erstellen
-CREATE TABLE IF NOT EXISTS leads (
+-- =============================================================================
+-- companies
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS public.companies (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  customer_name TEXT NOT NULL,
-  email TEXT NOT NULL,
-  phone TEXT,
-  message TEXT NOT NULL,
-  service_type TEXT,
-  city TEXT,
-  form_id TEXT NOT NULL,
-  page_url TEXT NOT NULL,
-  source_url TEXT,
-  additional_data JSONB,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  name TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Index für häufig verwendete Abfragen erstellen
-CREATE INDEX IF NOT EXISTS idx_leads_email ON leads(email);
-CREATE INDEX IF NOT EXISTS idx_leads_created_at ON leads(created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_leads_form_id ON leads(form_id);
-CREATE INDEX IF NOT EXISTS idx_leads_service_type ON leads(service_type);
-CREATE INDEX IF NOT EXISTS idx_leads_city ON leads(city);
+-- =============================================================================
+-- tickets
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS public.tickets (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  ticket_display_id TEXT,
+  is_partner BOOLEAN DEFAULT FALSE,
+  partner_name TEXT,
+  kunde_name TEXT,
+  kontakt_email TEXT NOT NULL,
+  kontakt_telefon TEXT,
+  telefonnummer TEXT,
+  objekt_adresse TEXT NOT NULL,
+  beschreibung TEXT,
+  gewerk TEXT[],
+  status TEXT,
+  ablehnungs_grund TEXT,
+  abgelehnt_am TIMESTAMPTZ,
+  interne_notizen TEXT,
+  internal_notes TEXT,
+  notizen_intern TEXT,
+  assigned_to TEXT,
+  zugewiesener_mitarbeiter TEXT,
+  bild_urls TEXT[],
+  image_urls TEXT[],
+  historie JSONB DEFAULT '[]'::jsonb,
+  termin_start TIMESTAMPTZ,
+  termin_ende TIMESTAMPTZ,
+  termin_typ TEXT,
+  company_id UUID REFERENCES public.companies(id) ON DELETE SET NULL,
+  position INTEGER,
+  priority_score DOUBLE PRECISION,
+  dringlichkeit TEXT,
+  quelle TEXT,
+  hat_stern_markierung BOOLEAN,
+  abschluss_check BOOLEAN,
+  kommentare JSONB,
+  additional_data JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
 
--- Row Level Security (RLS) aktivieren
-ALTER TABLE leads ENABLE ROW LEVEL SECURITY;
+CREATE INDEX IF NOT EXISTS idx_tickets_company_id ON public.tickets(company_id);
+CREATE INDEX IF NOT EXISTS idx_tickets_status ON public.tickets(status);
+CREATE INDEX IF NOT EXISTS idx_tickets_created_at ON public.tickets(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_tickets_termin_start ON public.tickets(termin_start);
 
--- Policy: Alle können neue Leads einfügen (für öffentliche Formulare)
-CREATE POLICY "Allow public insert" ON leads
-  FOR INSERT
-  TO anon, authenticated
-  WITH CHECK (true);
+ALTER TABLE public.tickets ADD CONSTRAINT tickets_status_check
+  CHECK (
+    status IS NULL
+    OR status IN (
+      'Anfrage',
+      'Eingeteilt',
+      'Nachbereitung',
+      'Abrechnung',
+      'Abgelehnt',
+      'Archiv',
+      'Ticket'
+    )
+  );
 
--- Policy: Nur authentifizierte Benutzer können Leads lesen
-CREATE POLICY "Allow authenticated read" ON leads
-  FOR SELECT
+-- =============================================================================
+-- ticket_history
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS public.ticket_history (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  ticket_id UUID REFERENCES public.tickets(id) ON DELETE CASCADE,
+  aktion TEXT NOT NULL,
+  details JSONB,
+  erstellt_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_ticket_history_ticket_id ON public.ticket_history(ticket_id);
+
+-- =============================================================================
+-- profiles (auth.users Erweiterung für Multi-Role)
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS public.profiles (
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  role TEXT NOT NULL DEFAULT 'admin' CHECK (role IN (
+    'admin',
+    'gewerk_elektro',
+    'gewerk_sanitaer',
+    'innenausbau',
+    'reinigung'
+  )),
+  display_name TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_profiles_role ON public.profiles(role);
+
+-- RLS
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can read own profile"
+  ON public.profiles FOR SELECT
   TO authenticated
-  USING (true);
+  USING (auth.uid() = id);
 
--- Optional: Policy für Service Role (vollständiger Zugriff)
-CREATE POLICY "Allow service role full access" ON leads
-  FOR ALL
-  TO service_role
-  USING (true)
-  WITH CHECK (true);
+CREATE POLICY "Admins can read all profiles"
+  ON public.profiles FOR SELECT
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.profiles p
+      WHERE p.id = auth.uid() AND p.role = 'admin'
+    )
+  );
 
--- Kommentare für Dokumentation
-COMMENT ON TABLE leads IS 'Speichert alle Formular-Einreichungen von der Website';
-COMMENT ON COLUMN leads.customer_name IS 'Vollständiger Name des Kunden';
-COMMENT ON COLUMN leads.email IS 'E-Mail-Adresse des Kunden';
-COMMENT ON COLUMN leads.phone IS 'Telefonnummer (optional)';
-COMMENT ON COLUMN leads.message IS 'Nachricht vom Kunden';
-COMMENT ON COLUMN leads.service_type IS 'Art der angefragten Leistung';
-COMMENT ON COLUMN leads.city IS 'Stadt/Standort';
-COMMENT ON COLUMN leads.form_id IS 'ID des Formulars (z.B. inquiry_form, contact_form)';
-COMMENT ON COLUMN leads.page_url IS 'Pfad der Seite, von der das Formular abgesendet wurde (z.B. /kontakt)';
-COMMENT ON COLUMN leads.source_url IS 'Vollständige URL der Seite, von der das Formular abgesendet wurde (inkl. Domain)';
-COMMENT ON COLUMN leads.additional_data IS 'Zusätzliche Formular-Daten als JSON (z.B. company_name, privacy_accepted, etc.)';
-COMMENT ON COLUMN leads.created_at IS 'Zeitstempel der Einreichung';
+CREATE POLICY "Users can update own profile"
+  ON public.profiles FOR UPDATE
+  TO authenticated
+  USING (auth.uid() = id);
 
+-- Trigger + Function für Auto-Profil bei Signup
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER SET search_path = ''
+AS $$
+BEGIN
+  INSERT INTO public.profiles (id, role, display_name)
+  VALUES (
+    NEW.id,
+    COALESCE(NEW.raw_user_meta_data->>'role', 'admin'),
+    COALESCE(NEW.raw_user_meta_data->>'display_name', split_part(NEW.email, '@', 1))
+  );
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_new_user();
+
+CREATE OR REPLACE FUNCTION public.get_my_role()
+RETURNS TEXT
+LANGUAGE sql
+SECURITY DEFINER
+STABLE
+SET search_path = ''
+AS $$
+  SELECT role FROM public.profiles WHERE id = auth.uid();
+$$;
