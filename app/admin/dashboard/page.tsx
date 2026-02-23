@@ -18,6 +18,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
@@ -671,6 +683,19 @@ export default function AdminDashboardPage() {
   /** Spalte 1 Tabs: Eingang (Anfrage) | Angebote (Angebot_erstellt). */
   const [incomingTab, setIncomingTab] = useState<"Eingang" | "Angebote">("Eingang");
 
+  /** Create-Ticket-Dialog: manuell neue Tickets anlegen. */
+  const [createTicketOpen, setCreateTicketOpen] = useState(false);
+  const [createTicketKundeName, setCreateTicketKundeName] = useState("");
+  const [createTicketEmail, setCreateTicketEmail] = useState("");
+  const [createTicketTelefon, setCreateTicketTelefon] = useState("");
+  const [createTicketAdresse, setCreateTicketAdresse] = useState("");
+  const [createTicketBeschreibung, setCreateTicketBeschreibung] = useState("");
+  const [createTicketGewerk, setCreateTicketGewerk] = useState<string>("");
+  const [createTicketIsPartner, setCreateTicketIsPartner] = useState(false);
+  const [createTicketPartnerName, setCreateTicketPartnerName] = useState("");
+  const [createTicketSubmitting, setCreateTicketSubmitting] = useState(false);
+  const [createTicketError, setCreateTicketError] = useState<string | null>(null);
+
   /** Quote Builder Overlay: Ticket für Angebotsbearbeitung, UI only. */
   const [quoteBuilderOpen, setQuoteBuilderOpen] = useState(false);
   const [quoteBuilderTicketId, setQuoteBuilderTicketId] = useState<string | null>(null);
@@ -993,6 +1018,123 @@ export default function AdminDashboardPage() {
     setRejectionTicket(null);
     setRejectionOtherText("");
   };
+
+  const resetCreateTicketForm = useCallback(() => {
+    setCreateTicketKundeName("");
+    setCreateTicketEmail("");
+    setCreateTicketTelefon("");
+    setCreateTicketAdresse("");
+    setCreateTicketBeschreibung("");
+    setCreateTicketGewerk("");
+    setCreateTicketIsPartner(false);
+    setCreateTicketPartnerName("");
+    setCreateTicketError(null);
+  }, []);
+
+  const handleCreateTicket = useCallback(async () => {
+    const kunde_name = createTicketIsPartner
+      ? (createTicketPartnerName.trim() || createTicketKundeName.trim() || null)
+      : (createTicketKundeName.trim() || null);
+    const kontakt_email = createTicketEmail.trim();
+    const objekt_adresse = createTicketAdresse.trim();
+
+    if (!kunde_name) {
+      setCreateTicketError("Name (Kunde oder Partner) ist erforderlich.");
+      return;
+    }
+    if (!kontakt_email) {
+      setCreateTicketError("E-Mail ist erforderlich.");
+      return;
+    }
+    if (!objekt_adresse) {
+      setCreateTicketError("Objektadresse ist erforderlich.");
+      return;
+    }
+
+    setCreateTicketSubmitting(true);
+    setCreateTicketError(null);
+
+    try {
+      const position =
+        tickets.length === 0
+          ? 10
+          : Math.max(10, ...tickets.map((t) => (typeof t.position === "number" ? t.position : 0))) + 10;
+      const gewerkValue: string[] | null = createTicketGewerk.trim()
+        ? [createTicketGewerk.trim()]
+        : null;
+
+      const payload = {
+        company_id: DEFAULT_COMPANY_ID,
+        status: STATUS.ANFRAGE,
+        position,
+        is_partner: createTicketIsPartner,
+        partner_name: createTicketIsPartner ? (createTicketPartnerName.trim() || null) : null,
+        kunde_name,
+        kontakt_email,
+        kontakt_telefon: createTicketTelefon.trim() || null,
+        objekt_adresse,
+        beschreibung: createTicketBeschreibung.trim() || null,
+        gewerk: gewerkValue,
+        historie: [],
+      };
+
+      const { data, error } = await supabase
+        .from("tickets")
+        .insert([payload])
+        .select("id, created_at, ticket_display_id, status, position")
+        .single();
+
+      if (error) {
+        setCreateTicketError(error.message);
+        return;
+      }
+
+      const newTicket: Ticket = {
+        id: data.id,
+        ticket_display_id: data.ticket_display_id,
+        is_partner: createTicketIsPartner,
+        partner_name: createTicketIsPartner ? createTicketPartnerName.trim() || null : null,
+        kunde_name,
+        kontakt_email,
+        kontakt_telefon: createTicketTelefon.trim() || null,
+        objekt_adresse,
+        beschreibung: createTicketBeschreibung.trim() || null,
+        gewerk: gewerkValue,
+        status: STATUS.ANFRAGE,
+        ablehnungs_grund: null,
+        abgelehnt_am: null,
+        interne_notizen: null,
+        kommentare: null,
+        assigned_to: null,
+        image_urls: null,
+        termin_start: null,
+        termin_ende: null,
+        termin_typ: null,
+        historie: [],
+        position: data.position ?? position,
+        created_at: data.created_at,
+      };
+
+      setTickets((prev) => [newTicket, ...prev]);
+      setCreateTicketOpen(false);
+      resetCreateTicketForm();
+    } catch (e) {
+      setCreateTicketError(e instanceof Error ? e.message : "Unbekannter Fehler");
+    } finally {
+      setCreateTicketSubmitting(false);
+    }
+  }, [
+    createTicketIsPartner,
+    createTicketPartnerName,
+    createTicketKundeName,
+    createTicketEmail,
+    createTicketTelefon,
+    createTicketAdresse,
+    createTicketBeschreibung,
+    createTicketGewerk,
+    tickets,
+    resetCreateTicketForm,
+  ]);
 
   /** ISO-Datum zu datetime-local Wert (YYYY-MM-DDTHH:mm). */
   const toDateTimeLocal = (iso: string | null): string => {
@@ -2565,6 +2707,21 @@ export default function AdminDashboardPage() {
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
+            onClick={() => {
+              setCreateTicketOpen(true);
+              resetCreateTicketForm();
+            }}
+            className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-2 text-xs font-medium transition-all hover:opacity-90 ${
+              isLightTheme
+                ? "border-slate-200 bg-slate-100 text-slate-800 shadow-sm hover:border-slate-300 hover:bg-slate-200"
+                : "border-blue-500/60 bg-blue-500/20 text-blue-200 shadow-sm hover:bg-blue-500/30"
+            }`}
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Ticket erstellen
+          </button>
+          <button
+            type="button"
             onClick={toggleDashboardTheme}
             className={`inline-flex items-center gap-1 rounded-full border px-3 py-2 text-xs font-medium transition-all hover:opacity-90 ${
               isLightTheme
@@ -3188,6 +3345,155 @@ export default function AdminDashboardPage() {
               Termin bestätigen
             </button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create-Ticket-Dialog: manuell neue Tickets anlegen */}
+      <Dialog
+        open={createTicketOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setCreateTicketOpen(false);
+            resetCreateTicketForm();
+          }
+        }}
+      >
+        <DialogContent className="max-w-md border-slate-700 bg-slate-900 text-slate-100">
+          <DialogHeader>
+            <DialogTitle className="text-slate-100">Ticket erstellen</DialogTitle>
+            <DialogDescription className="text-slate-400">
+              Neues Ticket manuell anlegen – erscheint im Eingang.
+            </DialogDescription>
+          </DialogHeader>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleCreateTicket();
+            }}
+            className="space-y-4 py-2"
+          >
+            {createTicketError && (
+              <div className="rounded-md border border-red-500/50 bg-red-950/40 p-2 text-sm text-red-200">
+                {createTicketError}
+              </div>
+            )}
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="create-is-partner"
+                checked={createTicketIsPartner}
+                onCheckedChange={(v) => setCreateTicketIsPartner(!!v)}
+                className="border-slate-600 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+              />
+              <Label htmlFor="create-is-partner" className="text-sm text-slate-300 cursor-pointer">
+                Partner-Anfrage
+              </Label>
+            </div>
+            {createTicketIsPartner ? (
+              <div className="space-y-2">
+                <Label htmlFor="create-partner-name" className="text-slate-300">Partner / Firma</Label>
+                <Input
+                  id="create-partner-name"
+                  value={createTicketPartnerName}
+                  onChange={(e) => setCreateTicketPartnerName(e.target.value)}
+                  placeholder="z. B. Hausverwaltung Süd GmbH"
+                  className="border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"
+                />
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Label htmlFor="create-kunde-name" className="text-slate-300">Kundenname *</Label>
+                <Input
+                  id="create-kunde-name"
+                  value={createTicketKundeName}
+                  onChange={(e) => setCreateTicketKundeName(e.target.value)}
+                  placeholder="Max Mustermann"
+                  required
+                  className="border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"
+                />
+              </div>
+            )}
+            <div className="space-y-2">
+              <Label htmlFor="create-email" className="text-slate-300">E-Mail *</Label>
+              <Input
+                id="create-email"
+                type="email"
+                value={createTicketEmail}
+                onChange={(e) => setCreateTicketEmail(e.target.value)}
+                placeholder="info@beispiel.de"
+                required
+                className="border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="create-telefon" className="text-slate-300">Telefon (optional)</Label>
+              <Input
+                id="create-telefon"
+                type="tel"
+                value={createTicketTelefon}
+                onChange={(e) => setCreateTicketTelefon(e.target.value)}
+                placeholder="+49 89 …"
+                className="border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="create-adresse" className="text-slate-300">Objektadresse *</Label>
+              <Input
+                id="create-adresse"
+                value={createTicketAdresse}
+                onChange={(e) => setCreateTicketAdresse(e.target.value)}
+                placeholder="Musterstraße 42, 80331 München"
+                required
+                className="border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="create-gewerk" className="text-slate-300">Gewerk (optional)</Label>
+              <Select value={createTicketGewerk || "_none"} onValueChange={(v) => setCreateTicketGewerk(v === "_none" ? "" : v)}>
+                <SelectTrigger className="border-slate-600 bg-slate-800 text-slate-100">
+                  <SelectValue placeholder="Auswählen…" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-900 border-slate-700">
+                  <SelectItem value="_none" className="text-slate-400">– Keins –</SelectItem>
+                  {GEWERKE_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value} className="text-slate-100">
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="create-beschreibung" className="text-slate-300">Beschreibung (optional)</Label>
+              <Textarea
+                id="create-beschreibung"
+                value={createTicketBeschreibung}
+                onChange={(e) => setCreateTicketBeschreibung(e.target.value)}
+                placeholder="Kurze Beschreibung der Anfrage…"
+                rows={3}
+                className="border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500 resize-none"
+              />
+            </div>
+            <DialogFooter className="gap-2 sm:gap-0 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setCreateTicketOpen(false);
+                  resetCreateTicketForm();
+                }}
+                className="border-slate-600 bg-slate-800 text-slate-200 hover:bg-slate-700"
+              >
+                Abbrechen
+              </Button>
+              <Button
+                type="submit"
+                disabled={createTicketSubmitting}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                {createTicketSubmitting ? "Wird erstellt…" : "Ticket erstellen"}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 

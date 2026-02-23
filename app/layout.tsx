@@ -6,9 +6,8 @@ import { ThemeMain } from "@/components/ThemeMain";
 import { GewerkHoverProvider } from "@/components/providers/GewerkHoverContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { CookieConsent } from "@/components/CookieConsent";
+import { DeferredToasters } from "@/components/DeferredToasters";
 import ScrollToTop from "@/components/ScrollToTop";
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { generateAllSchemas } from "@/lib/schema";
@@ -79,8 +78,7 @@ export default function RootLayout({
                 <ConditionalFooter />
               </div>
               <CookieConsent />
-              <Toaster />
-              <Sonner />
+              <DeferredToasters />
             </TooltipProvider>
           </ThemeProvider>
         </QueryProvider>

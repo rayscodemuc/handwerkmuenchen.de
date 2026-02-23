@@ -4,6 +4,25 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: __dirname,
   },
+  experimental: {
+    optimizePackageImports: [
+      "lucide-react",
+      "@radix-ui/react-tabs",
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-select",
+      "@radix-ui/react-collapsible",
+      "@radix-ui/react-checkbox",
+      "@radix-ui/react-toast",
+      "@radix-ui/react-slot",
+      "@radix-ui/react-avatar",
+      "@radix-ui/react-switch",
+      "@radix-ui/react-tooltip",
+      "@radix-ui/react-accordion",
+      "@radix-ui/react-label",
+      "@radix-ui/react-popover",
+      "@radix-ui/react-slider",
+    ],
+  },
   async redirects() {
     return [
       // Leistungen Reinigung/Facility: flache Pfade → verschachtelte Silo-Pfade
