@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { Phone, Paintbrush, SprayCan, Building, Zap, Droplets, Hourglass, CheckCircle, X, ChevronLeft, ChevronRight, GripVertical, Trash2, MessageSquare, Send, Sun, Moon, CalendarIcon, Plus, FileText, Settings, LayoutDashboard, Users, LogOut, Pencil, Save } from "lucide-react";
 import { format, add, setHours, setMinutes, startOfWeek as startOfWeekDf } from "date-fns";
@@ -9,7 +10,8 @@ import { DndContext, DragOverlay, useDraggable, useDroppable, closestCorners, po
 import { snapCenterToCursor } from "@dnd-kit/modifiers";
 import { SortableContext, verticalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useAdminUser } from "../AdminUserContext";
 import {
@@ -37,6 +39,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { Logo } from "@/components/Logo";
 import { BUSINESS_COLUMNS, DEFAULT_COMPANY_ID, STATUS, TERMIN_TYP } from "@/src/config/businessConfig";
+
+const supabase = createClient();
 
 const MINUTE_15_OPTIONS = ["00", "15", "30", "45"] as const;
 
@@ -299,6 +303,62 @@ function SortableTicketCard({
         <div className="min-w-0 flex-1">{children}</div>
       </div>
     </article>
+  );
+}
+
+function ImageLightbox({ src, isOpen, onClose }: { src: string; isOpen: boolean; onClose: () => void }) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev || "unset";
+    };
+  }, [isOpen]);
+
+  if (!mounted || typeof document === "undefined") {
+    return null;
+  }
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/80 p-4 pointer-events-auto"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Bild vergrößert"
+      onClick={() => onClose()}
+    >
+      <div
+        className="relative"
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+      >
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}
+          className="absolute right-4 top-4 rounded-full bg-white/90 p-2 text-slate-800 shadow-lg transition hover:bg-white"
+          aria-label="Schließen"
+        >
+          <X className="h-5 w-5" strokeWidth={2} />
+        </button>
+        <img
+          src={src}
+          alt="Vergrößerte Ansicht"
+          className="max-h-[90vh] max-w-full rounded-lg object-contain shadow-xl"
+        />
+      </div>
+    </div>,
+    document.body
   );
 }
 
@@ -1458,6 +1518,37 @@ export default function AdminDashboardPage() {
 
   const BUCKET_TICKET_IMAGES = "ticket-images";
 
+  const handleDownloadImage = async (url: string, fallbackName: string) => {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        console.error("Download fehlgeschlagen:", response.statusText);
+        return;
+      }
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = fallbackName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      console.error("Download-Fehler:", err);
+    }
+  };
+
+  const handleDownloadAllImages = async () => {
+    if (!detailTicket?.image_urls || detailTicket.image_urls.length === 0) return;
+    for (let idx = 0; idx < detailTicket.image_urls.length; idx++) {
+      const url = detailTicket.image_urls[idx]!;
+      const displayUrl = signedImageUrls[idx] ?? url;
+      const fileLabel = `Bild-${idx + 1}.jpg`;
+      await handleDownloadImage(displayUrl, fileLabel);
+    }
+  };
+
   /** Client-seitige Komprimierung: max 1920px längste Seite, JPEG Qualität 0.82. Spart Datenvolumen und Ladezeit. */
   const compressImageForUpload = (file: File): Promise<Blob> => {
     return new Promise((resolve, reject) => {
@@ -1503,15 +1594,46 @@ export default function AdminDashboardPage() {
   const uploadTicketImage = async (ticketId: string, file: File) => {
     setUploadingImage(true);
     setError(null);
+    try {
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      if (authError) {
+        console.error("[uploadTicketImage] auth.getUser error:", authError);
+        setError("Nicht eingeloggt");
+        setUploadingImage(false);
+        return;
+      }
+      if (!authData?.user) {
+        console.error("[uploadTicketImage] auth.getUser returned no user");
+        setError("Nicht eingeloggt");
+        setUploadingImage(false);
+        return;
+      }
+      console.log("UPLOAD_USER_ID:", authData.user.id);
+    } catch (e) {
+      console.error("[uploadTicketImage] auth.getUser exception:", e);
+      setError("Nicht eingeloggt");
+      setUploadingImage(false);
+      return;
+    }
     const isImage = file.type.startsWith("image/");
-    const blob = isImage ? await compressImageForUpload(file) : file;
+    const blob = isImage ? await compressImageForUpload(file) : (file as Blob);
+    if (!blob || !(blob instanceof Blob)) {
+      console.error("[uploadTicketImage] Invalid blob:", blob);
+      setError("Ungültige Datei für Upload.");
+      setUploadingImage(false);
+      return;
+    }
     const ext = "jpg";
-    const path = `${ticketId}/${Date.now()}.${ext}`;
+    const filename = `${Date.now()}.${ext}`;
+    const path = filename.replace(/^\/+/, "");
+    console.log("UPLOAD_PATH:", path);
     const { error: uploadError } = await supabase.storage.from(BUCKET_TICKET_IMAGES).upload(path, blob, {
       cacheControl: "3600",
-      upsert: false,
+      upsert: true,
+      contentType: isImage ? "image/jpeg" : file.type || "application/octet-stream",
     });
     if (uploadError) {
+      console.error("[uploadTicketImage] Storage error:", uploadError);
       setError(uploadError.message);
       setUploadingImage(false);
       return;
@@ -1713,22 +1835,46 @@ export default function AdminDashboardPage() {
       }));
   }, [col2Tickets]);
 
-  /** Setzt nur den Status (für Drop auf Spalte 3–6). */
+  /** Setzt nur den Status / Spalte. Bei Statuswechsel erscheint das Ticket in der Zielspalte ganz oben. */
   const setTicketStatus = useCallback(
     async (ticketId: string, newStatus: string) => {
-      const { error } = await supabase.from("tickets").update({ status: newStatus }).eq("id", ticketId);
+      const current = tickets.find((t) => t.id === ticketId);
+      if (!current) return;
+
+      const trimmedNew = (newStatus ?? "").trim();
+      const trimmedOld = (current.status ?? "").trim();
+
+      const payload: Record<string, unknown> = { status: trimmedNew };
+
+      // Wenn die Spalte wirklich gewechselt wird, Position so setzen,
+      // dass das Ticket in der neuen Spalte ganz oben erscheint.
+      if (trimmedOld !== trimmedNew) {
+        const targetTickets = tickets.filter((t) => (t.status ?? "").trim() === trimmedNew);
+        if (targetTickets.length === 0) {
+          payload.position = 10;
+        } else {
+          const minPos = Math.min(
+            ...targetTickets.map((t) =>
+              typeof t.position === "number" ? t.position : 10
+            )
+          );
+          payload.position = minPos - 10;
+        }
+      }
+
+      const { error } = await supabase.from("tickets").update(payload).eq("id", ticketId);
       if (error) {
         setError(error.message);
         return;
       }
       setTickets((prev) =>
-        prev.map((t) => (t.id === ticketId ? { ...t, status: newStatus } : t))
+        prev.map((t) => (t.id === ticketId ? ({ ...t, ...payload } as Ticket) : t))
       );
       if (detailTicket?.id === ticketId) {
-        setDetailTicket((prev) => (prev ? { ...prev, status: newStatus } : null));
+        setDetailTicket((prev) => (prev ? ({ ...prev, ...payload } as Ticket) : null));
       }
     },
-    [detailTicket?.id]
+    [tickets, detailTicket?.id]
   );
 
   // ─── Hilfsfunktion: Spalten-Konfiguration aus Business-Config (alle Kanban-Spalten) ───
@@ -1903,6 +2049,9 @@ export default function AdminDashboardPage() {
       console.log("[DnD] resolved column:", resolved ? { colId: resolved.config.colId, status: resolved.config.status, targetTicketId: resolved.targetTicketId } : null);
       if (resolved && !overId.startsWith("slot-")) {
         const { config } = resolved;
+        // Spalte der Karte vor dem Drag, um reine Reorders zu erkennen
+        const sourceColumn = columnConfigs.find((cfg) => cfg.tickets.some((t) => t.id === ticketId));
+        const isSameColumn = sourceColumn?.colId === config.colId;
         // Präzise Einfügeposition: dropIndicator hat Vorrang (DOM-basiert, pointer-genau)
         const insertBeforeId = dropIndicator && dropIndicator.colId === config.colId
           ? dropIndicator.insertBeforeId ?? undefined
@@ -1910,16 +2059,27 @@ export default function AdminDashboardPage() {
         const newPosition = computeNewPosition(config.tickets, ticketId, insertBeforeId);
         console.log("[DnD] insertBeforeId:", insertBeforeId ?? "END", "→ position:", newPosition);
         const isCol1 = config.colId === COLUMN_IDS[0] || overId === "column-eingang-mobile" || overId === "column-1-mobile-list";
-        if (isCol1) {
-          const hasTicketNumber = (ticket.ticket_display_id ?? "").trim() !== "";
-          const newStatus = hasTicketNumber ? STATUS.EINGETEILT : STATUS.ANFRAGE;
-          await moveTicketToColumn(ticketId, newStatus, newPosition, { termin_start: null, termin_ende: null, termin_typ: null });
-          if (detailTicket?.id === ticketId) {
-            setDetailTerminStart("");
-            setDetailTerminEnde("");
-          }
+
+        // Reorder innerhalb derselben Spalte: Status NICHT ändern
+        if (isSameColumn) {
+          const currentStatus = (ticket.status ?? "").trim() || config.status;
+          await moveTicketToColumn(ticketId, currentStatus, newPosition);
         } else {
-          await moveTicketToColumn(ticketId, config.status, newPosition);
+          if (isCol1) {
+            const hasTicketNumber = (ticket.ticket_display_id ?? "").trim() !== "";
+            const newStatus = hasTicketNumber ? STATUS.EINGETEILT : STATUS.ANFRAGE;
+            await moveTicketToColumn(ticketId, newStatus, newPosition, {
+              termin_start: null,
+              termin_ende: null,
+              termin_typ: null,
+            });
+            if (detailTicket?.id === ticketId) {
+              setDetailTerminStart("");
+              setDetailTerminEnde("");
+            }
+          } else {
+            await moveTicketToColumn(ticketId, config.status, newPosition);
+          }
         }
         return;
       }
@@ -1941,7 +2101,7 @@ export default function AdminDashboardPage() {
       }
 
       if (isFromCalendar) {
-        // Kalender-zu-Kalender: Ursprüngliche Dauer beibehalten
+        // Kalender-zu-Kalender: Ursprüngliche Dauer beibehalten – KEINE neue ticket_display_id vergeben
         const origStart = ticket.termin_start ? new Date(ticket.termin_start) : null;
         const origEnd = ticket.termin_ende ? new Date(ticket.termin_ende) : null;
         const durationMs = origStart && origEnd ? origEnd.getTime() - origStart.getTime() : 60 * 60 * 1000; // Fallback 1h
@@ -1949,17 +2109,12 @@ export default function AdminDashboardPage() {
         const startIso = slotStart.toISOString();
         const endIso = newEnd.toISOString();
         console.log("[DnD] Kalender-Event verschieben:", { ticketId, startIso, endIso, status: ticket.status });
-        // Falls noch keine ticket_display_id → jetzt vergeben
         const calUpdates: Record<string, unknown> = {
           termin_start: startIso,
           termin_ende: endIso,
           status: STATUS.EINGETEILT,
           termin_typ: ticket.termin_typ ?? null,
         };
-        const needsDisplayId = !ticket.ticket_display_id || String(ticket.ticket_display_id).trim() === "";
-        if (needsDisplayId) {
-          calUpdates.ticket_display_id = await getNextTicketDisplayId();
-        }
         const { error: dbErr } = await supabase
           .from("tickets")
           .update(calUpdates)
@@ -3786,11 +3941,20 @@ export default function AdminDashboardPage() {
       </Dialog>
 
       {/* Detail-Modal (Trello-Stil): nur assigned_to + internal_notes (DB); Anzeige: ID, Datum, Kunde, Adresse, Anfragetext */}
-      <Dialog open={!!detailTicket} onOpenChange={(open) => !open && closeDetailModal()}>
+      <Dialog
+        open={!!detailTicket}
+        onOpenChange={(open) => {
+          // Wenn die Bild-Lightbox offen ist, ignorieren wir Outside-Clicks / ESC von Radix.
+          if (!open && lightboxImage) return;
+          if (!open) closeDetailModal();
+        }}
+      >
         <DialogContent
-          className={`max-h-[90vh] w-[900px] max-w-[95vw] overflow-y-auto border-0 p-0 shadow-xl sm:rounded-xl ${
-            isLightTheme ? "bg-white" : "bg-slate-900"
-          }`}
+          className={cn(
+            "max-h-[90vh] w-[900px] max-w-[95vw] overflow-y-auto border-0 p-0 shadow-xl sm:rounded-xl",
+            isLightTheme ? "bg-white" : "bg-slate-900",
+            lightboxImage ? "pointer-events-none select-none" : "pointer-events-auto"
+          )}
           onOpenAutoFocus={(e) => e.preventDefault()}
           onCloseAutoFocus={(e) => {
             e.preventDefault();
@@ -4123,31 +4287,69 @@ export default function AdminDashboardPage() {
                         <span className="mt-1 text-xs text-slate-500">Direkt in Supabase Storage (ticket-images)</span>
                       </label>
                       {Array.isArray(detailTicket?.image_urls) && detailTicket.image_urls.length > 0 && (
-                        <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
-                          {detailTicket.image_urls.map((url, idx) => {
-                            const displayUrl = signedImageUrls[idx] ?? url;
-                            return (
+                        <>
+                          <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
+                            {detailTicket.image_urls.map((url, idx) => {
+                              const displayUrl = signedImageUrls[idx] ?? url;
+                              return (
+                                <button
+                                  key={`${url}-${idx}`}
+                                  type="button"
+                                  onClick={() => setLightboxImage(displayUrl)}
+                                  className="overflow-hidden rounded-lg border border-slate-200 bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                  <img
+                                    src={displayUrl}
+                                    alt={`Dokumentation ${idx + 1}`}
+                                    className="h-20 w-full object-cover"
+                                    onError={(e) => {
+                                      const el = e.currentTarget;
+                                      if (el.src !== url) {
+                                        el.src = url;
+                                      }
+                                    }}
+                                  />
+                                </button>
+                              );
+                            })}
+                          </div>
+                          <div className="mt-3 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                            <div className="mb-1 flex items-center justify-between gap-2">
+                              <span className="font-semibold uppercase tracking-wider">
+                                Anhänge herunterladen
+                              </span>
                               <button
-                                key={`${url}-${idx}`}
                                 type="button"
-                                onClick={() => setLightboxImage(displayUrl)}
-                                className="overflow-hidden rounded-lg border border-slate-200 bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="inline-flex items-center rounded-full border border-slate-300 bg-white px-2.5 py-1 text-[11px] font-medium text-slate-700 hover:bg-slate-100"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  void handleDownloadAllImages();
+                                }}
                               >
-                                <img
-                                  src={displayUrl}
-                                  alt={`Dokumentation ${idx + 1}`}
-                                  className="h-20 w-full object-cover"
-                                  onError={(e) => {
-                                    const el = e.currentTarget;
-                                    if (el.src !== url) {
-                                      el.src = url;
-                                    }
-                                  }}
-                                />
+                                Alle herunterladen
                               </button>
-                            );
-                          })}
-                        </div>
+                            </div>
+                            <div className="mt-1 flex flex-wrap gap-2">
+                              {detailTicket.image_urls.map((url, idx) => {
+                                const displayUrl = signedImageUrls[idx] ?? url;
+                                const fileLabel = `Bild ${idx + 1}`;
+                                return (
+                                  <button
+                                    key={`download-${url}-${idx}`}
+                                    type="button"
+                                    className="inline-flex items-center rounded-full border border-slate-300 bg-white px-2.5 py-1 text-[11px] font-medium text-slate-700 hover:bg-slate-100"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      void handleDownloadImage(displayUrl, `${fileLabel}.jpg`);
+                                    }}
+                                  >
+                                    {fileLabel}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </>
                       )}
                     </div>
                   </section>
@@ -4357,7 +4559,7 @@ export default function AdminDashboardPage() {
                 </div>
 
                 {/* Sidebar: Aktionen (30 %) */}
-                <div className="flex flex-col gap-2 border-t border-slate-200 bg-slate-50/50 p-4 sm:flex-[0_0_30%] sm:border-t-0 sm:border-l">
+                <div className="flex flex-col gap-3 border-t border-slate-200 bg-slate-50/50 p-4 sm:flex-[0_0_30%] sm:border-t-0 sm:border-l">
                   <span className="w-full text-xs font-semibold uppercase tracking-wider text-slate-500 sm:mb-1">
                     Aktionen
                   </span>
@@ -4425,6 +4627,31 @@ export default function AdminDashboardPage() {
                       <p className="text-xs text-slate-500">Status: {detailTicket?.status ?? "–"}.</p>
                     </>
                   )}
+
+                  {detailTicket && (
+                    <div className="mt-1 space-y-1">
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                        In Spalte verschieben
+                      </span>
+                      <Select
+                        value={(detailTicket.status ?? "").trim() || STATUS.ANFRAGE}
+                        onValueChange={(value) => {
+                          setTicketStatus(detailTicket.id, value);
+                        }}
+                      >
+                        <SelectTrigger className="h-8 text-xs">
+                          <SelectValue placeholder="Spalte wählen" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {BUSINESS_COLUMNS.filter((c) => c.kind === "kanban").map((col) => (
+                            <SelectItem key={col.id} value={col.status} className="text-xs">
+                              {col.title}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -4432,30 +4659,9 @@ export default function AdminDashboardPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Lightbox: Bild groß anzeigen */}
+      {/* Lightbox: Bild groß anzeigen (eigenes Portal über dem Ticket-Modal) */}
       {lightboxImage && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Bild vergrößert"
-          onClick={() => setLightboxImage(null)}
-        >
-          <button
-            type="button"
-            onClick={() => setLightboxImage(null)}
-            className="absolute right-4 top-4 rounded-full bg-white/90 p-2 text-slate-800 shadow-lg transition hover:bg-white"
-            aria-label="Schließen"
-          >
-            <X className="h-5 w-5" strokeWidth={2} />
-          </button>
-          <img
-            src={lightboxImage}
-            alt="Vergrößerte Ansicht"
-            className="max-h-[90vh] max-w-full rounded-lg object-contain shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          />
-        </div>
+        <ImageLightbox src={lightboxImage} isOpen={true} onClose={() => setLightboxImage(null)} />
       )}
 
       {/* Quote Builder Overlay – Angebotsbearbeitung (UI only) */}
