@@ -107,6 +107,7 @@ export type AuftragHandwerkerDetailDialogProps = {
   onOpenChange: (open: boolean) => void;
   auftrag: HandwerkerAuftrag | null;
   onAuftragPatch?: (auftragId: string, patch: Partial<HandwerkerAuftrag>) => void;
+  showBilling?: boolean;
   /** Bekanntes Board-Ticket (z. B. Klick im Kanban) – sonst wird per `auftrag_id` gesucht. */
   boardTicketId?: string | null;
   boardTicketGewerk?: string[] | null;
@@ -118,11 +119,13 @@ export function AuftragHandwerkerDetailDialog({
   onOpenChange,
   auftrag,
   onAuftragPatch,
+  showBilling = true,
   boardTicketId: boardTicketIdProp,
   boardTicketGewerk,
   onBoardGewerkSaved,
 }: AuftragHandwerkerDetailDialogProps) {
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [deletingImageUrl, setDeletingImageUrl] = useState<string | null>(null);
   const [uploadingDoc, setUploadingDoc] = useState(false);
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
   const [detailKommentare, setDetailKommentare] = useState<HandwerkerKommentar[]>([]);
@@ -284,7 +287,7 @@ export function AuftragHandwerkerDetailDialog({
         .from(BUCKET_IMAGES)
         .upload(path, blob, {
           cacheControl: "3600",
-          upsert: true,
+          upsert: false,
           contentType: isImage ? "image/jpeg" : file.type || "application/octet-stream",
         });
       if (uploadError) {
@@ -345,7 +348,7 @@ export function AuftragHandwerkerDetailDialog({
         .from(BUCKET_IMAGES)
         .upload(path, body, {
           cacheControl: "3600",
-          upsert: true,
+          upsert: false,
           contentType,
         });
       if (uploadError) {
@@ -368,6 +371,42 @@ export function AuftragHandwerkerDetailDialog({
       onAuftragPatch?.(auftragId, { angebot_rechnung_urls: newUrls });
       setUploadingDoc(false);
       return publicUrl;
+    },
+    [onAuftragPatch]
+  );
+
+  const deleteAuftragImage = useCallback(
+    async (auftragId: string, targetUrl: string, currentUrls: string[] = []) => {
+      setDeletingImageUrl(targetUrl);
+      setDialogError(null);
+      const nextUrls = currentUrls.filter((u) => u !== targetUrl);
+
+      // Best-effort: remove underlying storage object when URL matches public bucket path.
+      try {
+        const parsed = new URL(targetUrl);
+        const marker = `/storage/v1/object/public/${BUCKET_IMAGES}/`;
+        const idx = parsed.pathname.indexOf(marker);
+        if (idx >= 0) {
+          const objectPath = decodeURIComponent(parsed.pathname.slice(idx + marker.length));
+          if (objectPath) {
+            await supabase.storage.from(BUCKET_IMAGES).remove([objectPath]);
+          }
+        }
+      } catch {
+        // Ignore invalid URL format; DB list update is the source of truth.
+      }
+
+      const { error: updateError } = await supabase
+        .from("auftraege")
+        .update({ image_urls: nextUrls })
+        .eq("id", auftragId);
+
+      if (updateError) {
+        setDialogError(updateError.message);
+      } else {
+        onAuftragPatch?.(auftragId, { image_urls: nextUrls });
+      }
+      setDeletingImageUrl(null);
     },
     [onAuftragPatch]
   );
@@ -638,7 +677,7 @@ export function AuftragHandwerkerDetailDialog({
                           </>
                         ) : null}
 
-                        {(rechnungsempfaengerText || leistungsempfaengerText) && (
+                        {showBilling && (rechnungsempfaengerText || leistungsempfaengerText) && (
                           <>
                             <div className="h-px bg-slate-100" />
                             <div className="px-3 py-3 sm:px-4">
@@ -811,14 +850,34 @@ export function AuftragHandwerkerDetailDialog({
                               detailAuftrag.image_urls.length > 0 && (
                                 <div className="mt-2 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                                   {detailAuftrag.image_urls.map((url, idx) => (
-                                    <button
+                                    <div
                                       key={`${url}-${idx}`}
-                                      type="button"
-                                      onClick={() => setLightboxImage(url)}
                                       className="relative h-24 w-32 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-100"
                                     >
-                                      <img src={url} alt="" className="h-full w-full object-cover" />
-                                    </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => setLightboxImage(url)}
+                                        className="h-full w-full"
+                                      >
+                                        <img src={url} alt="" className="h-full w-full object-cover" />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          void deleteAuftragImage(
+                                            detailAuftrag.id,
+                                            url,
+                                            detailAuftrag.image_urls ?? []
+                                          )
+                                        }
+                                        disabled={deletingImageUrl === url || uploadingImage}
+                                        className="absolute right-1 top-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-black/55 text-white transition hover:bg-black/75 disabled:opacity-50"
+                                        aria-label="Foto löschen"
+                                        title="Foto löschen"
+                                      >
+                                        <Trash2 className="h-3.5 w-3.5" />
+                                      </button>
+                                    </div>
                                   ))}
                                 </div>
                               )}

@@ -4,8 +4,9 @@ export type UserRole =
   | "admin"
   | "gewerk_elektro"
   | "gewerk_sanitaer"
-  | "innenausbau"
-  | "reinigung";
+  | "gewerk_ausbau"
+  | "gewerk_reinigung"
+  | "gewerk_facility";
 
 export type SessionUser = {
   id: string;
@@ -13,6 +14,20 @@ export type SessionUser = {
   role: UserRole;
   displayName: string | null;
 };
+
+/** Anzeige + Auswahl in Admin-Benutzerverwaltung. */
+export const USER_ROLE_OPTIONS: { value: UserRole; label: string }[] = [
+  { value: "admin", label: "Admin (voller Zugriff)" },
+  { value: "gewerk_elektro", label: "Gewerk · Elektro" },
+  { value: "gewerk_sanitaer", label: "Gewerk · Sanitär" },
+  { value: "gewerk_ausbau", label: "Gewerk · Ausbau" },
+  { value: "gewerk_reinigung", label: "Gewerk · Reinigung" },
+  { value: "gewerk_facility", label: "Gewerk · Facility" },
+];
+
+export function isValidUserRole(value: string): value is UserRole {
+  return USER_ROLE_OPTIONS.some((o) => o.value === value);
+}
 
 /** Session + Profil (Rolle) des aktuellen Nutzers. Server-only. */
 export async function getSessionUser(): Promise<SessionUser | null> {

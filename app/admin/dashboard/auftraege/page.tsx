@@ -14,10 +14,13 @@ import {
 } from "lucide-react";
 import { AuftragHandwerkerDetailDialog } from "@/components/admin/AuftragHandwerkerDetailDialog";
 import type { HandwerkerAuftrag } from "@/src/types/handwerker-auftrag";
+import { useAdminUser } from "../../AdminUserContext";
 
 const supabase = createClient();
 
 export default function AuftraegePage() {
+  const adminUser = useAdminUser();
+  const showBilling = adminUser?.role === "admin";
   const [auftraege, setAuftraege] = useState<HandwerkerAuftrag[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -205,6 +208,7 @@ export default function AuftraegePage() {
         auftrag={detailAuftrag}
         onOpenChange={(open) => !open && setDetailAuftrag(null)}
         onAuftragPatch={handleAuftragPatch}
+        showBilling={showBilling}
       />
     </div>
   );

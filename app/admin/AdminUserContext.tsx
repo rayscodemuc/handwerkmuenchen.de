@@ -1,11 +1,13 @@
 "use client";
 
 import React, { createContext, useContext } from "react";
+import type { UserRole } from "@/lib/auth";
 
 type AdminUser = {
   id: string;
   email: string | null;
   displayName: string | null;
+  role: UserRole;
 };
 
 const AdminUserContext = createContext<AdminUser | null>(null);

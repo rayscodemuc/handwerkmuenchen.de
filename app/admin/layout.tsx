@@ -11,7 +11,7 @@ export default async function AdminLayout({
   if (!user) redirect("/login?redirect=/admin");
 
   return (
-    <AdminUserProvider user={{ id: user.id, email: user.email, displayName: user.displayName }}>
+    <AdminUserProvider user={{ id: user.id, email: user.email, displayName: user.displayName, role: user.role }}>
       <div className="min-h-screen bg-slate-950">
         <main className="overflow-auto">{children}</main>
       </div>

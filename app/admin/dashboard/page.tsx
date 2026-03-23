@@ -817,6 +817,7 @@ export default function AdminDashboardPage() {
 
   /** Aktuell angemeldeter Nutzer (vom Layout/Server). */
   const adminUser = useAdminUser();
+  const showAuftragBilling = adminUser?.role === "admin";
   const { toast } = useToast();
 
   /** Auto-Historisierung: verhindert doppelte Inserts innerhalb einer Session. */
@@ -4257,6 +4258,7 @@ export default function AdminDashboardPage() {
           }
         }}
         onAuftragPatch={handleHandwerkerAuftragPatch}
+        showBilling={showAuftragBilling}
         boardTicketId={handwerkerLinkedTicketId}
         boardTicketGewerk={handwerkerBoardTicketGewerk}
         onBoardGewerkSaved={handleHandwerkerBoardGewerkSaved}
