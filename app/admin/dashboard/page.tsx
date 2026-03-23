@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
-import { Phone, Paintbrush, SprayCan, Building, Zap, Droplets, Hourglass, CheckCircle, X, ChevronLeft, ChevronRight, GripVertical, Trash2, MessageSquare, Send, Sun, Moon, CalendarIcon, Plus, FileText, Settings, LayoutDashboard, Users, LogOut, Pencil, Save } from "lucide-react";
+import { Phone, Paintbrush, SprayCan, Building, Zap, Droplets, Hourglass, CheckCircle, X, ChevronLeft, ChevronRight, GripVertical, Trash2, MessageSquare, Send, Sun, Moon, CalendarIcon, Plus, FileText, Settings, LayoutDashboard, Users, LogOut, Pencil, Save, ClipboardList, Upload, Paperclip } from "lucide-react";
 import { format, add, setHours, setMinutes, startOfWeek as startOfWeekDf } from "date-fns";
 import { de } from "date-fns/locale";
 import { DndContext, DragOverlay, useDraggable, useDroppable, closestCorners, pointerWithin, rectIntersection, MeasuringStrategy, PointerSensor, useSensor, useSensors, type DragEndEvent, type DragStartEvent, type DragOverEvent, type CollisionDetection } from "@dnd-kit/core";
@@ -38,9 +38,25 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Logo } from "@/components/Logo";
+import { AuftragHandwerkerDetailDialog } from "@/components/admin/AuftragHandwerkerDetailDialog";
+import { normalizeAuftragRow } from "@/lib/auftraege/billing-recipient-fields";
+import { mapAuftragstypToGewerk } from "@/lib/auftraege/mapAuftragstypToGewerk";
+import type { HandwerkerAuftrag } from "@/src/types/handwerker-auftrag";
 import { BUSINESS_COLUMNS, DEFAULT_COMPANY_ID, STATUS, TERMIN_TYP } from "@/src/config/businessConfig";
+import { GEWERKE_OPTIONS } from "@/src/config/gewerkeOptions";
 
 const supabase = createClient();
+
+/** PDF & Co. für SPM-Auftrags-Anhänge (Bilder laufen separat über Komprimierung → .jpg). */
+function attachmentFileExt(file: File): string {
+  if (file.type.includes("pdf")) return "pdf";
+  const m = /\.([a-z0-9]{1,8})$/i.exec(file.name.trim());
+  if (m && /^[a-z0-9]+$/i.test(m[1]!)) {
+    const e = m[1]!.toLowerCase();
+    return e === "jpeg" ? "jpg" : e;
+  }
+  return "bin";
+}
 
 const MINUTE_15_OPTIONS = ["00", "15", "30", "45"] as const;
 
@@ -82,7 +98,16 @@ type Ticket = {
   /** Positionswert für Trello-Style-Reihenfolge innerhalb einer Spalte. */
   position: number | null;
   created_at: string;
+  additional_data?: { auftrag_id?: string; auftragsnummer?: string } | null;
 };
+
+/** Anzeige-Nummer: für Aufträge aus auftraege → auftragsnummer, sonst ticket_display_id. */
+function getTicketOrAuftragNumber(t: Ticket | null): string {
+  if (!t) return "–";
+  const nr = (t.additional_data as { auftragsnummer?: string } | undefined)?.auftragsnummer;
+  if (nr?.trim()) return nr.trim();
+  return (t.ticket_display_id ?? "").trim() || "–";
+}
 
 /**
  * Ermittelt per DOM, welche Spalte unter dem Cursor liegt.
@@ -434,8 +459,11 @@ function DraggableEventPill({
             return Icon ? <Icon className="h-3 w-3 shrink-0" strokeWidth={2} /> : null;
           })()}
           <span className="min-w-0 truncate text-[11px] font-medium">
-            {ev.resource?.ticket_display_id ?? ev.id.slice(0, 8)}
+            {getTicketOrAuftragNumber(ev.resource ?? null) !== "–" ? getTicketOrAuftragNumber(ev.resource ?? null) : ev.id.slice(0, 8)}
           </span>
+          {(ev.resource as Ticket | undefined)?.additional_data?.auftrag_id && (
+            <span className="shrink-0 rounded px-1 py-0.5 text-[9px] font-medium bg-amber-500/30 text-amber-200">SPM</span>
+          )}
         </div>
         <span className="min-w-0 truncate text-[10px] leading-tight opacity-90">
           {getTicketDisplayName(ev.resource ?? ({} as Ticket))}
@@ -458,15 +486,6 @@ const ASSIGNEE_OPTIONS = [
   { value: "max.mustermann", label: "Max Mustermann" },
   { value: "anna.schmidt", label: "Anna Schmidt" },
   { value: "thomas.weber", label: "Thomas Weber" },
-] as const;
-
-/** Verfügbare Gewerke für Multi-Select. */
-const GEWERKE_OPTIONS = [
-  { value: "Elektro", label: "Elektro" },
-  { value: "Sanitär", label: "Sanitär" },
-  { value: "Ausbau", label: "Ausbau" },
-  { value: "Reinigung", label: "Reinigung" },
-  { value: "Facility", label: "Facility" },
 ] as const;
 
 /** Platzhalter: spätere E-Mail-Logik. */
@@ -583,9 +602,10 @@ function isKalkulationFaellig(ticket: Ticket): boolean {
   return (ticket.status ?? "").trim() === STATUS.BESICHTIGUNG && isTerminEndeInPast(ticket);
 }
 
-/** Kartentyp für visuelle Hierarchie: PARTNER (Blauer Glow) | ANFRAGE (Grau) | TICKET (Blau). */
-function getCardType(t: Ticket): "PARTNER" | "ANFRAGE" | "TICKET" {
+/** Kartentyp für visuelle Hierarchie: PARTNER | AUFTRAG (fix aus auftraege) | ANFRAGE | TICKET. */
+function getCardType(t: Ticket): "PARTNER" | "AUFTRAG" | "ANFRAGE" | "TICKET" {
   if (!!t.is_partner) return "PARTNER";
+  if (t.additional_data?.auftrag_id) return "AUFTRAG";
   if ((t.status ?? "").trim() === STATUS.ANFRAGE) return "ANFRAGE";
   return "TICKET";
 }
@@ -716,6 +736,9 @@ export default function AdminDashboardPage() {
   const [detailKundenEditMode, setDetailKundenEditMode] = useState(false);
   const [detailSaving, setDetailSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingAuftragDoc, setUploadingAuftragDoc] = useState(false);
+  /** SPM-Aufträge: URLs der hochgeladenen Angebote/Rechnungen (aus auftraege.angebot_rechnung_urls). */
+  const [detailAuftragDocs, setDetailAuftragDocs] = useState<string[]>([]);
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
   /** Signierte URLs für Modal-Bilder (funktioniert auch bei privatem Storage-Bucket). */
   const [signedImageUrls, setSignedImageUrls] = useState<string[]>([]);
@@ -753,6 +776,23 @@ export default function AdminDashboardPage() {
 
   /** Spalte 1 Tabs: Eingang (Anfrage) | Angebote (Angebot_erstellt). */
   const [incomingTab, setIncomingTab] = useState<"Eingang" | "Angebote">("Eingang");
+
+  /** Mobile: Tab „Anfragen“ | „Kalender“ – auch per Header-Button umschaltbar. */
+  const [mobileMainTab, setMobileMainTab] = useState<"list" | "calendar">("list");
+  const desktopCalendarSectionRef = useRef<HTMLElement | null>(null);
+
+  /** SPM-Auftrag: gleiche Handwerker-Modalansicht wie auf /admin/dashboard/auftraege */
+  const [handwerkerAuftragDetail, setHandwerkerAuftragDetail] = useState<HandwerkerAuftrag | null>(null);
+  const [handwerkerAuftragLoading, setHandwerkerAuftragLoading] = useState(false);
+  /** Board-Karte zum SPM-Auftrag (für Gewerk-Bearbeitung im Handwerker-Dialog). */
+  const [handwerkerLinkedTicketId, setHandwerkerLinkedTicketId] = useState<string | null>(null);
+
+  const handwerkerBoardTicketGewerk = useMemo(() => {
+    if (!handwerkerLinkedTicketId) return null;
+    const t = tickets.find((x) => x.id === handwerkerLinkedTicketId);
+    const g = t?.gewerk;
+    return Array.isArray(g) ? g : null;
+  }, [handwerkerLinkedTicketId, tickets]);
 
   /** Create-Ticket-Dialog: manuell neue Tickets anlegen. */
   const [createTicketOpen, setCreateTicketOpen] = useState(false);
@@ -820,6 +860,16 @@ export default function AdminDashboardPage() {
 
   const isLightTheme = dashboardTheme === "light";
 
+  const openCalendarFromHeader = useCallback(() => {
+    setMobileMainTab("calendar");
+    requestAnimationFrame(() => {
+      desktopCalendarSectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+  }, []);
+
   /** Sensor: Drag startet erst nach 5px Bewegung → Klick bleibt Klick. */
   const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 5 } });
   const sensors = useSensors(pointerSensor);
@@ -869,7 +919,7 @@ export default function AdminDashboardPage() {
     };
   }, [detailTicket?.id, detailTicket?.image_urls]);
 
-  /** Soft Refresh: Daten neu laden. Automatik: termin_ende überschritten → Status Nachbereitung. */
+  /** Soft Refresh: Daten neu laden. Automatik: termin_ende überschritten → Status Nachbereitung. Sync: Aufträge → Tickets. */
   const loadTickets = async () => {
     setLoading(true);
     setError(null);
@@ -879,8 +929,84 @@ export default function AdminDashboardPage() {
       setLoading(false);
       return;
     }
-    const list = data ?? [];
+    let list = data ?? [];
     console.log(`✅ Tickets geladen: ${list.length} Tickets`);
+
+    /** Aufträge aus auftraege-Tabelle als Tickets in „Neue Anfragen“ übernehmen (einmalig pro Auftrag). */
+    try {
+      const { data: auftraegeData } = await supabase.from("auftraege").select("id, auftragsnummer, datum, auftragstyp, mieter_name, mieter_email, mieter_telefon, adresse_strasse, adresse_ort, aufgabe");
+      const auftraege = (auftraegeData ?? []) as Array<{
+        id: string;
+        auftragsnummer: string | null;
+        mieter_name: string | null;
+        mieter_email: string | null;
+        mieter_telefon: string | null;
+        adresse_strasse: string | null;
+        adresse_ort: string | null;
+        aufgabe: string | null;
+        auftragstyp: string | null;
+      }>;
+      const linkedAuftragIds = new Set(
+        list
+          .map((t) => (t as Ticket & { additional_data?: { auftrag_id?: string } }).additional_data?.auftrag_id)
+          .filter(Boolean)
+      );
+      let insertedCount = 0;
+      for (const a of auftraege) {
+        if (linkedAuftragIds.has(a.id)) continue;
+        const adresse = [a.adresse_strasse, a.adresse_ort].filter(Boolean).join(", ").trim() || "Keine Angabe";
+        const email = (a.mieter_email ?? "").trim() || "aus-auftrag@handwerkmuenchen.de";
+        const { data: inserted } = await supabase
+          .from("tickets")
+          .insert({
+            company_id: DEFAULT_COMPANY_ID,
+            kunde_name: (a.mieter_name ?? "").trim() || `Auftrag ${a.auftragsnummer ?? a.id.slice(0, 8)}`,
+            kontakt_email: email,
+            kontakt_telefon: (a.mieter_telefon ?? "").trim() || null,
+            objekt_adresse: adresse,
+            beschreibung: (a.aufgabe ?? "").trim() || null,
+            gewerk: mapAuftragstypToGewerk(a.auftragstyp, a.aufgabe),
+            status: STATUS.ANFRAGE,
+            additional_data: { auftrag_id: a.id, auftragsnummer: a.auftragsnummer, quelle: "auftraege" },
+          })
+          .select("id")
+          .single();
+        if (inserted) {
+          linkedAuftragIds.add(a.id);
+          insertedCount++;
+        }
+      }
+      if (insertedCount > 0) {
+        const { data: refreshed } = await fetchTickets(DEFAULT_COMPANY_ID);
+        if (refreshed) list = refreshed;
+        console.log(`✅ ${insertedCount} Auftrag/Aufträge als Anfragen übernommen`);
+      }
+
+      /** SPM-Tickets ohne Gewerk: aus auftragstyp / Aufgabe nachtragen (ältere Imports). */
+      const auftragById = new Map(auftraege.map((a) => [a.id, a]));
+      let backfillGewerkCount = 0;
+      for (const t of list) {
+        const aid = (t as Ticket & { additional_data?: { auftrag_id?: string } }).additional_data
+          ?.auftrag_id;
+        if (!aid) continue;
+        const existing = normalizeGewerke(t.gewerk ?? null);
+        if (existing.length > 0) continue;
+        const row = auftragById.get(aid);
+        const mapped = mapAuftragstypToGewerk(row?.auftragstyp, row?.aufgabe);
+        if (!mapped) continue;
+        const { error: upErr } = await supabase.from("tickets").update({ gewerk: mapped }).eq("id", t.id);
+        if (!upErr) {
+          backfillGewerkCount++;
+          list = list.map((x) => (x.id === t.id ? { ...x, gewerk: mapped } : x));
+        }
+      }
+      if (backfillGewerkCount > 0) {
+        console.log(`✅ ${backfillGewerkCount} SPM-Ticket(s): Gewerk aus Auftrag ergänzt`);
+      }
+    } catch (syncErr) {
+      console.warn("[Auftraege→Tickets Sync]", syncErr);
+    }
+
     const now = new Date().toISOString();
     const toMove = list.filter((t: Ticket) => {
       const s = (t.status ?? "").trim();
@@ -1252,7 +1378,7 @@ export default function AdminDashboardPage() {
     return `${y}-${m}-${day}T${h}:${min}`;
   };
 
-  const openDetailModal = (ticket: Ticket) => {
+  const openTicketDetailModal = (ticket: Ticket) => {
     setDetailTicket(ticket);
     setDetailKommentare(Array.isArray(ticket?.kommentare) ? ticket.kommentare : []);
     setNewKommentarText("");
@@ -1262,18 +1388,79 @@ export default function AdminDashboardPage() {
     setDetailTerminEnde(toDateTimeLocal(ticket?.termin_ende ?? null));
     setDetailHistorieNewDate(format(new Date(), "yyyy-MM-dd"));
     setDetailHistorieNewText("");
-    // Gewerke: aus gewerk-Array ableiten
     const gewerkeArray = normalizeGewerke(ticket?.gewerk ?? null);
     setDetailGewerke(gewerkeArray);
-    // Bearbeitbare Kunden-Daten
     setDetailKundeName(ticket?.kunde_name ?? "");
     setDetailPartnerName(ticket?.partner_name ?? "");
     setDetailEmail(ticket?.kontakt_email ?? "");
     setDetailTelefon(ticket?.kontakt_telefon ?? "");
     setDetailAdresse(ticket?.objekt_adresse ?? "");
     setDetailBeschreibung(ticket?.beschreibung ?? "");
-    setDetailKundenEditMode(false);
+    setDetailAuftragDocs([]);
   };
+
+  const handleHandwerkerAuftragPatch = useCallback((auftragId: string, patch: Partial<HandwerkerAuftrag>) => {
+    setHandwerkerAuftragDetail((prev) =>
+      prev?.id === auftragId ? { ...prev, ...patch } : prev
+    );
+  }, []);
+
+  const handleHandwerkerBoardGewerkSaved = useCallback((ticketId: string, gewerk: string[] | null) => {
+    setTickets((prev) => prev.map((t) => (t.id === ticketId ? { ...t, gewerk } : t)));
+  }, []);
+
+  /** Aufträge (SPM) → Handwerker-Dialog; klassische Anfragen → Ticket-Modal. */
+  const openDetailModal = (ticket: Ticket) => {
+    const aid = ticket.additional_data?.auftrag_id;
+    if (aid) {
+      setHandwerkerLinkedTicketId(ticket.id);
+      void (async () => {
+        setHandwerkerAuftragLoading(true);
+        try {
+          const { data, error } = await supabase
+            .from("auftraege")
+            .select("*")
+            .eq("id", aid)
+            .single();
+          if (error || !data) {
+            setHandwerkerLinkedTicketId(null);
+            toast({
+              variant: "destructive",
+              title: "Auftrag konnte nicht geladen werden",
+              description: error?.message ?? "Bitte später erneut versuchen.",
+            });
+            openTicketDetailModal(ticket);
+            return;
+          }
+          setHandwerkerAuftragDetail(
+            normalizeAuftragRow(data as Record<string, unknown>) as HandwerkerAuftrag
+          );
+        } finally {
+          setHandwerkerAuftragLoading(false);
+        }
+      })();
+      return;
+    }
+    openTicketDetailModal(ticket);
+  };
+
+  /** SPM-Aufträge: angebot_rechnung_urls aus auftraege laden. */
+  useEffect(() => {
+    const auftragId = detailTicket?.additional_data?.auftrag_id;
+    if (!auftragId) {
+      setDetailAuftragDocs([]);
+      return;
+    }
+    (async () => {
+      const { data } = await supabase
+        .from("auftraege")
+        .select("angebot_rechnung_urls")
+        .eq("id", auftragId)
+        .single();
+      const urls = (data as { angebot_rechnung_urls?: string[] } | null)?.angebot_rechnung_urls;
+      setDetailAuftragDocs(Array.isArray(urls) ? urls : []);
+    })();
+  }, [detailTicket?.id, detailTicket?.additional_data?.auftrag_id]);
 
   const closeDetailModal = () => {
     if (detailTicket) {
@@ -1301,6 +1488,7 @@ export default function AdminDashboardPage() {
     setDetailAdresse("");
     setDetailBeschreibung("");
     setDetailKundenEditMode(false);
+    setDetailAuftragDocs([]);
   };
 
   /** Kunden-Daten speichern (auf Kassette-Klick) und Bearbeitungsmodus beenden. */
@@ -1660,6 +1848,61 @@ export default function AdminDashboardPage() {
     setUploadingImage(false);
   };
 
+  /** SPM-Auftrag: Dateien (PDF, Bilder, …) in auftraege.angebot_rechnung_urls speichern. */
+  const uploadAuftragDoc = async (auftragId: string, file: File) => {
+    setUploadingAuftragDoc(true);
+    setError(null);
+    try {
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      if (authError || !authData?.user) {
+        setError("Nicht eingeloggt");
+        setUploadingAuftragDoc(false);
+        return;
+      }
+      if (!file || !(file instanceof Blob)) {
+        setError("Ungültige Datei");
+        setUploadingAuftragDoc(false);
+        return;
+      }
+      const isImage = file.type.startsWith("image/");
+      const body: Blob = isImage ? await compressImageForUpload(file) : file;
+      const ext = isImage ? "jpg" : attachmentFileExt(file);
+      const contentType = isImage
+        ? "image/jpeg"
+        : file.type || "application/octet-stream";
+      const path = `auftraege/docs/${auftragId}_${Date.now()}.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from(BUCKET_TICKET_IMAGES)
+        .upload(path, body, {
+          cacheControl: "3600",
+          upsert: true,
+          contentType,
+        });
+      if (uploadError) {
+        setError(uploadError.message);
+        setUploadingAuftragDoc(false);
+        return;
+      }
+      const { data: urlData } = supabase.storage.from(BUCKET_TICKET_IMAGES).getPublicUrl(path);
+      const publicUrl = urlData.publicUrl;
+      const current = [...detailAuftragDocs];
+      const newUrls = [...current, publicUrl];
+      const { error: updateError } = await supabase
+        .from("auftraege")
+        .update({ angebot_rechnung_urls: newUrls })
+        .eq("id", auftragId);
+      if (updateError) {
+        setError(updateError.message);
+        setUploadingAuftragDoc(false);
+        return;
+      }
+      setDetailAuftragDocs(newUrls);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Upload fehlgeschlagen");
+    }
+    setUploadingAuftragDoc(false);
+  };
+
   const handleConfirmRejection = async () => {
     if (!rejectionTicket) return;
     const reasonText =
@@ -1828,7 +2071,7 @@ export default function AdminDashboardPage() {
       .filter((t) => t.termin_start != null && t.termin_start.trim() !== "")
       .map((t) => ({
         id: t.id,
-        title: `${getTicketDisplayName(t)}${t.ticket_display_id ? ` (${t.ticket_display_id})` : ""}`,
+        title: `${getTicketDisplayName(t)}${getTicketOrAuftragNumber(t) !== "–" ? ` (${getTicketOrAuftragNumber(t)})` : ""}`,
         start: new Date(t.termin_start!),
         end: t.termin_ende ? new Date(t.termin_ende) : new Date(t.termin_start!),
         resource: t,
@@ -2403,6 +2646,7 @@ export default function AdminDashboardPage() {
           const displayName = getTicketDisplayName(ticket);
           const hasPhone = !!(ticket.kontakt_telefon ?? "").trim();
           const isAnfrageStatus = (ticket.status ?? "").trim() === STATUS.ANFRAGE;
+          const isFromAuftrag = !!ticket.additional_data?.auftrag_id;
           const isConverting = convertingId === ticket.id;
           // Gewerk-Icon: erstes Gewerk aus Gewerk-Array
           const firstGewerk = normalizeGewerke(ticket.gewerk ?? null)[0] ?? null;
@@ -2424,6 +2668,9 @@ export default function AdminDashboardPage() {
               if (cardType === "PARTNER") {
                 return "border-blue-500/60 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:border-blue-500 hover:bg-blue-50/40";
               }
+              if (cardType === "AUFTRAG") {
+                return "border-emerald-500/50 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:border-emerald-500 hover:bg-emerald-50/40";
+              }
               if (cardType === "ANFRAGE") {
                 return "border-slate-200/80 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:border-slate-300 hover:bg-slate-50/80";
               }
@@ -2432,6 +2679,9 @@ export default function AdminDashboardPage() {
             // Dark theme
             if (cardType === "PARTNER") {
               return "border-blue-500/70 bg-slate-900 shadow-[0_0_12px_rgba(59,130,246,0.25)] hover:border-blue-400";
+            }
+            if (cardType === "AUFTRAG") {
+              return "border-emerald-500/60 bg-slate-900/80 hover:border-emerald-400";
             }
             if (cardType === "ANFRAGE") {
               return "border-slate-600 bg-slate-900/80 hover:border-slate-500";
@@ -2443,6 +2693,9 @@ export default function AdminDashboardPage() {
               if (cardType === "PARTNER") {
                 return "border border-blue-500/60 bg-blue-50 text-blue-700";
               }
+              if (cardType === "AUFTRAG") {
+                return "border border-emerald-500/60 bg-emerald-50 text-emerald-700";
+              }
               if (cardType === "ANFRAGE") {
                 return "bg-sky-100 text-sky-800";
               }
@@ -2450,6 +2703,9 @@ export default function AdminDashboardPage() {
             }
             if (cardType === "PARTNER") {
               return "border border-blue-500/70 bg-blue-500/10 text-blue-300";
+            }
+            if (cardType === "AUFTRAG") {
+              return "border border-emerald-500/60 bg-emerald-500/10 text-emerald-300";
             }
             if (cardType === "ANFRAGE") {
               return "bg-sky-500/20 text-sky-200";
@@ -2471,8 +2727,13 @@ export default function AdminDashboardPage() {
               <div className="mb-1 flex items-center justify-between gap-2">
                 <div className="flex min-w-0 flex-wrap items-center gap-1.5">
                   <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-medium ${labelBadgeClasses}`}>
-                    {cardType === "PARTNER" ? "Partner" : cardType === "ANFRAGE" ? "Anfrage" : "Ticket"}
+                    {cardType === "PARTNER" ? "Partner" : cardType === "AUFTRAG" ? "Auftrag" : cardType === "ANFRAGE" ? "Anfrage" : "Ticket"}
                   </span>
+                  {cardType === "AUFTRAG" && (
+                    <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium ${isLightTheme ? "bg-amber-100 text-amber-800" : "bg-amber-500/20 text-amber-300"}`}>
+                      SPM
+                    </span>
+                  )}
                   {(ticket.status ?? "").trim() === STATUS.BESICHTIGUNG && (
                     <span className={`rounded px-1.5 py-0.5 text-[10px] ${isLightTheme ? "bg-slate-200 text-slate-700" : "bg-slate-700 text-slate-300"}`}>
                       Besichtigung
@@ -2495,7 +2756,7 @@ export default function AdminDashboardPage() {
                 </div>
                 <span className="flex items-center gap-1">
                   <span className={`shrink-0 text-xs tabular-nums ${isLightTheme ? "text-slate-500" : "text-slate-400"}`}>
-                    {(ticket.status ?? "").trim() === STATUS.ANFRAGE ? "–" : (ticket.ticket_display_id ?? "–")}
+                    {getTicketOrAuftragNumber(ticket)}
                   </span>
                   {options?.isAngeboteTab && options.offerAttentionIds?.has(ticket.id) && (
                     <span
@@ -2506,6 +2767,15 @@ export default function AdminDashboardPage() {
                   )}
                 </span>
               </div>
+              {colId === "column-1" && isFromAuftrag && (
+                <p
+                  className={`mb-1 text-[10px] leading-snug ${
+                    isLightTheme ? "text-emerald-800/90" : "text-emerald-300/90"
+                  }`}
+                >
+                  Öffnen: gleiche Handwerker-Ansicht wie unter „Aufträge“
+                </p>
+              )}
               <div className="mb-1 flex items-start justify-between gap-2">
                 <div className="min-w-0 flex-1">
                   <p className={`line-clamp-1 text-sm font-medium ${isLightTheme ? "text-slate-900" : "text-slate-100"}`}>{displayName}</p>
@@ -2572,7 +2842,7 @@ export default function AdminDashboardPage() {
                   <span>{formatTicketDate(ticket.created_at)}</span>
                 </div>
               </div>
-              {isAnfrageStatus && (
+              {isAnfrageStatus && !isFromAuftrag && (
                 <div
                   className={`mt-3 flex w-full gap-2 border-t pt-2 ${
                     isLightTheme ? "border-slate-200" : "border-slate-700"
@@ -2597,7 +2867,7 @@ export default function AdminDashboardPage() {
                   </button>
                 </div>
               )}
-              {options?.isAngeboteTab && (
+              {options?.isAngeboteTab && !(ticket as Ticket & { additional_data?: { auftrag_id?: string } }).additional_data?.auftrag_id && (
                 <div
                   className={`mt-3 flex w-full flex-col gap-2 border-t pt-2 ${
                     isLightTheme ? "border-slate-200" : "border-slate-700"
@@ -2969,6 +3239,18 @@ export default function AdminDashboardPage() {
             </span>
           )}
           <div className="flex flex-wrap items-center justify-end gap-2">
+          <button
+            type="button"
+            onClick={openCalendarFromHeader}
+            title="Kalender öffnen"
+            className={`inline-flex items-center justify-center rounded-full border p-2 text-xs font-medium transition-all hover:opacity-90 ${
+              isLightTheme
+                ? "border-slate-200 bg-white text-slate-700 shadow-sm hover:border-slate-300"
+                : "border-slate-600 bg-slate-900/80 text-slate-100 hover:border-slate-500 hover:bg-slate-800/80"
+            }`}
+          >
+            <CalendarIcon className="h-4 w-4" strokeWidth={2} />
+          </button>
           <Popover>
             <PopoverTrigger asChild>
               <button
@@ -2996,6 +3278,15 @@ export default function AdminDashboardPage() {
                 >
                   <LayoutDashboard className="h-4 w-4 shrink-0" />
                   Dashboard
+                </Link>
+                <Link
+                  href="/admin/dashboard/auftraege"
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                    isLightTheme ? "text-slate-700 hover:bg-slate-100" : "text-slate-300 hover:bg-slate-800 hover:text-slate-100"
+                  }`}
+                >
+                  <ClipboardList className="h-4 w-4 shrink-0" />
+                  Aufträge
                 </Link>
                 <Link
                   href="/admin/benutzer"
@@ -3056,7 +3347,11 @@ export default function AdminDashboardPage() {
         >
           {/* Mobile: Tabs Eingang | Kalender */}
           <div className="lg:hidden">
-            <Tabs defaultValue="list" className="w-full">
+            <Tabs
+              value={mobileMainTab}
+              onValueChange={(v) => setMobileMainTab(v === "calendar" ? "calendar" : "list")}
+              className="w-full"
+            >
               <TabsList className="mb-3 h-9 w-full bg-slate-800">
                 <TabsTrigger value="list" className="flex-1 text-xs data-[state=active]:bg-slate-700">
                   Anfragen ({col1Tickets.length})
@@ -3264,7 +3559,9 @@ export default function AdminDashboardPage() {
               </div>
               {/* Spalte 2: Terminplaner (Kalender) – gleiche Höhe, scrollbar */}
               <section
-                className={`flex-1 min-w-0 flex min-h-0 flex-col rounded-2xl border p-4 overflow-hidden transition-colors ${
+                ref={desktopCalendarSectionRef}
+                id="dashboard-week-calendar"
+                className={`flex-1 min-w-0 flex min-h-0 scroll-mt-24 flex-col overflow-hidden rounded-2xl border p-4 transition-colors ${
                   isLightTheme ? "border-slate-200/80 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)]" : "border-slate-800 bg-slate-900/40"
                 }`}
               >
@@ -3302,7 +3599,10 @@ export default function AdminDashboardPage() {
                       const Icon = getGewerkIcon(gewerkeList[0] ?? null);
                       return Icon ? <Icon className="h-3 w-3 shrink-0" strokeWidth={2} /> : null;
                     })()}
-                    <span className="line-clamp-1">{ev.resource?.ticket_display_id ?? ev.id.slice(0, 8)}</span>
+                    <span className="line-clamp-1">{getTicketOrAuftragNumber(ev.resource ?? null) !== "–" ? getTicketOrAuftragNumber(ev.resource ?? null) : ev.id.slice(0, 8)}</span>
+                    {(ev.resource as Ticket | undefined)?.additional_data?.auftrag_id && (
+                      <span className="shrink-0 rounded px-1 py-0.5 text-[9px] font-medium bg-amber-500/40 text-amber-100">SPM</span>
+                    )}
                   </div>
                   <span className="line-clamp-1 block text-[10px] opacity-90">{getTicketDisplayName(ev.resource ?? {} as Ticket)}</span>
                 </div>
@@ -3313,9 +3613,16 @@ export default function AdminDashboardPage() {
               if (!ticket) return null;
               return (
                 <div className="pointer-events-none cursor-grabbing opacity-70 rounded-lg border border-blue-500/70 bg-slate-900 px-3 py-2 shadow-lg min-w-[140px]">
-                  <div className="text-[10px] text-blue-300">TICKET</div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] text-blue-300">{ticket.additional_data?.auftrag_id ? "AUFTRAG" : "TICKET"}</span>
+                    {ticket.additional_data?.auftrag_id && (
+                      <span className="rounded px-1.5 py-0.5 text-[9px] font-medium bg-amber-500/30 text-amber-200">SPM</span>
+                    )}
+                  </div>
                   <div className="text-sm font-medium text-slate-100">{getTicketDisplayName(ticket)}</div>
-                  {ticket.ticket_display_id && <div className="text-xs text-slate-400">{ticket.ticket_display_id}</div>}
+                  {getTicketOrAuftragNumber(ticket) !== "–" && (
+                    <div className="text-xs text-slate-400">{getTicketOrAuftragNumber(ticket)}</div>
+                  )}
                 </div>
               );
             })() : null}
@@ -3409,8 +3716,8 @@ export default function AdminDashboardPage() {
               {pendingSlotDrop?.ticket && (
                 <>
                   <span className={`font-medium ${isLightTheme ? "text-slate-800" : "text-slate-200"}`}>{getTicketDisplayName(pendingSlotDrop.ticket)}</span>
-                  {pendingSlotDrop.ticket.ticket_display_id && (
-                    <span className={`ml-2 ${isLightTheme ? "text-slate-500" : "text-slate-500"}`}>({pendingSlotDrop.ticket.ticket_display_id})</span>
+                  {getTicketOrAuftragNumber(pendingSlotDrop.ticket) !== "–" && (
+                    <span className={`ml-2 ${isLightTheme ? "text-slate-500" : "text-slate-500"}`}>({getTicketOrAuftragNumber(pendingSlotDrop.ticket)})</span>
                   )}
                 </>
               )}
@@ -3940,6 +4247,38 @@ export default function AdminDashboardPage() {
         </DialogContent>
       </Dialog>
 
+      <AuftragHandwerkerDetailDialog
+        open={!!handwerkerAuftragDetail}
+        auftrag={handwerkerAuftragDetail}
+        onOpenChange={(open) => {
+          if (!open) {
+            setHandwerkerAuftragDetail(null);
+            setHandwerkerLinkedTicketId(null);
+          }
+        }}
+        onAuftragPatch={handleHandwerkerAuftragPatch}
+        boardTicketId={handwerkerLinkedTicketId}
+        boardTicketGewerk={handwerkerBoardTicketGewerk}
+        onBoardGewerkSaved={handleHandwerkerBoardGewerkSaved}
+      />
+      {handwerkerAuftragLoading && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/25 backdrop-blur-[1px]"
+          aria-busy="true"
+          aria-live="polite"
+        >
+          <div
+            className={`rounded-xl border px-6 py-4 text-sm shadow-lg ${
+              isLightTheme
+                ? "border-slate-200 bg-white text-slate-700"
+                : "border-slate-600 bg-slate-900 text-slate-200"
+            }`}
+          >
+            Auftrag wird geladen …
+          </div>
+        </div>
+      )}
+
       {/* Detail-Modal (Trello-Stil): nur assigned_to + internal_notes (DB); Anzeige: ID, Datum, Kunde, Adresse, Anfragetext */}
       <Dialog
         open={!!detailTicket}
@@ -3972,11 +4311,18 @@ export default function AdminDashboardPage() {
                     <span className={`text-xs font-medium uppercase tracking-wider ${isLightTheme ? "text-slate-500" : "text-slate-400"}`}>
                       {getColumnNameForTicket(detailTicket)}
                     </span>
-                    <DialogTitle className={`text-lg font-semibold ${isLightTheme ? "text-slate-900" : "text-slate-100"}`}>
-                      {detailTicket?.ticket_display_id
-                        ? detailTicket.ticket_display_id
-                        : (detailTicket?.status ?? "").trim() === STATUS.ANFRAGE ? "Anfrage" : "–"}{" "}
-                      · {getTicketDisplayName(detailTicket)}
+                    <DialogTitle className="flex flex-wrap items-center gap-2 text-lg font-semibold">
+                      <span className={isLightTheme ? "text-slate-900" : "text-slate-100"}>
+                        {getTicketOrAuftragNumber(detailTicket) !== "–"
+                          ? getTicketOrAuftragNumber(detailTicket)
+                          : (detailTicket?.status ?? "").trim() === STATUS.ANFRAGE ? "Anfrage" : "–"}{" "}
+                        · {getTicketDisplayName(detailTicket)}
+                      </span>
+                      {detailTicket?.additional_data?.auftrag_id && (
+                        <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${isLightTheme ? "bg-amber-100 text-amber-800" : "bg-amber-500/20 text-amber-300"}`}>
+                          SPM
+                        </span>
+                      )}
                     </DialogTitle>
                   </div>
                 </div>
@@ -4052,11 +4398,18 @@ export default function AdminDashboardPage() {
                     </div>
                     <dl className="space-y-2 text-sm">
                       <div>
-                        <dt className={isLightTheme ? "text-slate-500" : "text-slate-400"}>ID</dt>
-                        <dd className={`font-medium ${isLightTheme ? "text-slate-900" : "text-slate-100"}`}>
-                          {detailTicket?.ticket_display_id
-                            ? detailTicket.ticket_display_id
-                            : "–"}
+                        <dt className={isLightTheme ? "text-slate-500" : "text-slate-400"}>
+                          {detailTicket?.additional_data?.auftrag_id ? "Auftragsnummer" : "Ticket-Nr."}
+                        </dt>
+                        <dd className="flex items-center gap-2">
+                          <span className={`font-medium ${isLightTheme ? "text-slate-900" : "text-slate-100"}`}>
+                            {getTicketOrAuftragNumber(detailTicket)}
+                          </span>
+                          {detailTicket?.additional_data?.auftrag_id && (
+                            <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium ${isLightTheme ? "bg-amber-100 text-amber-800" : "bg-amber-500/20 text-amber-300"}`}>
+                              SPM
+                            </span>
+                          )}
                         </dd>
                       </div>
                       <div>
@@ -4563,7 +4916,9 @@ export default function AdminDashboardPage() {
                   <span className="w-full text-xs font-semibold uppercase tracking-wider text-slate-500 sm:mb-1">
                     Aktionen
                   </span>
-                  {detailTicket != null && (detailTicket.status ?? "").trim() === STATUS.ANFRAGE && (
+                  {detailTicket != null &&
+                    (detailTicket.status ?? "").trim() === STATUS.ANFRAGE &&
+                    !detailTicket.additional_data?.auftrag_id && (
                     <>
                       <button
                         type="button"
@@ -4626,6 +4981,90 @@ export default function AdminDashboardPage() {
                       )}
                       <p className="text-xs text-slate-500">Status: {detailTicket?.status ?? "–"}.</p>
                     </>
+                  )}
+
+                  {detailTicket?.additional_data?.auftrag_id && (
+                    <div className="mt-1 space-y-2">
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                        Weitere Dateien
+                      </span>
+                      <p className={`text-[11px] leading-snug ${isLightTheme ? "text-slate-500" : "text-slate-400"}`}>
+                        Angebot, Rechnung, Fotos, Messprotokoll – PDF und Bilder, mehrere möglich.
+                      </p>
+                      <label className={`flex cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed py-3 transition-colors ${
+                        isLightTheme ? "border-slate-200 hover:border-slate-300 hover:bg-slate-50" : "border-slate-600 hover:border-slate-500 hover:bg-slate-800/50"
+                      }`}>
+                        <input
+                          type="file"
+                          accept="application/pdf,.pdf,image/*,.heic,.heif"
+                          multiple
+                          className="hidden"
+                          disabled={uploadingAuftragDoc}
+                          onChange={async (e) => {
+                            const files = e.target.files;
+                            const aid = detailTicket?.additional_data?.auftrag_id;
+                            if (!files?.length || !aid) return;
+                            for (let i = 0; i < files.length; i++) {
+                              await uploadAuftragDoc(aid, files[i]!);
+                            }
+                            e.target.value = "";
+                          }}
+                        />
+                        <Upload className={`h-4 w-4 ${isLightTheme ? "text-slate-500" : "text-slate-400"}`} />
+                        <span className="text-xs font-medium">
+                          {uploadingAuftragDoc ? "Wird hochgeladen …" : "Dateien auswählen"}
+                        </span>
+                      </label>
+                      {detailAuftragDocs.length > 0 && (
+                        <div className="space-y-1">
+                          {detailAuftragDocs.map((url, idx) => (
+                            <a
+                              key={`${url}-${idx}`}
+                              href={url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={`flex w-full items-center gap-2 rounded-lg border px-3 py-2 text-xs no-underline ${
+                                isLightTheme ? "border-slate-200 bg-white text-slate-700 hover:bg-slate-50" : "border-slate-600 bg-slate-800 text-slate-200 hover:bg-slate-700"
+                              }`}
+                            >
+                              <Paperclip className="h-3.5 w-3.5 shrink-0" />
+                              Dokument {idx + 1}
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {detailTicket && !detailTicket.additional_data?.auftrag_id && (
+                    <div className="mt-1 space-y-1">
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                        Angebots-App
+                      </span>
+                      <a
+                        href={(() => {
+                          const base = "https://handwerkmuenchen-angebots-app.vercel.app";
+                          const params = new URLSearchParams({ customer_id: detailTicket.id });
+                          const gewerk = Array.isArray(detailTicket.gewerk) && detailTicket.gewerk.length > 0
+                            ? detailTicket.gewerk.join(", ")
+                            : null;
+                          const subject = [
+                            getTicketOrAuftragNumber(detailTicket) !== "–" ? `Ticket ${getTicketOrAuftragNumber(detailTicket)}` : null,
+                            gewerk,
+                            detailTicket.beschreibung?.slice(0, 80) ?? null,
+                          ]
+                            .filter(Boolean)
+                            .join(" – ");
+                          if (subject) params.set("subject", subject);
+                          return `${base}?${params.toString()}`;
+                        })()}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-700"
+                      >
+                        <FileText className="h-4 w-4" strokeWidth={2} />
+                        Angebot erstellen
+                      </a>
+                    </div>
                   )}
 
                   {detailTicket && (

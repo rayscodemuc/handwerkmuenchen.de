@@ -27,6 +27,7 @@ type Ticket = {
   termin_typ: string | null;
   image_urls: string[] | null;
   created_at: string;
+  additional_data?: { auftrag_id?: string; auftragsnummer?: string } | null;
 };
 
 function getDisplayName(t: Ticket | null): string {
@@ -68,6 +69,7 @@ export default function AuftragPage() {
   const params = useParams();
   const id = typeof params.id === "string" ? params.id : "";
   const [ticket, setTicket] = useState<Ticket | null>(null);
+  const [anhangUrl, setAnhangUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -79,14 +81,27 @@ export default function AuftragPage() {
     (async () => {
       const { data, error: e } = await supabase
         .from("tickets")
-        .select("id, ticket_display_id, is_partner, kunde_name, partner_name, kontakt_email, kontakt_telefon, objekt_adresse, beschreibung, gewerk, status, interne_notizen, kommentare, termin_start, termin_ende, termin_typ, image_urls, created_at")
+        .select("id, ticket_display_id, is_partner, kunde_name, partner_name, kontakt_email, kontakt_telefon, objekt_adresse, beschreibung, gewerk, status, interne_notizen, kommentare, termin_start, termin_ende, termin_typ, image_urls, created_at, additional_data")
         .eq("id", id)
         .single();
       if (e) {
         setError(e.message);
         setTicket(null);
+        setAnhangUrl(null);
       } else {
-        setTicket(data as Ticket);
+        const t = data as Ticket;
+        setTicket(t);
+        const auftragId = t?.additional_data?.auftrag_id;
+        if (auftragId) {
+          const { data: auftrag } = await supabase
+            .from("auftraege")
+            .select("anhang_url")
+            .eq("id", auftragId)
+            .single();
+          setAnhangUrl((auftrag as { anhang_url?: string } | null)?.anhang_url ?? null);
+        } else {
+          setAnhangUrl(null);
+        }
       }
       setLoading(false);
     })();
@@ -131,7 +146,9 @@ export default function AuftragPage() {
     );
   }
 
-  const ticketNummer = (ticket.ticket_display_id ?? "").trim() || "–";
+  const ticketNummer =
+    (ticket.additional_data?.auftragsnummer ?? ticket.ticket_display_id ?? "").trim() || "–";
+  const isAuftrag = !!ticket.additional_data?.auftrag_id;
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 print:bg-white print:text-black">
@@ -171,9 +188,35 @@ export default function AuftragPage() {
           </div>
           <div className="text-right text-sm text-slate-600">
             <div className="font-medium text-slate-900">Arbeitsauftrag</div>
-            <div>Ticket-Nr.: {ticketNummer}</div>
+            <div>{isAuftrag ? "Auftrags-Nr." : "Ticket-Nr."}: {ticketNummer}</div>
           </div>
         </div>
+
+        {/* Angehängte PDF (Aufträge aus n8n) */}
+        {anhangUrl && (
+          <div className="mb-6">
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <span className="text-xs font-medium uppercase tracking-wider text-slate-500">
+                Angehängtes Dokument (PDF)
+              </span>
+              <a
+                href={anhangUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-medium text-blue-600 hover:underline print:no-underline"
+              >
+                PDF in neuem Tab öffnen / drucken
+              </a>
+            </div>
+            <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-100 shadow-sm print:rounded">
+              <iframe
+                src={anhangUrl}
+                title="Angehängtes PDF"
+                className="h-[min(80vh,600px)] w-full min-h-[400px]"
+              />
+            </div>
+          </div>
+        )}
 
         {/* Kunde & Kontakt */}
         <div className="mb-6 rounded-2xl border border-slate-200/80 bg-slate-50/50 p-4 shadow-sm print:rounded print:shadow-none">
