@@ -166,51 +166,68 @@ function GewerkTerminPickerPanel({ value, onChange, minutePillsRef, variant }: G
   const apply = (date: Date, h: number, min: number) =>
     onChange(applyGewerkTerminTimeOnDate(date, h, min));
   const full = variant === "fullscreen";
+  const gewerkKalenderDatumLabel = format(d, "EEEE, d. MMMM yyyy", { locale: de });
 
   return (
     <div
       className={
-        full ? "flex flex-col" : "flex flex-col max-h-[min(78dvh,560px)] sm:max-h-none"
+        full
+          ? "flex min-h-0 flex-1 flex-col"
+          : "flex min-h-0 max-h-[min(78dvh,560px)] flex-col sm:max-h-none"
       }
     >
-      <div
-        className={
-          full
-            ? "pb-2"
-            : "min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-2 pb-1 pt-2 sm:px-4 sm:pb-0 sm:pt-4 [-webkit-overflow-scrolling:touch]"
-        }
-      >
+      {/* Kalender nicht in overflow-y-auto: sonst fangen Mobile-Browser Taps als Scroll ab. */}
+      <div className={full ? "shrink-0 pb-2" : "shrink-0 px-2 pb-1 pt-2 sm:px-4 sm:pb-0 sm:pt-4"}>
         <Calendar
           mode="single"
+          required
           selected={d}
-          onSelect={(date) => date && apply(date, startHour, startMin)}
+          onSelect={(date, triggerDate) => {
+            const next = date ?? triggerDate;
+            if (next) apply(next, startHour, startMin);
+          }}
           locale={de}
           navLayout={narrow ? "after" : "around"}
           classNames={GEWERK_TERMIN_CAL_CLASSNAMES}
         />
       </div>
-      <div className="shrink-0 border-t border-slate-200 bg-white">
+      <div className="flex min-h-0 flex-1 flex-col border-t border-slate-200 bg-white">
         <div
           className={
             full
-              ? "flex flex-col gap-3 px-1 pt-4"
-              : "flex flex-wrap items-center gap-3 px-2 py-2 sm:px-4 sm:py-3 sm:pt-3"
+              ? "flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-y-contain px-1 pt-4 [-webkit-overflow-scrolling:touch]"
+              : "flex max-h-[min(42dvh,320px)] min-h-0 flex-col gap-3 overflow-y-auto overscroll-y-contain px-2 py-2 sm:max-h-none sm:overflow-visible sm:px-4 sm:py-3 sm:pt-3"
           }
         >
-          <button
-            type="button"
-            onClick={() => {
-              const today = new Date();
-              apply(today, startHour, startMin);
-            }}
-            className={`touch-manipulation self-start rounded-lg px-1 text-left font-semibold underline-offset-2 active:text-blue-700 ${
+          <div
+            className={
               full
-                ? "min-h-11 text-sm text-blue-600"
-                : "min-h-0 text-xs text-blue-600 sm:font-medium sm:text-slate-500 sm:no-underline sm:hover:text-blue-600 sm:hover:underline"
-            }`}
+                ? "flex items-start justify-between gap-3 px-1"
+                : "flex w-full items-start justify-between gap-2 sm:w-auto sm:max-w-full"
+            }
           >
-            Heute
-          </button>
+            <p
+              className={`min-w-0 flex-1 font-semibold leading-snug text-slate-900 ${
+                full ? "text-base" : "text-sm sm:text-xs sm:font-medium"
+              }`}
+            >
+              {gewerkKalenderDatumLabel}
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                const today = new Date();
+                apply(today, startHour, startMin);
+              }}
+              className={`touch-manipulation shrink-0 rounded-lg font-semibold text-blue-600 underline-offset-2 active:text-blue-700 ${
+                full
+                  ? "min-h-11 text-sm"
+                  : "min-h-0 text-xs sm:font-medium sm:text-slate-500 sm:no-underline sm:hover:text-blue-600 sm:hover:underline"
+              }`}
+            >
+              Heute
+            </button>
+          </div>
           <div
             className={full ? "flex w-full flex-col gap-3" : "flex flex-wrap items-center gap-3"}
           >
@@ -1968,7 +1985,7 @@ export function AuftragHandwerkerDetailDialog({
                 </h2>
                 <span className="h-11 w-11 shrink-0" aria-hidden />
               </header>
-              <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 pb-4 pt-2 [-webkit-overflow-scrolling:touch]">
+              <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-4 pb-4 pt-2">
                 <GewerkTerminPickerPanel
                   value={gewerkTerminStartLocal}
                   onChange={setGewerkTerminStartLocal}
