@@ -1,5 +1,6 @@
 import { parseISO, isValid } from "date-fns";
 import type { HandwerkerAuftrag } from "@/src/types/handwerker-auftrag";
+import { kanbanPositionSortKey } from "@/lib/auftraege/kanban-position-sort-key";
 
 const DEFAULT_SLOT_MS = 60 * 60 * 1000;
 
@@ -64,6 +65,9 @@ export function splitAuftraegeKommendeUndWeitere(
   const kommendeIds = new Set(kommende.map((x) => x.id));
   const weitere = auftraege.filter((a) => !kommendeIds.has(a.id));
   weitere.sort((a, b) => {
+    const pa = kanbanPositionSortKey(a.board_position);
+    const pb = kanbanPositionSortKey(b.board_position);
+    if (pa !== pb) return pa - pb;
     const ca = a.created_at ? new Date(String(a.created_at)).getTime() : 0;
     const cb = b.created_at ? new Date(String(b.created_at)).getTime() : 0;
     return cb - ca;

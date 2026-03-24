@@ -49,6 +49,7 @@ import { GEWERKE_OPTIONS } from "@/src/config/gewerkeOptions";
 import { STATUS, TERMIN_TYP } from "@/src/config/businessConfig";
 import { canonicalizeGewerkArray } from "@/lib/auftraege/canonical-gewerk";
 import { getBesichtigungAutoArchiveUpdate, parseTerminVergangen } from "@/lib/auftraege/termin-vergangen";
+import { primaryAuftragAnhangUrl } from "@/lib/auftraege/primary-auftrag-anhang-url";
 
 function isoToDatetimeLocalValue(iso: string | null | undefined): string {
   if (!iso?.trim()) return "";
@@ -914,7 +915,7 @@ export function AuftragHandwerkerDetailDialog({
       auftragId: string,
       file: File,
       currentUrls: string[] = []
-    ): Promise<string | null> => {
+    ): Promise<string[] | null> => {
       setUploadingDoc(true);
       setDialogError(null);
       try {
@@ -953,19 +954,30 @@ export function AuftragHandwerkerDetailDialog({
       }
       const { data: urlData } = supabase.storage.from(BUCKET_IMAGES).getPublicUrl(path);
       const publicUrl = urlData.publicUrl;
-      const newUrls = [...currentUrls, publicUrl];
+      const newUrls = [publicUrl, ...currentUrls];
+      const { data: existingRow } = await supabase
+        .from("auftraege")
+        .select("anhang_url")
+        .eq("id", auftragId)
+        .maybeSingle();
+      const hasAnhang =
+        String((existingRow as { anhang_url?: string | null } | null)?.anhang_url ?? "").trim() !== "";
+      const anhangPatch: { anhang_url?: string } = {};
+      if (!isImage && !hasAnhang) {
+        anhangPatch.anhang_url = publicUrl;
+      }
       const { error: updateError } = await supabase
         .from("auftraege")
-        .update({ angebot_rechnung_urls: newUrls })
+        .update({ angebot_rechnung_urls: newUrls, ...anhangPatch })
         .eq("id", auftragId);
       if (updateError) {
         setDialogError(updateError.message);
         setUploadingDoc(false);
         return null;
       }
-      onAuftragPatch?.(auftragId, { angebot_rechnung_urls: newUrls });
+      onAuftragPatch?.(auftragId, { angebot_rechnung_urls: newUrls, ...anhangPatch });
       setUploadingDoc(false);
-      return publicUrl;
+      return newUrls;
     },
     [onAuftragPatch]
   );
@@ -1117,6 +1129,13 @@ export function AuftragHandwerkerDetailDialog({
               const datumLabel = formatAuftragDatum(detailAuftrag.datum);
               const rechnungsempfaengerText = resolveRechnungsempfaenger(detailAuftrag);
               const leistungsempfaengerText = resolveLeistungsempfaenger(detailAuftrag);
+              const primaryPdfHref = primaryAuftragAnhangUrl(detailAuftrag);
+              const angebotUrlsOhneHauptpdf = (detailAuftrag.angebot_rechnung_urls ?? []).filter(
+                (u) =>
+                  typeof u === "string" &&
+                  u.trim() !== "" &&
+                  (!primaryPdfHref || u.trim() !== primaryPdfHref.trim())
+              );
               return (
                 <>
                   {dialogError && (
@@ -1218,9 +1237,9 @@ export function AuftragHandwerkerDetailDialog({
                           WhatsApp
                         </a>
                       ) : null}
-                      {detailAuftrag.anhang_url ? (
+                      {primaryPdfHref ? (
                         <a
-                          href={detailAuftrag.anhang_url}
+                          href={primaryPdfHref}
                           target="_blank"
                           rel="noopener noreferrer"
                           className={`flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-blue-200 bg-blue-50/80 px-3 py-2 text-sm font-semibold text-blue-900 shadow-sm transition-colors hover:bg-blue-50 active:scale-[0.98] ${wa ? "" : "col-span-2 sm:col-span-1"}`}
@@ -1770,12 +1789,12 @@ export function AuftragHandwerkerDetailDialog({
                                   if (!files?.length || !detailAuftrag.id) return;
                                   let urls = [...(detailAuftrag.angebot_rechnung_urls ?? [])];
                                   for (let i = 0; i < files.length; i++) {
-                                    const newUrl = await uploadAuftragDoc(
+                                    const nextUrls = await uploadAuftragDoc(
                                       detailAuftrag.id,
                                       files[i]!,
                                       urls
                                     );
-                                    if (newUrl) urls = [...urls, newUrl];
+                                    if (nextUrls) urls = nextUrls;
                                   }
                                   e.target.value = "";
                                 }}
@@ -1785,10 +1804,9 @@ export function AuftragHandwerkerDetailDialog({
                                 {uploadingDoc ? "Wird hochgeladen …" : "Dateien auswählen"}
                               </span>
                             </label>
-                            {Array.isArray(detailAuftrag.angebot_rechnung_urls) &&
-                              detailAuftrag.angebot_rechnung_urls.length > 0 && (
+                            {angebotUrlsOhneHauptpdf.length > 0 && (
                                 <div className="mt-2 space-y-1.5">
-                                  {detailAuftrag.angebot_rechnung_urls.map((url, idx) => {
+                                  {angebotUrlsOhneHauptpdf.map((url, idx) => {
                                     const isImg = isProbablyImageAttachmentUrl(url);
                                     return (
                                       <div

@@ -48,6 +48,8 @@ import {
 } from "@/components/admin/eingang-ticket-cards";
 import { isKommenderOderLaufenderTermin } from "@/lib/auftraege/gewerk-auftraege-split";
 import { normalizeAuftragRow } from "@/lib/auftraege/billing-recipient-fields";
+import { kanbanPositionSortKey } from "@/lib/auftraege/kanban-position-sort-key";
+import { primaryAuftragAnhangUrl } from "@/lib/auftraege/primary-auftrag-anhang-url";
 import { filterAuftraegeRowsByRole } from "@/lib/auftraege/filter-auftraege-by-role";
 import { roleToGewerk } from "@/lib/auftraege/role-to-gewerk";
 import type { HandwerkerAuftrag } from "@/src/types/handwerker-auftrag";
@@ -55,6 +57,8 @@ import { BUSINESS_COLUMNS, DEFAULT_COMPANY_ID, STATUS, TERMIN_TYP } from "@/src/
 import { GEWERKE_OPTIONS } from "@/src/config/gewerkeOptions";
 
 const supabase = createClient();
+
+const BUCKET_TICKET_IMAGES = "ticket-images";
 
 /** PDF & Co. für SPM-Auftrags-Anhänge (Bilder laufen separat über Komprimierung → .jpg). */
 function attachmentFileExt(file: File): string {
@@ -846,8 +850,8 @@ function isKalkulationFaelligAuftrag(a: HandwerkerAuftrag): boolean {
 }
 
 function sortAuftraegeByBoardPosition(a: HandwerkerAuftrag, b: HandwerkerAuftrag): number {
-  const posA = typeof a.board_position === "number" ? a.board_position : Number.MAX_SAFE_INTEGER;
-  const posB = typeof b.board_position === "number" ? b.board_position : Number.MAX_SAFE_INTEGER;
+  const posA = kanbanPositionSortKey(a.board_position);
+  const posB = kanbanPositionSortKey(b.board_position);
   if (posA !== posB) return posA - posB;
   const ca = a.created_at ? new Date(String(a.created_at)).getTime() : 0;
   const cb = b.created_at ? new Date(String(b.created_at)).getTime() : 0;
@@ -886,14 +890,14 @@ function computeMergedColumnPosition(
           : `ticket:${insertBeforeDndId}`;
 
   const items: BoardPosItem[] = [
-    ...colTickets.map((t) => ({
-      key: `ticket:${t.id}`,
-      position: typeof t.position === "number" ? t.position : 10,
-    })),
-    ...colAuftraege.map((a) => ({
-      key: `auftrag:${a.id}`,
-      position: typeof a.board_position === "number" ? a.board_position : 10,
-    })),
+    ...colTickets.map((t) => {
+      const k = kanbanPositionSortKey(t.position);
+      return { key: `ticket:${t.id}`, position: k === Number.MAX_SAFE_INTEGER ? 10 : k };
+    }),
+    ...colAuftraege.map((a) => {
+      const k = kanbanPositionSortKey(a.board_position);
+      return { key: `auftrag:${a.id}`, position: k === Number.MAX_SAFE_INTEGER ? 10 : k };
+    }),
   ].sort((x, y) => x.position - y.position);
 
   let list = items.filter((i) => i.key !== draggedKey);
@@ -929,13 +933,13 @@ function mergeBoardDisplayRows(tickets: Ticket[], auftraege: HandwerkerAuftrag[]
     ...tickets.map((t) => ({
       kind: "ticket" as const,
       t,
-      pos: typeof t.position === "number" ? t.position : Number.MAX_SAFE_INTEGER,
+      pos: kanbanPositionSortKey(t.position),
       created: new Date(t.created_at).getTime(),
     })),
     ...auftraege.map((a) => ({
       kind: "auftrag" as const,
       a,
-      pos: typeof a.board_position === "number" ? a.board_position : Number.MAX_SAFE_INTEGER,
+      pos: kanbanPositionSortKey(a.board_position),
       created: a.created_at ? new Date(String(a.created_at)).getTime() : 0,
     })),
   ];
@@ -964,8 +968,8 @@ function normalizeGewerke(value: string[] | string | null | undefined): string[]
 
 /** Sortierung innerhalb einer Spalte: zuerst nach position (aufsteigend), dann nach created_at (neuere zuerst). */
 function sortByPositionThenCreatedAt(a: Ticket, b: Ticket): number {
-  const posA = typeof a.position === "number" ? a.position : Number.MAX_SAFE_INTEGER;
-  const posB = typeof b.position === "number" ? b.position : Number.MAX_SAFE_INTEGER;
+  const posA = kanbanPositionSortKey(a.position);
+  const posB = kanbanPositionSortKey(b.position);
   if (posA !== posB) return posA - posB;
   const createdA = new Date(a.created_at).getTime();
   const createdB = new Date(b.created_at).getTime();
@@ -976,7 +980,13 @@ function sortByPositionThenCreatedAt(a: Ticket, b: Ticket): number {
 function getPositionForAppend(columnTickets: Ticket[], excludeTicketId?: string): number {
   const list = excludeTicketId ? columnTickets.filter((t) => t.id !== excludeTicketId) : columnTickets;
   if (list.length === 0) return 10;
-  const maxPos = Math.max(10, ...list.map((t) => (typeof t.position === "number" ? t.position : 0)));
+  const maxPos = Math.max(
+    10,
+    ...list.map((t) => {
+      const k = kanbanPositionSortKey(t.position);
+      return k === Number.MAX_SAFE_INTEGER ? 0 : k;
+    })
+  );
   return maxPos + 10;
 }
 
@@ -1036,6 +1046,8 @@ export default function AdminDashboardPage() {
   const [uploadingAuftragDoc, setUploadingAuftragDoc] = useState(false);
   /** SPM-Aufträge: URLs der hochgeladenen Angebote/Rechnungen (aus auftraege.angebot_rechnung_urls). */
   const [detailAuftragDocs, setDetailAuftragDocs] = useState<string[]>([]);
+  /** Haupt-PDF (wie n8n anhang_url) – nicht doppelt unter „Weitere Dateien“ listen. */
+  const [detailAuftragAnhangUrl, setDetailAuftragAnhangUrl] = useState<string | null>(null);
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
   /** Signierte URLs für Modal-Bilder (funktioniert auch bei privatem Storage-Bucket). */
   const [signedImageUrls, setSignedImageUrls] = useState<string[]>([]);
@@ -1122,6 +1134,23 @@ export default function AdminDashboardPage() {
   const [createTicketSubmitting, setCreateTicketSubmitting] = useState(false);
   const [createTicketError, setCreateTicketError] = useState<string | null>(null);
 
+  /** Auswahl Ticket vs. SPM-Auftrag, dann jeweils eigenes Formular. */
+  const [createChooserOpen, setCreateChooserOpen] = useState(false);
+  const [createAuftragOpen, setCreateAuftragOpen] = useState(false);
+  const [createAuftragMieterName, setCreateAuftragMieterName] = useState("");
+  const [createAuftragEmail, setCreateAuftragEmail] = useState("");
+  const [createAuftragTelefon, setCreateAuftragTelefon] = useState("");
+  const [createAuftragAdresse, setCreateAuftragAdresse] = useState("");
+  const [createAuftragAufgabe, setCreateAuftragAufgabe] = useState("");
+  const [createAuftragNr, setCreateAuftragNr] = useState("");
+  const [createAuftragGewerk, setCreateAuftragGewerk] = useState<string>("");
+  const [createAuftragRechnungsempfaenger, setCreateAuftragRechnungsempfaenger] = useState("");
+  const [createAuftragLeistungsempfaenger, setCreateAuftragLeistungsempfaenger] = useState("");
+  const [createAuftragPdfFile, setCreateAuftragPdfFile] = useState<File | null>(null);
+  const createAuftragPdfInputRef = useRef<HTMLInputElement>(null);
+  const [createAuftragSubmitting, setCreateAuftragSubmitting] = useState(false);
+  const [createAuftragError, setCreateAuftragError] = useState<string | null>(null);
+
   /** Quote Builder Overlay: Ticket für Angebotsbearbeitung, UI only. */
   const [quoteBuilderOpen, setQuoteBuilderOpen] = useState(false);
   const [quoteBuilderTicketId, setQuoteBuilderTicketId] = useState<string | null>(null);
@@ -1154,6 +1183,9 @@ export default function AdminDashboardPage() {
       if (aHas && bHas && ta !== tb) return ta - tb;
       if (aHas && !bHas) return -1;
       if (!aHas && bHas) return 1;
+      const pa = kanbanPositionSortKey(a.board_position);
+      const pb = kanbanPositionSortKey(b.board_position);
+      if (pa !== pb) return pa - pb;
       const ca = a.created_at ? new Date(String(a.created_at)).getTime() : 0;
       const cb = b.created_at ? new Date(String(b.created_at)).getTime() : 0;
       return cb - ca;
@@ -1636,6 +1668,21 @@ export default function AdminDashboardPage() {
     setCreateTicketError(null);
   }, []);
 
+  const resetCreateAuftragForm = useCallback(() => {
+    setCreateAuftragMieterName("");
+    setCreateAuftragEmail("");
+    setCreateAuftragTelefon("");
+    setCreateAuftragAdresse("");
+    setCreateAuftragAufgabe("");
+    setCreateAuftragNr("");
+    setCreateAuftragGewerk("");
+    setCreateAuftragRechnungsempfaenger("");
+    setCreateAuftragLeistungsempfaenger("");
+    setCreateAuftragPdfFile(null);
+    setCreateAuftragError(null);
+    if (createAuftragPdfInputRef.current) createAuftragPdfInputRef.current.value = "";
+  }, []);
+
   const handleCreateTicket = useCallback(async () => {
     const kunde_name = createTicketIsPartner
       ? (createTicketPartnerName.trim() || createTicketKundeName.trim() || null)
@@ -1663,7 +1710,13 @@ export default function AdminDashboardPage() {
       const position =
         tickets.length === 0
           ? 10
-          : Math.max(10, ...tickets.map((t) => (typeof t.position === "number" ? t.position : 0))) + 10;
+          : Math.max(
+              10,
+              ...tickets.map((t) => {
+                const k = kanbanPositionSortKey(t.position);
+                return k === Number.MAX_SAFE_INTEGER ? 0 : k;
+              })
+            ) + 10;
       const gewerkValue: string[] | null = createTicketGewerk.trim()
         ? [createTicketGewerk.trim()]
         : null;
@@ -1743,6 +1796,130 @@ export default function AdminDashboardPage() {
     resetCreateTicketForm,
   ]);
 
+  const handleCreateAuftrag = useCallback(async () => {
+    const mieter_name = createAuftragMieterName.trim();
+    const mieter_email = createAuftragEmail.trim();
+    const adresse_strasse = createAuftragAdresse.trim();
+    const auftragsnummer = createAuftragNr.trim();
+
+    if (!mieter_name) {
+      setCreateAuftragError("Name (Mieter/Kunde) ist erforderlich.");
+      return;
+    }
+    if (!adresse_strasse) {
+      setCreateAuftragError("Objektadresse ist erforderlich.");
+      return;
+    }
+    if (!auftragsnummer) {
+      setCreateAuftragError("Auftragsnummer ist erforderlich.");
+      return;
+    }
+    const pdfFile = createAuftragPdfFile;
+    if (!pdfFile) {
+      setCreateAuftragError("Bitte die Auftrags-PDF auswählen.");
+      return;
+    }
+    const looksPdf =
+      pdfFile.type === "application/pdf" || pdfFile.name.toLowerCase().endsWith(".pdf");
+    if (!looksPdf) {
+      setCreateAuftragError("Bitte eine PDF-Datei wählen.");
+      return;
+    }
+
+    setCreateAuftragSubmitting(true);
+    setCreateAuftragError(null);
+
+    try {
+      const res = await authFetch("/api/admin/auftraege", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mieter_name,
+          mieter_email: mieter_email || null,
+          mieter_telefon: createAuftragTelefon.trim() || null,
+          adresse_strasse,
+          aufgabe: createAuftragAufgabe.trim() || null,
+          auftragsnummer,
+          gewerk: createAuftragGewerk.trim() || null,
+          rechnungsempfaenger: createAuftragRechnungsempfaenger.trim() || null,
+          leistungsempfaenger: createAuftragLeistungsempfaenger.trim() || null,
+        }),
+      });
+      const json = (await res.json()) as HandwerkerAuftrag | { error?: string };
+      if (!res.ok) {
+        setCreateAuftragError(typeof json === "object" && json && "error" in json ? String(json.error) : "Anlegen fehlgeschlagen");
+        return;
+      }
+      if (!("id" in json) || !json.id) {
+        setCreateAuftragError("Antwort ohne Auftrags-ID.");
+        return;
+      }
+      const newId = json.id;
+      const path = `auftraege/docs/${newId}_${Date.now()}.pdf`;
+      const { error: upErr } = await supabase.storage.from(BUCKET_TICKET_IMAGES).upload(path, pdfFile, {
+        cacheControl: "3600",
+        upsert: true,
+        contentType: "application/pdf",
+      });
+      if (upErr) {
+        setCreateAuftragError(
+          `Auftrag wurde angelegt, PDF-Upload fehlgeschlagen: ${upErr.message}. Bitte PDF im Auftrags-Dialog nachladen.`
+        );
+        setAuftraegeBoard((prev) => [json as HandwerkerAuftrag, ...prev]);
+        setCreateAuftragOpen(false);
+        resetCreateAuftragForm();
+        void loadTickets(true);
+        return;
+      }
+      const { data: urlData } = supabase.storage.from(BUCKET_TICKET_IMAGES).getPublicUrl(path);
+      const publicUrl = urlData.publicUrl;
+      const docRes = await authFetch(`/api/admin/auftraege/${encodeURIComponent(newId)}/doc-url`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: publicUrl }),
+      });
+      const docJson = (await docRes.json()) as {
+        angebot_rechnung_urls?: string[];
+        anhang_url?: string | null;
+        error?: string;
+      };
+      const merged: HandwerkerAuftrag = {
+        ...(json as HandwerkerAuftrag),
+        angebot_rechnung_urls: Array.isArray(docJson.angebot_rechnung_urls)
+          ? docJson.angebot_rechnung_urls
+          : [publicUrl],
+        anhang_url: (docJson.anhang_url ?? publicUrl) as string | null,
+      };
+      setAuftraegeBoard((prev) => [merged, ...prev]);
+      void loadTickets(true);
+      if (!docRes.ok) {
+        setCreateAuftragError(
+          `Auftrag und PDF-Upload OK, Speichern der URL fehlgeschlagen: ${docJson.error ?? docRes.statusText}. Bitte im Auftrag prüfen.`
+        );
+        setCreateAuftragSubmitting(false);
+        return;
+      }
+      setCreateAuftragOpen(false);
+      resetCreateAuftragForm();
+    } catch (e) {
+      setCreateAuftragError(e instanceof Error ? e.message : "Unbekannter Fehler");
+    } finally {
+      setCreateAuftragSubmitting(false);
+    }
+  }, [
+    createAuftragMieterName,
+    createAuftragEmail,
+    createAuftragTelefon,
+    createAuftragAdresse,
+    createAuftragAufgabe,
+    createAuftragNr,
+    createAuftragGewerk,
+    createAuftragRechnungsempfaenger,
+    createAuftragLeistungsempfaenger,
+    createAuftragPdfFile,
+    resetCreateAuftragForm,
+  ]);
+
   /** ISO-Datum zu datetime-local Wert (YYYY-MM-DDTHH:mm). */
   const toDateTimeLocal = (iso: string | null): string => {
     if (!iso) return "";
@@ -1774,6 +1951,7 @@ export default function AdminDashboardPage() {
     setDetailAdresse(ticket?.objekt_adresse ?? "");
     setDetailBeschreibung(ticket?.beschreibung ?? "");
     setDetailAuftragDocs([]);
+    setDetailAuftragAnhangUrl(null);
   };
 
   const handleHandwerkerAuftragPatch = useCallback((auftragId: string, patch: Partial<HandwerkerAuftrag>) => {
@@ -1840,18 +2018,33 @@ export default function AdminDashboardPage() {
     const auftragId = detailTicket?.additional_data?.auftrag_id;
     if (!auftragId) {
       setDetailAuftragDocs([]);
+      setDetailAuftragAnhangUrl(null);
       return;
     }
     (async () => {
       const { data } = await supabase
         .from("auftraege")
-        .select("angebot_rechnung_urls")
+        .select("angebot_rechnung_urls, anhang_url")
         .eq("id", auftragId)
         .single();
-      const urls = (data as { angebot_rechnung_urls?: string[] } | null)?.angebot_rechnung_urls;
+      const row = data as { angebot_rechnung_urls?: string[]; anhang_url?: string | null } | null;
+      const urls = row?.angebot_rechnung_urls;
       setDetailAuftragDocs(Array.isArray(urls) ? urls : []);
+      const ah = row?.anhang_url;
+      setDetailAuftragAnhangUrl(typeof ah === "string" && ah.trim() !== "" ? ah.trim() : null);
     })();
   }, [detailTicket?.id, detailTicket?.additional_data?.auftrag_id]);
+
+  /** Liste „Weitere Dateien“ ohne das Haupt-PDF (gleiche URL wie Auftrag-PDF / anhang_url). */
+  const detailAuftragWeitereDateien = useMemo(() => {
+    const primary = primaryAuftragAnhangUrl({
+      anhang_url: detailAuftragAnhangUrl,
+      angebot_rechnung_urls: detailAuftragDocs,
+    });
+    if (!primary) return detailAuftragDocs;
+    const p = primary.trim();
+    return detailAuftragDocs.filter((u) => (u ?? "").trim() !== p);
+  }, [detailAuftragDocs, detailAuftragAnhangUrl]);
 
   const closeDetailModal = () => {
     if (detailTicket) {
@@ -1882,6 +2075,7 @@ export default function AdminDashboardPage() {
     setDetailBeschreibung("");
     setDetailKundenEditMode(false);
     setDetailAuftragDocs([]);
+    setDetailAuftragAnhangUrl(null);
   };
 
   /** Kunden-Daten speichern (auf Kassette-Klick) und Bearbeitungsmodus beenden. */
@@ -2097,8 +2291,6 @@ export default function AdminDashboardPage() {
     [tickets, detailTicket?.id]
   );
 
-  const BUCKET_TICKET_IMAGES = "ticket-images";
-
   const handleDownloadImage = async (url: string, fallbackName: string) => {
     try {
       const response = await fetch(url);
@@ -2239,8 +2431,12 @@ export default function AdminDashboardPage() {
     setUploadingImage(false);
   };
 
-  /** SPM-Auftrag: Dateien (PDF, Bilder, …) in auftraege.angebot_rechnung_urls speichern. */
-  const uploadAuftragDoc = async (auftragId: string, file: File) => {
+  /** SPM-Auftrag: Dateien (PDF, Bilder, …) in auftraege.angebot_rechnung_urls speichern (neueste URL zuerst). */
+  const uploadAuftragDoc = async (
+    auftragId: string,
+    file: File,
+    currentUrlsOverride?: string[]
+  ): Promise<string[] | null> => {
     setUploadingAuftragDoc(true);
     setError(null);
     try {
@@ -2248,12 +2444,12 @@ export default function AdminDashboardPage() {
       if (authError || !authData?.user) {
         setError("Nicht eingeloggt");
         setUploadingAuftragDoc(false);
-        return;
+        return null;
       }
       if (!file || !(file instanceof Blob)) {
         setError("Ungültige Datei");
         setUploadingAuftragDoc(false);
-        return;
+        return null;
       }
       const isImage = file.type.startsWith("image/");
       const body: Blob = isImage ? await compressImageForUpload(file) : file;
@@ -2272,26 +2468,49 @@ export default function AdminDashboardPage() {
       if (uploadError) {
         setError(uploadError.message);
         setUploadingAuftragDoc(false);
-        return;
+        return null;
       }
       const { data: urlData } = supabase.storage.from(BUCKET_TICKET_IMAGES).getPublicUrl(path);
       const publicUrl = urlData.publicUrl;
-      const current = [...detailAuftragDocs];
-      const newUrls = [...current, publicUrl];
+      const current = [...(currentUrlsOverride ?? detailAuftragDocs)];
+      const newUrls = [publicUrl, ...current];
+      const { data: existingRow } = await supabase
+        .from("auftraege")
+        .select("anhang_url")
+        .eq("id", auftragId)
+        .maybeSingle();
+      const hasAnhang =
+        String((existingRow as { anhang_url?: string | null } | null)?.anhang_url ?? "").trim() !== "";
+      const anhangPatch: { anhang_url?: string } = {};
+      if (!isImage && !hasAnhang) {
+        anhangPatch.anhang_url = publicUrl;
+      }
       const { error: updateError } = await supabase
         .from("auftraege")
-        .update({ angebot_rechnung_urls: newUrls })
+        .update({ angebot_rechnung_urls: newUrls, ...anhangPatch })
         .eq("id", auftragId);
       if (updateError) {
         setError(updateError.message);
         setUploadingAuftragDoc(false);
-        return;
+        return null;
       }
       setDetailAuftragDocs(newUrls);
+      if (anhangPatch.anhang_url) setDetailAuftragAnhangUrl(anhangPatch.anhang_url);
+      setAuftraegeBoard((prev) =>
+        prev.map((a) =>
+          a.id === auftragId ? { ...a, angebot_rechnung_urls: newUrls, ...anhangPatch } : a
+        )
+      );
+      setHandwerkerAuftragDetail((prev) =>
+        prev?.id === auftragId ? { ...prev, angebot_rechnung_urls: newUrls, ...anhangPatch } : prev
+      );
+      setUploadingAuftragDoc(false);
+      return newUrls;
     } catch (e) {
       setError(e instanceof Error ? e.message : "Upload fehlgeschlagen");
     }
     setUploadingAuftragDoc(false);
+    return null;
   };
 
   const handleConfirmRejection = async () => {
@@ -2608,9 +2827,10 @@ export default function AdminDashboardPage() {
           payload.position = 10;
         } else {
           const minPos = Math.min(
-            ...targetTickets.map((t) =>
-              typeof t.position === "number" ? t.position : 10
-            )
+            ...targetTickets.map((t) => {
+              const k = kanbanPositionSortKey(t.position);
+              return k === Number.MAX_SAFE_INTEGER ? 10 : k;
+            })
           );
           payload.position = minPos - 10;
         }
@@ -4557,10 +4777,8 @@ export default function AdminDashboardPage() {
                   (mobileBoardTab === "eingang" || mobileBoardTab === "angebote") && (
                     <button
                       type="button"
-                      onClick={() => {
-                        setCreateTicketOpen(true);
-                        resetCreateTicketForm();
-                      }}
+                      onClick={() => setCreateChooserOpen(true)}
+                      title="Ticket oder SPM-Auftrag anlegen"
                       className={`inline-flex min-h-[3rem] w-full touch-manipulation items-center justify-center gap-2 rounded-full border px-4 py-3.5 text-base font-semibold shadow-md transition-all active:scale-[0.99] sm:min-h-12 sm:py-3 sm:text-sm ${
                         isLightTheme
                           ? "border-blue-700 bg-blue-600 text-white hover:bg-blue-700"
@@ -4568,7 +4786,7 @@ export default function AdminDashboardPage() {
                       }`}
                     >
                       <Plus className="h-5 w-5 shrink-0" strokeWidth={2.5} />
-                      Ticket erstellen
+                      Neu anlegen
                     </button>
                   )}
                 {!isGewerkUser && (
@@ -4746,10 +4964,8 @@ export default function AdminDashboardPage() {
                 {!isGewerkUser && (
                   <button
                     type="button"
-                    onClick={() => {
-                      setCreateTicketOpen(true);
-                      resetCreateTicketForm();
-                    }}
+                    onClick={() => setCreateChooserOpen(true)}
+                    title="Ticket oder SPM-Auftrag anlegen"
                     className={`shrink-0 w-full inline-flex min-h-11 items-center justify-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold shadow-sm transition-all active:scale-[0.99] hover:opacity-95 ${
                       isLightTheme
                         ? "border-blue-700 bg-blue-600 text-white hover:bg-blue-700"
@@ -4757,7 +4973,7 @@ export default function AdminDashboardPage() {
                     }`}
                   >
                     <Plus className="h-4 w-4 shrink-0" strokeWidth={2.5} />
-                    Ticket erstellen
+                    Neu anlegen
                   </button>
                 )}
               <aside
@@ -5380,8 +5596,69 @@ export default function AdminDashboardPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Create-Ticket-Dialog: nur Admin */}
+      {/* Neu anlegen: Auswahl + Ticket-Dialog + SPM-Auftrag-Dialog (nur Admin) */}
       {!isGewerkUser && (
+        <>
+          <Dialog open={createChooserOpen} onOpenChange={setCreateChooserOpen}>
+            <DialogContent
+              className={cn(
+                "max-w-[calc(100vw-2rem)] sm:max-w-lg",
+                isLightTheme
+                  ? "border-slate-200 bg-white text-slate-900"
+                  : "border-slate-700 bg-slate-900 text-slate-100"
+              )}
+            >
+              <DialogHeader>
+                <DialogTitle className={isLightTheme ? "text-slate-900" : "text-slate-100"}>Neu anlegen</DialogTitle>
+                <DialogDescription className={isLightTheme ? "text-slate-600" : "text-slate-400"}>
+                  Ticket für eine klassische Anfrage-Karte – oder SPM-Auftrag ohne Ticket (z. B. wenn die Automatisierung nicht gelaufen ist).
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-3 pt-2 sm:grid-cols-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    resetCreateTicketForm();
+                    setCreateChooserOpen(false);
+                    setCreateTicketOpen(true);
+                  }}
+                  className={cn(
+                    "flex min-h-[4.5rem] touch-manipulation flex-col items-start gap-1 rounded-xl border p-4 text-left text-sm font-semibold transition-colors sm:min-h-0",
+                    isLightTheme
+                      ? "border-slate-200 bg-slate-50 hover:border-blue-300 hover:bg-blue-50/80"
+                      : "border-slate-600 bg-slate-800/60 hover:border-blue-500/50 hover:bg-slate-800"
+                  )}
+                >
+                  <span className="flex items-center gap-2 text-base">
+                    <FileText className="h-5 w-5 shrink-0 text-blue-600 dark:text-blue-400" strokeWidth={2} />
+                    Ticket
+                  </span>
+                  <span className="text-xs font-normal opacity-80">Erscheint im Eingang wie eine normale Anfrage.</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    resetCreateAuftragForm();
+                    setCreateChooserOpen(false);
+                    setCreateAuftragOpen(true);
+                  }}
+                  className={cn(
+                    "flex min-h-[4.5rem] touch-manipulation flex-col items-start gap-1 rounded-xl border p-4 text-left text-sm font-semibold transition-colors sm:min-h-0",
+                    isLightTheme
+                      ? "border-slate-200 bg-slate-50 hover:border-emerald-300 hover:bg-emerald-50/80"
+                      : "border-slate-600 bg-slate-800/60 hover:border-emerald-500/50 hover:bg-slate-800"
+                  )}
+                >
+                  <span className="flex items-center gap-2 text-base">
+                    <Building className="h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" strokeWidth={2} />
+                    Auftrag (SPM)
+                  </span>
+                  <span className="text-xs font-normal opacity-80">Nur Auftrag im Board, ohne verknüpftes Ticket.</span>
+                </button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
         <Dialog
           open={createTicketOpen}
           onOpenChange={(open) => {
@@ -5562,6 +5839,273 @@ export default function AdminDashboardPage() {
             </form>
           </DialogContent>
         </Dialog>
+
+        <Dialog
+          open={createAuftragOpen}
+          onOpenChange={(open) => {
+            if (!open) {
+              setCreateAuftragOpen(false);
+              resetCreateAuftragForm();
+            }
+          }}
+        >
+          <DialogContent
+            className={cn(
+              "flex flex-col gap-0 overflow-hidden p-0",
+              "max-sm:bottom-0 max-sm:left-0 max-sm:right-0 max-sm:top-0 max-sm:h-[100dvh] max-sm:max-h-[100dvh] max-sm:w-full max-sm:max-w-none max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-none max-sm:border-0 max-sm:shadow-none",
+              "sm:left-1/2 sm:top-1/2 sm:h-auto sm:max-h-[min(92dvh,720px)] sm:w-full sm:max-w-md sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-lg sm:border sm:shadow-lg",
+              isLightTheme
+                ? "border-slate-200 bg-white text-slate-900 max-sm:bg-white"
+                : "border-slate-700 bg-slate-900 text-slate-100 max-sm:bg-slate-900"
+            )}
+          >
+            <div
+              className={cn(
+                "shrink-0 border-b px-4 pb-3 pr-14 text-left sm:px-6 sm:pr-16",
+                "pt-[max(1.25rem,calc(0.75rem+env(safe-area-inset-top)))] sm:pt-5",
+                isLightTheme ? "border-slate-200/90" : "border-slate-700/80"
+              )}
+            >
+              <DialogHeader className="text-left">
+                <DialogTitle
+                  className={cn(
+                    "text-lg font-semibold leading-snug tracking-tight sm:text-xl",
+                    isLightTheme ? "text-slate-900" : "text-slate-100"
+                  )}
+                >
+                  SPM-Auftrag anlegen
+                </DialogTitle>
+              </DialogHeader>
+            </div>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                void handleCreateAuftrag();
+              }}
+              className="flex min-h-0 flex-1 flex-col overflow-hidden"
+            >
+              <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6">
+                {createAuftragError && (
+                  <div
+                    className={`rounded-md border border-red-500/50 p-2 text-sm ${isLightTheme ? "bg-red-50 text-red-800" : "bg-red-950/40 text-red-200"}`}
+                  >
+                    {createAuftragError}
+                  </div>
+                )}
+                <div className="space-y-2">
+                  <Label htmlFor="create-auf-mieter" className={isLightTheme ? "text-slate-700" : "text-slate-300"}>
+                    Mieter / Kundenname *
+                  </Label>
+                  <Input
+                    id="create-auf-mieter"
+                    value={createAuftragMieterName}
+                    onChange={(e) => setCreateAuftragMieterName(e.target.value)}
+                    placeholder="Max Mustermann"
+                    required
+                    className={
+                      isLightTheme
+                        ? "border-slate-200 bg-white text-slate-900 placeholder:text-slate-500"
+                        : "border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="create-auf-email" className={isLightTheme ? "text-slate-700" : "text-slate-300"}>
+                    E-Mail (optional)
+                  </Label>
+                  <Input
+                    id="create-auf-email"
+                    type="email"
+                    value={createAuftragEmail}
+                    onChange={(e) => setCreateAuftragEmail(e.target.value)}
+                    placeholder="falls vorhanden"
+                    className={
+                      isLightTheme
+                        ? "border-slate-200 bg-white text-slate-900 placeholder:text-slate-500"
+                        : "border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="create-auf-tel" className={isLightTheme ? "text-slate-700" : "text-slate-300"}>
+                    Telefon (optional)
+                  </Label>
+                  <Input
+                    id="create-auf-tel"
+                    type="tel"
+                    value={createAuftragTelefon}
+                    onChange={(e) => setCreateAuftragTelefon(e.target.value)}
+                    placeholder="+49 89 …"
+                    className={
+                      isLightTheme
+                        ? "border-slate-200 bg-white text-slate-900 placeholder:text-slate-500"
+                        : "border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="create-auf-adr" className={isLightTheme ? "text-slate-700" : "text-slate-300"}>
+                    Objektadresse *
+                  </Label>
+                  <Input
+                    id="create-auf-adr"
+                    value={createAuftragAdresse}
+                    onChange={(e) => setCreateAuftragAdresse(e.target.value)}
+                    placeholder="Musterstraße 42, 80331 München"
+                    required
+                    className={
+                      isLightTheme
+                        ? "border-slate-200 bg-white text-slate-900 placeholder:text-slate-500"
+                        : "border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="create-auf-aufgabe" className={isLightTheme ? "text-slate-700" : "text-slate-300"}>
+                    Aufgabe / Kurzbeschreibung (optional)
+                  </Label>
+                  <Textarea
+                    id="create-auf-aufgabe"
+                    value={createAuftragAufgabe}
+                    onChange={(e) => setCreateAuftragAufgabe(e.target.value)}
+                    placeholder="z. B. Wasserschaden Bad"
+                    rows={3}
+                    className={`resize-none ${isLightTheme ? "border-slate-200 bg-white text-slate-900 placeholder:text-slate-500" : "border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"}`}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="create-auf-rechnung" className={isLightTheme ? "text-slate-700" : "text-slate-300"}>
+                    Rechnungsempfänger (optional)
+                  </Label>
+                  <Textarea
+                    id="create-auf-rechnung"
+                    value={createAuftragRechnungsempfaenger}
+                    onChange={(e) => setCreateAuftragRechnungsempfaenger(e.target.value)}
+                    placeholder="Firma oder Person, an die die Rechnung geht"
+                    rows={2}
+                    className={`resize-none ${isLightTheme ? "border-slate-200 bg-white text-slate-900 placeholder:text-slate-500" : "border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"}`}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="create-auf-leistung" className={isLightTheme ? "text-slate-700" : "text-slate-300"}>
+                    Leistungsempfänger (optional)
+                  </Label>
+                  <Textarea
+                    id="create-auf-leistung"
+                    value={createAuftragLeistungsempfaenger}
+                    onChange={(e) => setCreateAuftragLeistungsempfaenger(e.target.value)}
+                    placeholder="Firma oder Person, für die die Leistung erbracht wird (falls abweichend)"
+                    rows={2}
+                    className={`resize-none ${isLightTheme ? "border-slate-200 bg-white text-slate-900 placeholder:text-slate-500" : "border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"}`}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="create-auf-nr" className={isLightTheme ? "text-slate-700" : "text-slate-300"}>
+                    Auftragsnummer *
+                  </Label>
+                  <Input
+                    id="create-auf-nr"
+                    value={createAuftragNr}
+                    onChange={(e) => setCreateAuftragNr(e.target.value)}
+                    placeholder="z. B. aus ERP oder Vermieter"
+                    required
+                    className={
+                      isLightTheme
+                        ? "border-slate-200 bg-white text-slate-900 placeholder:text-slate-500"
+                        : "border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="create-auf-pdf" className={isLightTheme ? "text-slate-700" : "text-slate-300"}>
+                    Auftrags-PDF *
+                  </Label>
+                  <Input
+                    ref={createAuftragPdfInputRef}
+                    id="create-auf-pdf"
+                    type="file"
+                    accept="application/pdf,.pdf"
+                    className={cn(
+                      /* h-10 der Basis-Input schneidet file-Button ab → auto/min-h + symmetrisches Padding */
+                      "h-auto min-h-[3.25rem] cursor-pointer py-3 pl-3 pr-2 text-sm leading-normal file:mr-3 file:inline-flex file:h-9 file:shrink-0 file:cursor-pointer file:items-center file:rounded-lg file:border-0 file:px-4 file:py-2 file:text-sm file:font-medium file:leading-none",
+                      isLightTheme
+                        ? "border-slate-200 bg-white text-slate-900 file:bg-slate-100 file:text-slate-800"
+                        : "border-slate-600 bg-slate-800 text-slate-100 file:bg-slate-700 file:text-slate-100"
+                    )}
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      setCreateAuftragPdfFile(f ?? null);
+                    }}
+                  />
+                  <p className={`text-xs ${isLightTheme ? "text-slate-500" : "text-slate-400"}`}>
+                    Wird in Supabase Storage abgelegt und mit dem Auftrag verknüpft (wie im Auftrags-Dialog).
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="create-auf-gewerk" className={isLightTheme ? "text-slate-700" : "text-slate-300"}>
+                    Gewerk (optional)
+                  </Label>
+                  <Select value={createAuftragGewerk || "_none"} onValueChange={(v) => setCreateAuftragGewerk(v === "_none" ? "" : v)}>
+                    <SelectTrigger
+                      id="create-auf-gewerk"
+                      className={
+                        isLightTheme ? "border-slate-200 bg-white text-slate-900" : "border-slate-600 bg-slate-800 text-slate-100"
+                      }
+                    >
+                      <SelectValue placeholder="Auswählen…" />
+                    </SelectTrigger>
+                    <SelectContent
+                      className={isLightTheme ? "border-slate-200 bg-white" : "border-slate-700 bg-slate-900"}
+                    >
+                      <SelectItem value="_none" className={isLightTheme ? "text-slate-600" : "text-slate-400"}>
+                        – Keins –
+                      </SelectItem>
+                      {GEWERKE_OPTIONS.map((opt) => (
+                        <SelectItem
+                          key={opt.value}
+                          value={opt.value}
+                          className={isLightTheme ? "text-slate-900" : "text-slate-100"}
+                        >
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <DialogFooter
+                className={cn(
+                  "shrink-0 gap-2 border-t px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:gap-0 sm:px-6 sm:pb-3",
+                  isLightTheme ? "border-slate-200/90 bg-slate-50/90" : "border-slate-700/80 bg-slate-900/95"
+                )}
+              >
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setCreateAuftragOpen(false);
+                    resetCreateAuftragForm();
+                  }}
+                  className={
+                    isLightTheme
+                      ? "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                      : "border-slate-600 bg-slate-800 text-slate-200 hover:bg-slate-700"
+                  }
+                >
+                  Abbrechen
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={createAuftragSubmitting}
+                  className="bg-emerald-600 text-white hover:bg-emerald-700"
+                >
+                  {createAuftragSubmitting ? "Wird angelegt…" : "Auftrag anlegen"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+        </>
       )}
 
       <Dialog open={!!rejectionTicket} onOpenChange={(open) => !open && closeRejectionModal()}>
@@ -6418,8 +6962,10 @@ export default function AdminDashboardPage() {
                             const files = e.target.files;
                             const aid = detailTicket?.additional_data?.auftrag_id;
                             if (!files?.length || !aid) return;
+                            let urls = [...detailAuftragDocs];
                             for (let i = 0; i < files.length; i++) {
-                              await uploadAuftragDoc(aid, files[i]!);
+                              const next = await uploadAuftragDoc(aid, files[i]!, urls);
+                              if (next) urls = next;
                             }
                             e.target.value = "";
                           }}
@@ -6429,9 +6975,9 @@ export default function AdminDashboardPage() {
                           {uploadingAuftragDoc ? "Wird hochgeladen …" : "Dateien auswählen"}
                         </span>
                       </label>
-                      {detailAuftragDocs.length > 0 && (
+                      {detailAuftragWeitereDateien.length > 0 && (
                         <div className="space-y-1">
-                          {detailAuftragDocs.map((url, idx) => (
+                          {detailAuftragWeitereDateien.map((url, idx) => (
                             <a
                               key={`${url}-${idx}`}
                               href={url}

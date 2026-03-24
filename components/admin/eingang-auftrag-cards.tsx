@@ -17,6 +17,7 @@ import { TERMIN_TYP } from "@/src/config/businessConfig";
 import { parseTerminVergangen } from "@/lib/auftraege/termin-vergangen";
 import { formatGewerkTerminKurz } from "@/lib/auftraege/gewerk-termin-kurzformat";
 import { isTerminGeradeAktiv } from "@/lib/auftraege/gewerk-auftraege-split";
+import { primaryAuftragAnhangUrl } from "@/lib/auftraege/primary-auftrag-anhang-url";
 
 function normalizeGewerke(value: string[] | string | null | undefined): string[] {
   if (Array.isArray(value)) {
@@ -170,6 +171,7 @@ export function AuftragEingangVolleKarteView({
   const boardSt = (auftrag.board_status ?? "").trim();
   const title = isLightTheme ? "text-slate-900" : "text-slate-100";
   const sub = isLightTheme ? "text-slate-500" : "text-slate-400";
+  const primaryPdf = primaryAuftragAnhangUrl(auftrag);
 
   return (
     <div
@@ -263,9 +265,9 @@ export function AuftragEingangVolleKarteView({
         </div>
       </div>
       <div className="flex shrink-0 flex-col items-end justify-between gap-2">
-        {auftrag.anhang_url ? (
+        {primaryPdf ? (
           <a
-            href={auftrag.anhang_url}
+            href={primaryPdf}
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}

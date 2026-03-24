@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { Logo } from "@/components/Logo";
+import { primaryAuftragAnhangUrl } from "@/lib/auftraege/primary-auftrag-anhang-url";
 
 type Kommentar = { id: string; text: string; author: string; timestamp: string };
 
@@ -95,10 +96,17 @@ export default function AuftragPage() {
         if (auftragId) {
           const { data: auftrag } = await supabase
             .from("auftraege")
-            .select("anhang_url")
+            .select("anhang_url, angebot_rechnung_urls")
             .eq("id", auftragId)
             .single();
-          setAnhangUrl((auftrag as { anhang_url?: string } | null)?.anhang_url ?? null);
+          setAnhangUrl(
+            primaryAuftragAnhangUrl(
+              (auftrag ?? {}) as {
+                anhang_url?: string | null;
+                angebot_rechnung_urls?: string[] | null;
+              }
+            )
+          );
         } else {
           setAnhangUrl(null);
         }

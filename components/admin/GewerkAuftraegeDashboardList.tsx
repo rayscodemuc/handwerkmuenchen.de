@@ -20,6 +20,7 @@ import { TERMIN_TYP } from "@/src/config/businessConfig";
 import { parseTerminVergangen } from "@/lib/auftraege/termin-vergangen";
 import { splitAuftraegeKommendeUndWeitere, isTerminGeradeAktiv } from "@/lib/auftraege/gewerk-auftraege-split";
 import { formatGewerkTerminKurz } from "@/lib/auftraege/gewerk-termin-kurzformat";
+import { primaryAuftragAnhangUrl } from "@/lib/auftraege/primary-auftrag-anhang-url";
 
 function normalizeGewerke(value: string[] | string | null | undefined): string[] {
   if (Array.isArray(value)) {
@@ -113,6 +114,7 @@ function GewerkAuftragVolleKarte({ auftrag, isLightTheme, card, title, sub, onSe
     ? formatTerminRange(letzteBesichtigung.termin_start, letzteBesichtigung.termin_ende)
     : null;
   const boardSt = (auftrag.board_status ?? "").trim();
+  const primaryPdf = primaryAuftragAnhangUrl(auftrag);
 
   return (
     <article
@@ -206,9 +208,9 @@ function GewerkAuftragVolleKarte({ auftrag, isLightTheme, card, title, sub, onSe
         </div>
       </div>
       <div className="flex shrink-0 flex-col items-end justify-between gap-2">
-        {auftrag.anhang_url ? (
+        {primaryPdf ? (
           <a
-            href={auftrag.anhang_url}
+            href={primaryPdf}
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
@@ -327,7 +329,7 @@ export function GewerkAuftraegeDashboardList({
   const narrow = useNarrowGewerkLayout();
   const { kommende, weitere } = useMemo(() => splitAuftraegeKommendeUndWeitere(auftraege), [auftraege]);
 
-  const [mobileSeg, setMobileSeg] = useState<"termine" | "weitere">("termine");
+  const [mobileSeg, setMobileSeg] = useState<"termine" | "weitere">("weitere");
   useEffect(() => {
     if (kommende.length === 0) setMobileSeg("weitere");
   }, [kommende.length]);
@@ -383,10 +385,6 @@ export function GewerkAuftraegeDashboardList({
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
           <h2 className={`text-lg font-semibold ${title}`}>Meine Aufträge</h2>
-          <p className={`mt-1 max-w-xl text-xs leading-snug ${sub}`}>
-            Am Handy: links „Offene Aufträge“, rechts „Termine“. Größere Ansichten: zuerst offene Aufträge, darunter
-            kommende Termine kompakt nach Zeit.
-          </p>
         </div>
         <button
           type="button"
