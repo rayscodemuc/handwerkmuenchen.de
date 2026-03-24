@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { normalizeAuftragRow } from "@/lib/auftraege/billing-recipient-fields";
 import { filterAuftraegeRowsByRole } from "@/lib/auftraege/filter-auftraege-by-role";
+import { getBesichtigungAutoArchiveUpdate } from "@/lib/auftraege/termin-vergangen";
 import { getSessionUserFromRequest } from "@/lib/auth";
+import type { HandwerkerAuftrag } from "@/src/types/handwerker-auftrag";
 import { getSupabaseForApiRequest } from "@/lib/supabase/api-request-client";
 
 export const dynamic = "force-dynamic";
@@ -31,13 +33,27 @@ export async function GET(request: Request) {
       );
     }
 
-    const rows = filterAuftraegeRowsByRole(
-      (data ?? []).map((row) =>
-        normalizeAuftragRow(row as Record<string, unknown>)
-      ),
-      sessionUser.role
-    );
-    return NextResponse.json(rows);
+    let rows = (data ?? []).map((row) =>
+      normalizeAuftragRow(row as Record<string, unknown>)
+    ) as HandwerkerAuftrag[];
+
+    for (let i = 0; i < rows.length; i++) {
+      const spec = getBesichtigungAutoArchiveUpdate(rows[i]);
+      if (!spec) continue;
+      const { data: updated, error: upErr } = await supabase
+        .from("auftraege")
+        .update(spec.payload)
+        .eq("id", rows[i].id)
+        .eq("termin_start", spec.matchTerminStart)
+        .select("*")
+        .maybeSingle();
+      if (!upErr && updated) {
+        rows[i] = normalizeAuftragRow(updated as Record<string, unknown>) as HandwerkerAuftrag;
+      }
+    }
+
+    const filtered = filterAuftraegeRowsByRole(rows, sessionUser.role);
+    return NextResponse.json(filtered);
   } catch (err) {
     console.error("[API auftraege]", err);
     return NextResponse.json(

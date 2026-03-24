@@ -6,6 +6,14 @@ export type HandwerkerKommentar = {
   timestamp: string;
 };
 
+/** Eintrag in `auftraege.termin_vergangen` nach manuellem Ablegen einer abgeschlossenen Besichtigung. */
+export type VergangenerTerminEintrag = {
+  termin_start: string;
+  termin_ende: string | null;
+  termin_typ: string | null;
+  abgelegt_am: string;
+};
+
 export type HandwerkerAuftrag = {
   id: string;
   created_at?: string | null;
@@ -34,5 +42,7 @@ export type HandwerkerAuftrag = {
   termin_start?: string | null;
   termin_ende?: string | null;
   termin_typ?: string | null;
+  /** Chronologisch angehängte vergangene Termine (JSON in DB). */
+  termin_vergangen?: VergangenerTerminEintrag[] | null;
   [key: string]: unknown;
 };

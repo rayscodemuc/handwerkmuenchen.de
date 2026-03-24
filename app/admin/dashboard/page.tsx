@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
-import { Phone, Paintbrush, SprayCan, Building, Zap, Droplets, Hourglass, CheckCircle, X, ChevronLeft, ChevronRight, GripVertical, Trash2, MessageSquare, Send, Sun, Moon, CalendarIcon, Plus, FileText, Settings, LayoutDashboard, Users, LogOut, Pencil, Save, ClipboardList, Upload, Paperclip } from "lucide-react";
+import { Phone, Paintbrush, SprayCan, Building, Zap, Droplets, Hourglass, CheckCircle, X, ChevronLeft, ChevronRight, GripVertical, Trash2, MessageSquare, Send, Sun, Moon, CalendarIcon, Plus, FileText, Settings, LayoutDashboard, Users, LogOut, Pencil, Save, Upload, Paperclip } from "lucide-react";
 import { format, add, setHours, setMinutes, startOfWeek as startOfWeekDf } from "date-fns";
 import { de } from "date-fns/locale";
 import { DndContext, DragOverlay, useDraggable, useDroppable, closestCorners, pointerWithin, rectIntersection, MeasuringStrategy, PointerSensor, useSensor, useSensors, type DragEndEvent, type DragStartEvent, type DragOverEvent, type CollisionDetection } from "@dnd-kit/core";
@@ -40,6 +40,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { Logo } from "@/components/Logo";
 import { AuftragHandwerkerDetailDialog } from "@/components/admin/AuftragHandwerkerDetailDialog";
+import { GewerkAuftraegeDashboardList } from "@/components/admin/GewerkAuftraegeDashboardList";
 import { normalizeAuftragRow } from "@/lib/auftraege/billing-recipient-fields";
 import { filterAuftraegeRowsByRole } from "@/lib/auftraege/filter-auftraege-by-role";
 import { roleToGewerk } from "@/lib/auftraege/role-to-gewerk";
@@ -1049,7 +1050,7 @@ export default function AdminDashboardPage() {
   const [isMobileViewport, setIsMobileViewport] = useState(false);
   const desktopCalendarSectionRef = useRef<HTMLElement | null>(null);
 
-  /** SPM-Auftrag: gleiche Handwerker-Modalansicht wie auf /admin/dashboard/auftraege */
+  /** SPM-Auftrag: Handwerker-Detailmodal */
   const [handwerkerAuftragDetail, setHandwerkerAuftragDetail] = useState<HandwerkerAuftrag | null>(null);
   const [handwerkerAuftragLoading, setHandwerkerAuftragLoading] = useState(false);
   /** Board-Karte zum SPM-Auftrag (für Gewerk-Bearbeitung im Handwerker-Dialog). */
@@ -1086,9 +1087,33 @@ export default function AdminDashboardPage() {
   /** Aktuell angemeldeter Nutzer (vom Layout/Server). */
   const adminUser = useAdminUser();
   const showAuftragBilling = adminUser?.role === "admin";
-  /** Gewerk-Rollen: Board nur Ticket-Eingang + Kalender (keine Angebote-/Prozess-Spalten). */
+  /** Gewerk-Rollen: kompakte Auftragsliste statt Kanban (Admin behält volles Board). */
   const isGewerkUser = Boolean(adminUser?.role && adminUser.role !== "admin");
   const { toast } = useToast();
+
+  /** Gewerk-Ansicht: kommende Termine zuerst, sonst nach Eingang sortieren. */
+  const gewerkSortedAuftraege = useMemo(() => {
+    const list = [...auftraegeBoard];
+    const parseT = (s: string | null | undefined) => {
+      const t = (s ?? "").trim();
+      if (!t) return NaN;
+      const ms = new Date(t).getTime();
+      return Number.isNaN(ms) ? NaN : ms;
+    };
+    list.sort((a, b) => {
+      const ta = parseT(a.termin_start);
+      const tb = parseT(b.termin_start);
+      const aHas = !Number.isNaN(ta);
+      const bHas = !Number.isNaN(tb);
+      if (aHas && bHas && ta !== tb) return ta - tb;
+      if (aHas && !bHas) return -1;
+      if (!aHas && bHas) return 1;
+      const ca = a.created_at ? new Date(String(a.created_at)).getTime() : 0;
+      const cb = b.created_at ? new Date(String(b.created_at)).getTime() : 0;
+      return cb - ca;
+    });
+    return list;
+  }, [auftraegeBoard]);
 
   /** Auto-Historisierung: verhindert doppelte Inserts innerhalb einer Session. */
   const historizedBesichtigungKeysRef = useRef<Set<string>>(new Set());
@@ -4032,30 +4057,33 @@ export default function AdminDashboardPage() {
             </span>
           )}
           <div className="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2">
-          <button
-            type="button"
-            onClick={openCalendarFromHeader}
-            title="Kalender öffnen"
-            className={`inline-flex h-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-full border p-0 text-xs font-medium transition-all hover:opacity-90 active:scale-[0.98] ${
-              isLightTheme
-                ? "border-slate-200 bg-white text-slate-700 shadow-sm hover:border-slate-300"
-                : "border-slate-600 bg-slate-900/80 text-slate-100 hover:border-slate-500 hover:bg-slate-800/80"
-            }`}
-          >
-            <CalendarIcon className="h-5 w-5" strokeWidth={2} />
-          </button>
-          {isGewerkUser && (
-            <Link
-              href="/admin/dashboard/auftraege"
-              title="Aufträge"
+          {!isGewerkUser && (
+            <button
+              type="button"
+              onClick={openCalendarFromHeader}
+              title="Kalender öffnen"
               className={`inline-flex h-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-full border p-0 text-xs font-medium transition-all hover:opacity-90 active:scale-[0.98] ${
                 isLightTheme
                   ? "border-slate-200 bg-white text-slate-700 shadow-sm hover:border-slate-300"
                   : "border-slate-600 bg-slate-900/80 text-slate-100 hover:border-slate-500 hover:bg-slate-800/80"
               }`}
             >
-              <ClipboardList className="h-5 w-5 shrink-0" strokeWidth={2} />
-            </Link>
+              <CalendarIcon className="h-5 w-5" strokeWidth={2} />
+            </button>
+          )}
+          {isGewerkUser && (
+            <button
+              type="button"
+              onClick={toggleDashboardTheme}
+              title={isLightTheme ? "Dunkel" : "Hell"}
+              className={`inline-flex h-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-full border p-0 text-xs font-medium transition-all hover:opacity-90 active:scale-[0.98] ${
+                isLightTheme
+                  ? "border-slate-200 bg-white text-slate-700 shadow-sm hover:border-slate-300"
+                  : "border-slate-600 bg-slate-900/80 text-slate-100 hover:border-slate-500 hover:bg-slate-800/80"
+              }`}
+            >
+              {isLightTheme ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+            </button>
           )}
           {!isGewerkUser && (
             <>
@@ -4086,15 +4114,6 @@ export default function AdminDashboardPage() {
                     >
                       <LayoutDashboard className="h-4 w-4 shrink-0" />
                       Dashboard
-                    </Link>
-                    <Link
-                      href="/admin/dashboard/auftraege"
-                      className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                        isLightTheme ? "text-slate-700 hover:bg-slate-100" : "text-slate-300 hover:bg-slate-800 hover:text-slate-100"
-                      }`}
-                    >
-                      <ClipboardList className="h-4 w-4 shrink-0" />
-                      Aufträge
                     </Link>
                     <Link
                       href="/admin/benutzer"
@@ -4155,6 +4174,18 @@ export default function AdminDashboardPage() {
           onDragOver={handleDragOver}
           onDragMove={handleDragMove}
         >
+          {isGewerkUser ? (
+          <div className="mx-auto w-full max-w-3xl">
+            <GewerkAuftraegeDashboardList
+              auftraege={gewerkSortedAuftraege}
+              loading={loading}
+              isLightTheme={isLightTheme}
+              onRefresh={() => void loadTickets(true)}
+              onSelectAuftrag={openAuftragBoardDetail}
+            />
+          </div>
+          ) : (
+          <>
           {/* Mobile: Tabs Eingang | Kalender */}
           <div className="lg:hidden">
             <Tabs
@@ -4457,6 +4488,8 @@ export default function AdminDashboardPage() {
               </div>
             )}
           </div>
+          </>
+          )}
 
           <DragOverlay dropAnimation={null} modifiers={[snapCenterToCursor]}>
             {activeDragId?.startsWith("event-") ? (() => {
@@ -5744,7 +5777,7 @@ export default function AdminDashboardPage() {
                                 addKommentar();
                               }
                             }}
-                            placeholder="Kommentar schreiben … (Ctrl+Enter zum Senden)"
+                            placeholder="Kommentar schreiben"
                             className="flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                           />
                           <button
