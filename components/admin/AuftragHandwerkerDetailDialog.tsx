@@ -80,30 +80,36 @@ const GEWERK_TERMIN_DAUER_OPTIONEN: { minutes: number; label: string }[] = [
 
 const GEWERK_TERMIN_MINUTE_OPTIONS = ["00", "15", "30", "45"] as const;
 
+/** Gemeinsame Klassen für Vor/Zurück (react-day-picker v9: button_previous / button_next). */
+const GEWERK_TERMIN_NAV_BTN =
+  "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-700 active:bg-slate-200 touch-manipulation sm:h-8 sm:w-8 sm:text-slate-600 sm:z-10";
+
 /**
  * Kalender + Uhrzeit-Popover: Mobile zuerst größere Zellen (≥44px), ab sm kompakter wie Desktop.
+ * Klassen-Schlüssel für react-day-picker v9 (month_caption, nav, button_*, month_grid, …).
+ * Mobil: navLayout "after" → Monatstitel + Pfeile in einer Zeile, Pfeile rechts bündig.
  */
 const GEWERK_TERMIN_CAL_CLASSNAMES = {
   months: "flex w-full flex-col space-y-3 sm:space-y-4",
-  month: "w-full space-y-3 sm:space-y-4",
-  caption: "flex justify-center pt-1 relative items-center min-h-11 sm:min-h-0",
-  nav_button_previous: "absolute left-0 sm:left-1",
-  nav_button_next: "absolute right-0 sm:right-1",
-  table: "w-full border-collapse space-y-1",
-  head_row: "flex w-full justify-between px-0.5",
-  row: "flex w-full mt-1.5 justify-between px-0.5 sm:mt-2",
-  cell: "flex h-11 w-11 shrink-0 items-center justify-center p-0 text-center text-sm sm:h-9 sm:w-9",
-  day_selected: "bg-blue-600 text-white hover:bg-blue-600 hover:text-white",
-  day_hidden: "invisible",
-  caption_label: "text-base font-semibold text-slate-800 sm:text-sm sm:font-medium sm:text-slate-700",
-  head_cell:
-    "flex h-8 w-11 items-center justify-center text-[11px] font-medium uppercase tracking-wide text-slate-500 sm:w-9 sm:text-xs sm:normal-case sm:tracking-normal",
-  nav_button:
-    "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-700 active:bg-slate-200 sm:h-8 sm:w-8 sm:text-slate-600 touch-manipulation",
-  day: "h-11 w-11 min-h-[44px] min-w-[44px] p-0 text-[15px] font-medium leading-none rounded-xl text-slate-800 hover:bg-slate-100 aria-selected:opacity-100 sm:h-9 sm:w-9 sm:min-h-0 sm:min-w-0 sm:text-sm sm:font-normal sm:text-slate-700 touch-manipulation",
-  day_today: "bg-slate-200/90 text-slate-900 sm:bg-slate-200/80",
-  day_outside: "text-slate-400 opacity-50",
-  day_disabled: "text-slate-400 opacity-30",
+  month:
+    "relative w-full max-sm:grid max-sm:grid-cols-[minmax(0,1fr)_auto] max-sm:grid-rows-[auto_auto] max-sm:items-center max-sm:gap-x-2 max-sm:gap-y-3 sm:space-y-4",
+  month_caption:
+    "flex w-full items-center justify-center max-sm:col-start-1 max-sm:row-start-1 max-sm:min-h-11 sm:relative sm:min-h-0 sm:justify-center sm:pt-1",
+  caption_label: "text-center text-base font-semibold text-slate-800 sm:text-sm sm:font-medium sm:text-slate-700",
+  nav: "flex flex-row items-center gap-1 justify-end max-sm:col-start-2 max-sm:row-start-1 max-sm:self-center sm:hidden",
+  button_previous: `${GEWERK_TERMIN_NAV_BTN} max-sm:static sm:absolute sm:left-1 sm:top-1`,
+  button_next: `${GEWERK_TERMIN_NAV_BTN} max-sm:static sm:absolute sm:right-1 sm:top-1`,
+  month_grid: "w-full border-collapse max-sm:col-span-2 max-sm:row-start-2",
+  weekday:
+    "h-8 w-11 p-0 text-center text-[11px] font-medium uppercase tracking-wide text-slate-500 sm:w-9 sm:text-xs sm:normal-case sm:tracking-normal",
+  day: "p-0 text-center align-middle",
+  day_button:
+    "mx-auto h-11 w-11 min-h-[44px] min-w-[44px] rounded-xl p-0 text-[15px] font-medium leading-none text-slate-800 hover:bg-slate-100 aria-selected:opacity-100 sm:h-9 sm:w-9 sm:min-h-0 sm:min-w-0 sm:text-sm sm:font-normal sm:text-slate-700 touch-manipulation",
+  selected: "bg-blue-600 text-white [&_button]:bg-blue-600 [&_button]:text-white [&_button]:hover:bg-blue-600 [&_button]:hover:text-white",
+  hidden: "invisible",
+  today: "bg-slate-200/90 sm:bg-slate-200/80 [&_button]:text-slate-900",
+  outside: "text-slate-400 opacity-50",
+  disabled: "text-slate-400 opacity-30",
 };
 
 /** Unter 640px: volle Breite, große Targets, Popover unten zentriert. */
@@ -151,6 +157,7 @@ type GewerkTerminPickerPanelProps = {
 };
 
 function GewerkTerminPickerPanel({ value, onChange, minutePillsRef, variant }: GewerkTerminPickerPanelProps) {
+  const narrow = useIsNarrowTerminPicker();
   const raw = value.trim();
   let d = raw ? new Date(raw) : new Date();
   if (Number.isNaN(d.getTime())) d = new Date();
@@ -178,6 +185,7 @@ function GewerkTerminPickerPanel({ value, onChange, minutePillsRef, variant }: G
           selected={d}
           onSelect={(date) => date && apply(date, startHour, startMin)}
           locale={de}
+          navLayout={narrow ? "after" : "around"}
           classNames={GEWERK_TERMIN_CAL_CLASSNAMES}
         />
       </div>
