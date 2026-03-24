@@ -9,7 +9,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Kein Zugriff." }, { status: 403 });
   }
 
-  let body: { user_id?: string; password?: string };
+  let body: { user_id?: string; password?: string; email?: string };
   try {
     body = (await request.json()) as typeof body;
   } catch {
@@ -18,6 +18,8 @@ export async function POST(request: Request) {
 
   const userId = String(body.user_id ?? "").trim();
   const password = String(body.password ?? "");
+  /** Erwartete E-Mail aus dem Admin-UI – muss zur Nutzer-ID passen (verhindert falsches Konto bei veralteter Liste). */
+  const expectedEmail = String(body.email ?? "").trim().toLowerCase();
 
   if (!userId) {
     return NextResponse.json({ error: "Nutzer-ID fehlt." }, { status: 400 });
@@ -34,6 +36,21 @@ export async function POST(request: Request) {
 
   try {
     const admin = createServiceRoleClient();
+    const { data: userData, error: getErr } = await admin.auth.admin.getUserById(userId);
+    if (getErr || !userData.user) {
+      return NextResponse.json({ error: "Nutzer nicht gefunden." }, { status: 404 });
+    }
+    const actualEmail = String(userData.user.email ?? "").trim().toLowerCase();
+    if (expectedEmail && actualEmail !== expectedEmail) {
+      return NextResponse.json(
+        {
+          error:
+            "E-Mail und Nutzer-ID passen nicht zusammen. Bitte „Aktualisieren“ in der Liste klicken und den Vorgang erneut starten.",
+        },
+        { status: 409 },
+      );
+    }
+
     const { error } = await admin.auth.admin.updateUserById(userId, { password });
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 400 });

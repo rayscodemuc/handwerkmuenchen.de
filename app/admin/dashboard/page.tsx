@@ -35,12 +35,18 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Logo } from "@/components/Logo";
 import { AuftragHandwerkerDetailDialog } from "@/components/admin/AuftragHandwerkerDetailDialog";
 import { GewerkAuftraegeDashboardList } from "@/components/admin/GewerkAuftraegeDashboardList";
+import { AuftragEingangKommendeRowView, AuftragEingangVolleKarteView } from "@/components/admin/eingang-auftrag-cards";
+import {
+  TicketEingangKommendeRowView,
+  TicketEingangVolleKarteView,
+  ticketEingangTerminBlock,
+} from "@/components/admin/eingang-ticket-cards";
+import { isKommenderOderLaufenderTermin } from "@/lib/auftraege/gewerk-auftraege-split";
 import { normalizeAuftragRow } from "@/lib/auftraege/billing-recipient-fields";
 import { filterAuftraegeRowsByRole } from "@/lib/auftraege/filter-auftraege-by-role";
 import { roleToGewerk } from "@/lib/auftraege/role-to-gewerk";
@@ -187,19 +193,11 @@ function detectColumnAtPoint(px: number, py: number): string | null {
 /**
  * Kanban-Collision-Detection: Nutzt detectColumnAtPoint für robuste Spalten-Erkennung.
  */
-let _lastCollisionLog = "";
 const kanbanCollisionDetection: CollisionDetection = (args) => {
   const { pointerCoordinates, droppableRects, droppableContainers } = args;
   if (!pointerCoordinates) return closestCorners(args);
 
   const targetColId = detectColumnAtPoint(pointerCoordinates.x, pointerCoordinates.y);
-
-  // Debug: Log nur bei Änderungen
-  const logKey = `col=${targetColId ?? "NONE"}`;
-  if (logKey !== _lastCollisionLog) {
-    _lastCollisionLog = logKey;
-    if (targetColId) console.log(`[Collision] Spalte: ${targetColId} bei ptr=(${Math.round(pointerCoordinates.x)},${Math.round(pointerCoordinates.y)})`);
-  }
 
   // Cursor ist IN einer Spalte (oder im Grid-Bereich zwischen Spalten)
   if (targetColId) {
@@ -324,12 +322,12 @@ function SortableTicketCard({
     >
       <div className="flex gap-1 items-stretch lg:items-start">
         <span
-          className="shrink-0 inline-flex min-h-[44px] min-w-[44px] cursor-grab touch-none select-none items-center justify-center rounded-lg text-slate-500 active:cursor-grabbing active:bg-slate-500/15 lg:min-h-0 lg:min-w-0 lg:p-1 lg:active:bg-transparent dark:active:bg-slate-400/10 dark:lg:active:bg-transparent"
+          className="hidden shrink-0 cursor-grab touch-none select-none items-center justify-center rounded-lg text-slate-500 active:cursor-grabbing active:bg-slate-500/15 lg:inline-flex lg:min-h-0 lg:min-w-0 lg:p-1 lg:active:bg-transparent dark:active:bg-slate-400/10 dark:lg:active:bg-transparent"
           aria-label="Ticket verschieben"
           {...listeners}
           {...attributes}
         >
-          <GripVertical className="h-5 w-5 lg:h-3.5 lg:w-3.5" strokeWidth={2} />
+          <GripVertical className="h-3.5 w-3.5" strokeWidth={2} />
         </span>
         <div className="min-w-0 flex-1 self-center lg:self-start">{children}</div>
       </div>
@@ -374,12 +372,12 @@ function SortableAuftragCard({
     >
       <div className="flex items-stretch gap-1 lg:items-start">
         <span
-          className="shrink-0 inline-flex min-h-[44px] min-w-[44px] cursor-grab touch-none select-none items-center justify-center rounded-lg text-slate-500 active:cursor-grabbing active:bg-slate-500/15 lg:min-h-0 lg:min-w-0 lg:p-1 lg:active:bg-transparent dark:active:bg-slate-400/10 dark:lg:active:bg-transparent"
+          className="hidden shrink-0 cursor-grab touch-none select-none items-center justify-center rounded-lg text-slate-500 active:cursor-grabbing active:bg-slate-500/15 lg:inline-flex lg:min-h-0 lg:min-w-0 lg:p-1 lg:active:bg-transparent dark:active:bg-slate-400/10 dark:lg:active:bg-transparent"
           aria-label="Auftrag verschieben"
           {...listeners}
           {...attributes}
         >
-          <GripVertical className="h-5 w-5 lg:h-3.5 lg:w-3.5" strokeWidth={2} />
+          <GripVertical className="h-3.5 w-3.5" strokeWidth={2} />
         </span>
         <div className="min-w-0 flex-1 self-center lg:self-start">{children}</div>
       </div>
@@ -450,6 +448,7 @@ function DroppableSlot({
   style,
   children,
   theme,
+  compact,
 }: {
   dayIndex: number;
   slotIndex: number;
@@ -457,6 +456,8 @@ function DroppableSlot({
   style?: React.CSSProperties;
   children?: React.ReactNode;
   theme: "light" | "dark";
+  /** Mobil: Zeilenhöhe kommt vom Grid, keine feste min-h-48 (vermeidet Zerrungen). */
+  compact?: boolean;
 }) {
   const { setNodeRef, isOver } = useDroppable({
     id: `slot-${dayIndex}-${slotIndex}`,
@@ -466,7 +467,9 @@ function DroppableSlot({
     <div
       ref={setNodeRef}
       style={style}
-      className={`min-h-[48px] border-b border-r ${
+      className={`box-border border-b border-r ${
+        compact ? "h-full min-h-0" : "min-h-[48px]"
+      } ${
         isLight ? "border-slate-200" : "border-slate-800"
       } ${isOver || isHighlight ? (isLight ? "bg-blue-100" : "bg-blue-500/20") : isLight ? "bg-white" : "bg-slate-900/50"}`}
     >
@@ -480,11 +483,17 @@ function DraggableEventPill({
   style,
   className,
   onOpenDetail,
+  compact,
+  parallelInSlot = 1,
 }: {
   ev: WeekEvent;
   style: React.CSSProperties;
   className: string;
   onOpenDetail: () => void;
+  /** Mobil: etwas größere Schrift, bessere Zeilenhöhen. */
+  compact?: boolean;
+  /** Termine mit gleichem Start (Tag+Slot); mobil: eine Zeile ohne Kundenzeile, damit Spalten lesbar bleiben. */
+  parallelInSlot?: number;
 }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `event-${ev.id}`,
@@ -494,6 +503,11 @@ function DraggableEventPill({
         ev.resourceKind === "auftrag" ? ev.id.replace(/^auftrag-/, "") : undefined,
     },
   });
+  const tightParallel = !!compact && parallelInSlot > 1;
+  const subtitle =
+    ev.resourceKind === "ticket"
+      ? getTicketDisplayName(ev.resource as Ticket)
+      : getAuftragCardTitle(ev.resource as HandwerkerAuftrag);
   return (
     <button
       ref={setNodeRef}
@@ -502,7 +516,7 @@ function DraggableEventPill({
         e.stopPropagation();
         onOpenDetail();
       }}
-      className={`cursor-grab active:cursor-grabbing touch-none select-none flex flex-col overflow-visible ${className} ${
+      className={`cursor-grab active:cursor-grabbing touch-manipulation select-none flex flex-col overflow-visible sm:touch-none ${className} ${
         isDragging ? "opacity-0" : ""
       }`}
       style={style}
@@ -510,8 +524,19 @@ function DraggableEventPill({
       {...listeners}
       {...attributes}
     >
-      <div className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-visible px-1.5 py-1 text-left">
-        <div className="flex min-w-0 flex-1 items-center gap-1">
+      <div
+        className={cn(
+          "flex min-h-0 flex-1 flex-col overflow-visible text-left",
+          compact ? "gap-0.5 px-1 py-0.5" : "gap-0.5 px-1.5 py-1",
+          tightParallel && "justify-center py-0.5"
+        )}
+      >
+        <div
+          className={cn(
+            "flex min-w-0 gap-1",
+            tightParallel ? "flex-1 items-center justify-center" : "flex-1 items-center"
+          )}
+        >
           {(() => {
             const gewerkArr =
               ev.resourceKind === "ticket"
@@ -519,9 +544,18 @@ function DraggableEventPill({
                 : normalizeGewerke((ev.resource as HandwerkerAuftrag)?.gewerk ?? null);
             const firstGewerk = gewerkArr[0] ?? null;
             const Icon = getGewerkIcon(firstGewerk);
-            return Icon ? <Icon className="h-3 w-3 shrink-0" strokeWidth={2} /> : null;
+            return Icon ? (
+              <Icon
+                className={`shrink-0 ${tightParallel && parallelInSlot > 2 ? "h-3 w-3" : compact ? "h-3.5 w-3.5" : "h-3 w-3"}`}
+                strokeWidth={2}
+              />
+            ) : null;
           })()}
-          <span className="min-w-0 truncate text-[11px] font-medium">
+          <span
+            className={`min-w-0 truncate font-medium ${
+              tightParallel && parallelInSlot > 2 ? "text-[10px]" : compact ? "text-xs" : "text-[11px]"
+            }`}
+          >
             {ev.resourceKind === "ticket"
               ? getTicketOrAuftragNumber(ev.resource as Ticket) !== "–"
                 ? getTicketOrAuftragNumber(ev.resource as Ticket)
@@ -529,14 +563,22 @@ function DraggableEventPill({
               : (ev.resource as HandwerkerAuftrag)?.auftragsnummer?.trim() || ev.id.slice(0, 8)}
           </span>
           {(ev.resourceKind === "auftrag" || !!(ev.resource as Ticket | undefined)?.additional_data?.auftrag_id) && (
-            <span className="shrink-0 rounded px-1 py-0.5 text-[9px] font-medium bg-amber-500/30 text-amber-200">SPM</span>
+            <span
+              className={`shrink-0 rounded px-1 py-0.5 font-medium bg-amber-500/30 text-amber-200 ${
+                compact ? "text-[10px]" : "text-[9px]"
+              } ${tightParallel && parallelInSlot > 2 ? "px-0.5 text-[9px]" : ""}`}
+            >
+              SPM
+            </span>
           )}
         </div>
-        <span className="min-w-0 truncate text-[10px] leading-tight opacity-90">
-          {ev.resourceKind === "ticket"
-            ? getTicketDisplayName(ev.resource as Ticket)
-            : getAuftragCardTitle(ev.resource as HandwerkerAuftrag)}
-        </span>
+        {!tightParallel && (
+          <span
+            className={`min-w-0 truncate leading-tight opacity-90 ${compact ? "text-[11px]" : "text-[10px]"}`}
+          >
+            {subtitle}
+          </span>
+        )}
       </div>
     </button>
   );
@@ -558,8 +600,8 @@ const ASSIGNEE_OPTIONS = [
 ] as const;
 
 /** Platzhalter: spätere E-Mail-Logik. */
-function sendRejectionEmail(customerEmail: string, reason: string): void {
-  console.log(`E-Mail an Kunde ${customerEmail} gesendet wegen Grund: ${reason}`);
+function sendRejectionEmail(_customerEmail: string, _reason: string): void {
+  /* bewusst leer bis Versand angebunden */
 }
 
 /** Hauptanschrift für Karte: kunde_name, falls leer dann partner_name (Sicherheits-Check bei Partnern). */
@@ -1044,8 +1086,12 @@ export default function AdminDashboardPage() {
   /** Spalte 1 Tabs: Eingang (Anfrage) | Angebote (Angebot_erstellt). */
   const [incomingTab, setIncomingTab] = useState<"Eingang" | "Angebote">("Eingang");
 
-  /** Mobile: Tab „Anfragen“ | „Kalender“ – auch per Header-Button umschaltbar. */
+  /** Mobile: Ansicht „Anfragen“ vs. Kalender – nur per Header-Kalender-Button; zurück über „Anfragen“. */
   const [mobileMainTab, setMobileMainTab] = useState<"list" | "calendar">("list");
+  /** Mobil (Admin): horizontal wählbare Board-Spalte – Eingang, Angebote, dann 3–6. */
+  const [mobileBoardTab, setMobileBoardTab] = useState<
+    "eingang" | "angebote" | "column-3" | "column-4" | "column-5" | "column-6"
+  >("eingang");
   /** Viewport &lt; lg: Kalender-Grid und Touch-Optimierung. */
   const [isMobileViewport, setIsMobileViewport] = useState(false);
   const desktopCalendarSectionRef = useRef<HTMLElement | null>(null);
@@ -1187,7 +1233,7 @@ export default function AdminDashboardPage() {
 
   /** Droppables: Eingangsspalte (Desktop) + Mobile-Liste + Eingang-Dropzone für Kalender. */
   const { setNodeRef: setCol1Ref, isOver: isOverCol1 } = useDroppable({ id: COLUMN_IDS[0] });
-  const { setNodeRef: setEingangMobileRef, isOver: isOverEingangMobile } = useDroppable({ id: "column-eingang-mobile" });
+  const { setNodeRef: setEingangMobileRef } = useDroppable({ id: "column-eingang-mobile" });
   const { setNodeRef: setCol1MobileListRef, isOver: isOverCol1MobileList } = useDroppable({ id: "column-1-mobile-list" });
 
   /** Auto-Save für assigned_to: Debounce 500ms nach Tippen (nur wenn Modal offen). */
@@ -1255,7 +1301,6 @@ export default function AdminDashboardPage() {
         });
       }
     }
-    console.log(`✅ Tickets geladen: ${list.length} Tickets`);
 
     /** Aufträge für gemischtes Board (keine automatischen Shadow-Tickets mehr). */
     try {
@@ -1269,7 +1314,6 @@ export default function AdminDashboardPage() {
         ? filterAuftraegeRowsByRole(aufListRaw, adminUser.role)
         : aufListRaw;
       setAuftraegeBoard(aufList);
-      console.log(`✅ Aufträge fürs Board: ${aufList.length}`);
     } catch (syncErr) {
       console.warn("[Auftraege Board]", syncErr);
       setAuftraegeBoard([]);
@@ -1290,8 +1334,6 @@ export default function AdminDashboardPage() {
       );
     });
     if (toMove.length > 0) {
-      console.log(`[AutoMove] ${toMove.length} Ticket(s) mit abgelaufenem termin_ende → Nachbereitung:`,
-        toMove.map(t => ({ id: t.id.slice(0, 8), status: t.status, termin_ende: t.termin_ende })));
       for (const t of toMove) {
         await supabase.from("tickets").update({ status: STATUS.NACHBEREITUNG }).eq("id", t.id);
       }
@@ -2147,7 +2189,6 @@ export default function AdminDashboardPage() {
         setUploadingImage(false);
         return;
       }
-      console.log("UPLOAD_USER_ID:", authData.user.id);
     } catch (e) {
       console.error("[uploadTicketImage] auth.getUser exception:", e);
       setError("Nicht eingeloggt");
@@ -2165,7 +2206,6 @@ export default function AdminDashboardPage() {
     const ext = "jpg";
     const filename = `${Date.now()}.${ext}`;
     const path = filename.replace(/^\/+/, "");
-    console.log("UPLOAD_PATH:", path);
     const { error: uploadError } = await supabase.storage.from(BUCKET_TICKET_IMAGES).upload(path, blob, {
       cacheControl: "3600",
       upsert: true,
@@ -2758,7 +2798,6 @@ export default function AdminDashboardPage() {
       lastIndicatorKey.current = "";
       const activeId = event.active?.id as string | undefined;
       let overId = event.over?.id as string | undefined;
-      console.log("[DnD] handleDragEnd RAW", { activeId, overId });
 
       // ─── DOM-Override: IMMER prüfen, auch wenn overId undefined ist ───
       // Falls @dnd-kit keinen Container findet (passiert bei Spalten 3-6),
@@ -2785,7 +2824,6 @@ export default function AdminDashboardPage() {
         if (detectedCol) {
           if (!overId) {
             // Kein Ziel erkannt → Spalte setzen
-            console.log(`[DnD] ⚡ DOM-Override: overId war undefined, Cursor über "${detectedCol}" → gesetzt!`);
             overId = detectedCol;
           } else if (overId === detectedCol) {
             // Bereits korrekte Spalte → nichts tun
@@ -2793,12 +2831,10 @@ export default function AdminDashboardPage() {
             const resolvedOver = resolveColumnForOverId(overId);
             const overColId = resolvedOver?.config.colId;
             if (overColId !== detectedCol) {
-              console.log(`[DnD] ⚡ DOM-Override: overId "${overId}" gehört zu ${overColId}, Cursor über "${detectedCol}" → korrigiert!`);
               overId = detectedCol;
             }
           } else if (overId !== detectedCol) {
             // overId ist ein Slot oder eine falsche Spalte → Override
-            console.log(`[DnD] ⚡ DOM-Override: overId war "${overId}", Cursor über "${detectedCol}" → korrigiert!`);
             overId = detectedCol;
           }
         }
@@ -2849,7 +2885,6 @@ export default function AdminDashboardPage() {
 
       // ─── Karte auf Spalte oder Karte (Trello-Style) ───
       const resolved = resolveColumnForOverId(overId);
-      console.log("[DnD] resolved column:", resolved ? { colId: resolved.config.colId, status: resolved.config.status, targetDndId: resolved.targetDndId } : null);
       if (resolved && !overId.startsWith("slot-")) {
         const { config } = resolved;
         const sourceColumn =
@@ -2883,7 +2918,6 @@ export default function AdminDashboardPage() {
             draggedDndId,
             insertBeforeDndId
           );
-          console.log("[DnD] insertBeforeDndId:", insertBeforeDndId ?? "END", "→ position:", newPosition);
           if (isSameColumn) {
             const currentStatus = (entity.ticket.status ?? "").trim() || config.status;
             await moveTicketToColumn(ticketId, currentStatus, newPosition);
@@ -3151,47 +3185,14 @@ export default function AdminDashboardPage() {
   ]);
 
   const handleDragStart = useCallback((event: DragStartEvent) => {
-    setActiveDragId(String(event.active?.id ?? ""));
+    setActiveDragId(String(event.active.id));
     setManualOverCol(null);
     setDropIndicator(null);
     lastIndicatorKey.current = "";
-    console.log("[DnD] ═══════════════════ DRAG START ═══════════════════");
-    console.log("[DnD] activeId:", event.active?.id);
-    console.log("[DnD] Collision Detection Version: V3-DOM-QUERY");
-    // Debug: Prüfe ob Spalten-Elemente sichtbar und messbar sind
-    const colIds = ["column-1", "column-3", "column-4", "column-5", "column-6"];
-    colIds.forEach((id) => {
-      const el = document.querySelector(`[data-col-droppable="${id}"]`) as HTMLElement | null;
-      if (el) {
-        const rect = el.getBoundingClientRect();
-        console.log(`[DnD] DOM ${id}: ${Math.round(rect.width)}x${Math.round(rect.height)} @ left=${Math.round(rect.left)} top=${Math.round(rect.top)} right=${Math.round(rect.right)} bottom=${Math.round(rect.bottom)}`);
-      } else {
-        console.warn(`[DnD] DOM ${id}: ❌ NICHT GEFUNDEN!`);
-      }
-    });
-    // Debug: @dnd-kit registrierte Container
-    const allDroppables = document.querySelectorAll("[data-col-droppable]");
-    console.log(`[DnD] Alle data-col-droppable Elemente im DOM: ${allDroppables.length}`, Array.from(allDroppables).map(e => e.getAttribute("data-col-droppable")));
-    console.log("[DnD] ═══════════════════════════════════════════════════");
   }, []);
 
-  const lastLoggedOverId = useRef<string | undefined>(undefined);
   const handleDragOver = useCallback((event: DragOverEvent) => {
     const overId = event.over?.id as string | undefined;
-    // Nur loggen wenn sich overId ändert (reduziert Spam)
-    if (overId !== lastLoggedOverId.current) {
-      lastLoggedOverId.current = overId;
-      const category = !overId
-        ? "KEIN ZIEL"
-        : overId.startsWith("column-")
-          ? "SPALTE"
-          : overId.startsWith("ticket-") || overId.startsWith("auftrag-")
-            ? "KARTE"
-            : overId.startsWith("slot-")
-              ? "KALENDER-SLOT"
-              : "UNBEKANNT";
-      console.log(`[DnD] handleDragOver → ${category}: ${overId ?? "null"}`);
-    }
     if (overId && typeof overId === "string" && overId.startsWith("slot-")) {
       const match = overId.match(/^slot-(\d+)-(\d+)$/);
       if (match) setDropTargetSlot({ dayIndex: parseInt(match[1], 10), slotIndex: parseInt(match[2], 10) });
@@ -3344,10 +3345,15 @@ export default function AdminDashboardPage() {
     options?: { isAngeboteTab?: boolean; onOpenQuoteBuilder?: (t: Ticket) => void; offerAttentionIds?: Set<string> }
   ) => {
     const rows = mergeBoardDisplayRows(ticketsList, auftraegeList);
-    if (loading) return <p className="text-sm text-slate-400">Lade Tickets…</p>;
+    const eingangGewerkStyle = colId === "column-1" && !options?.isAngeboteTab;
+    if (loading) return <p className={`text-sm ${isLightTheme ? "text-slate-500" : "text-slate-400"}`}>Lade Tickets…</p>;
     if (rows.length === 0) {
       const showHere = activeDragId && dropIndicator && colId && dropIndicator.colId === colId;
-      return showHere ? <DropIndicatorLine /> : <p className="text-sm text-slate-500">{emptyLabel}</p>;
+      return showHere ? (
+        <DropIndicatorLine />
+      ) : (
+        <p className={`text-sm ${isLightTheme ? "text-slate-600" : "text-slate-500"}`}>{emptyLabel}</p>
+      );
     }
     const indicatorCol = dropIndicator && colId && dropIndicator.colId === colId ? dropIndicator : null;
     return (
@@ -3356,6 +3362,35 @@ export default function AdminDashboardPage() {
           if (row.kind === "auftrag") {
             const a = row.a;
             const showIndA = activeDragId && indicatorCol && indicatorCol.insertBeforeId === `auftrag-${a.id}`;
+            if (eingangGewerkStyle) {
+              const kommendA = isKommenderOderLaufenderTermin(a);
+              const aufCardShell = isLightTheme
+                ? "border-slate-200/80 bg-white shadow-sm hover:border-slate-300"
+                : "border-slate-700/80 bg-slate-900/80 hover:border-slate-600";
+              return (
+                <React.Fragment key={a.id}>
+                  {showIndA && <DropIndicatorLine />}
+                  <SortableAuftragCard
+                    auftrag={a}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => openAuftragBoardDetail(a)}
+                    onKeyDown={(e) => e.key === "Enter" && openAuftragBoardDetail(a)}
+                    className="cursor-pointer border-0 bg-transparent p-0 shadow-none transition-colors active:scale-[0.99] lg:active:scale-100"
+                  >
+                    {kommendA ? (
+                      <AuftragEingangKommendeRowView auftrag={a} isLightTheme={isLightTheme} />
+                    ) : (
+                      <AuftragEingangVolleKarteView
+                        auftrag={a}
+                        isLightTheme={isLightTheme}
+                        cardClassName={aufCardShell}
+                      />
+                    )}
+                  </SortableAuftragCard>
+                </React.Fragment>
+              );
+            }
             const aufBorder = isLightTheme
               ? "border-emerald-500/50 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:border-emerald-500 hover:bg-emerald-50/40"
               : "border-emerald-500/60 bg-slate-900/80 hover:border-emerald-400";
@@ -3524,6 +3559,278 @@ export default function AdminDashboardPage() {
           })();
           const showIndicatorBefore =
             activeDragId && indicatorCol && indicatorCol.insertBeforeId === `ticket-${ticket.id}`;
+          const kommendT = isKommenderOderLaufenderTermin(ticket);
+          if (eingangGewerkStyle && kommendT) {
+            return (
+              <React.Fragment key={ticket.id}>
+                {showIndicatorBefore && <DropIndicatorLine />}
+                <SortableTicketCard
+                  ticket={ticket}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => openDetailModal(ticket)}
+                  onKeyDown={(e) => e.key === "Enter" && openDetailModal(ticket)}
+                  className={`cursor-pointer border-0 bg-transparent p-0 shadow-none transition-colors active:scale-[0.99] lg:active:scale-100 ${urgencyLevel === "24h" ? "animate-pulse" : ""}`}
+                >
+                  <TicketEingangKommendeRowView
+                    ticket={ticket}
+                    isLightTheme={isLightTheme}
+                    displayName={displayName}
+                    anzeigeNr={getTicketOrAuftragNumber(ticket)}
+                  />
+                </SortableTicketCard>
+              </React.Fragment>
+            );
+          }
+          if (eingangGewerkStyle && !kommendT) {
+            const volleCardClass = `${cardBorderClasses} ${urgencyLevel !== "neutral" ? urgencyHeatmapClasses : ""}`;
+            const gewerkeListT = normalizeGewerke(ticket.gewerk ?? null);
+            const gewerkeRow = (
+              <>
+                {gewerkeListT.length > 0 ? (
+                  gewerkeListT.map((g, idx) => {
+                    const Icon = getGewerkIcon(g);
+                    return (
+                      <span key={`${g}-${idx}`} className={`inline-flex items-center gap-1 ${getGewerkBadgeClasses(g, isLightTheme)}`}>
+                        {Icon && <Icon className="h-3 w-3 shrink-0" strokeWidth={2} />}
+                        {g}
+                      </span>
+                    );
+                  })
+                ) : (
+                  <span className={`text-[11px] ${isLightTheme ? "text-slate-500" : "text-slate-400"}`}>–</span>
+                )}
+                <span className={`text-[11px] ${isLightTheme ? "text-slate-600" : "text-slate-500"}`}>
+                  {ticket.status || "Ticket"}
+                </span>
+              </>
+            );
+            const statusMetaRow = (
+              <div
+                className={`flex items-center gap-1 text-[11px] ${
+                  isOver24h
+                    ? "font-semibold text-red-500"
+                    : isLightTheme
+                      ? "text-slate-600"
+                      : "text-slate-500"
+                }`}
+              >
+                {isOver24h && (
+                  <Hourglass className="h-3.5 w-3.5 shrink-0 text-red-500" strokeWidth={2} aria-hidden />
+                )}
+                <span>{formatTicketDate(ticket.created_at)}</span>
+              </div>
+            );
+            const phoneButton = hasPhone ? (
+              <a
+                href={`tel:${ticket.kontakt_telefon!.trim()}`}
+                onClick={(e) => e.stopPropagation()}
+                className={`inline-flex h-11 min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-full transition-colors active:scale-95 ${
+                  isLightTheme
+                    ? "text-emerald-700 hover:bg-emerald-50 hover:text-emerald-900"
+                    : "text-emerald-400 hover:bg-emerald-500/15 hover:text-emerald-200"
+                }`}
+                aria-label="Anrufen"
+              >
+                <Phone className="h-5 w-5" strokeWidth={2} />
+              </a>
+            ) : null;
+            const badgeCluster = (
+              <>
+                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-medium ${labelBadgeClasses}`}>
+                  {cardType === "PARTNER" ? "Partner" : cardType === "AUFTRAG" ? "Auftrag" : cardType === "ANFRAGE" ? "Anfrage" : "Ticket"}
+                </span>
+                {cardType === "AUFTRAG" && (
+                  <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium ${isLightTheme ? "bg-amber-100 text-amber-800" : "bg-amber-500/20 text-amber-300"}`}>
+                    SPM
+                  </span>
+                )}
+                {(ticket.status ?? "").trim() === STATUS.BESICHTIGUNG && (
+                  <span className={`rounded px-1.5 py-0.5 text-[10px] ${isLightTheme ? "bg-slate-200 text-slate-700" : "bg-slate-700 text-slate-300"}`}>
+                    Besichtigung
+                  </span>
+                )}
+                {(ticket.status ?? "").trim() === STATUS.AUSFUEHRUNG && (
+                  <span className={`rounded px-1.5 py-0.5 text-[10px] ${isLightTheme ? "bg-blue-100 text-blue-800" : "bg-blue-500/20 text-blue-200"}`}>
+                    Ausführung
+                  </span>
+                )}
+                {options?.isAngeboteTab && isKalkulationFaellig(ticket) && (
+                  <span
+                    className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${
+                      isLightTheme
+                        ? "border border-amber-300 bg-amber-100 text-amber-800"
+                        : "border border-amber-500/40 bg-amber-500/20 text-amber-300"
+                    }`}
+                  >
+                    Kalkulation fällig
+                  </span>
+                )}
+              </>
+            );
+            const footer = (
+              <>
+                {isAnfrageStatus && !isFromAuftrag && !isGewerkUser && (
+                  <div
+                    className={`mt-3 flex w-full gap-2 border-t pt-2 ${
+                      isLightTheme ? "border-slate-200" : "border-slate-700"
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleConvertToTicket(ticket);
+                      }}
+                      disabled={isConverting}
+                      className="flex min-w-0 flex-[3] items-center justify-center gap-1.5 rounded-full bg-blue-600 px-3 py-2 text-xs font-medium text-white transition-all hover:opacity-90 disabled:opacity-50"
+                    >
+                      <CheckCircle className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
+                      <span className="whitespace-nowrap">{isConverting ? "Wird umgewandelt…" : "In Ticket umwandeln"}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        openRejectionModal(ticket);
+                      }}
+                      className="flex min-w-0 flex-[2] items-center justify-center gap-1.5 rounded-full bg-red-600/90 px-3 py-2 text-xs font-medium text-white transition-all hover:opacity-90"
+                    >
+                      <X className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
+                      Ablehnen
+                    </button>
+                  </div>
+                )}
+                {options?.isAngeboteTab && !(ticket as Ticket & { additional_data?: { auftrag_id?: string } }).additional_data?.auftrag_id && (
+                  <div
+                    className={`mt-3 flex w-full flex-col gap-2 border-t pt-2 ${
+                      isLightTheme ? "border-slate-200" : "border-slate-700"
+                    }`}
+                  >
+                    {isKalkulationFaellig(ticket) && options.onOpenQuoteBuilder && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          options.onOpenQuoteBuilder?.(ticket);
+                        }}
+                        className={`inline-flex w-full items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-xs font-medium transition-all hover:opacity-90 ${
+                          isLightTheme
+                            ? "bg-blue-600 text-white shadow-sm hover:bg-blue-700"
+                            : "bg-blue-600 text-white shadow-sm hover:bg-blue-700"
+                        }`}
+                      >
+                        <FileText className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
+                        Angebot erstellen
+                      </button>
+                    )}
+                    {(ticket.status ?? "").trim() === STATUS.ANGEBOT_ERSTELLT && (
+                      <>
+                        {options.onOpenQuoteBuilder && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              options.onOpenQuoteBuilder?.(ticket);
+                            }}
+                            className={`inline-flex w-full items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-medium transition-all hover:opacity-90 ${
+                              isLightTheme
+                                ? "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                                : "bg-slate-800/80 text-slate-300 hover:bg-slate-700"
+                            }`}
+                          >
+                            <FileText className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
+                            Angebot bearbeiten
+                          </button>
+                        )}
+                        <div className="flex w-full gap-2">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
+                            className="flex flex-1 items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-xs font-medium transition-all hover:opacity-90"
+                            style={
+                              isLightTheme
+                                ? { backgroundColor: "#bbf7d0", color: "#166534" }
+                                : { backgroundColor: "rgba(34,197,94,0.2)", color: "#86efac" }
+                            }
+                          >
+                            <CheckCircle className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
+                            Angenommen
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
+                            className="flex flex-1 items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-xs font-medium transition-all hover:opacity-90"
+                            style={
+                              isLightTheme
+                                ? { backgroundColor: "#fecaca", color: "#991b1b" }
+                                : { backgroundColor: "rgba(239,68,68,0.2)", color: "#fca5a5" }
+                            }
+                          >
+                            <X className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
+                            Abgelehnt
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+              </>
+            );
+            return (
+              <React.Fragment key={ticket.id}>
+                {showIndicatorBefore && <DropIndicatorLine />}
+                <SortableTicketCard
+                  ticket={ticket}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => openDetailModal(ticket)}
+                  onKeyDown={(e) => e.key === "Enter" && openDetailModal(ticket)}
+                  className={`cursor-pointer border-0 bg-transparent p-0 shadow-none transition-colors active:scale-[0.99] lg:active:scale-100 ${urgencyLevel === "24h" ? "animate-pulse" : ""}`}
+                >
+                  <TicketEingangVolleKarteView
+                    isLightTheme={isLightTheme}
+                    cardClassName={volleCardClass}
+                    badgeCluster={badgeCluster}
+                    numberRight={
+                      <span className="flex items-center gap-1">
+                        <span className={`shrink-0 text-xs tabular-nums ${isLightTheme ? "text-slate-500" : "text-slate-400"}`}>
+                          {getTicketOrAuftragNumber(ticket)}
+                        </span>
+                        {options?.isAngeboteTab && options.offerAttentionIds?.has(ticket.id) && (
+                          <span
+                            className={`inline-flex h-2 w-2 rounded-full ${isLightTheme ? "bg-blue-500" : "bg-blue-400"}`}
+                          />
+                        )}
+                      </span>
+                    }
+                    displayName={displayName}
+                    objektAdresse={ticket.objekt_adresse}
+                    beschreibung={ticket.beschreibung}
+                    terminBlock={ticketEingangTerminBlock(
+                      ticket,
+                      isLightTheme,
+                      isLightTheme ? "text-slate-500" : "text-slate-400"
+                    )}
+                    gewerkeRow={gewerkeRow}
+                    statusMetaRow={statusMetaRow}
+                    phoneButton={phoneButton}
+                    footer={footer}
+                  />
+                </SortableTicketCard>
+              </React.Fragment>
+            );
+          }
           return (
             <React.Fragment key={ticket.id}>
               {showIndicatorBefore && <DropIndicatorLine />}
@@ -3781,41 +4088,55 @@ export default function AdminDashboardPage() {
 
   const weekDays = useMemo(() => Array.from({ length: 6 }, (_, i) => add(weekStart, { days: i })), [weekStart]);
 
+  const calMobile = isMobileViewport;
+  const calSlotPx = calMobile ? 48 : 48;
+  const calHeaderH = calMobile ? 44 : 36;
+
   const renderWeekCalendar = () => (
-    <>
-      <div className="mb-3 shrink-0 flex items-center justify-between gap-2">
-        <h2 className={`text-xs font-medium uppercase tracking-wider ${
-          isLightTheme ? "text-slate-500" : "text-slate-500"
-        }`}>
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div
+        className={cn(
+          "mb-3 shrink-0 gap-2",
+          calMobile ? "flex flex-col" : "flex flex-row items-center justify-between"
+        )}
+      >
+        <h2
+          className={`text-xs font-medium uppercase tracking-wider ${
+            isLightTheme ? "text-slate-600" : "text-slate-400"
+          }`}
+        >
           Terminplaner
         </h2>
-        <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
+        <div className="flex shrink-0 items-center justify-center gap-1 sm:gap-1.5">
           <button
             type="button"
             onClick={() => setWeekStart((prev) => add(prev, { weeks: -1 }))}
-            className={`inline-flex h-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-full transition-all hover:opacity-90 active:scale-95 ${
+            className={`inline-flex h-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-full transition-colors ${
               isLightTheme
-                ? "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
-                : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+                ? "text-slate-600 hover:bg-slate-100 active:bg-slate-200"
+                : "text-slate-300 hover:bg-slate-800 active:bg-slate-700"
             }`}
             aria-label="Vorherige Woche"
           >
             <ChevronLeft className="h-5 w-5" strokeWidth={2} />
           </button>
           <span
-            className={`min-w-0 flex-1 text-center text-xs font-medium sm:min-w-[180px] sm:flex-none sm:text-sm ${
-              isLightTheme ? "text-slate-700" : "text-slate-200"
-            }`}
+            className={cn(
+              "min-w-0 px-1 text-center text-sm font-semibold tabular-nums leading-snug",
+              calMobile ? "max-w-[min(100%,18rem)] flex-1" : "sm:min-w-[180px]",
+              isLightTheme ? "text-slate-800" : "text-slate-100"
+            )}
           >
-            {format(weekDays[0], "d. MMM", { locale: de })} – {format(weekDays[5], "d. MMM yyyy", { locale: de })}
+            {format(weekDays[0], "d. MMM", { locale: de })} –{" "}
+            {format(weekDays[5], "d. MMM yyyy", { locale: de })}
           </span>
           <button
             type="button"
             onClick={() => setWeekStart((prev) => add(prev, { weeks: 1 }))}
-            className={`inline-flex h-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-full transition-all hover:opacity-90 active:scale-95 ${
+            className={`inline-flex h-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-full transition-colors ${
               isLightTheme
-                ? "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
-                : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+                ? "text-slate-600 hover:bg-slate-100 active:bg-slate-200"
+                : "text-slate-300 hover:bg-slate-800 active:bg-slate-700"
             }`}
             aria-label="Nächste Woche"
           >
@@ -3823,119 +4144,138 @@ export default function AdminDashboardPage() {
           </button>
         </div>
       </div>
-      <p className={`mb-2 shrink-0 text-[11px] ${isLightTheme ? "text-slate-500" : "text-slate-500"}`}>
-        <span className="lg:hidden">07:00–20:00 · In eine Zelle ziehen für Termin</span>
-        <span className="hidden lg:inline">
-          Ganze Stunden 07:00–20:00. Karte links in eine Zelle ziehen → Termin + Status „Ticket“.
-        </span>
-      </p>
-      <div className="min-h-0 flex-1 overflow-auto overscroll-x-auto [-webkit-overflow-scrolling:touch]">
       <div
-        className={`rounded-2xl border ${
-          isLightTheme ? "border-slate-200/80 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)]" : "border-slate-800 bg-[#1e293b]"
-        }`}
-        style={{
-          display: "grid",
-          gridTemplateColumns: isMobileViewport ? "52px repeat(6, minmax(56px, 1fr))" : "64px repeat(6, 1fr)",
-          gridTemplateRows: `36px repeat(${TOTAL_SLOTS}, ${isMobileViewport ? 44 : 48}px)`,
-          minHeight: isMobileViewport ? 520 : 680,
-          minWidth: isMobileViewport ? 420 : undefined,
-        }}
+        className={cn(
+          "min-h-0 flex-1 overflow-auto overscroll-x-contain [-webkit-overflow-scrolling:touch]",
+          calMobile && "max-h-[min(72dvh,calc(100dvh-13rem))] rounded-2xl ring-1 ring-black/[0.04] dark:ring-white/[0.06]"
+        )}
       >
         <div
-          className={`sticky top-0 z-10 col-start-1 row-start-1 rounded-tl-xl border-b border-r ${
-            isLightTheme ? "border-slate-200/80 bg-slate-100" : "border-slate-700/80 bg-slate-800"
+          className={`rounded-2xl border ${
+            isLightTheme ? "border-slate-200/80 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)]" : "border-slate-800 bg-[#1e293b]"
           }`}
-        />
-        {weekDays.map((day, dayIndex) => (
+          style={{
+            display: "grid",
+            gridTemplateColumns: calMobile
+              ? "56px repeat(6, minmax(76px, 1fr))"
+              : "64px repeat(6, 1fr)",
+            gridTemplateRows: `${calHeaderH}px repeat(${TOTAL_SLOTS}, ${calSlotPx}px)`,
+            minHeight: calMobile ? 500 : 680,
+            minWidth: calMobile ? 56 + 6 * 76 : undefined,
+          }}
+        >
           <div
-            key={dayIndex}
-            className={`sticky top-0 z-10 border-b border-r px-1 py-1 text-center text-xs font-medium ${
-              isLightTheme
-                ? "border-slate-200 bg-slate-50 text-slate-700"
-                : "border-slate-800 bg-slate-800 text-slate-300"
-            }`}
-            style={{ gridColumn: dayIndex + 2, gridRow: 1 }}
-          >
-            {format(day, "EEE d.MM.", { locale: de })}
-          </div>
-        ))}
-        {Array.from({ length: TOTAL_SLOTS }).map((_, slotIndex) => {
-          const hour = CALENDAR_HOUR_START + Math.floor(slotIndex / SLOTS_PER_HOUR);
-          const min = (slotIndex % SLOTS_PER_HOUR) * SLOT_MINUTES;
-          const timeLabel = `${String(hour).padStart(2, "0")}:${String(min).padStart(2, "0")}`;
-          return (
+            className={cn(
+              "sticky left-0 top-0 z-[25] col-start-1 row-start-1 rounded-tl-xl border-b border-r shadow-[2px_0_8px_-2px_rgba(0,0,0,0.06)]",
+              isLightTheme ? "border-slate-200/80 bg-slate-100" : "border-slate-700/80 bg-slate-800"
+            )}
+          />
+          {weekDays.map((day, dayIndex) => (
             <div
-              key={`time-${slotIndex}`}
-              className={`flex items-center justify-end border-b border-r py-0.5 pr-3 pl-2 text-xs tabular-nums ${
+              key={dayIndex}
+              className={`sticky top-0 z-20 border-b border-r px-0.5 py-1 text-center font-semibold leading-tight ${
+                calMobile ? "text-[11px]" : "text-xs"
+              } ${
                 isLightTheme
-                  ? "border-slate-200/80 bg-slate-50/50 text-slate-500"
-                  : "border-slate-700/80 bg-slate-800/30 text-slate-400"
+                  ? "border-slate-200 bg-slate-50 text-slate-700"
+                  : "border-slate-800 bg-slate-800 text-slate-300"
               }`}
-              style={{ gridColumn: 1, gridRow: slotIndex + 2 }}
+              style={{ gridColumn: dayIndex + 2, gridRow: 1 }}
             >
-              {timeLabel}
+              {calMobile ? (
+                <>
+                  <span className="block uppercase tracking-wide text-[10px] opacity-80">
+                    {format(day, "EEE", { locale: de })}
+                  </span>
+                  <span className="block tabular-nums">{format(day, "d.MM.", { locale: de })}</span>
+                </>
+              ) : (
+                format(day, "EEE d.MM.", { locale: de })
+              )}
             </div>
-          );
-        })}
-        {weekDays.map((_, dayIndex) =>
-          Array.from({ length: TOTAL_SLOTS }).map((_, slotIndex) => (
-            <DroppableSlot
-              key={`${dayIndex}-${slotIndex}`}
-              dayIndex={dayIndex}
-              slotIndex={slotIndex}
-              isHighlight={
-                dropTargetSlot?.dayIndex === dayIndex && dropTargetSlot?.slotIndex === slotIndex
-              }
-              style={{ gridColumn: dayIndex + 2, gridRow: slotIndex + 2 }}
-              theme={isLightTheme ? "light" : "dark"}
-            />
-          ))
-        )}
-        {calendarEvents.filter((ev) => isEventInWeek(ev.start)).map((ev) => {
-          const dayIndex = getDayOffset(ev.start);
-          const slotIndex = getSlotIndex(ev.start);
-          const span = getSlotSpan(ev.start, ev.end);
-          if (dayIndex < 0 || dayIndex > 5 || slotIndex < 0 || slotIndex >= TOTAL_SLOTS) return null;
-          
-          // Layout für überlappende Events (Apple-Kalender-Style)
-          const layout = getOverlappingEventsLayout.get(ev.id);
-          const width = layout ? `${layout.width}%` : "100%";
-          const left = layout ? `${layout.left}%` : "0%";
-          const zIndex = layout && layout.total > 1 ? layout.index + 1 : 1;
-          
-          return (
-            <DraggableEventPill
-              key={ev.id}
-              ev={ev}
-              style={{
-                gridColumn: dayIndex + 2,
-                gridRow: `${slotIndex + 2} / span ${span}`,
-                zIndex,
-                minHeight: "44px",
-                width,
-                left,
-                position: "relative",
-              }}
-              className={`mx-0.5 rounded-lg border px-0 py-0 text-left text-[11px] font-medium shadow hover:opacity-90 ${
-                (ev.resource?.termin_typ ?? "").trim() === TERMIN_TYP.BESICHTIGUNG
-                  ? "bg-slate-500/90 border-slate-400 text-white"
-                  : `text-white ${eventPillBg(ev.resource)} border-blue-400/50`
-              }`}
-              onOpenDetail={() => {
-                if (ev.resourceKind === "ticket") {
-                  const t = tickets.find((x) => x.id === ev.id);
-                  if (t) openDetailModal(t);
-                } else if (ev.resource && ev.resourceKind === "auftrag") {
-                  openAuftragBoardDetail(ev.resource as HandwerkerAuftrag);
+          ))}
+          {Array.from({ length: TOTAL_SLOTS }).map((_, slotIndex) => {
+            const hour = CALENDAR_HOUR_START + Math.floor(slotIndex / SLOTS_PER_HOUR);
+            const min = (slotIndex % SLOTS_PER_HOUR) * SLOT_MINUTES;
+            const timeLabel = `${String(hour).padStart(2, "0")}:${String(min).padStart(2, "0")}`;
+            const showLabel = min === 0;
+            return (
+              <div
+                key={`time-${slotIndex}`}
+                className={cn(
+                  "sticky left-0 z-[15] flex items-center justify-end border-b border-r py-0.5 pl-2 tabular-nums shadow-[2px_0_8px_-2px_rgba(0,0,0,0.05)]",
+                  calMobile ? "pr-2 text-[11px] leading-none" : "pr-3 text-xs",
+                  isLightTheme
+                    ? "border-slate-200/80 bg-slate-50 text-slate-600"
+                    : "border-slate-700/80 bg-slate-900 text-slate-400"
+                )}
+                style={{ gridColumn: 1, gridRow: slotIndex + 2 }}
+              >
+                {showLabel ? timeLabel : ""}
+              </div>
+            );
+          })}
+          {weekDays.map((_, dayIndex) =>
+            Array.from({ length: TOTAL_SLOTS }).map((_, slotIndex) => (
+              <DroppableSlot
+                key={`${dayIndex}-${slotIndex}`}
+                dayIndex={dayIndex}
+                slotIndex={slotIndex}
+                isHighlight={
+                  dropTargetSlot?.dayIndex === dayIndex && dropTargetSlot?.slotIndex === slotIndex
                 }
-              }}
-            />
-          );
-        })}
+                style={{ gridColumn: dayIndex + 2, gridRow: slotIndex + 2 }}
+                theme={isLightTheme ? "light" : "dark"}
+                compact={calMobile}
+              />
+            ))
+          )}
+          {calendarEvents.filter((ev) => isEventInWeek(ev.start)).map((ev) => {
+            const dayIndex = getDayOffset(ev.start);
+            const slotIndex = getSlotIndex(ev.start);
+            const span = getSlotSpan(ev.start, ev.end);
+            if (dayIndex < 0 || dayIndex > 5 || slotIndex < 0 || slotIndex >= TOTAL_SLOTS) return null;
+
+            // Layout für überlappende Events (Apple-Kalender-Style)
+            const layout = getOverlappingEventsLayout.get(ev.id);
+            const width = layout ? `${layout.width}%` : "100%";
+            const left = layout ? `${layout.left}%` : "0%";
+            const zIndex = layout && layout.total > 1 ? layout.index + 1 : 1;
+
+            return (
+              <DraggableEventPill
+                key={ev.id}
+                ev={ev}
+                compact={calMobile}
+                parallelInSlot={layout?.total ?? 1}
+                style={{
+                  gridColumn: dayIndex + 2,
+                  gridRow: `${slotIndex + 2} / span ${span}`,
+                  zIndex,
+                  minHeight: `${calSlotPx * span - 4}px`,
+                  width,
+                  left,
+                  position: "relative",
+                }}
+                className={`mx-0.5 rounded-lg border px-0 py-0 text-left font-medium shadow-sm hover:opacity-90 ${
+                  (ev.resource?.termin_typ ?? "").trim() === TERMIN_TYP.BESICHTIGUNG
+                    ? "bg-slate-500/90 border-slate-400 text-white"
+                    : `text-white ${eventPillBg(ev.resource)} border-blue-400/50`
+                }`}
+                onOpenDetail={() => {
+                  if (ev.resourceKind === "ticket") {
+                    const t = tickets.find((x) => x.id === ev.id);
+                    if (t) openDetailModal(t);
+                  } else if (ev.resource && ev.resourceKind === "auftrag") {
+                    openAuftragBoardDetail(ev.resource as HandwerkerAuftrag);
+                  }
+                }}
+              />
+            );
+          })}
+        </div>
       </div>
-      </div>
-    </>
+    </div>
   );
 
   // Weitere Kanban-Spalten außer Eingang (incoming)
@@ -3950,8 +4290,10 @@ export default function AdminDashboardPage() {
   // Generische Kanban-Spalte
   const KanbanColumn = ({
     config,
+    className,
   }: {
     config: (typeof BUSINESS_COLUMNS)[number];
+    className?: string;
   }) => {
     const { setNodeRef, isOver } = useDroppable({ id: config.droppableId });
     const columnCfg = columnConfigs.find((c) => c.colId === config.droppableId);
@@ -3994,10 +4336,18 @@ export default function AdminDashboardPage() {
       <section
         ref={setNodeRef}
         data-col-droppable={config.droppableId}
-        className={`flex flex-col overflow-hidden rounded-2xl border p-4 transition-colors ${sectionColorClasses}`}
+        className={cn(
+          "flex flex-col overflow-hidden rounded-2xl border p-4 transition-colors",
+          sectionColorClasses,
+          className
+        )}
       >
         <div className="mb-2 flex shrink-0 items-center justify-between gap-2">
-          <h2 className="text-xs font-medium uppercase tracking-wider text-slate-500">
+          <h2
+            className={`text-xs font-medium uppercase tracking-wider ${
+              isLightTheme ? "text-slate-600" : "text-slate-500"
+            }`}
+          >
             {config.title}
           </h2>
           <span
@@ -4038,118 +4388,135 @@ export default function AdminDashboardPage() {
       }`}
     >
       <div
-        className={`sticky top-0 z-10 flex items-center justify-between gap-3 border-b px-4 py-3 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur sm:gap-4 sm:px-6 lg:px-8 ${
+        className={`sticky top-0 z-10 flex flex-col gap-3 border-b px-4 py-3 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur sm:gap-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:gap-3 lg:px-8 ${
           isLightTheme ? "border-slate-200/80 bg-white/95 shadow-[0_1px_0_0_rgba(0,0,0,0.04)]" : "border-slate-800 bg-slate-950/95"
         }`}
       >
-        <Logo
-          variant={isLightTheme ? "footer" : "header"}
-          className="h-8"
-        />
-        <div className="flex flex-col items-end gap-1.5">
-          {adminUser?.email && (
-            <span className={`max-w-[min(100%,12rem)] truncate text-xs sm:max-w-none ${isLightTheme ? "text-slate-500" : "text-slate-500"}`}>
-              {adminUser.email}
-            </span>
-          )}
-          <div className="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2">
-          {!isGewerkUser && (
-            <button
-              type="button"
-              onClick={openCalendarFromHeader}
-              title="Kalender öffnen"
-              className={`inline-flex h-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-full border p-0 text-xs font-medium transition-all hover:opacity-90 active:scale-[0.98] ${
-                isLightTheme
-                  ? "border-slate-200 bg-white text-slate-700 shadow-sm hover:border-slate-300"
-                  : "border-slate-600 bg-slate-900/80 text-slate-100 hover:border-slate-500 hover:bg-slate-800/80"
-              }`}
-            >
-              <CalendarIcon className="h-5 w-5" strokeWidth={2} />
-            </button>
-          )}
-          {isGewerkUser && (
-            <button
-              type="button"
-              onClick={toggleDashboardTheme}
-              title={isLightTheme ? "Dunkel" : "Hell"}
-              className={`inline-flex h-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-full border p-0 text-xs font-medium transition-all hover:opacity-90 active:scale-[0.98] ${
-                isLightTheme
-                  ? "border-slate-200 bg-white text-slate-700 shadow-sm hover:border-slate-300"
-                  : "border-slate-600 bg-slate-900/80 text-slate-100 hover:border-slate-500 hover:bg-slate-800/80"
-              }`}
-            >
-              {isLightTheme ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
-            </button>
-          )}
-          {!isGewerkUser && (
-            <>
-              <Popover>
-                <PopoverTrigger asChild>
+        <div className="flex w-full shrink-0 justify-center lg:w-auto lg:justify-start">
+          <Logo variant={isLightTheme ? "footer" : "header"} className="h-8" />
+        </div>
+        <div className="flex w-full min-w-0 flex-col items-center gap-2 lg:w-auto lg:items-end lg:gap-1.5">
+          <div className="flex w-full min-w-0 items-center justify-between gap-2 pb-0.5 lg:w-auto lg:flex-wrap lg:justify-end lg:gap-2 lg:pb-0">
+            <div className="flex min-w-0 flex-nowrap items-center gap-1.5 overflow-x-auto overflow-y-visible [-webkit-overflow-scrolling:touch] sm:gap-2 lg:contents lg:overflow-visible [&_button]:shrink-0">
+              {!isGewerkUser && (
+                <button
+                  type="button"
+                  onClick={openCalendarFromHeader}
+                  title="Kalender öffnen"
+                  className={`inline-flex h-11 min-h-[44px] min-w-[44px] touch-manipulation items-center justify-center rounded-full border p-0 text-xs font-medium transition-all hover:opacity-90 active:scale-[0.98] ${
+                    isLightTheme
+                      ? "border-slate-200 bg-white text-slate-700 shadow-sm hover:border-slate-300"
+                      : "border-slate-600 bg-slate-900/80 text-slate-100 hover:border-slate-500 hover:bg-slate-800/80"
+                  }`}
+                >
+                  <CalendarIcon className="h-5 w-5" strokeWidth={2} />
+                </button>
+              )}
+              {isGewerkUser && (
+                <>
                   <button
                     type="button"
-                    title="Einstellungen"
-                    className={`inline-flex h-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-full border p-0 text-xs font-medium transition-all hover:opacity-90 active:scale-[0.98] ${
+                    onClick={openCalendarFromHeader}
+                    title="Kalender öffnen"
+                    className={`inline-flex h-11 min-h-[44px] min-w-[44px] touch-manipulation items-center justify-center rounded-full border p-0 text-xs font-medium transition-all hover:opacity-90 active:scale-[0.98] ${
                       isLightTheme
                         ? "border-slate-200 bg-white text-slate-700 shadow-sm hover:border-slate-300"
                         : "border-slate-600 bg-slate-900/80 text-slate-100 hover:border-slate-500 hover:bg-slate-800/80"
                     }`}
                   >
-                    <Settings className="h-5 w-5" />
+                    <CalendarIcon className="h-5 w-5" strokeWidth={2} />
                   </button>
-                </PopoverTrigger>
-                <PopoverContent
-                  align="end"
-                  className={`w-52 p-2 ${isLightTheme ? "border-slate-200 bg-white" : "border-slate-700 bg-slate-900"}`}
-                >
-                  <nav className="flex flex-col gap-0.5">
-                    <Link
-                      href="/admin/dashboard"
-                      className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                        isLightTheme ? "text-slate-700 hover:bg-slate-100" : "text-slate-300 hover:bg-slate-800 hover:text-slate-100"
+                  <button
+                    type="button"
+                    onClick={toggleDashboardTheme}
+                    title={isLightTheme ? "Dunkel" : "Hell"}
+                    className={`inline-flex h-11 min-h-[44px] min-w-[44px] touch-manipulation items-center justify-center rounded-full border p-0 text-xs font-medium transition-all hover:opacity-90 active:scale-[0.98] ${
+                      isLightTheme
+                        ? "border-slate-200 bg-white text-slate-700 shadow-sm hover:border-slate-300"
+                        : "border-slate-600 bg-slate-900/80 text-slate-100 hover:border-slate-500 hover:bg-slate-800/80"
+                    }`}
+                  >
+                    {isLightTheme ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+                  </button>
+                </>
+              )}
+              {!isGewerkUser && (
+                <>
+                  <Popover modal={isMobileViewport}>
+                    <PopoverTrigger asChild>
+                      <button
+                        type="button"
+                        title="Einstellungen"
+                        className={`inline-flex h-11 min-h-[44px] min-w-[44px] touch-manipulation items-center justify-center rounded-full border p-0 text-xs font-medium transition-all hover:opacity-90 active:scale-[0.98] ${
+                          isLightTheme
+                            ? "border-slate-200 bg-white text-slate-700 shadow-sm hover:border-slate-300"
+                            : "border-slate-600 bg-slate-900/80 text-slate-100 hover:border-slate-500 hover:bg-slate-800/80"
+                        }`}
+                      >
+                        <Settings className="h-5 w-5" />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      align="end"
+                      collisionPadding={16}
+                      className={`w-[min(calc(100vw-2rem),13rem)] touch-manipulation p-2 sm:w-52 ${
+                        isLightTheme ? "border-slate-200 bg-white" : "border-slate-700 bg-slate-900"
                       }`}
                     >
-                      <LayoutDashboard className="h-4 w-4 shrink-0" />
-                      Dashboard
-                    </Link>
-                    <Link
-                      href="/admin/benutzer"
-                      className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                        isLightTheme ? "text-slate-700 hover:bg-slate-100" : "text-slate-300 hover:bg-slate-800 hover:text-slate-100"
-                      }`}
-                    >
-                      <Users className="h-4 w-4 shrink-0" />
-                      Benutzerverwaltung
-                    </Link>
-                  </nav>
-                </PopoverContent>
-              </Popover>
+                      <nav className="flex flex-col gap-0.5">
+                        <Link
+                          href="/admin/dashboard"
+                          className={`flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors sm:min-h-0 ${
+                            isLightTheme ? "text-slate-700 hover:bg-slate-100" : "text-slate-300 hover:bg-slate-800 hover:text-slate-100"
+                          }`}
+                        >
+                          <LayoutDashboard className="h-4 w-4 shrink-0" />
+                          Dashboard
+                        </Link>
+                        <Link
+                          href="/admin/benutzer"
+                          className={`flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors sm:min-h-0 ${
+                            isLightTheme ? "text-slate-700 hover:bg-slate-100" : "text-slate-300 hover:bg-slate-800 hover:text-slate-100"
+                          }`}
+                        >
+                          <Users className="h-4 w-4 shrink-0" />
+                          Benutzerverwaltung
+                        </Link>
+                      </nav>
+                    </PopoverContent>
+                  </Popover>
+                  <button
+                    type="button"
+                    onClick={toggleDashboardTheme}
+                    title={isLightTheme ? "Dunkel" : "Hell"}
+                    className={`inline-flex h-11 min-h-[44px] min-w-[44px] touch-manipulation items-center justify-center rounded-full border p-0 text-xs font-medium transition-all hover:opacity-90 active:scale-[0.98] ${
+                      isLightTheme
+                        ? "border-slate-200 bg-white text-slate-700 shadow-sm hover:border-slate-300"
+                        : "border-slate-600 bg-slate-900/80 text-slate-100 hover:border-slate-500 hover:bg-slate-800/80"
+                    }`}
+                  >
+                    {isLightTheme ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+                  </button>
+                </>
+              )}
+            </div>
+            <form
+              action="/auth/signout"
+              method="post"
+              className="inline shrink-0 max-lg:mr-2 max-lg:pr-[env(safe-area-inset-right)] lg:mr-0 lg:pr-0"
+            >
               <button
-                type="button"
-                onClick={toggleDashboardTheme}
-                title={isLightTheme ? "Dunkel" : "Hell"}
-                className={`inline-flex h-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-full border p-0 text-xs font-medium transition-all hover:opacity-90 active:scale-[0.98] ${
+                type="submit"
+                title="Abmelden"
+                className={`inline-flex h-11 min-h-[44px] min-w-[44px] touch-manipulation items-center justify-center rounded-full border p-0 text-xs font-medium transition-all hover:opacity-90 active:scale-[0.98] ${
                   isLightTheme
-                    ? "border-slate-200 bg-white text-slate-700 shadow-sm hover:border-slate-300"
+                    ? "border-slate-200 bg-white text-slate-700 shadow-sm hover:border-slate-300 hover:bg-slate-100"
                     : "border-slate-600 bg-slate-900/80 text-slate-100 hover:border-slate-500 hover:bg-slate-800/80"
                 }`}
               >
-                {isLightTheme ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+                <LogOut className="h-5 w-5" />
               </button>
-            </>
-          )}
-          <form action="/auth/signout" method="post" className="inline">
-            <button
-              type="submit"
-              title="Abmelden"
-              className={`inline-flex h-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-full border p-0 text-xs font-medium transition-all hover:opacity-90 active:scale-[0.98] ${
-                isLightTheme
-                  ? "border-slate-200 bg-white text-slate-700 shadow-sm hover:border-slate-300 hover:bg-slate-100"
-                  : "border-slate-600 bg-slate-900/80 text-slate-100 hover:border-slate-500 hover:bg-slate-800/80"
-              }`}
-            >
-              <LogOut className="h-5 w-5" />
-            </button>
-          </form>
+            </form>
           </div>
         </div>
       </div>
@@ -4182,157 +4549,193 @@ export default function AdminDashboardPage() {
           </div>
           ) : (
           <>
-          {/* Mobile: Tabs Eingang | Kalender */}
+          {/* Mobile: Anfragen/Eingang (Standard); Kalender nur per Header-Icon */}
           <div className="lg:hidden">
-            <Tabs
-              value={mobileMainTab}
-              onValueChange={(v) => setMobileMainTab(v === "calendar" ? "calendar" : "list")}
-              className="w-full"
-            >
-              <TabsList
-                className={`mb-3 grid h-12 w-full grid-cols-2 gap-1 rounded-xl p-1 ${
-                  isLightTheme ? "bg-slate-200/90" : "bg-slate-800"
-                }`}
-              >
-                <TabsTrigger
-                  value="list"
-                  className={`rounded-lg text-sm font-medium transition-all data-[state=active]:shadow-sm ${
-                    isLightTheme
-                      ? "text-slate-600 data-[state=active]:bg-white data-[state=active]:text-slate-900"
-                      : "text-slate-400 data-[state=active]:bg-slate-700 data-[state=active]:text-slate-100"
-                  }`}
-                >
-                  {isGewerkUser
-                    ? `Eingang (${col1EingangTickets.length + col1EingangAuftraege.length})`
-                    : `Anfragen (${col1Tickets.length + col1AuftraegeInBucket.length})`}
-                </TabsTrigger>
-                <TabsTrigger
-                  value="calendar"
-                  className={`rounded-lg text-sm font-medium transition-all data-[state=active]:shadow-sm ${
-                    isLightTheme
-                      ? "text-slate-600 data-[state=active]:bg-white data-[state=active]:text-slate-900"
-                      : "text-slate-400 data-[state=active]:bg-slate-700 data-[state=active]:text-slate-100"
-                  }`}
-                >
-                  Kalender
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent value="list" className="mt-0 space-y-3">
-                {!isGewerkUser && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCreateTicketOpen(true);
-                      resetCreateTicketForm();
-                    }}
-                    className="w-full inline-flex items-center justify-center gap-1.5 rounded-full border border-blue-500/60 bg-blue-500/20 px-3 py-2.5 text-xs font-medium text-blue-200 shadow-sm transition-all hover:opacity-90 hover:bg-blue-500/30"
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                    Ticket erstellen
-                  </button>
-                )}
-                <section
-                  ref={setCol1MobileListRef}
-                  className={`flex flex-col rounded-2xl border p-4 transition-colors ${
-                    isOverCol1MobileList
-                      ? isLightTheme
-                        ? "border-blue-500 bg-blue-50 ring-2 ring-blue-400/50"
-                        : "border-blue-500 bg-slate-800/80 ring-2 ring-blue-500/50"
-                      : isLightTheme
-                        ? "border-slate-200 bg-white shadow-sm"
-                        : "border-slate-800 bg-slate-900/70"
-                  }`}
-                >
-                  {!isGewerkUser && (
-                    <div className="mb-3 flex shrink-0 rounded-xl bg-slate-800/60 p-1">
-                      <button
-                        type="button"
-                        onClick={() => setIncomingTab("Eingang")}
-                        className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
-                          incomingTab === "Eingang"
-                            ? "bg-slate-700 text-slate-100 shadow-sm"
-                            : "text-slate-400 hover:text-slate-200"
-                        }`}
-                      >
-                        Eingang ({col1EingangTickets.length + col1EingangAuftraege.length})
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setIncomingTab("Angebote")}
-                        className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
-                          incomingTab === "Angebote"
-                            ? "bg-slate-700 text-slate-100 shadow-sm"
-                            : "text-slate-400 hover:text-slate-200"
-                        }`}
-                      >
-                        Angebote ({col1AngeboteTickets.length + col1AngeboteAuftraege.length})
-                      </button>
-                    </div>
-                  )}
-                  <div
-                    ref={listScrollRef}
-                    tabIndex={-1}
-                    className="max-h-[min(70dvh,calc(100dvh-14rem))] space-y-3 overflow-y-auto overscroll-y-contain pr-1 [-webkit-overflow-scrolling:touch]"
-                  >
-                    <SortableContext
-                      items={[
-                        ...(isGewerkUser || incomingTab === "Eingang" ? col1EingangTickets : col1AngeboteTickets).map(
-                          (t) => `ticket-${t.id}`
-                        ),
-                        ...(isGewerkUser || incomingTab === "Eingang" ? col1EingangAuftraege : col1AngeboteAuftraege).map(
-                          (a) => `auftrag-${a.id}`
-                        ),
-                      ]}
-                      strategy={verticalListSortingStrategy}
+            {mobileMainTab === "list" ? (
+              <div className="space-y-3">
+                {!isGewerkUser &&
+                  (mobileBoardTab === "eingang" || mobileBoardTab === "angebote") && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCreateTicketOpen(true);
+                        resetCreateTicketForm();
+                      }}
+                      className={`inline-flex min-h-[3rem] w-full touch-manipulation items-center justify-center gap-2 rounded-full border px-4 py-3.5 text-base font-semibold shadow-md transition-all active:scale-[0.99] sm:min-h-12 sm:py-3 sm:text-sm ${
+                        isLightTheme
+                          ? "border-blue-700 bg-blue-600 text-white hover:bg-blue-700"
+                          : "border-blue-400 bg-blue-600 text-white shadow-blue-950/40 hover:bg-blue-500"
+                      }`}
                     >
-                      {renderBoardColumnCards(
-                        isGewerkUser || incomingTab === "Eingang" ? col1EingangTickets : col1AngeboteTickets,
-                        isGewerkUser || incomingTab === "Eingang" ? col1EingangAuftraege : col1AngeboteAuftraege,
-                        isGewerkUser || incomingTab === "Eingang" ? "Keine Anfragen." : "Keine Angebote.",
-                        "column-1",
-                        !isGewerkUser && incomingTab === "Angebote"
-                          ? {
-                              isAngeboteTab: true,
-                              onOpenQuoteBuilder: (t) => {
-                                setQuoteBuilderTicketId(t.id);
-                                setQuoteBuilderOpen(true);
-                                markOfferSeen(t.id);
-                              },
-                              offerAttentionIds,
-                            }
-                          : undefined
-                      )}
-                    </SortableContext>
+                      <Plus className="h-5 w-5 shrink-0" strokeWidth={2.5} />
+                      Ticket erstellen
+                    </button>
+                  )}
+                {!isGewerkUser && (
+                  <div
+                    className={cn(
+                      "overflow-x-auto overflow-y-hidden rounded-2xl border p-1 [-webkit-overflow-scrolling:touch]",
+                      isLightTheme
+                        ? "border-slate-200/90 bg-slate-100/70 shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)]"
+                        : "border-slate-700/80 bg-slate-900/50 shadow-[inset_0_1px_2px_rgba(0,0,0,0.2)]"
+                    )}
+                  >
+                    <div
+                      className="flex w-max min-w-full items-stretch gap-1 px-0.5 py-0.5"
+                      role="tablist"
+                      aria-label="Board-Spalte"
+                    >
+                      {(
+                        [
+                          {
+                            id: "eingang" as const,
+                            title: "Eingang",
+                            count: col1EingangTickets.length + col1EingangAuftraege.length,
+                          },
+                          {
+                            id: "angebote" as const,
+                            title: "Angebote",
+                            count: col1AngeboteTickets.length + col1AngeboteAuftraege.length,
+                          },
+                          ...processColumns.map((cfg) => {
+                            const colCfg = columnConfigs.find((c) => c.colId === cfg.droppableId);
+                            const n = (colCfg?.tickets.length ?? 0) + (colCfg?.auftraege.length ?? 0);
+                            const raw = cfg.title.replace(/^\d+\.\s*/, "").trim();
+                            const title = (raw.split("&")[0] ?? raw).trim();
+                            return {
+                              id: cfg.droppableId as "column-3" | "column-4" | "column-5" | "column-6",
+                              title,
+                              count: n,
+                            };
+                          }),
+                        ] as const
+                      ).map((tab) => {
+                        const active = mobileBoardTab === tab.id;
+                        return (
+                          <button
+                            key={tab.id}
+                            type="button"
+                            role="tab"
+                            aria-selected={active}
+                            onClick={() => {
+                              setMobileBoardTab(tab.id);
+                              if (tab.id === "eingang") setIncomingTab("Eingang");
+                              if (tab.id === "angebote") setIncomingTab("Angebote");
+                            }}
+                            className={cn(
+                              "flex h-11 min-w-[5.75rem] max-w-[9.5rem] shrink-0 touch-manipulation items-center gap-2 rounded-xl px-2.5 transition-[background-color,box-shadow,color] duration-200",
+                              active
+                                ? isLightTheme
+                                  ? "bg-white text-slate-900 shadow-sm ring-1 ring-slate-200/90"
+                                  : "bg-slate-700/95 text-slate-100 shadow-md ring-1 ring-slate-500/40"
+                                : isLightTheme
+                                  ? "text-slate-600 hover:bg-slate-200/60"
+                                  : "text-slate-400 hover:bg-slate-800/80"
+                            )}
+                          >
+                            <span className="min-w-0 flex-1 truncate text-left text-[13px] font-medium leading-none">
+                              {tab.title}
+                            </span>
+                            <span
+                              className={cn(
+                                "shrink-0 tabular-nums",
+                                "min-w-[1.375rem] rounded-full px-1.5 py-0.5 text-center text-[11px] font-semibold leading-none",
+                                active
+                                  ? isLightTheme
+                                    ? "bg-slate-100 text-slate-700"
+                                    : "bg-slate-600/90 text-slate-100"
+                                  : isLightTheme
+                                    ? "bg-white/80 text-slate-500"
+                                    : "bg-slate-800 text-slate-400"
+                              )}
+                            >
+                              {tab.count}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-                </section>
-              </TabsContent>
-              <TabsContent value="calendar" className="mt-0">
-                <div
-                  ref={setEingangMobileRef}
-                  className={`mb-3 rounded-xl border border-dashed px-3 py-3 text-center text-xs leading-snug transition-colors sm:py-2 ${
-                    isOverEingangMobile
-                      ? isLightTheme
-                        ? "border-blue-500 bg-blue-50 text-blue-800"
-                        : "border-blue-500 bg-blue-500/20 text-blue-200"
-                      : isLightTheme
-                        ? "border-slate-300 bg-slate-100 text-slate-600"
-                        : "border-slate-600 bg-slate-800/50 text-slate-400"
+                )}
+                {!isGewerkUser && (mobileBoardTab === "eingang" || mobileBoardTab === "angebote") ? (
+                  <section
+                    ref={setCol1MobileListRef}
+                    className={`flex flex-col rounded-2xl border p-4 transition-colors ${
+                      isOverCol1MobileList
+                        ? isLightTheme
+                          ? "border-blue-500 bg-blue-50 ring-2 ring-blue-400/50"
+                          : "border-blue-500 bg-slate-800/80 ring-2 ring-blue-500/50"
+                        : isLightTheme
+                          ? "border-slate-200 bg-white shadow-sm"
+                          : "border-slate-800 bg-slate-900/70"
+                    }`}
+                  >
+                    <div
+                      ref={listScrollRef}
+                      tabIndex={-1}
+                      className="max-h-[min(70dvh,calc(100dvh-14rem))] space-y-3 overflow-y-auto overscroll-y-contain pr-1 [-webkit-overflow-scrolling:touch]"
+                    >
+                      <SortableContext
+                        items={[
+                          ...(mobileBoardTab === "eingang" ? col1EingangTickets : col1AngeboteTickets).map(
+                            (t) => `ticket-${t.id}`
+                          ),
+                          ...(mobileBoardTab === "eingang" ? col1EingangAuftraege : col1AngeboteAuftraege).map(
+                            (a) => `auftrag-${a.id}`
+                          ),
+                        ]}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        {renderBoardColumnCards(
+                          mobileBoardTab === "eingang" ? col1EingangTickets : col1AngeboteTickets,
+                          mobileBoardTab === "eingang" ? col1EingangAuftraege : col1AngeboteAuftraege,
+                          mobileBoardTab === "eingang" ? "Keine Anfragen." : "Keine Angebote.",
+                          "column-1",
+                          mobileBoardTab === "angebote"
+                            ? {
+                                isAngeboteTab: true,
+                                onOpenQuoteBuilder: (t) => {
+                                  setQuoteBuilderTicketId(t.id);
+                                  setQuoteBuilderOpen(true);
+                                  markOfferSeen(t.id);
+                                },
+                                offerAttentionIds,
+                              }
+                            : undefined
+                        )}
+                      </SortableContext>
+                    </div>
+                  </section>
+                ) : !isGewerkUser && isMounted && isMobileViewport ? (
+                  <div className="flex min-h-[min(65dvh,520px)] flex-col">
+                    {(() => {
+                      const cfg = processColumns.find((c) => c.droppableId === mobileBoardTab);
+                      if (!cfg) return null;
+                      return <KanbanColumn config={cfg} className="h-full min-h-0" />;
+                    })()}
+                  </div>
+                ) : null}
+              </div>
+            ) : (
+              <div
+                ref={setEingangMobileRef}
+                className="mt-0 flex min-h-0 flex-col space-y-3"
+              >
+                <button
+                  type="button"
+                  onClick={() => setMobileMainTab("list")}
+                  className={`flex min-h-11 w-full touch-manipulation items-center gap-2 rounded-xl border px-3 py-2.5 text-left text-sm font-semibold transition-colors active:scale-[0.99] ${
+                    isLightTheme
+                      ? "border-slate-200 bg-white text-slate-800 shadow-sm hover:bg-slate-50"
+                      : "border-slate-600 bg-slate-800/80 text-slate-100 hover:bg-slate-800"
                   }`}
                 >
-                  {isOverEingangMobile ? (
-                    "Loslassen → Termin entfernen"
-                  ) : (
-                    <>
-                      <span className="sm:hidden">Karte hier ablegen → zurück zum Eingang</span>
-                      <span className="hidden sm:inline">
-                        Kalender-Karte hier ablegen → Termin entfernen, Karte zurück in den Eingang
-                      </span>
-                    </>
-                  )}
-                </div>
+                  <ChevronLeft className="h-5 w-5 shrink-0 opacity-80" strokeWidth={2} />
+                  {isGewerkUser ? "Zurück zum Eingang" : "Zurück zu Anfragen"}
+                </button>
                 {renderWeekCalendar()}
-              </TabsContent>
-            </Tabs>
+              </div>
+            )}
           </div>
 
           {/* Desktop: 6-Spalten – Obere Sektion (Planung): Spalte 1 + 2 gleiche Höhe */}
@@ -4347,13 +4750,13 @@ export default function AdminDashboardPage() {
                       setCreateTicketOpen(true);
                       resetCreateTicketForm();
                     }}
-                    className={`shrink-0 w-full inline-flex items-center justify-center gap-1.5 rounded-full border px-3 py-2.5 text-xs font-medium transition-all hover:opacity-90 ${
+                    className={`shrink-0 w-full inline-flex min-h-11 items-center justify-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold shadow-sm transition-all active:scale-[0.99] hover:opacity-95 ${
                       isLightTheme
-                        ? "border-slate-200 bg-slate-100 text-slate-800 shadow-sm hover:border-slate-300 hover:bg-slate-200"
-                        : "border-blue-500/60 bg-blue-500/20 text-blue-200 shadow-sm hover:bg-blue-500/30"
+                        ? "border-blue-700 bg-blue-600 text-white hover:bg-blue-700"
+                        : "border-blue-400 bg-blue-600 text-white hover:bg-blue-500"
                     }`}
                   >
-                    <Plus className="h-3.5 w-3.5" />
+                    <Plus className="h-4 w-4 shrink-0" strokeWidth={2.5} />
                     Ticket erstellen
                   </button>
                 )}
@@ -4371,7 +4774,11 @@ export default function AdminDashboardPage() {
                 }`}
               >
                 <div className="mb-2 flex shrink-0 items-center justify-between gap-2">
-                  <h2 className="text-xs font-medium uppercase tracking-wider text-slate-500">
+                  <h2
+                    className={`text-xs font-medium uppercase tracking-wider ${
+                      isLightTheme ? "text-slate-600" : "text-slate-500"
+                    }`}
+                  >
                     {isGewerkUser || incomingTab === "Eingang" ? "1. Neue Anfragen" : "1. Angebote & Kalkulationen"}
                   </h2>
                   <span className={`rounded-full px-2 py-0.5 text-xs ${
@@ -4474,16 +4881,18 @@ export default function AdminDashboardPage() {
                 {renderWeekCalendar()}
               </section>
             </div>
-
-            {/* Untere Sektion (Prozess): nur Admin */}
-            {!isGewerkUser && (
-              <div className="grid grid-cols-4 gap-4" style={{ height: "720px" }}>
-                {processColumns.map((cfg) => (
-                  <KanbanColumn key={cfg.id} config={cfg} />
-                ))}
-              </div>
-            )}
           </div>
+
+          {/* Spalten 3–6: nur Desktop-Grid (≥lg); Mobil jeweils eine Spalte über mobileBoardTab, sonst doppelte Droppables */}
+          {!isGewerkUser && isMounted && !isMobileViewport && (
+            <div className="mt-4 grid h-[720px] grid-cols-4 gap-4">
+              {processColumns.map((cfg) => (
+                <div key={cfg.id} className="flex h-full min-h-0 flex-col">
+                  <KanbanColumn config={cfg} className="h-full min-h-0" />
+                </div>
+              ))}
+            </div>
+          )}
           </>
           )}
 
@@ -4512,6 +4921,8 @@ export default function AdminDashboardPage() {
               const showSpm =
                 ev.resourceKind === "auftrag" ||
                 !!(res as Ticket | undefined)?.additional_data?.auftrag_id;
+              const overlayParallel = getOverlappingEventsLayout.get(ev.id)?.total ?? 1;
+              const overlayTight = isMobileViewport && overlayParallel > 1;
               return (
                 <div
                   className={`pointer-events-none cursor-grabbing opacity-70 mx-0.5 rounded-lg border px-1.5 py-0.5 text-left text-[11px] font-medium text-white shadow-lg flex flex-col justify-center min-w-[100px] ${
@@ -4531,7 +4942,9 @@ export default function AdminDashboardPage() {
                       <span className="shrink-0 rounded px-1 py-0.5 text-[9px] font-medium bg-amber-500/40 text-amber-100">SPM</span>
                     )}
                   </div>
-                  <span className="line-clamp-1 block text-[10px] opacity-90">{titleLine}</span>
+                  {!overlayTight && (
+                    <span className="line-clamp-1 block text-[10px] opacity-90">{titleLine}</span>
+                  )}
                 </div>
               );
             })() : activeDragId?.startsWith("ticket-") ? (() => {

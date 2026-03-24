@@ -23,6 +23,7 @@ dist-ssr
 
 # misc
 .DS_Store
+supabase/.temp/
 *.pem
 # Editor
 .vscode/*

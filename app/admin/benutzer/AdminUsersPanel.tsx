@@ -155,7 +155,11 @@ export function AdminUsersPanel() {
       const res = await fetch("/api/admin/users/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: resetUser.id, password: resetPassword }),
+        body: JSON.stringify({
+          user_id: resetUser.id,
+          email: resetUser.email ?? "",
+          password: resetPassword,
+        }),
       });
       const json = (await res.json()) as { error?: string; message?: string };
       if (res.ok) {
@@ -173,28 +177,26 @@ export function AdminUsersPanel() {
   };
 
   return (
-    <div className="space-y-10">
-      <section className="rounded-xl border border-slate-800 bg-slate-900/50 p-6">
-        <h2 className="text-lg font-semibold text-slate-100">Neuen Nutzer anlegen</h2>
-        <p className="mt-1 text-sm text-slate-400">
+    <div className="space-y-6 sm:space-y-10">
+      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+        <h2 className="text-lg font-semibold text-slate-900">Neuen Nutzer anlegen</h2>
+        <p className="mt-1 text-sm text-slate-600">
           Gewerk-Nutzer sehen nur Aufträge, deren Kanban-Karte ihr Gewerk enthält. Admin sieht alles.
         </p>
         <form onSubmit={(e) => void handleCreate(e)} className="mt-6 space-y-4">
           {formError && (
-            <div className="rounded-lg border border-red-500/40 bg-red-950/30 px-3 py-2 text-sm text-red-200">
+            <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
               {formError}
             </div>
           )}
           {formSuccess && (
-            <div className="rounded-lg border border-emerald-500/40 bg-emerald-950/30 px-3 py-2 text-sm text-emerald-200">
+            <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900">
               {formSuccess}
             </div>
           )}
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="nu-email" className="text-slate-300">
-                E-Mail
-              </Label>
+              <Label htmlFor="nu-email">E-Mail</Label>
               <Input
                 id="nu-email"
                 type="email"
@@ -202,13 +204,10 @@ export function AdminUsersPanel() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="off"
-                className="border-slate-600 bg-slate-800 text-slate-100"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="nu-pass" className="text-slate-300">
-                Passwort (min. 8 Zeichen)
-              </Label>
+              <Label htmlFor="nu-pass">Passwort (min. 8 Zeichen)</Label>
               <Input
                 id="nu-pass"
                 type="password"
@@ -217,32 +216,28 @@ export function AdminUsersPanel() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="new-password"
-                className="border-slate-600 bg-slate-800 text-slate-100"
               />
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="nu-name" className="text-slate-300">
-                Anzeigename (optional)
-              </Label>
+              <Label htmlFor="nu-name">Anzeigename (optional)</Label>
               <Input
                 id="nu-name"
                 type="text"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                className="border-slate-600 bg-slate-800 text-slate-100"
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-slate-300">Rolle</Label>
+              <Label>Rolle</Label>
               <Select value={role} onValueChange={(v) => setRole(v as UserRole)}>
-                <SelectTrigger className="border-slate-600 bg-slate-800 text-slate-100">
+                <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="border-slate-700 bg-slate-900">
+                <SelectContent>
                   {USER_ROLE_OPTIONS.map((o) => (
-                    <SelectItem key={o.value} value={o.value} className="text-slate-100 focus:bg-slate-800">
+                    <SelectItem key={o.value} value={o.value}>
                       {o.label}
                     </SelectItem>
                   ))}
@@ -250,7 +245,7 @@ export function AdminUsersPanel() {
               </Select>
             </div>
           </div>
-          <Button type="submit" disabled={creating} className="bg-slate-100 text-slate-900 hover:bg-white">
+          <Button type="submit" disabled={creating}>
             {creating ? "Wird angelegt…" : "Nutzer anlegen"}
           </Button>
         </form>
@@ -258,19 +253,13 @@ export function AdminUsersPanel() {
 
       <section>
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold text-slate-100">Bestehende Nutzer</h2>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => void loadUsers()}
-            disabled={loading}
-            className="border-slate-600 bg-transparent text-slate-200 hover:bg-slate-800"
-          >
+          <h2 className="text-lg font-semibold text-slate-900">Bestehende Nutzer</h2>
+          <Button type="button" variant="outline" onClick={() => void loadUsers()} disabled={loading}>
             Aktualisieren
           </Button>
         </div>
         {listError && (
-          <div className="mb-4 rounded-lg border border-amber-500/40 bg-amber-950/20 px-3 py-2 text-sm text-amber-100">
+          <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
             {listError}
           </div>
         )}
@@ -279,90 +268,155 @@ export function AdminUsersPanel() {
         ) : users.length === 0 ? (
           <p className="text-sm text-slate-500">Keine Nutzer gefunden.</p>
         ) : (
-          <div className="overflow-x-auto rounded-xl border border-slate-800">
-            <table className="w-full min-w-[560px] text-left text-sm">
-              <thead className="border-b border-slate-800 bg-slate-900/80 text-xs uppercase tracking-wide text-slate-500">
-                <tr>
-                  <th className="px-4 py-3 font-medium">E-Mail</th>
-                  <th className="px-4 py-3 font-medium">Rolle</th>
-                  <th className="px-4 py-3 font-medium">Name</th>
-                  <th className="px-4 py-3 font-medium">Angelegt</th>
-                  <th className="w-24 px-4 py-3 font-medium">Aktionen</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800">
-                {users.map((u) => (
-                  <tr key={u.id} className="bg-slate-900/30 text-slate-200">
-                    <td className="px-4 py-3">{u.email ?? "–"}</td>
-                    <td className="px-4 py-3 text-slate-300">{roleLabel(u.role)}</td>
-                    <td className="px-4 py-3 text-slate-400">{u.display_name ?? "–"}</td>
-                    <td className="px-4 py-3 text-slate-500">
-                      {u.created_at ? new Date(u.created_at).toLocaleString("de-DE") : "–"}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-1">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="h-9 w-9 text-slate-400 hover:bg-slate-800 hover:text-slate-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                          onClick={() => handleOpenReset(u)}
-                          disabled={u.id === currentUser?.id}
-                          aria-label={
-                            u.id === currentUser?.id
-                              ? "Eigenes Passwort nur über „Passwort vergessen“ änderbar"
-                              : `Passwort für ${u.email} zurücksetzen`
-                          }
-                          title={
-                            u.id === currentUser?.id
-                              ? "Eigenes Passwort nur über „Passwort vergessen“ änderbar"
-                              : "Passwort zurücksetzen"
-                          }
-                        >
-                          <KeyRound className="h-4 w-4" />
-                        </Button>
-                        {u.email?.trim() ? (
+          <>
+            {/* Mobil: gleiche Infos wie Tabelle, ohne horizontales Scrollen */}
+            <ul className="flex flex-col gap-3 sm:hidden">
+              {users.map((u) => (
+                <li
+                  key={u.id}
+                  className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+                >
+                  <p className="break-words text-sm font-semibold text-slate-900">{u.email ?? "–"}</p>
+                  <dl className="mt-3 space-y-2 text-sm">
+                    <div className="flex gap-2">
+                      <dt className="w-24 shrink-0 text-slate-500">Rolle</dt>
+                      <dd className="min-w-0 text-slate-800">{roleLabel(u.role)}</dd>
+                    </div>
+                    <div className="flex gap-2">
+                      <dt className="w-24 shrink-0 text-slate-500">Name</dt>
+                      <dd className="min-w-0 text-slate-700">{u.display_name ?? "–"}</dd>
+                    </div>
+                    <div className="flex gap-2">
+                      <dt className="w-24 shrink-0 text-slate-500">Angelegt</dt>
+                      <dd className="min-w-0 tabular-nums text-slate-600">
+                        {u.created_at
+                          ? new Date(u.created_at).toLocaleString("de-DE", {
+                              day: "2-digit",
+                              month: "2-digit",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })
+                          : "–"}
+                      </dd>
+                    </div>
+                  </dl>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="min-h-11 touch-manipulation"
+                      onClick={() => handleOpenReset(u)}
+                      disabled={u.id === currentUser?.id}
+                    >
+                      <KeyRound className="mr-2 h-4 w-4" />
+                      Passwort
+                    </Button>
+                    {u.email?.trim() ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="min-h-11 touch-manipulation"
+                        onClick={() => void handleResendEmail(u)}
+                        disabled={resendingId === u.id}
+                      >
+                        <Mail className="mr-2 h-4 w-4" />
+                        {resendingId === u.id ? "Sende…" : "E-Mail"}
+                      </Button>
+                    ) : null}
+                  </div>
+                  {u.id === currentUser?.id && (
+                    <p className="mt-2 text-xs text-slate-500">
+                      Eigenes Passwort nur über „Passwort vergessen“ auf der Anmeldeseite änderbar.
+                    </p>
+                  )}
+                </li>
+              ))}
+            </ul>
+
+            <div className="hidden overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm sm:block">
+              <table className="w-full min-w-[560px] text-left text-sm">
+                <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-600">
+                  <tr>
+                    <th className="px-4 py-3 font-medium">E-Mail</th>
+                    <th className="px-4 py-3 font-medium">Rolle</th>
+                    <th className="px-4 py-3 font-medium">Name</th>
+                    <th className="px-4 py-3 font-medium">Angelegt</th>
+                    <th className="w-24 px-4 py-3 font-medium">Aktionen</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200">
+                  {users.map((u) => (
+                    <tr key={u.id} className="text-slate-800 transition-colors hover:bg-slate-50/80">
+                      <td className="px-4 py-3">{u.email ?? "–"}</td>
+                      <td className="px-4 py-3 text-slate-700">{roleLabel(u.role)}</td>
+                      <td className="px-4 py-3 text-slate-600">{u.display_name ?? "–"}</td>
+                      <td className="px-4 py-3 text-slate-500">
+                        {u.created_at ? new Date(u.created_at).toLocaleString("de-DE") : "–"}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-1">
                           <Button
                             type="button"
                             variant="ghost"
                             size="icon"
-                            className="h-9 w-9 text-slate-400 hover:bg-slate-800 hover:text-slate-200"
-                            onClick={() => void handleResendEmail(u)}
-                            disabled={resendingId === u.id}
-                            aria-label={`Willkommens-Mail an ${u.email} erneut senden`}
-                            title="Willkommens-Mail erneut senden"
+                            className="h-9 w-9 text-slate-500 hover:bg-slate-100 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
+                            onClick={() => handleOpenReset(u)}
+                            disabled={u.id === currentUser?.id}
+                            aria-label={
+                              u.id === currentUser?.id
+                                ? "Eigenes Passwort nur über „Passwort vergessen“ änderbar"
+                                : `Passwort für ${u.email} zurücksetzen`
+                            }
+                            title={
+                              u.id === currentUser?.id
+                                ? "Eigenes Passwort nur über „Passwort vergessen“ änderbar"
+                                : "Passwort zurücksetzen"
+                            }
                           >
-                            <Mail className="h-4 w-4" />
+                            <KeyRound className="h-4 w-4" />
                           </Button>
-                        ) : (
-                          <span className="w-9" />
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                          {u.email?.trim() ? (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-9 w-9 text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+                              onClick={() => void handleResendEmail(u)}
+                              disabled={resendingId === u.id}
+                              aria-label={`Willkommens-Mail an ${u.email} erneut senden`}
+                              title="Willkommens-Mail erneut senden"
+                            >
+                              <Mail className="h-4 w-4" />
+                            </Button>
+                          ) : (
+                            <span className="w-9" />
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </section>
 
       <Dialog open={!!resetUser} onOpenChange={(o) => !o && setResetUser(null)}>
-        <DialogContent className="border-slate-700 bg-slate-900 sm:max-w-md">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-slate-100">
-              Passwort zurücksetzen
-            </DialogTitle>
+            <DialogTitle>Passwort zurücksetzen</DialogTitle>
           </DialogHeader>
           {resetUser && (
             <>
-              <p className="text-sm text-slate-400">
-                Neues Passwort für <strong className="text-slate-200">{resetUser.email}</strong>:
+              <p className="text-sm text-muted-foreground">
+                Neues Passwort für <strong className="text-foreground">{resetUser.email}</strong>:
               </p>
               <div className="space-y-2">
-                <Label htmlFor="reset-pass" className="text-slate-300">
-                  Neues Passwort (min. 8 Zeichen)
-                </Label>
+                <Label htmlFor="reset-pass">Neues Passwort (min. 8 Zeichen)</Label>
                 <Input
                   id="reset-pass"
                   type="password"
@@ -370,24 +424,17 @@ export function AdminUsersPanel() {
                   onChange={(e) => setResetPassword(e.target.value)}
                   minLength={8}
                   autoComplete="new-password"
-                  className="border-slate-600 bg-slate-800 text-slate-100"
                   placeholder="••••••••"
                 />
               </div>
               <DialogFooter className="gap-2 sm:gap-0">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setResetUser(null)}
-                  className="border-slate-600 text-slate-200"
-                >
+                <Button type="button" variant="outline" onClick={() => setResetUser(null)}>
                   Abbrechen
                 </Button>
                 <Button
                   type="button"
                   onClick={() => void handleResetPassword()}
                   disabled={resetPassword.length < 8 || resetting}
-                  className="bg-slate-100 text-slate-900 hover:bg-white"
                 >
                   {resetting ? "Wird gespeichert…" : "Passwort ändern"}
                 </Button>
