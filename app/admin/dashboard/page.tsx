@@ -4574,14 +4574,14 @@ export default function AdminDashboardPage() {
                 {!isGewerkUser && (
                   <div
                     className={cn(
-                      "overflow-x-auto overflow-y-hidden rounded-2xl border p-1 [-webkit-overflow-scrolling:touch]",
+                      "overflow-x-auto overscroll-x-contain rounded-2xl border p-1 [-webkit-overflow-scrolling:touch]",
                       isLightTheme
                         ? "border-slate-200/90 bg-slate-100/70 shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)]"
                         : "border-slate-700/80 bg-slate-900/50 shadow-[inset_0_1px_2px_rgba(0,0,0,0.2)]"
                     )}
                   >
                     <div
-                      className="flex w-max min-w-full items-stretch gap-1 px-0.5 py-0.5"
+                      className="flex w-max min-w-full items-stretch gap-1 px-0.5 py-1"
                       role="tablist"
                       aria-label="Board-Spalte"
                     >
@@ -4623,7 +4623,7 @@ export default function AdminDashboardPage() {
                               if (tab.id === "angebote") setIncomingTab("Angebote");
                             }}
                             className={cn(
-                              "flex h-11 min-w-[5.75rem] max-w-[9.5rem] shrink-0 touch-manipulation items-center gap-2 rounded-xl px-2.5 transition-[background-color,box-shadow,color] duration-200",
+                              "flex min-h-11 min-w-[5.75rem] max-w-[9.5rem] shrink-0 touch-manipulation items-center gap-2 rounded-xl px-2.5 py-1.5 transition-[background-color,box-shadow,color] duration-200",
                               active
                                 ? isLightTheme
                                   ? "bg-white text-slate-900 shadow-sm ring-1 ring-slate-200/90"
@@ -4633,13 +4633,13 @@ export default function AdminDashboardPage() {
                                   : "text-slate-400 hover:bg-slate-800/80"
                             )}
                           >
-                            <span className="min-w-0 flex-1 truncate text-left text-[13px] font-medium leading-none">
+                            <span className="min-w-0 flex-1 truncate text-left text-[13px] font-medium leading-snug">
                               {tab.title}
                             </span>
                             <span
                               className={cn(
                                 "shrink-0 tabular-nums",
-                                "min-w-[1.375rem] rounded-full px-1.5 py-0.5 text-center text-[11px] font-semibold leading-none",
+                                "min-w-[1.375rem] rounded-full px-1.5 py-0.5 text-center text-[11px] font-semibold leading-tight",
                                 active
                                   ? isLightTheme
                                     ? "bg-slate-100 text-slate-700"
@@ -5391,24 +5391,43 @@ export default function AdminDashboardPage() {
             }
           }}
         >
-          <DialogContent className={`max-w-md ${
-            isLightTheme
-              ? "border-slate-200 bg-white text-slate-900"
-              : "border-slate-700 bg-slate-900 text-slate-100"
-          }`}>
-            <DialogHeader>
-              <DialogTitle className={isLightTheme ? "text-slate-900" : "text-slate-100"}>Ticket erstellen</DialogTitle>
-              <DialogDescription className={isLightTheme ? "text-slate-600" : "text-slate-400"}>
-                Neues Ticket manuell anlegen – erscheint im Eingang.
-              </DialogDescription>
-            </DialogHeader>
+          <DialogContent
+            className={cn(
+              "flex max-h-[min(92dvh,720px)] w-[calc(100vw-1.25rem)] max-w-md flex-col gap-0 overflow-hidden p-0 sm:w-full",
+              "max-sm:top-[max(0.75rem,env(safe-area-inset-top))] max-sm:translate-y-0",
+              isLightTheme
+                ? "border-slate-200 bg-white text-slate-900"
+                : "border-slate-700 bg-slate-900 text-slate-100"
+            )}
+          >
+            <div
+              className={cn(
+                "shrink-0 border-b px-4 pb-3 pt-5 pr-14 text-left sm:px-6 sm:pr-16",
+                isLightTheme ? "border-slate-200/90" : "border-slate-700/80"
+              )}
+            >
+              <DialogHeader className="space-y-1.5 text-left">
+                <DialogTitle
+                  className={cn(
+                    "text-lg font-semibold leading-snug tracking-tight sm:text-xl",
+                    isLightTheme ? "text-slate-900" : "text-slate-100"
+                  )}
+                >
+                  Ticket erstellen
+                </DialogTitle>
+                <DialogDescription className={isLightTheme ? "text-slate-600" : "text-slate-400"}>
+                  Neues Ticket manuell anlegen – erscheint im Eingang.
+                </DialogDescription>
+              </DialogHeader>
+            </div>
             <form
               onSubmit={(e) => {
                 e.preventDefault();
                 handleCreateTicket();
               }}
-              className="space-y-4 py-2"
+              className="flex min-h-0 flex-1 flex-col overflow-hidden"
             >
+              <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6">
               {createTicketError && (
                 <div className={`rounded-md border border-red-500/50 p-2 text-sm ${isLightTheme ? "bg-red-50 text-red-800" : "bg-red-950/40 text-red-200"}`}>
                   {createTicketError}
@@ -5510,7 +5529,13 @@ export default function AdminDashboardPage() {
                   className={`resize-none ${isLightTheme ? "border-slate-200 bg-white text-slate-900 placeholder:text-slate-500" : "border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"}`}
                 />
               </div>
-              <DialogFooter className="gap-2 sm:gap-0 pt-2">
+              </div>
+              <DialogFooter
+                className={cn(
+                  "shrink-0 gap-2 border-t px-4 py-3 sm:gap-0 sm:px-6",
+                  isLightTheme ? "border-slate-200/90 bg-slate-50/90" : "border-slate-700/80 bg-slate-900/95"
+                )}
+              >
                 <Button
                   type="button"
                   variant="outline"
