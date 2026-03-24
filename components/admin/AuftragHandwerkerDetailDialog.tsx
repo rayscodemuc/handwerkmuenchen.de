@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import {
   Paperclip,
@@ -141,6 +141,132 @@ function applyGewerkTerminTimeOnDate(baseDate: Date, hour: number, minute: numbe
   const next = new Date(baseDate);
   next.setHours(hour, minute, 0, 0);
   return dateToDatetimeLocalValue(next);
+}
+
+type GewerkTerminPickerPanelProps = {
+  value: string;
+  onChange: (next: string) => void;
+  minutePillsRef: RefObject<HTMLDivElement | null>;
+  variant: "popover" | "fullscreen";
+};
+
+function GewerkTerminPickerPanel({ value, onChange, minutePillsRef, variant }: GewerkTerminPickerPanelProps) {
+  const raw = value.trim();
+  let d = raw ? new Date(raw) : new Date();
+  if (Number.isNaN(d.getTime())) d = new Date();
+  const startHour = d.getHours();
+  const startMin = Math.min(45, Math.round(d.getMinutes() / 15) * 15);
+  const apply = (date: Date, h: number, min: number) =>
+    onChange(applyGewerkTerminTimeOnDate(date, h, min));
+  const full = variant === "fullscreen";
+
+  return (
+    <div
+      className={
+        full ? "flex flex-col" : "flex flex-col max-h-[min(78dvh,560px)] sm:max-h-none"
+      }
+    >
+      <div
+        className={
+          full
+            ? "pb-2"
+            : "min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-2 pb-1 pt-2 sm:px-4 sm:pb-0 sm:pt-4 [-webkit-overflow-scrolling:touch]"
+        }
+      >
+        <Calendar
+          mode="single"
+          selected={d}
+          onSelect={(date) => date && apply(date, startHour, startMin)}
+          locale={de}
+          classNames={GEWERK_TERMIN_CAL_CLASSNAMES}
+        />
+      </div>
+      <div className="shrink-0 border-t border-slate-200 bg-white">
+        <div
+          className={
+            full
+              ? "flex flex-col gap-3 px-1 pt-4"
+              : "flex flex-wrap items-center gap-3 px-2 py-2 sm:px-4 sm:py-3 sm:pt-3"
+          }
+        >
+          <button
+            type="button"
+            onClick={() => {
+              const today = new Date();
+              apply(today, startHour, startMin);
+            }}
+            className={`touch-manipulation self-start rounded-lg px-1 text-left font-semibold underline-offset-2 active:text-blue-700 ${
+              full
+                ? "min-h-11 text-sm text-blue-600"
+                : "min-h-0 text-xs text-blue-600 sm:font-medium sm:text-slate-500 sm:no-underline sm:hover:text-blue-600 sm:hover:underline"
+            }`}
+          >
+            Heute
+          </button>
+          <div
+            className={full ? "flex w-full flex-col gap-3" : "flex flex-wrap items-center gap-3"}
+          >
+            <select
+              aria-label="Stunde"
+              value={String(startHour).padStart(2, "0")}
+              onChange={(e) => {
+                apply(d, parseInt(e.target.value, 10), startMin);
+                setTimeout(
+                  () => minutePillsRef.current?.focus({ preventScroll: true }),
+                  0
+                );
+              }}
+              className={`w-full rounded-xl border border-slate-200 bg-slate-50 font-semibold tabular-nums text-slate-900 outline-none focus:ring-2 focus:ring-blue-500/25 sm:w-auto sm:font-medium ${
+                full ? "min-h-12 px-4 py-3 text-base" : "px-2.5 py-2 text-sm"
+              }`}
+            >
+              {Array.from({ length: 24 }, (_, i) => (
+                <option key={i} value={String(i).padStart(2, "0")}>
+                  {String(i).padStart(2, "0")} Uhr
+                </option>
+              ))}
+            </select>
+            <div
+              ref={minutePillsRef}
+              tabIndex={-1}
+              className={
+                full
+                  ? "grid w-full grid-cols-4 gap-2 focus:outline-none"
+                  : "flex flex-wrap items-center gap-1.5 focus:outline-none"
+              }
+            >
+              {GEWERK_TERMIN_MINUTE_OPTIONS.map((m) => {
+                const minVal = parseInt(m, 10);
+                const isActive = startMin === minVal;
+                return (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => apply(d, startHour, minVal)}
+                    className={`touch-manipulation font-semibold tabular-nums transition-colors active:scale-[0.98] sm:active:scale-100 ${
+                      full
+                        ? `min-h-12 w-full rounded-xl text-sm ${
+                            isActive
+                              ? "bg-blue-600 text-white"
+                              : "border border-slate-200 bg-slate-50 text-slate-800 active:bg-slate-100"
+                          }`
+                        : `rounded-full px-3 py-2 text-xs ${
+                            isActive
+                              ? "bg-blue-600 text-white"
+                              : "bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900"
+                          }`
+                    }`}
+                  >
+                    :{m}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function snapGewerkDauerMinuten(diffMin: number): number {
@@ -290,6 +416,7 @@ export function AuftragHandwerkerDetailDialog({
   const [gewerkTerminStartLocal, setGewerkTerminStartLocal] = useState("");
   const [gewerkTerminDauerMin, setGewerkTerminDauerMin] = useState(60);
   const [gewerkTerminSaving, setGewerkTerminSaving] = useState(false);
+  const [gewerkTerminFullscreenOpen, setGewerkTerminFullscreenOpen] = useState(false);
 
   const [gewerkErledigtOpen, setGewerkErledigtOpen] = useState(false);
   const [gewerkErledigtSaving, setGewerkErledigtSaving] = useState(false);
@@ -298,6 +425,23 @@ export function AuftragHandwerkerDetailDialog({
     boardTicketIdProp != null && boardTicketIdProp !== ""
       ? boardTicketIdProp
       : fetchedBoardTicketId;
+
+  useEffect(() => {
+    if (!open) setGewerkTerminFullscreenOpen(false);
+  }, [open]);
+
+  useEffect(() => {
+    setGewerkTerminFullscreenOpen(false);
+  }, [auftrag?.id]);
+
+  useEffect(() => {
+    if (!gewerkTerminFullscreenOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [gewerkTerminFullscreenOpen]);
 
   useEffect(() => {
     const comments = normalizeKommentare((auftrag as Record<string, unknown> | null)?.handwerker_kommentare);
@@ -934,6 +1078,7 @@ export function AuftragHandwerkerDetailDialog({
         }}
       >
         <DialogContent className="flex h-[100dvh] max-h-[100dvh] w-full min-w-0 max-w-none flex-col gap-0 overflow-hidden border-0 p-0 sm:h-[min(92dvh,880px)] sm:max-h-[92dvh] sm:max-w-2xl sm:rounded-2xl sm:border sm:border-slate-200 sm:p-0">
+          <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           {mergedAuftrag &&
             (() => {
               const detailAuftrag = mergedAuftrag;
@@ -1224,11 +1369,12 @@ export function AuftragHandwerkerDetailDialog({
                               </button>
                             </div>
                             <span className="mt-3 block text-xs font-medium text-slate-600">Termin</span>
-                            <Popover modal={false}>
-                              <PopoverTrigger asChild>
+                            {terminPickerNarrow ? (
+                              <>
                                 <button
                                   type="button"
                                   id="gewerk-termin-start"
+                                  onClick={() => setGewerkTerminFullscreenOpen(true)}
                                   className="touch-manipulation mt-1 flex min-h-[52px] w-full items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-left text-base text-slate-900 outline-none transition-colors active:border-slate-300 active:bg-slate-50 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 sm:min-h-0 sm:px-3 sm:py-3 sm:text-sm sm:hover:border-slate-300 sm:hover:bg-slate-50"
                                 >
                                   <span
@@ -1247,122 +1393,48 @@ export function AuftragHandwerkerDetailDialog({
                                   </span>
                                   <CalendarIconLucide className="h-5 w-5 shrink-0 text-slate-400 sm:h-4 sm:w-4" strokeWidth={2} />
                                 </button>
-                              </PopoverTrigger>
-                              <PopoverContent
-                                align={terminPickerNarrow ? "center" : "start"}
-                                side={terminPickerNarrow ? "bottom" : "bottom"}
-                                sideOffset={terminPickerNarrow ? 10 : 8}
-                                collisionPadding={
-                                  terminPickerNarrow
-                                    ? { top: 12, bottom: 20, left: 12, right: 12 }
-                                    : 16
-                                }
-                                className={`z-[200] touch-manipulation overflow-hidden rounded-2xl border border-slate-200 bg-white p-0 font-sans shadow-2xl ${
-                                  terminPickerNarrow
-                                    ? "w-[calc(100vw-1.25rem)] max-w-[min(100vw-1.25rem,400px)] pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]"
-                                    : "w-[min(calc(100vw-1.5rem),320px)] pb-4"
-                                }`}
-                              >
-                                {(() => {
-                                  const raw = gewerkTerminStartLocal.trim();
-                                  let d = raw ? new Date(raw) : new Date();
-                                  if (Number.isNaN(d.getTime())) d = new Date();
-                                  const startHour = d.getHours();
-                                  const startMin = Math.min(45, Math.round(d.getMinutes() / 15) * 15);
-                                  const apply = (date: Date, h: number, min: number) =>
-                                    setGewerkTerminStartLocal(applyGewerkTerminTimeOnDate(date, h, min));
-                                  return (
-                                    <div
-                                      className={`flex flex-col ${terminPickerNarrow ? "max-h-[min(82dvh,640px)]" : "max-h-[min(78dvh,560px)] sm:max-h-none"}`}
+                              </>
+                            ) : (
+                              <Popover modal={false}>
+                                <PopoverTrigger asChild>
+                                  <button
+                                    type="button"
+                                    id="gewerk-termin-start"
+                                    className="touch-manipulation mt-1 flex min-h-[52px] w-full items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-left text-base text-slate-900 outline-none transition-colors active:border-slate-300 active:bg-slate-50 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 sm:min-h-0 sm:px-3 sm:py-3 sm:text-sm sm:hover:border-slate-300 sm:hover:bg-slate-50"
+                                  >
+                                    <span
+                                      className={`min-w-0 flex-1 leading-snug ${gewerkTerminStartLocal.trim() ? "font-semibold text-slate-900 sm:font-medium" : "text-slate-500"}`}
                                     >
-                                      <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-3 pb-1 pt-3 sm:px-4 sm:pb-0 sm:pt-4 [-webkit-overflow-scrolling:touch]">
-                                        <Calendar
-                                          mode="single"
-                                          selected={d}
-                                          onSelect={(date) => date && apply(date, startHour, startMin)}
-                                          locale={de}
-                                          classNames={GEWERK_TERMIN_CAL_CLASSNAMES}
-                                        />
-                                      </div>
-                                      <div className="shrink-0 border-t border-slate-200 bg-white">
-                                        <div
-                                          className={`px-3 py-3 sm:px-4 sm:pt-3 ${terminPickerNarrow ? "flex flex-col gap-3" : "flex flex-wrap items-center gap-3"}`}
-                                        >
-                                          <button
-                                            type="button"
-                                            onClick={() => {
-                                              const today = new Date();
-                                              apply(today, startHour, startMin);
-                                            }}
-                                            className="touch-manipulation min-h-11 self-start rounded-lg px-1 text-left text-sm font-semibold text-blue-600 underline-offset-2 active:text-blue-700 sm:min-h-0 sm:text-xs sm:font-medium sm:text-slate-500 sm:no-underline sm:hover:text-blue-600 sm:hover:underline"
-                                          >
-                                            Heute
-                                          </button>
-                                          <div
-                                            className={
-                                              terminPickerNarrow
-                                                ? "flex w-full flex-col gap-3"
-                                                : "flex flex-wrap items-center gap-3"
-                                            }
-                                          >
-                                            <select
-                                              aria-label="Stunde"
-                                              value={String(startHour).padStart(2, "0")}
-                                              onChange={(e) => {
-                                                apply(d, parseInt(e.target.value, 10), startMin);
-                                                setTimeout(
-                                                  () => gewerkTerminMinutePillsRef.current?.focus({ preventScroll: true }),
-                                                  0
-                                                );
-                                              }}
-                                              className={`w-full rounded-xl border border-slate-200 bg-slate-50 font-semibold tabular-nums text-slate-900 outline-none focus:ring-2 focus:ring-blue-500/25 sm:w-auto sm:font-medium sm:px-2.5 sm:py-2 sm:text-sm ${
-                                                terminPickerNarrow
-                                                  ? "min-h-12 px-4 py-3.5 text-base"
-                                                  : "px-2.5 py-2 text-sm"
-                                              }`}
-                                            >
-                                              {Array.from({ length: 24 }, (_, i) => (
-                                                <option key={i} value={String(i).padStart(2, "0")}>
-                                                  {String(i).padStart(2, "0")} Uhr
-                                                </option>
-                                              ))}
-                                            </select>
-                                            <div
-                                              ref={gewerkTerminMinutePillsRef}
-                                              tabIndex={-1}
-                                              className={
-                                                terminPickerNarrow
-                                                  ? "grid w-full grid-cols-4 gap-2 focus:outline-none"
-                                                  : "flex flex-wrap items-center gap-1.5 focus:outline-none"
-                                              }
-                                            >
-                                              {GEWERK_TERMIN_MINUTE_OPTIONS.map((m) => {
-                                                const minVal = parseInt(m, 10);
-                                                const isActive = startMin === minVal;
-                                                return (
-                                                  <button
-                                                    key={m}
-                                                    type="button"
-                                                    onClick={() => apply(d, startHour, minVal)}
-                                                    className={`touch-manipulation rounded-xl font-semibold tabular-nums transition-colors active:scale-[0.98] sm:rounded-full sm:px-3 sm:py-2 sm:text-xs sm:active:scale-100 ${
-                                                      terminPickerNarrow
-                                                        ? `min-h-12 w-full text-sm ${isActive ? "bg-blue-600 text-white" : "border border-slate-200 bg-slate-50 text-slate-800 active:bg-slate-100"}`
-                                                        : `px-3 py-2 text-xs ${isActive ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900"}`
-                                                    }`}
-                                                  >
-                                                    :{m}
-                                                  </button>
-                                                );
-                                              })}
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  );
-                                })()}
-                              </PopoverContent>
-                            </Popover>
+                                      {gewerkTerminStartLocal.trim() ? (
+                                        (() => {
+                                          const parsed = new Date(gewerkTerminStartLocal);
+                                          return Number.isNaN(parsed.getTime())
+                                            ? gewerkTerminStartLocal
+                                            : format(parsed, "EEEE, dd.MM.yyyy · HH:mm", { locale: de });
+                                        })()
+                                      ) : (
+                                        "Datum und Uhrzeit wählen"
+                                      )}
+                                    </span>
+                                    <CalendarIconLucide className="h-5 w-5 shrink-0 text-slate-400 sm:h-4 sm:w-4" strokeWidth={2} />
+                                  </button>
+                                </PopoverTrigger>
+                                <PopoverContent
+                                  align="start"
+                                  side="bottom"
+                                  sideOffset={8}
+                                  collisionPadding={16}
+                                  className="z-[200] touch-manipulation w-[min(calc(100vw-1.5rem),320px)] overflow-hidden rounded-2xl border border-slate-200 bg-white p-0 pb-4 font-sans shadow-2xl"
+                                >
+                                  <GewerkTerminPickerPanel
+                                    value={gewerkTerminStartLocal}
+                                    onChange={setGewerkTerminStartLocal}
+                                    minutePillsRef={gewerkTerminMinutePillsRef}
+                                    variant="popover"
+                                  />
+                                </PopoverContent>
+                              </Popover>
+                            )}
                             <label className="mt-2 block text-xs font-medium text-slate-600" htmlFor="gewerk-termin-dauer">
                               Dauer
                             </label>
@@ -1861,6 +1933,53 @@ export function AuftragHandwerkerDetailDialog({
                 </>
               );
             })()}
+          {mergedAuftrag && terminPickerNarrow && gewerkTerminFullscreenOpen ? (
+            <div
+              className="absolute inset-0 z-[300] flex flex-col bg-white"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="gewerk-termin-full-title"
+            >
+              <header className="flex shrink-0 items-center gap-2 border-b border-slate-200 px-2 py-2 pl-[max(0.5rem,env(safe-area-inset-left))] pr-[max(0.5rem,env(safe-area-inset-right))] pt-[max(0.5rem,env(safe-area-inset-top))]">
+                <button
+                  type="button"
+                  aria-label="Schließen"
+                  onClick={() => setGewerkTerminFullscreenOpen(false)}
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
+                  }}
+                  className="relative z-[1] touch-manipulation flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-slate-700 active:bg-slate-100"
+                >
+                  <X className="h-6 w-6" strokeWidth={2} />
+                </button>
+                <h2
+                  id="gewerk-termin-full-title"
+                  className="pointer-events-none min-w-0 flex-1 text-center text-lg font-semibold text-slate-900"
+                >
+                  Termin wählen
+                </h2>
+                <span className="h-11 w-11 shrink-0" aria-hidden />
+              </header>
+              <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 pb-4 pt-2 [-webkit-overflow-scrolling:touch]">
+                <GewerkTerminPickerPanel
+                  value={gewerkTerminStartLocal}
+                  onChange={setGewerkTerminStartLocal}
+                  minutePillsRef={gewerkTerminMinutePillsRef}
+                  variant="fullscreen"
+                />
+              </div>
+              <div className="shrink-0 border-t border-slate-200 bg-white px-4 py-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
+                <button
+                  type="button"
+                  className="touch-manipulation min-h-[52px] w-full rounded-xl bg-slate-900 py-3.5 text-base font-semibold text-white active:opacity-90"
+                  onClick={() => setGewerkTerminFullscreenOpen(false)}
+                >
+                  Fertig
+                </button>
+              </div>
+            </div>
+          ) : null}
+          </div>
         </DialogContent>
       </Dialog>
 

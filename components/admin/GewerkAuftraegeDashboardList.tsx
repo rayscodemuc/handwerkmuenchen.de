@@ -384,8 +384,8 @@ export function GewerkAuftraegeDashboardList({
         <div>
           <h2 className={`text-lg font-semibold ${title}`}>Meine Aufträge</h2>
           <p className={`mt-1 max-w-xl text-xs leading-snug ${sub}`}>
-            Kommende und laufende Termine erscheinen oben kompakt nach Zeit sortiert. Alle anderen Aufträge darunter –
-            am Handy kannst du zwischen „Termine“ und „Weitere“ wechseln.
+            Am Handy: links „Offene Aufträge“, rechts „Termine“. Größere Ansichten: zuerst offene Aufträge, darunter
+            kommende Termine kompakt nach Zeit.
           </p>
         </div>
         <button
@@ -427,6 +427,15 @@ export function GewerkAuftraegeDashboardList({
           <div className={`mb-4 grid grid-cols-2 gap-1.5 rounded-xl p-1 ${segmentWrap}`}>
             <button
               type="button"
+              onClick={() => setMobileSeg("weitere")}
+              className={`min-h-[44px] rounded-lg px-2 py-2.5 text-sm font-semibold transition-all ${
+                mobileSeg === "weitere" ? segmentActive : segmentIdle
+              }`}
+            >
+              Offene Aufträge ({weitere.length})
+            </button>
+            <button
+              type="button"
               onClick={() => setMobileSeg("termine")}
               className={`min-h-[44px] rounded-lg px-2 py-2.5 text-sm font-semibold transition-all ${
                 mobileSeg === "termine" ? segmentActive : segmentIdle
@@ -434,32 +443,23 @@ export function GewerkAuftraegeDashboardList({
             >
               Termine ({kommende.length})
             </button>
-            <button
-              type="button"
-              onClick={() => setMobileSeg("weitere")}
-              className={`min-h-[44px] rounded-lg px-2 py-2.5 text-sm font-semibold transition-all ${
-                mobileSeg === "weitere" ? segmentActive : segmentIdle
-              }`}
-            >
-              Weitere ({weitere.length})
-            </button>
           </div>
           {mobileSeg === "termine" ? listeKommende : listeWeitere}
         </>
       ) : (
         <div className="space-y-8">
+          {weitere.length > 0 ? (
+            <section aria-label={kommende.length > 0 ? "Offene Aufträge" : "Aufträge"}>
+              {kommende.length > 0 ? (
+                <h3 className={`mb-2 text-xs font-semibold uppercase tracking-wide ${sub}`}>Offene Aufträge</h3>
+              ) : null}
+              {listeWeitere}
+            </section>
+          ) : null}
           {kommende.length > 0 ? (
             <section aria-label="Kommende Termine">
               <h3 className={`mb-2 text-xs font-semibold uppercase tracking-wide ${sub}`}>Kommende Termine</h3>
               {listeKommende}
-            </section>
-          ) : null}
-          {weitere.length > 0 ? (
-            <section aria-label={kommende.length > 0 ? "Weitere Aufträge" : "Aufträge"}>
-              {kommende.length > 0 ? (
-                <h3 className={`mb-2 text-xs font-semibold uppercase tracking-wide ${sub}`}>Weitere Aufträge</h3>
-              ) : null}
-              {listeWeitere}
             </section>
           ) : null}
         </div>
