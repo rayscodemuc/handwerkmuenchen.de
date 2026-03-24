@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
-import { getSessionUser } from "@/lib/auth";
+import { getSessionUserFromRequest } from "@/lib/auth";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import { roleToGewerk } from "@/lib/auftraege/role-to-gewerk";
 import { DEFAULT_COMPANY_ID } from "@/src/config/businessConfig";
+
+export const dynamic = "force-dynamic";
 
 /** Alternative Schreibweisen für Gewerk-Filter (z.B. Sanitär/Sanitaer). */
 function gewerkFilterValues(gewerk: string): string[] {
@@ -19,7 +21,7 @@ function gewerkFilterValues(gewerk: string): string[] {
  */
 export async function GET(request: Request) {
   try {
-    const sessionUser = await getSessionUser();
+    const sessionUser = await getSessionUserFromRequest(request);
     if (!sessionUser) {
       return NextResponse.json({ error: "Nicht angemeldet." }, { status: 401 });
     }

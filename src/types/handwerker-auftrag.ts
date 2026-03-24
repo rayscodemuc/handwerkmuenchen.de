@@ -26,5 +26,13 @@ export type HandwerkerAuftrag = {
   handwerker_notizen?: string | null;
   handwerker_kommentare?: HandwerkerKommentar[] | null;
   angebot_rechnung_urls?: string[] | null;
+  /** Zugewiesene Gewerke (wie tickets.gewerk); Board/RLS. */
+  gewerk?: string[] | null;
+  /** Kanban-Status analog tickets.status. */
+  board_status?: string | null;
+  board_position?: number | null;
+  termin_start?: string | null;
+  termin_ende?: string | null;
+  termin_typ?: string | null;
   [key: string]: unknown;
 };

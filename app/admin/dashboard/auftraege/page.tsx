@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { authFetch } from "@/lib/supabase/auth-fetch";
 import { Logo } from "@/components/Logo";
 import {
   Paperclip,
@@ -11,12 +12,54 @@ import {
   RefreshCw,
   ChevronRight,
   FileText,
+  Paintbrush,
+  SprayCan,
+  Building,
+  Zap,
+  Droplets,
 } from "lucide-react";
 import { AuftragHandwerkerDetailDialog } from "@/components/admin/AuftragHandwerkerDetailDialog";
 import type { HandwerkerAuftrag } from "@/src/types/handwerker-auftrag";
 import { useAdminUser } from "../../AdminUserContext";
 
 const supabase = createClient();
+
+function normalizeGewerke(value: string[] | string | null | undefined): string[] {
+  if (Array.isArray(value)) {
+    return value.map((g) => (g ?? "").trim()).filter((g) => g.length > 0);
+  }
+  if (typeof value === "string" && value.trim()) return [value.trim()];
+  return [];
+}
+
+function getGewerkIcon(gewerk: string) {
+  const g = gewerk.trim().toLowerCase();
+  if (g === "ausbau") return Paintbrush;
+  if (g === "reinigung") return SprayCan;
+  if (g === "facility") return Building;
+  if (g === "elektro") return Zap;
+  if (g === "sanitär" || g === "sanitaer") return Droplets;
+  return null;
+}
+
+function gewerkBadgeClass(gewerk: string): string {
+  const base =
+    "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold tracking-wide";
+  switch (gewerk.trim()) {
+    case "Elektro":
+      return `${base} border-amber-500 bg-amber-300 text-amber-900`;
+    case "Sanitär":
+      return `${base} border-blue-500 bg-blue-300 text-blue-900`;
+    case "Ausbau":
+      return `${base} border-orange-500 bg-orange-300 text-orange-900`;
+    case "Reinigung":
+      return `${base} border-emerald-500 bg-emerald-300 text-emerald-900`;
+    case "Facility":
+      return `${base} border-slate-500 bg-slate-300 text-slate-900`;
+    default:
+      return `${base} border-slate-400 bg-slate-200 text-slate-800`;
+  }
+}
 
 export default function AuftraegePage() {
   const adminUser = useAdminUser();
@@ -30,7 +73,7 @@ export default function AuftraegePage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/auftraege");
+      const res = await authFetch("/api/auftraege");
       const json = await res.json();
       if (!res.ok) {
         const msg =
@@ -79,8 +122,8 @@ export default function AuftraegePage() {
   }, []);
 
   return (
-    <div className="min-h-[100dvh] bg-slate-50 pb-[max(1rem,env(safe-area-inset-bottom,1rem))]">
-      <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-slate-200/80 bg-white/90 px-4 py-3 backdrop-blur-md  sm:px-6">
+    <div className="min-h-[100dvh] touch-manipulation bg-slate-50 pb-[max(1rem,env(safe-area-inset-bottom,1rem))]">
+      <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-slate-200/80 bg-white/90 px-4 py-3 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur-md sm:px-6">
         <div className="flex min-w-0 flex-1 items-center gap-3">
           <Link
             href="/admin/dashboard"
@@ -145,7 +188,9 @@ export default function AuftraegePage() {
           </div>
         ) : (
           <ul className="space-y-3 sm:space-y-4">
-            {auftraege.map((auftrag) => (
+            {auftraege.map((auftrag) => {
+              const gewListe = normalizeGewerke(auftrag.gewerk ?? null);
+              return (
               <li key={auftrag.id}>
                 <article
                   role="button"
@@ -180,6 +225,21 @@ export default function AuftraegePage() {
                     <p className="line-clamp-2 text-sm text-slate-500">
                       {(auftrag.aufgabe ?? "").trim() || "–"}
                     </p>
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {gewListe.length > 0 ? (
+                        gewListe.map((g) => {
+                          const Icon = getGewerkIcon(g);
+                          return (
+                            <span key={g} className={gewerkBadgeClass(g)}>
+                              {Icon ? <Icon className="h-3 w-3 shrink-0" strokeWidth={2} /> : null}
+                              {g}
+                            </span>
+                          );
+                        })
+                      ) : (
+                        <span className="text-[11px] text-slate-400">Kein Gewerk</span>
+                      )}
+                    </div>
                   </div>
                   <div className="flex shrink-0 flex-col items-end justify-between gap-2">
                     {auftrag.anhang_url && (
@@ -198,7 +258,8 @@ export default function AuftraegePage() {
                   </div>
                 </article>
               </li>
-            ))}
+              );
+            })}
           </ul>
         )}
       </main>

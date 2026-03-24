@@ -38,6 +38,7 @@ import {
 } from "@/lib/auftraege/handwerker-detail-utils";
 import type { HandwerkerAuftrag } from "@/src/types/handwerker-auftrag";
 import { GEWERKE_OPTIONS } from "@/src/config/gewerkeOptions";
+import { canonicalizeGewerkArray } from "@/lib/auftraege/canonical-gewerk";
 
 const BUCKET_IMAGES = "ticket-images";
 const supabase = createClient();
@@ -112,6 +113,8 @@ export type AuftragHandwerkerDetailDialogProps = {
   boardTicketId?: string | null;
   boardTicketGewerk?: string[] | null;
   onBoardGewerkSaved?: (ticketId: string, gewerk: string[] | null) => void;
+  /** Wenn keine verknüpfte Kanban-Karte existiert: Gewerk auf `auftraege.gewerk` speichern. */
+  onAuftragBoardGewerkSaved?: (auftragId: string, gewerk: string[] | null) => void;
   /** Nur Admin: Gewerk am Board-Ticket bearbeiten. Gewerk-Nutzer: Bereich ausgeblendet. */
   showBoardGewerkSection?: boolean;
 };
@@ -125,6 +128,7 @@ export function AuftragHandwerkerDetailDialog({
   boardTicketId: boardTicketIdProp,
   boardTicketGewerk,
   onBoardGewerkSaved,
+  onAuftragBoardGewerkSaved,
   showBoardGewerkSection = true,
 }: AuftragHandwerkerDetailDialogProps) {
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -210,7 +214,7 @@ export function AuftragHandwerkerDetailDialog({
         setFetchedBoardGewerk(null);
       } else {
         setFetchedBoardTicketId(data.id);
-        setFetchedBoardGewerk(Array.isArray(data.gewerk) ? data.gewerk : null);
+        setFetchedBoardGewerk(canonicalizeGewerkArray(data.gewerk));
       }
       setBoardTicketLookupDone(true);
     })();
@@ -224,20 +228,32 @@ export function AuftragHandwerkerDetailDialog({
       boardGewerkSyncKey.current = "";
       return;
     }
-    if (!effectiveBoardTicketId) {
-      setBoardGewerke([]);
-      boardGewerkSyncKey.current = "";
+    if (!boardTicketLookupDone) return;
+    if (effectiveBoardTicketId) {
+      const fromTicketRaw =
+        boardTicketIdProp != null && boardTicketIdProp !== ""
+          ? boardTicketGewerk
+          : fetchedBoardGewerk;
+      const fromTicket = canonicalizeGewerkArray(fromTicketRaw) ?? [];
+      const fromAuftrag = canonicalizeGewerkArray(auftrag?.gewerk) ?? [];
+      /** Kanban-Badges lesen aus `auftraege.gewerk`; Ticket kann veraltet sein — Vorrang Auftrag. */
+      const merged = fromAuftrag.length > 0 ? fromAuftrag : fromTicket;
+      const key = `t:${effectiveBoardTicketId}|a:${auftrag?.id ?? ""}|auf:${JSON.stringify(fromAuftrag)}|tk:${JSON.stringify(fromTicket)}`;
+      if (boardGewerkSyncKey.current === key) return;
+      boardGewerkSyncKey.current = key;
+      setBoardGewerke(merged);
       return;
     }
-    if (!boardTicketLookupDone) return;
-    const fromProp =
-      boardTicketIdProp != null && boardTicketIdProp !== ""
-        ? boardTicketGewerk
-        : fetchedBoardGewerk;
-    const key = `${effectiveBoardTicketId}:${JSON.stringify(fromProp ?? null)}`;
-    if (boardGewerkSyncKey.current === key) return;
-    boardGewerkSyncKey.current = key;
-    setBoardGewerke(normalizeGewerkList(fromProp));
+    if (auftrag?.id) {
+      const fromAuftrag = canonicalizeGewerkArray(auftrag?.gewerk) ?? [];
+      const key = `auftrag:${auftrag.id}:${JSON.stringify(fromAuftrag)}`;
+      if (boardGewerkSyncKey.current === key) return;
+      boardGewerkSyncKey.current = key;
+      setBoardGewerke(fromAuftrag);
+      return;
+    }
+    setBoardGewerke([]);
+    boardGewerkSyncKey.current = "";
   }, [
     open,
     effectiveBoardTicketId,
@@ -245,25 +261,66 @@ export function AuftragHandwerkerDetailDialog({
     boardTicketIdProp,
     boardTicketGewerk,
     fetchedBoardGewerk,
+    auftrag?.id,
+    auftrag?.gewerk,
   ]);
 
   const saveBoardGewerk = useCallback(async () => {
-    if (!showBoardGewerkSection || !effectiveBoardTicketId) return;
+    if (!showBoardGewerkSection) return;
     setBoardGewerkSaving(true);
     setDialogError(null);
     const value = boardGewerke.length > 0 ? boardGewerke : null;
-    const { error } = await supabase
-      .from("tickets")
-      .update({ gewerk: value })
-      .eq("id", effectiveBoardTicketId);
-    if (error) {
-      setDialogError(error.message);
-    } else {
-      boardGewerkSyncKey.current = `${effectiveBoardTicketId}:${JSON.stringify(value)}`;
+    /**
+     * Gemischtes Board zeigt SPM-Karten aus `auftraege` (Badges aus auftraege.gewerk).
+     * Legacy: oft existiert zusätzlich ein Ticket mit gleichem Gewerk — beides muss synchron bleiben,
+     * sonst wirkt die Zuweisung „verschwunden“, wenn nur tickets.gewerk gesetzt wurde.
+     */
+    const tasks: Promise<{ error: { message: string } | null }>[] = [];
+    if (auftrag?.id) {
+      tasks.push(
+        Promise.resolve(
+          supabase.from("auftraege").update({ gewerk: value }).eq("id", auftrag.id)
+        ).then((r) => ({ error: r.error }))
+      );
+    }
+    if (effectiveBoardTicketId) {
+      tasks.push(
+        Promise.resolve(
+          supabase.from("tickets").update({ gewerk: value }).eq("id", effectiveBoardTicketId)
+        ).then((r) => ({ error: r.error }))
+      );
+    }
+    if (tasks.length === 0) {
+      setBoardGewerkSaving(false);
+      return;
+    }
+    const results = await Promise.all(tasks);
+    const firstErr = results.find((r) => r.error)?.error;
+    if (firstErr) {
+      setDialogError(firstErr.message);
+      setBoardGewerkSaving(false);
+      return;
+    }
+    if (effectiveBoardTicketId) {
+      setFetchedBoardGewerk(value);
+    }
+    if (auftrag?.id) {
+      onAuftragBoardGewerkSaved?.(auftrag.id, value);
+      onAuftragPatch?.(auftrag.id, { gewerk: value });
+    }
+    if (effectiveBoardTicketId) {
       onBoardGewerkSaved?.(effectiveBoardTicketId, value);
     }
     setBoardGewerkSaving(false);
-  }, [showBoardGewerkSection, effectiveBoardTicketId, boardGewerke, onBoardGewerkSaved]);
+  }, [
+    showBoardGewerkSection,
+    effectiveBoardTicketId,
+    boardGewerke,
+    auftrag?.id,
+    onBoardGewerkSaved,
+    onAuftragBoardGewerkSaved,
+    onAuftragPatch,
+  ]);
 
   const uploadAuftragImage = useCallback(
     async (
@@ -759,21 +816,20 @@ export function AuftragHandwerkerDetailDialog({
                               <span className="min-w-0 flex-1 truncate text-right text-xs text-slate-600">
                                 {!boardTicketLookupDone
                                   ? "…"
-                                  : !effectiveBoardTicketId
-                                    ? "Keine Karte"
-                                    : boardGewerke.length > 0
+                                  : effectiveBoardTicketId || auftrag?.id
+                                    ? boardGewerke.length > 0
                                       ? boardGewerke.join(", ")
-                                      : "Nicht gewählt"}
+                                      : "Nicht gewählt"
+                                    : "—"}
                               </span>
                               <ChevronDown className="h-4 w-4 shrink-0 text-slate-400 transition-transform group-open:rotate-180" />
                             </summary>
                             <div className="space-y-2 border-t border-slate-50 px-3 pb-3 pt-2 sm:px-4">
                               {!boardTicketLookupDone ? (
                                 <p className="text-xs text-slate-500">Wird geladen…</p>
-                              ) : !effectiveBoardTicketId ? (
+                              ) : !effectiveBoardTicketId && !auftrag?.id ? (
                                 <p className="text-xs leading-relaxed text-slate-600">
-                                  Sobald eine Kanban-Karte mit diesem Auftrag existiert, kannst du das Gewerk hier
-                                  setzen.
+                                  Kein Auftrag geladen.
                                 </p>
                               ) : (
                                 <>
@@ -926,13 +982,14 @@ export function AuftragHandwerkerDetailDialog({
                                 ))
                               )}
                             </div>
-                            <div className="mt-2 flex items-end gap-2">
+                            {/* flex-col auf schmalen Viewports: vermeidet Verschieben des Senden-Buttons bei Fokus/Tastatur (w-full + Neben-Button in einer Zeile bricht oft). */}
+                            <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-end sm:gap-2">
                               <Textarea
                                 value={newKommentarText}
                                 onChange={(e) => setNewKommentarText(e.target.value)}
                                 placeholder="Kommentar schreiben … (Ctrl+Enter zum Senden)"
                                 rows={2}
-                                className="min-h-[72px] resize-none border-slate-200 text-sm leading-relaxed placeholder:text-slate-400"
+                                className="min-h-[72px] w-full min-w-0 flex-1 resize-none border-slate-200 text-base leading-relaxed placeholder:text-slate-400 sm:text-sm"
                                 onKeyDown={(e) => {
                                   if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
                                     e.preventDefault();
@@ -944,17 +1001,17 @@ export function AuftragHandwerkerDetailDialog({
                                 type="button"
                                 onClick={() => void addKommentar()}
                                 disabled={!newKommentarText.trim() || kommentarSaving || !detailAuftrag.id}
-                                className="mb-0.5 inline-flex h-10 shrink-0 items-center justify-center rounded-lg bg-slate-900 px-3 text-white transition-colors hover:bg-slate-800 disabled:opacity-50"
+                                className="inline-flex h-11 w-full shrink-0 items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 text-sm font-medium text-white transition-colors hover:bg-slate-800 disabled:opacity-50 sm:h-10 sm:w-auto sm:px-3"
                                 aria-label="Kommentar senden"
                               >
-                                <Send className="h-4 w-4" />
+                                <Send className="h-4 w-4 shrink-0" />
+                                <span className="sm:hidden">Senden</span>
                               </button>
                             </div>
                           </div>
                           <div className="h-px bg-slate-100" />
                           <div>
-                            <p className="mb-1.5 text-xs font-medium text-slate-600">Rechnung hinzufügen</p>
-                            <p className="mb-2 text-xs text-slate-500">PDF und Bilder</p>
+                            <p className="mb-2 text-xs font-medium text-slate-600">Rechnung hinzufügen</p>
                             <label className="flex cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-slate-200 py-3.5 transition-colors hover:border-slate-300 hover:bg-slate-50 active:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50">
                               <input
                                 type="file"

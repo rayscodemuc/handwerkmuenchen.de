@@ -11,6 +11,7 @@ import { snapCenterToCursor } from "@dnd-kit/modifiers";
 import { SortableContext, verticalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { createClient } from "@/lib/supabase/client";
+import { authFetch } from "@/lib/supabase/auth-fetch";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useAdminUser } from "../AdminUserContext";
@@ -40,7 +41,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Logo } from "@/components/Logo";
 import { AuftragHandwerkerDetailDialog } from "@/components/admin/AuftragHandwerkerDetailDialog";
 import { normalizeAuftragRow } from "@/lib/auftraege/billing-recipient-fields";
-import { mapAuftragstypToGewerk } from "@/lib/auftraege/mapAuftragstypToGewerk";
+import { filterAuftraegeRowsByRole } from "@/lib/auftraege/filter-auftraege-by-role";
 import { roleToGewerk } from "@/lib/auftraege/role-to-gewerk";
 import type { HandwerkerAuftrag } from "@/src/types/handwerker-auftrag";
 import { BUSINESS_COLUMNS, DEFAULT_COMPANY_ID, STATUS, TERMIN_TYP } from "@/src/config/businessConfig";
@@ -208,7 +209,7 @@ const kanbanCollisionDetection: CollisionDetection = (args) => {
     if (colDomRect) {
       const ticketsInCol = droppableContainers.filter((c) => {
         const cid = String(c.id);
-        if (!cid.startsWith("ticket-")) return false;
+        if (!cid.startsWith("ticket-") && !cid.startsWith("auftrag-")) return false;
         const r = droppableRects.get(c.id);
         if (!r || r.width === 0) return false;
         const cx = r.left + r.width / 2;
@@ -280,7 +281,8 @@ type WeekEvent = {
   title: string;
   start: Date;
   end: Date;
-  resource?: Ticket;
+  resource?: Ticket | HandwerkerAuftrag;
+  resourceKind: "ticket" | "auftrag";
 };
 
 function SortableTicketCard({
@@ -313,20 +315,72 @@ function SortableTicketCard({
       ref={setNodeRef}
       style={style}
       data-ticket-id={ticket.id}
+      data-board-item-id={`ticket-${ticket.id}`}
       {...articleProps}
       className={`${articleProps.className ?? ""} ${
         isOver ? "ring-2 ring-blue-500/60 ring-offset-2 ring-offset-slate-900" : ""
       }`}
     >
-      <div className="flex gap-1 items-start">
+      <div className="flex gap-1 items-stretch lg:items-start">
         <span
-          className="shrink-0 inline-flex cursor-grab touch-none select-none p-1 text-slate-500 hover:text-slate-300 active:cursor-grabbing"
+          className="shrink-0 inline-flex min-h-[44px] min-w-[44px] cursor-grab touch-none select-none items-center justify-center rounded-lg text-slate-500 active:cursor-grabbing active:bg-slate-500/15 lg:min-h-0 lg:min-w-0 lg:p-1 lg:active:bg-transparent dark:active:bg-slate-400/10 dark:lg:active:bg-transparent"
+          aria-label="Ticket verschieben"
           {...listeners}
           {...attributes}
         >
-          <GripVertical className="h-3.5 w-3.5" />
+          <GripVertical className="h-5 w-5 lg:h-3.5 lg:w-3.5" strokeWidth={2} />
         </span>
-        <div className="min-w-0 flex-1">{children}</div>
+        <div className="min-w-0 flex-1 self-center lg:self-start">{children}</div>
+      </div>
+    </article>
+  );
+}
+
+function SortableAuftragCard({
+  auftrag,
+  children,
+  ...articleProps
+}: {
+  auftrag: HandwerkerAuftrag;
+  children: React.ReactNode;
+} & React.ComponentPropsWithoutRef<"article">) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+    isOver,
+  } = useSortable({
+    id: `auftrag-${auftrag.id}`,
+    data: { auftragId: auftrag.id },
+  });
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.3 : 1,
+  };
+  return (
+    <article
+      ref={setNodeRef}
+      style={style}
+      data-board-item-id={`auftrag-${auftrag.id}`}
+      {...articleProps}
+      className={`${articleProps.className ?? ""} ${
+        isOver ? "ring-2 ring-blue-500/60 ring-offset-2 ring-offset-slate-900" : ""
+      }`}
+    >
+      <div className="flex items-stretch gap-1 lg:items-start">
+        <span
+          className="shrink-0 inline-flex min-h-[44px] min-w-[44px] cursor-grab touch-none select-none items-center justify-center rounded-lg text-slate-500 active:cursor-grabbing active:bg-slate-500/15 lg:min-h-0 lg:min-w-0 lg:p-1 lg:active:bg-transparent dark:active:bg-slate-400/10 dark:lg:active:bg-transparent"
+          aria-label="Auftrag verschieben"
+          {...listeners}
+          {...attributes}
+        >
+          <GripVertical className="h-5 w-5 lg:h-3.5 lg:w-3.5" strokeWidth={2} />
+        </span>
+        <div className="min-w-0 flex-1 self-center lg:self-start">{children}</div>
       </div>
     </article>
   );
@@ -433,7 +487,11 @@ function DraggableEventPill({
 }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `event-${ev.id}`,
-    data: { ticketId: ev.id },
+    data: {
+      ticketId: ev.resourceKind === "ticket" ? ev.id : undefined,
+      auftragId:
+        ev.resourceKind === "auftrag" ? ev.id.replace(/^auftrag-/, "") : undefined,
+    },
   });
   return (
     <button
@@ -454,20 +512,29 @@ function DraggableEventPill({
       <div className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-visible px-1.5 py-1 text-left">
         <div className="flex min-w-0 flex-1 items-center gap-1">
           {(() => {
-            const gewerkeList = normalizeGewerke((ev.resource as Ticket | undefined)?.gewerk ?? null);
-            const firstGewerk = gewerkeList[0] ?? null;
+            const gewerkArr =
+              ev.resourceKind === "ticket"
+                ? normalizeGewerke((ev.resource as Ticket)?.gewerk ?? null)
+                : normalizeGewerke((ev.resource as HandwerkerAuftrag)?.gewerk ?? null);
+            const firstGewerk = gewerkArr[0] ?? null;
             const Icon = getGewerkIcon(firstGewerk);
             return Icon ? <Icon className="h-3 w-3 shrink-0" strokeWidth={2} /> : null;
           })()}
           <span className="min-w-0 truncate text-[11px] font-medium">
-            {getTicketOrAuftragNumber(ev.resource ?? null) !== "–" ? getTicketOrAuftragNumber(ev.resource ?? null) : ev.id.slice(0, 8)}
+            {ev.resourceKind === "ticket"
+              ? getTicketOrAuftragNumber(ev.resource as Ticket) !== "–"
+                ? getTicketOrAuftragNumber(ev.resource as Ticket)
+                : ev.id.slice(0, 8)
+              : (ev.resource as HandwerkerAuftrag)?.auftragsnummer?.trim() || ev.id.slice(0, 8)}
           </span>
-          {(ev.resource as Ticket | undefined)?.additional_data?.auftrag_id && (
+          {(ev.resourceKind === "auftrag" || !!(ev.resource as Ticket | undefined)?.additional_data?.auftrag_id) && (
             <span className="shrink-0 rounded px-1 py-0.5 text-[9px] font-medium bg-amber-500/30 text-amber-200">SPM</span>
           )}
         </div>
         <span className="min-w-0 truncate text-[10px] leading-tight opacity-90">
-          {getTicketDisplayName(ev.resource ?? ({} as Ticket))}
+          {ev.resourceKind === "ticket"
+            ? getTicketDisplayName(ev.resource as Ticket)
+            : getAuftragCardTitle(ev.resource as HandwerkerAuftrag)}
         </span>
       </div>
     </button>
@@ -716,6 +783,128 @@ function sanitizeTicketList(items: Ticket[]): Ticket[] {
   return dedupeSpmLinkedTickets(dedupeTicketsById(items));
 }
 
+/** Tickets, die einen SPM-Auftrag spiegeln, nicht nochmal als eigene Karte zeigen (Auftrag ist die Quelle). */
+function ticketHasLinkedAuftrag(t: Ticket): boolean {
+  const aid = t.additional_data?.auftrag_id;
+  return typeof aid === "string" && aid.trim().length > 0;
+}
+
+function auftragBoardStatus(a: HandwerkerAuftrag): string {
+  const s = (a.board_status ?? "").trim();
+  return s || STATUS.ANFRAGE;
+}
+
+function isKalkulationFaelligAuftrag(a: HandwerkerAuftrag): boolean {
+  if (auftragBoardStatus(a) !== STATUS.BESICHTIGUNG) return false;
+  const end = (a.termin_ende ?? "").trim();
+  if (!end) return false;
+  const d = new Date(end);
+  return !isNaN(d.getTime()) && d.getTime() < Date.now();
+}
+
+function sortAuftraegeByBoardPosition(a: HandwerkerAuftrag, b: HandwerkerAuftrag): number {
+  const posA = typeof a.board_position === "number" ? a.board_position : Number.MAX_SAFE_INTEGER;
+  const posB = typeof b.board_position === "number" ? b.board_position : Number.MAX_SAFE_INTEGER;
+  if (posA !== posB) return posA - posB;
+  const ca = a.created_at ? new Date(String(a.created_at)).getTime() : 0;
+  const cb = b.created_at ? new Date(String(b.created_at)).getTime() : 0;
+  return cb - ca;
+}
+
+function getAuftragCardTitle(a: HandwerkerAuftrag): string {
+  return (a.mieter_name ?? "").trim() || `Auftrag ${(a.auftragsnummer ?? "").trim() || a.id.slice(0, 8)}`;
+}
+
+function getAuftragCardAddress(a: HandwerkerAuftrag): string {
+  return [a.adresse_strasse, a.adresse_ort].filter(Boolean).join(", ").trim();
+}
+
+type BoardPosItem = { key: string; position: number };
+
+/** Neue board_position / position in einer Spalte mit Tickets + Aufträgen. */
+function computeMergedColumnPosition(
+  colTickets: Ticket[],
+  colAuftraege: HandwerkerAuftrag[],
+  draggedDndId: string,
+  insertBeforeDndId: string | null | undefined
+): number {
+  const draggedKey = draggedDndId.startsWith("ticket-")
+    ? `ticket:${draggedDndId.slice("ticket-".length)}`
+    : draggedDndId.startsWith("auftrag-")
+      ? `auftrag:${draggedDndId.slice("auftrag-".length)}`
+      : `ticket:${draggedDndId}`;
+  const beforeKey =
+    insertBeforeDndId == null
+      ? null
+      : insertBeforeDndId.startsWith("ticket-")
+        ? `ticket:${insertBeforeDndId.slice("ticket-".length)}`
+        : insertBeforeDndId.startsWith("auftrag-")
+          ? `auftrag:${insertBeforeDndId.slice("auftrag-".length)}`
+          : `ticket:${insertBeforeDndId}`;
+
+  const items: BoardPosItem[] = [
+    ...colTickets.map((t) => ({
+      key: `ticket:${t.id}`,
+      position: typeof t.position === "number" ? t.position : 10,
+    })),
+    ...colAuftraege.map((a) => ({
+      key: `auftrag:${a.id}`,
+      position: typeof a.board_position === "number" ? a.board_position : 10,
+    })),
+  ].sort((x, y) => x.position - y.position);
+
+  let list = items.filter((i) => i.key !== draggedKey);
+  if (list.length === 0) return 10;
+  if (!beforeKey) {
+    return Math.max(...list.map((i) => i.position)) + 10;
+  }
+  const idx = list.findIndex((i) => i.key === beforeKey);
+  if (idx === -1) return Math.max(...list.map((i) => i.position)) + 10;
+  const after = list[idx]!;
+  const before = idx > 0 ? list[idx - 1]! : null;
+  if (before && after.position - before.position > 1) {
+    return Math.round((before.position + after.position) / 2);
+  }
+  if (!before) return Math.max(1, after.position - 10);
+  list = list.map((item, i) => ({ ...item, position: (i + 1) * 10 }));
+  const newIdx = list.findIndex((i) => i.key === beforeKey);
+  const newAfter = list[newIdx]!;
+  const newBefore = newIdx > 0 ? list[newIdx - 1]! : null;
+  return newBefore ? Math.round((newBefore.position + newAfter.position) / 2) : Math.max(1, newAfter.position - 10);
+}
+
+type BoardDisplayRow =
+  | { kind: "ticket"; t: Ticket }
+  | { kind: "auftrag"; a: HandwerkerAuftrag };
+
+/** Gemeinsame Reihenfolge für Tickets und Aufträge in einer Spalte (Position → neuere zuerst). */
+function mergeBoardDisplayRows(tickets: Ticket[], auftraege: HandwerkerAuftrag[]): BoardDisplayRow[] {
+  type Tagged =
+    | { kind: "ticket"; t: Ticket; pos: number; created: number }
+    | { kind: "auftrag"; a: HandwerkerAuftrag; pos: number; created: number };
+  const tagged: Tagged[] = [
+    ...tickets.map((t) => ({
+      kind: "ticket" as const,
+      t,
+      pos: typeof t.position === "number" ? t.position : Number.MAX_SAFE_INTEGER,
+      created: new Date(t.created_at).getTime(),
+    })),
+    ...auftraege.map((a) => ({
+      kind: "auftrag" as const,
+      a,
+      pos: typeof a.board_position === "number" ? a.board_position : Number.MAX_SAFE_INTEGER,
+      created: a.created_at ? new Date(String(a.created_at)).getTime() : 0,
+    })),
+  ];
+  tagged.sort((x, y) => {
+    if (x.pos !== y.pos) return x.pos - y.pos;
+    return y.created - x.created;
+  });
+  return tagged.map((row) =>
+    row.kind === "ticket" ? { kind: "ticket" as const, t: row.t } : { kind: "auftrag" as const, a: row.a }
+  );
+}
+
 /** Normalisiert Gewerk-Werte (String oder Array) in ein bereinigtes String-Array. */
 function normalizeGewerke(value: string[] | string | null | undefined): string[] {
   if (Array.isArray(value)) {
@@ -751,9 +940,7 @@ function getPositionForAppend(columnTickets: Ticket[], excludeTicketId?: string)
 /** Lädt alle Tickets einer Company – gefiltert nach Rolle (API, serverseitig). */
 const fetchTickets = async (companyId: string = DEFAULT_COMPANY_ID) => {
   try {
-    const res = await fetch(`/api/tickets?company_id=${encodeURIComponent(companyId)}`, {
-      credentials: "include",
-    });
+    const res = await authFetch(`/api/tickets?company_id=${encodeURIComponent(companyId)}`);
     const json = await res.json();
     if (!res.ok) {
       return { data: [] as Ticket[], error: { message: json?.error ?? "Fehler beim Laden" } };
@@ -769,6 +956,8 @@ const fetchTickets = async (companyId: string = DEFAULT_COMPANY_ID) => {
 
 export default function AdminDashboardPage() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
+  /** SPM-Aufträge als eigene Board-Karten (ohne Pflicht-Ticket). */
+  const [auftraegeBoard, setAuftraegeBoard] = useState<HandwerkerAuftrag[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isMounted, setIsMounted] = useState(false);
@@ -826,14 +1015,26 @@ export default function AdminDashboardPage() {
   /** Dashboard-Theme: 'dark' (Standard) oder 'light'. */
   const [dashboardTheme, setDashboardTheme] = useState<"dark" | "light">("dark");
 
-  /** Pending Slot-Drop: Wenn ein Ticket auf einen Kalender-Slot gezogen wird, öffnet sich ein Dialog zur Zeitfenster-Auswahl. */
-  const [pendingSlotDrop, setPendingSlotDrop] = useState<{
-    ticketId: string;
-    ticket: Ticket;
-    slotStart: Date;
-    slotEnd: Date;
-    wasNachbereitung: boolean;
-  } | null>(null);
+  /** Pending Slot-Drop: Ticket oder Auftrag auf Kalender-Slot → Zeitfenster-Dialog. */
+  const [pendingSlotDrop, setPendingSlotDrop] = useState<
+    | {
+        kind: "ticket";
+        ticketId: string;
+        ticket: Ticket;
+        slotStart: Date;
+        slotEnd: Date;
+        wasNachbereitung: boolean;
+      }
+    | {
+        kind: "auftrag";
+        auftragId: string;
+        auftrag: HandwerkerAuftrag;
+        slotStart: Date;
+        slotEnd: Date;
+        wasNachbereitung: boolean;
+      }
+    | null
+  >(null);
   const [pendingTerminStart, setPendingTerminStart] = useState("");
   const [pendingTerminEnde, setPendingTerminEnde] = useState("");
   /** Nach Auswahl im "Was für ein Termin?"-Dialog: Besichtigung oder Ausführung. null = Typ noch nicht gewählt. */
@@ -844,6 +1045,8 @@ export default function AdminDashboardPage() {
 
   /** Mobile: Tab „Anfragen“ | „Kalender“ – auch per Header-Button umschaltbar. */
   const [mobileMainTab, setMobileMainTab] = useState<"list" | "calendar">("list");
+  /** Viewport &lt; lg: Kalender-Grid und Touch-Optimierung. */
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
   const desktopCalendarSectionRef = useRef<HTMLElement | null>(null);
 
   /** SPM-Auftrag: gleiche Handwerker-Modalansicht wie auf /admin/dashboard/auftraege */
@@ -900,6 +1103,15 @@ export default function AdminDashboardPage() {
   }, []);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(max-width: 1023px)");
+    const apply = () => setIsMobileViewport(mq.matches);
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
+
+  useEffect(() => {
     if (isGewerkUser && incomingTab === "Angebote") setIncomingTab("Eingang");
   }, [isGewerkUser, incomingTab]);
 
@@ -942,8 +1154,10 @@ export default function AdminDashboardPage() {
     });
   }, []);
 
-  /** Sensor: Drag startet erst nach 5px Bewegung → Klick bleibt Klick. */
-  const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 5 } });
+  /** Sensor: etwas höhere Schwelle auf Touch-Geräten → Tap öffnet Karte, bewusstes Ziehen startet Drag. */
+  const pointerSensor = useSensor(PointerSensor, {
+    activationConstraint: { distance: isMobileViewport ? 12 : 8 },
+  });
   const sensors = useSensors(pointerSensor);
 
   /** Droppables: Eingangsspalte (Desktop) + Mobile-Liste + Eingang-Dropzone für Kalender. */
@@ -1018,94 +1232,22 @@ export default function AdminDashboardPage() {
     }
     console.log(`✅ Tickets geladen: ${list.length} Tickets`);
 
-    /** Aufträge aus auftraege-Tabelle als Tickets in „Neue Anfragen“ übernehmen (einmalig pro Auftrag). API filtert nach Rolle. */
+    /** Aufträge für gemischtes Board (keine automatischen Shadow-Tickets mehr). */
     try {
-      const auftraegeRes = await fetch("/api/auftraege", { credentials: "include" });
-      const auftraegeRaw = auftraegeRes.ok ? (await auftraegeRes.json()) : null;
-      const auftraege = (Array.isArray(auftraegeRaw) ? auftraegeRaw : []) as Array<{
-        id: string;
-        auftragsnummer: string | null;
-        mieter_name: string | null;
-        mieter_email: string | null;
-        mieter_telefon: string | null;
-        adresse_strasse: string | null;
-        adresse_ort: string | null;
-        aufgabe: string | null;
-        auftragstyp: string | null;
-      }>;
-      const linkedAuftragIds = new Set(
-        list
-          .map((t) => (t as Ticket & { additional_data?: { auftrag_id?: string } }).additional_data?.auftrag_id)
-          .filter(Boolean)
+      const auftraegeRes = await authFetch("/api/auftraege");
+      const auftraegeRaw = auftraegeRes.ok ? await auftraegeRes.json() : null;
+      const aufListRaw = (Array.isArray(auftraegeRaw) ? auftraegeRaw : []).map(
+        (row) => normalizeAuftragRow(row as Record<string, unknown>) as HandwerkerAuftrag
       );
-      let insertedCount = 0;
-      for (const a of auftraege) {
-        if (linkedAuftragIds.has(a.id)) continue;
-        const { data: existingForAuftrag } = await supabase
-          .from("tickets")
-          .select("id")
-          .eq("additional_data->>auftrag_id", a.id)
-          .limit(1)
-          .maybeSingle();
-        if (existingForAuftrag?.id) {
-          linkedAuftragIds.add(a.id);
-          continue;
-        }
-        const adresse = [a.adresse_strasse, a.adresse_ort].filter(Boolean).join(", ").trim() || "Keine Angabe";
-        const email = (a.mieter_email ?? "").trim() || "aus-auftrag@handwerkmuenchen.de";
-        const { data: inserted, error: insertErr } = await supabase
-          .from("tickets")
-          .insert({
-            company_id: DEFAULT_COMPANY_ID,
-            kunde_name: (a.mieter_name ?? "").trim() || `Auftrag ${a.auftragsnummer ?? a.id.slice(0, 8)}`,
-            kontakt_email: email,
-            kontakt_telefon: (a.mieter_telefon ?? "").trim() || null,
-            objekt_adresse: adresse,
-            beschreibung: (a.aufgabe ?? "").trim() || null,
-            gewerk: mapAuftragstypToGewerk(a.auftragstyp, a.aufgabe),
-            status: STATUS.ANFRAGE,
-            additional_data: { auftrag_id: a.id, auftragsnummer: a.auftragsnummer, quelle: "auftraege" },
-          })
-          .select("id")
-          .maybeSingle();
-        if (insertErr?.code === "23505") {
-          linkedAuftragIds.add(a.id);
-          continue;
-        }
-        if (inserted) {
-          linkedAuftragIds.add(a.id);
-          insertedCount++;
-        }
-      }
-      if (insertedCount > 0) {
-        const { data: refreshed } = await fetchTickets(DEFAULT_COMPANY_ID);
-        if (refreshed) list = refreshed;
-        console.log(`✅ ${insertedCount} Auftrag/Aufträge als Anfragen übernommen`);
-      }
-
-      /** SPM-Tickets ohne Gewerk: aus auftragstyp / Aufgabe nachtragen (ältere Imports). */
-      const auftragById = new Map(auftraege.map((a) => [a.id, a]));
-      let backfillGewerkCount = 0;
-      for (const t of list) {
-        const aid = (t as Ticket & { additional_data?: { auftrag_id?: string } }).additional_data
-          ?.auftrag_id;
-        if (!aid) continue;
-        const existing = normalizeGewerke(t.gewerk ?? null);
-        if (existing.length > 0) continue;
-        const row = auftragById.get(aid);
-        const mapped = mapAuftragstypToGewerk(row?.auftragstyp, row?.aufgabe);
-        if (!mapped) continue;
-        const { error: upErr } = await supabase.from("tickets").update({ gewerk: mapped }).eq("id", t.id);
-        if (!upErr) {
-          backfillGewerkCount++;
-          list = list.map((x) => (x.id === t.id ? { ...x, gewerk: mapped } : x));
-        }
-      }
-      if (backfillGewerkCount > 0) {
-        console.log(`✅ ${backfillGewerkCount} SPM-Ticket(s): Gewerk aus Auftrag ergänzt`);
-      }
+      /** Kein Auto-Gewerk aus Auftragstyp/Aufgabe: leeres Gewerk bleibt leer (Admin-Entscheidung). */
+      const aufList = adminUser
+        ? filterAuftraegeRowsByRole(aufListRaw, adminUser.role)
+        : aufListRaw;
+      setAuftraegeBoard(aufList);
+      console.log(`✅ Aufträge fürs Board: ${aufList.length}`);
     } catch (syncErr) {
-      console.warn("[Auftraege→Tickets Sync]", syncErr);
+      console.warn("[Auftraege Board]", syncErr);
+      setAuftraegeBoard([]);
     }
 
     list = sanitizeTicketList(list);
@@ -1138,8 +1280,30 @@ export default function AdminDashboardPage() {
     if (!silent) setLoading(false);
   };
 
+  /** Immer aktuelle loadTickets-Version für Realtime-Callbacks (ohne stale closure). */
+  const loadTicketsRef = useRef(loadTickets);
+  loadTicketsRef.current = loadTickets;
+
   useEffect(() => {
     loadTickets();
+  }, []);
+
+  /** Auftrags-Zeilen: sofort für alle Rollen neu laden (Gewerk-Dashboard sieht Admin-Änderungen ohne Refresh). */
+  useEffect(() => {
+    const channel = supabase
+      .channel("auftraege-board-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "auftraege" },
+        () => {
+          void loadTicketsRef.current(true);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
   }, []);
 
   /** Fallback: alle 60s neu laden (Gewerk-User sehen sonst evtl. keine neu zugewiesenen Tickets). */
@@ -1549,10 +1713,24 @@ export default function AdminDashboardPage() {
     setHandwerkerAuftragDetail((prev) =>
       prev?.id === auftragId ? { ...prev, ...patch } : prev
     );
+    /** Kanban-Karten lesen aus `auftraegeBoard`, nicht nur aus dem Modal-State. */
+    setAuftraegeBoard((prev) =>
+      prev.map((a) => (a.id === auftragId ? { ...a, ...patch } : a))
+    );
   }, []);
 
   const handleHandwerkerBoardGewerkSaved = useCallback((ticketId: string, gewerk: string[] | null) => {
     setTickets((prev) => prev.map((t) => (t.id === ticketId ? { ...t, gewerk } : t)));
+  }, []);
+
+  const handleAuftragBoardGewerkSaved = useCallback((auftragId: string, gewerk: string[] | null) => {
+    setAuftraegeBoard((prev) => prev.map((a) => (a.id === auftragId ? { ...a, gewerk } : a)));
+    setHandwerkerAuftragDetail((prev) => (prev?.id === auftragId ? { ...prev, gewerk } : prev));
+  }, []);
+
+  const openAuftragBoardDetail = useCallback((a: HandwerkerAuftrag) => {
+    setHandwerkerLinkedTicketId(null);
+    setHandwerkerAuftragDetail(a);
   }, []);
 
   /** Aufträge (SPM) → Handwerker-Dialog; klassische Anfragen → Ticket-Modal. */
@@ -2088,6 +2266,12 @@ export default function AdminDashboardPage() {
     }
   };
 
+  /** Tickets ohne verknüpften SPM-Auftrag (Auftrag erscheint als eigene Karte). */
+  const ticketsOnBoard = useMemo(
+    () => tickets.filter((t) => !ticketHasLinkedAuftrag(t)),
+    [tickets]
+  );
+
   const colIncomingCfg = BUSINESS_COLUMNS.find((c) => c.id === "incoming")!;
   const colCalendarCfg = BUSINESS_COLUMNS.find((c) => c.id === "calendar")!;
   const colNachbereitungCfg = BUSINESS_COLUMNS.find((c) => c.id === "nachbereitung")!;
@@ -2104,7 +2288,7 @@ export default function AdminDashboardPage() {
   /** Spalte 1: Neue Anfragen (ohne Termin). Fallback: ungültiger/unbekannter Status → erste Spalte. */
   const col1Tickets = useMemo(
     () =>
-      tickets
+      ticketsOnBoard
         .filter((t) => {
           const s = (t.status ?? "").trim();
           const hasTermin = (t.termin_start ?? "").trim() !== "";
@@ -2119,7 +2303,31 @@ export default function AdminDashboardPage() {
         })
         .sort(sortByPositionThenCreatedAt),
     [
-      tickets,
+      ticketsOnBoard,
+      calendarStatuses,
+      colNachbereitungCfg.status,
+      colAbrechnungCfg.status,
+      colAbgelehntCfg.status,
+      colArchivCfg.status,
+    ]
+  );
+
+  /** Aufträge im gleichen räumlichen Bucket wie Spalte 1 (noch nicht in 2–6 / Kalender). */
+  const col1AuftraegeInBucket = useMemo(
+    () =>
+      auftraegeBoard.filter((a) => {
+        const s = auftragBoardStatus(a);
+        const hasTermin = (a.termin_start ?? "").trim() !== "";
+        const inCol2 = hasTermin && calendarStatuses.includes(s) && !isKalkulationFaelligAuftrag(a);
+        const inCol3 = s === colNachbereitungCfg.status;
+        const inCol4 = s === colAbrechnungCfg.status;
+        const inCol5 = s === colAbgelehntCfg.status;
+        const inCol6 = s === colArchivCfg.status;
+        if (inCol2 || inCol3 || inCol4 || inCol5 || inCol6) return false;
+        return true;
+      }),
+    [
+      auftraegeBoard,
       calendarStatuses,
       colNachbereitungCfg.status,
       colAbrechnungCfg.status,
@@ -2140,6 +2348,18 @@ export default function AdminDashboardPage() {
         }
       ),
     [col1Tickets]
+  );
+
+  const col1EingangAuftraege = useMemo(
+    () =>
+      col1AuftraegeInBucket
+        .filter((a) => {
+          const s = auftragBoardStatus(a);
+          const hasTermin = (a.termin_start ?? "").trim() !== "";
+          return s === STATUS.ANFRAGE || (s === STATUS.EINGETEILT && !hasTermin);
+        })
+        .sort(sortAuftraegeByBoardPosition),
+    [col1AuftraegeInBucket]
   );
 
   /** Spalte 1 Tab "Angebote": status Angebot_erstellt ODER Besichtigung mit abgelaufenem Termin. */
@@ -2165,66 +2385,144 @@ export default function AdminDashboardPage() {
     });
   }, [col1Tickets]);
 
+  const col1AngeboteAuftraege = useMemo(
+    () =>
+      col1AuftraegeInBucket
+        .filter(
+          (a) =>
+            auftragBoardStatus(a) === STATUS.ANGEBOT_ERSTELLT || isKalkulationFaelligAuftrag(a)
+        )
+        .sort((a, b) => {
+          const aF = isKalkulationFaelligAuftrag(a);
+          const bF = isKalkulationFaelligAuftrag(b);
+          if (aF && !bF) return -1;
+          if (!aF && bF) return 1;
+          if (aF && bF) {
+            const ae = a.termin_ende ? new Date(a.termin_ende).getTime() : 0;
+            const be = b.termin_ende ? new Date(b.termin_ende).getTime() : 0;
+            return be - ae;
+          }
+          return sortAuftraegeByBoardPosition(a, b);
+        }),
+    [col1AuftraegeInBucket]
+  );
+
   /** Spalte 2: Terminplaner – Tickets mit Termin (Eingeteilt, Besichtigung, Ausführung). */
   const col2Tickets = useMemo(
     () =>
-      tickets.filter((t) => {
+      ticketsOnBoard.filter((t) => {
         const hasTermin = (t.termin_start ?? "").trim() !== "";
         const s = (t.status ?? "").trim();
         // Abgelaufene Besichtigungen werden im UI nicht mehr im Kalender geführt
         return hasTermin && calendarStatuses.includes(s) && !isKalkulationFaellig(t);
       }),
-    [tickets, calendarStatuses]
+    [ticketsOnBoard, calendarStatuses]
+  );
+
+  const col2Auftraege = useMemo(
+    () =>
+      auftraegeBoard.filter((a) => {
+        const hasTermin = (a.termin_start ?? "").trim() !== "";
+        const s = auftragBoardStatus(a);
+        return hasTermin && calendarStatuses.includes(s) && !isKalkulationFaelligAuftrag(a);
+      }),
+    [auftraegeBoard, calendarStatuses]
   );
 
   /** Spalte 3: Nachbereitung & Doku (Status aus Business-Config). */
   const col3Tickets = useMemo(
     () =>
-      tickets
+      ticketsOnBoard
         .filter((t) => (t.status ?? "").trim() === colNachbereitungCfg.status)
         .sort(sortByPositionThenCreatedAt),
-    [tickets, colNachbereitungCfg.status]
+    [ticketsOnBoard, colNachbereitungCfg.status]
+  );
+
+  const col3Auftraege = useMemo(
+    () =>
+      auftraegeBoard
+        .filter((a) => auftragBoardStatus(a) === colNachbereitungCfg.status)
+        .sort(sortAuftraegeByBoardPosition),
+    [auftraegeBoard, colNachbereitungCfg.status]
   );
 
   /** Spalte 4: Erledigt & Abrechnung (Status aus Business-Config). */
   const col4Tickets = useMemo(
     () =>
-      tickets
+      ticketsOnBoard
         .filter((t) => (t.status ?? "").trim() === colAbrechnungCfg.status)
         .sort(sortByPositionThenCreatedAt),
-    [tickets, colAbrechnungCfg.status]
+    [ticketsOnBoard, colAbrechnungCfg.status]
+  );
+
+  const col4Auftraege = useMemo(
+    () =>
+      auftraegeBoard
+        .filter((a) => auftragBoardStatus(a) === colAbrechnungCfg.status)
+        .sort(sortAuftraegeByBoardPosition),
+    [auftraegeBoard, colAbrechnungCfg.status]
   );
 
   /** Spalte 5: Abgelehnt (Status aus Business-Config). */
   const col5Tickets = useMemo(
     () =>
-      tickets
+      ticketsOnBoard
         .filter((t) => (t.status ?? "").trim() === colAbgelehntCfg.status)
         .sort(sortByPositionThenCreatedAt),
-    [tickets, colAbgelehntCfg.status]
+    [ticketsOnBoard, colAbgelehntCfg.status]
+  );
+
+  const col5Auftraege = useMemo(
+    () =>
+      auftraegeBoard
+        .filter((a) => auftragBoardStatus(a) === colAbgelehntCfg.status)
+        .sort(sortAuftraegeByBoardPosition),
+    [auftraegeBoard, colAbgelehntCfg.status]
   );
 
   /** Spalte 6: Archiv (Status aus Business-Config). */
   const col6Tickets = useMemo(
     () =>
-      tickets
+      ticketsOnBoard
         .filter((t) => (t.status ?? "").trim() === colArchivCfg.status)
         .sort(sortByPositionThenCreatedAt),
-    [tickets, colArchivCfg.status]
+    [ticketsOnBoard, colArchivCfg.status]
   );
 
-  /** Kalender-Events aus Spalte-2-Tickets (termin_start). */
+  const col6Auftraege = useMemo(
+    () =>
+      auftraegeBoard
+        .filter((a) => auftragBoardStatus(a) === colArchivCfg.status)
+        .sort(sortAuftraegeByBoardPosition),
+    [auftraegeBoard, colArchivCfg.status]
+  );
+
+  /** Kalender-Events: Tickets + Aufträge mit termin_start in Spalte-2-Logik. */
   const calendarEvents = useMemo((): WeekEvent[] => {
-    return col2Tickets
+    const fromTickets = col2Tickets
       .filter((t) => t.termin_start != null && t.termin_start.trim() !== "")
       .map((t) => ({
         id: t.id,
+        resourceKind: "ticket" as const,
         title: `${getTicketDisplayName(t)}${getTicketOrAuftragNumber(t) !== "–" ? ` (${getTicketOrAuftragNumber(t)})` : ""}`,
         start: new Date(t.termin_start!),
         end: t.termin_ende ? new Date(t.termin_ende) : new Date(t.termin_start!),
         resource: t,
       }));
-  }, [col2Tickets]);
+    const fromAuftraege = col2Auftraege
+      .filter((a) => (a.termin_start ?? "").trim() !== "")
+      .map((a) => ({
+        id: `auftrag-${a.id}`,
+        resourceKind: "auftrag" as const,
+        title: `${getAuftragCardTitle(a)}${
+          (a.auftragsnummer ?? "").trim() ? ` (${(a.auftragsnummer ?? "").trim()})` : ""
+        }`,
+        start: new Date(a.termin_start!),
+        end: a.termin_ende ? new Date(a.termin_ende) : new Date(a.termin_start!),
+        resource: a,
+      }));
+    return [...fromTickets, ...fromAuftraege];
+  }, [col2Tickets, col2Auftraege]);
 
   /** Setzt nur den Status / Spalte. Bei Statuswechsel erscheint das Ticket in der Zielspalte ganz oben. */
   const setTicketStatus = useCallback(
@@ -2269,78 +2567,95 @@ export default function AdminDashboardPage() {
   );
 
   // ─── Hilfsfunktion: Spalten-Konfiguration aus Business-Config (alle Kanban-Spalten) ───
-  const columnConfigs = useMemo(
-    () =>
-      BUSINESS_COLUMNS.filter((c) => c.kind === "kanban").map((cfg) => {
-        let ticketsForCol: Ticket[];
-        if (cfg.id === "incoming") {
+  const columnConfigs = useMemo(() => {
+    return BUSINESS_COLUMNS.filter((c) => c.kind === "kanban").map((cfg) => {
+      let ticketsForCol: Ticket[];
+      let auftraegeForCol: HandwerkerAuftrag[];
+      switch (cfg.id) {
+        case "incoming":
           ticketsForCol = col1Tickets;
-        } else {
-          ticketsForCol = tickets
+          auftraegeForCol = col1AuftraegeInBucket;
+          break;
+        case "calendar":
+          ticketsForCol = col2Tickets;
+          auftraegeForCol = col2Auftraege;
+          break;
+        case "nachbereitung":
+          ticketsForCol = col3Tickets;
+          auftraegeForCol = col3Auftraege;
+          break;
+        case "abrechnung":
+          ticketsForCol = col4Tickets;
+          auftraegeForCol = col4Auftraege;
+          break;
+        case "abgelehnt":
+          ticketsForCol = col5Tickets;
+          auftraegeForCol = col5Auftraege;
+          break;
+        case "archiv":
+          ticketsForCol = col6Tickets;
+          auftraegeForCol = col6Auftraege;
+          break;
+        default:
+          ticketsForCol = ticketsOnBoard
             .filter((t) => (t.status ?? "").trim() === cfg.status)
             .sort(sortByPositionThenCreatedAt);
-        }
-        return {
-          colId: cfg.droppableId,
-          tickets: ticketsForCol,
-          status: cfg.status,
-        };
-      }),
-    [tickets, col1Tickets]
-  );
+          auftraegeForCol = auftraegeBoard
+            .filter((a) => auftragBoardStatus(a) === cfg.status)
+            .sort(sortAuftraegeByBoardPosition);
+      }
+      return {
+        colId: cfg.droppableId,
+        tickets: ticketsForCol,
+        auftraege: auftraegeForCol,
+        status: cfg.status,
+      };
+    });
+  }, [
+    col1Tickets,
+    col1AuftraegeInBucket,
+    col2Tickets,
+    col2Auftraege,
+    col3Tickets,
+    col3Auftraege,
+    col4Tickets,
+    col4Auftraege,
+    col5Tickets,
+    col5Auftraege,
+    col6Tickets,
+    col6Auftraege,
+    ticketsOnBoard,
+    auftraegeBoard,
+  ]);
 
-  /** Findet die Spalten-Config für ein gegebenes overId (Spalte oder Ticket). */
+  /** Findet die Spalten-Config für ein gegebenes overId (Spalte oder Karte). */
   const resolveColumnForOverId = useCallback(
-    (overId: string): { config: typeof columnConfigs[number]; targetTicketId?: string } | null => {
-      // 1) Direkt eine Spalte getroffen (column-1, column-3 … column-6, oder mobile)
+    (overId: string): { config: (typeof columnConfigs)[number]; targetDndId?: string } | null => {
       if (overId === COLUMN_IDS[0] || overId === "column-eingang-mobile" || overId === "column-1-mobile-list") {
-        return { config: columnConfigs[0] };
+        return { config: columnConfigs[0]! };
       }
       for (const cfg of columnConfigs) {
         if (overId === cfg.colId) return { config: cfg };
       }
-      // 2) Eine Karte getroffen → Spalte der Karte ermitteln
       if (overId.startsWith("ticket-")) {
         const uuid = overId.replace(/^ticket-/, "");
         for (const cfg of columnConfigs) {
           if (cfg.tickets.some((t) => t.id === uuid)) {
-            return { config: cfg, targetTicketId: uuid };
+            return { config: cfg, targetDndId: overId };
+          }
+        }
+      }
+      if (overId.startsWith("auftrag-")) {
+        const uuid = overId.replace(/^auftrag-/, "");
+        for (const cfg of columnConfigs) {
+          if (cfg.auftraege.some((a) => a.id === uuid)) {
+            return { config: cfg, targetDndId: overId };
           }
         }
       }
       return null;
     },
     [columnConfigs]
-  );
-
-  /** Berechnet die neue Position: vor einer bestimmten Karte oder ans Ende der Spalte. */
-  const computeNewPosition = useCallback(
-    (colTickets: Ticket[], draggedId: string, beforeTicketId?: string): number => {
-      // Arbeits-Kopie ohne das gezogene Ticket, mit Positionen initialisiert
-      let list = colTickets
-        .filter((t) => t.id !== draggedId)
-        .map((t, i) => ({ ...t, position: typeof t.position === "number" ? t.position : (i + 1) * 10 }));
-      if (list.length === 0) return 10;
-      if (!beforeTicketId) {
-        // Ans Ende
-        return Math.max(...list.map((t) => t.position)) + 10;
-      }
-      const idx = list.findIndex((t) => t.id === beforeTicketId);
-      if (idx === -1) return Math.max(...list.map((t) => t.position)) + 10;
-      const after = list[idx];
-      const before = idx > 0 ? list[idx - 1] : null;
-      if (before && after.position - before.position > 1) {
-        return Math.round((before.position + after.position) / 2);
-      }
-      if (!before) return Math.max(1, after.position - 10);
-      // Kein Platz → Re-Index
-      list = list.map((t, i) => ({ ...t, position: (i + 1) * 10 }));
-      const newIdx = list.findIndex((t) => t.id === beforeTicketId);
-      const newAfter = list[newIdx];
-      const newBefore = newIdx > 0 ? list[newIdx - 1] : null;
-      return newBefore ? Math.round((newBefore.position + newAfter.position) / 2) : Math.max(1, newAfter.position - 10);
-    },
-    []
   );
 
   /** Persistiert Status + Position in Supabase und aktualisiert den lokalen State. */
@@ -2360,6 +2675,52 @@ export default function AdminDashboardPage() {
       }
     },
     [detailTicket?.id]
+  );
+
+  const moveAuftragToColumn = useCallback(
+    async (auftragId: string, newBoardStatus: string, newBoardPosition: number, extras?: Record<string, unknown>) => {
+      const payload: Record<string, unknown> = {
+        board_status: newBoardStatus,
+        board_position: newBoardPosition,
+        ...extras,
+      };
+      const { error } = await supabase.from("auftraege").update(payload).eq("id", auftragId);
+      if (error) {
+        setError(error.message);
+        return;
+      }
+      setAuftraegeBoard((prev) =>
+        prev.map((a) => (a.id === auftragId ? { ...a, ...payload } as HandwerkerAuftrag : a))
+      );
+      setHandwerkerAuftragDetail((prev) =>
+        prev?.id === auftragId ? { ...prev, ...payload } as HandwerkerAuftrag : prev
+      );
+    },
+    []
+  );
+
+  const assignAuftragToSlot = useCallback(
+    async (auftragId: string, startIso: string, endIso: string, terminTyp: "Besichtigung" | "Ausführung") => {
+      const statusByTyp = terminTyp === TERMIN_TYP.BESICHTIGUNG ? STATUS.BESICHTIGUNG : STATUS.AUSFUEHRUNG;
+      const updates: Record<string, unknown> = {
+        board_status: statusByTyp,
+        termin_start: startIso,
+        termin_ende: endIso,
+        termin_typ: terminTyp,
+      };
+      const { error } = await supabase.from("auftraege").update(updates).eq("id", auftragId);
+      if (error) {
+        setError(error.message);
+        return;
+      }
+      setAuftraegeBoard((prev) =>
+        prev.map((a) => (a.id === auftragId ? { ...a, ...updates } as HandwerkerAuftrag : a))
+      );
+      setHandwerkerAuftragDetail((prev) =>
+        prev?.id === auftragId ? { ...prev, ...updates } as HandwerkerAuftrag : prev
+      );
+    },
+    []
   );
 
   /** Drag end: Karte zwischen Spalten verschieben, auf Kalender-Slot droppen, etc. */
@@ -2403,12 +2764,10 @@ export default function AdminDashboardPage() {
             overId = detectedCol;
           } else if (overId === detectedCol) {
             // Bereits korrekte Spalte → nichts tun
-          } else if (overId.startsWith("ticket-")) {
-            // overId ist ein Ticket → prüfe ob es in der erkannten Zielspalte liegt
+          } else if (overId.startsWith("ticket-") || overId.startsWith("auftrag-")) {
             const resolvedOver = resolveColumnForOverId(overId);
             const overColId = resolvedOver?.config.colId;
             if (overColId !== detectedCol) {
-              // Ticket gehört zu einer ANDEREN Spalte als der Cursor → Override!
               console.log(`[DnD] ⚡ DOM-Override: overId "${overId}" gehört zu ${overColId}, Cursor über "${detectedCol}" → korrigiert!`);
               overId = detectedCol;
             }
@@ -2425,39 +2784,86 @@ export default function AdminDashboardPage() {
         return;
       }
 
+      type DragEntity = { kind: "ticket"; ticket: Ticket } | { kind: "auftrag"; auftrag: HandwerkerAuftrag };
+
+      const parseEntity = (): DragEntity | null => {
+        if (activeId.startsWith("ticket-")) {
+          const id = activeId.replace(/^ticket-/, "");
+          const ticket = tickets.find((t) => t.id === id);
+          return ticket ? { kind: "ticket", ticket } : null;
+        }
+        if (activeId.startsWith("auftrag-")) {
+          const id = activeId.replace(/^auftrag-/, "");
+          const auftrag = auftraegeBoard.find((a) => a.id === id);
+          return auftrag ? { kind: "auftrag", auftrag } : null;
+        }
+        if (activeId.startsWith("event-")) {
+          const raw = activeId.replace(/^event-/, "");
+          if (raw.startsWith("auftrag-")) {
+            const id = raw.replace(/^auftrag-/, "");
+            const auftrag = auftraegeBoard.find((a) => a.id === id);
+            return auftrag ? { kind: "auftrag", auftrag } : null;
+          }
+          const ticket = tickets.find((t) => t.id === raw);
+          return ticket ? { kind: "ticket", ticket } : null;
+        }
+        return null;
+      };
+
+      const entity = parseEntity();
+      if (!entity) {
+        console.warn("[DnD] Unbekannte oder fehlende Ressource für activeId:", activeId);
+        return;
+      }
+
       const isFromCalendar = activeId.startsWith("event-");
-      const ticketId = activeId.startsWith("ticket-")
-        ? String(activeId).replace(/^ticket-/, "")
-        : isFromCalendar
-          ? String(activeId).replace(/^event-/, "")
-          : String(activeId);
-      const ticket = tickets.find((t) => t.id === ticketId);
-      if (!ticket) return;
-      const wasNachbereitung = (ticket.status ?? "").trim() === STATUS.NACHBEREITUNG;
+      const wasNachbereitung =
+        entity.kind === "ticket"
+          ? (entity.ticket.status ?? "").trim() === STATUS.NACHBEREITUNG
+          : auftragBoardStatus(entity.auftrag) === STATUS.NACHBEREITUNG;
 
       // ─── Karte auf Spalte oder Karte (Trello-Style) ───
       const resolved = resolveColumnForOverId(overId);
-      console.log("[DnD] resolved column:", resolved ? { colId: resolved.config.colId, status: resolved.config.status, targetTicketId: resolved.targetTicketId } : null);
+      console.log("[DnD] resolved column:", resolved ? { colId: resolved.config.colId, status: resolved.config.status, targetDndId: resolved.targetDndId } : null);
       if (resolved && !overId.startsWith("slot-")) {
         const { config } = resolved;
-        // Spalte der Karte vor dem Drag, um reine Reorders zu erkennen
-        const sourceColumn = columnConfigs.find((cfg) => cfg.tickets.some((t) => t.id === ticketId));
+        const sourceColumn =
+          entity.kind === "ticket"
+            ? columnConfigs.find((cfg) => cfg.tickets.some((t) => t.id === entity.ticket.id)) ?? null
+            : columnConfigs.find((cfg) => cfg.auftraege.some((a) => a.id === entity.auftrag.id)) ?? null;
         const isSameColumn = sourceColumn?.colId === config.colId;
-        // Präzise Einfügeposition: dropIndicator hat Vorrang (DOM-basiert, pointer-genau)
-        const insertBeforeId = dropIndicator && dropIndicator.colId === config.colId
-          ? dropIndicator.insertBeforeId ?? undefined
-          : resolved.targetTicketId;
-        const newPosition = computeNewPosition(config.tickets, ticketId, insertBeforeId);
-        console.log("[DnD] insertBeforeId:", insertBeforeId ?? "END", "→ position:", newPosition);
-        const isCol1 = config.colId === COLUMN_IDS[0] || overId === "column-eingang-mobile" || overId === "column-1-mobile-list";
+        const insertBeforeDndId =
+          dropIndicator && dropIndicator.colId === config.colId
+            ? dropIndicator.insertBeforeId ?? undefined
+            : resolved.targetDndId;
 
-        // Reorder innerhalb derselben Spalte: Status NICHT ändern
-        if (isSameColumn) {
-          const currentStatus = (ticket.status ?? "").trim() || config.status;
-          await moveTicketToColumn(ticketId, currentStatus, newPosition);
-        } else {
-          if (isCol1) {
-            const hasTicketNumber = (ticket.ticket_display_id ?? "").trim() !== "";
+        const isCol1Target =
+          config.colId === COLUMN_IDS[0] || overId === "column-eingang-mobile" || overId === "column-1-mobile-list";
+
+        let visTickets = config.tickets;
+        let visAuftraege = config.auftraege;
+        if (isCol1Target) {
+          visTickets = incomingTab === "Eingang" ? col1EingangTickets : col1AngeboteTickets;
+          visAuftraege = incomingTab === "Eingang" ? col1EingangAuftraege : col1AngeboteAuftraege;
+        }
+
+        const draggedDndId =
+          entity.kind === "ticket" ? `ticket-${entity.ticket.id}` : `auftrag-${entity.auftrag.id}`;
+
+        if (entity.kind === "ticket") {
+          const ticketId = entity.ticket.id;
+          const newPosition = computeMergedColumnPosition(
+            visTickets,
+            visAuftraege,
+            draggedDndId,
+            insertBeforeDndId
+          );
+          console.log("[DnD] insertBeforeDndId:", insertBeforeDndId ?? "END", "→ position:", newPosition);
+          if (isSameColumn) {
+            const currentStatus = (entity.ticket.status ?? "").trim() || config.status;
+            await moveTicketToColumn(ticketId, currentStatus, newPosition);
+          } else if (isCol1Target) {
+            const hasTicketNumber = (entity.ticket.ticket_display_id ?? "").trim() !== "";
             const newStatus = hasTicketNumber ? STATUS.EINGETEILT : STATUS.ANFRAGE;
             await moveTicketToColumn(ticketId, newStatus, newPosition, {
               termin_start: null,
@@ -2470,6 +2876,28 @@ export default function AdminDashboardPage() {
             }
           } else {
             await moveTicketToColumn(ticketId, config.status, newPosition);
+          }
+        } else {
+          const auftragId = entity.auftrag.id;
+          const newBoardPosition = computeMergedColumnPosition(
+            visTickets,
+            visAuftraege,
+            draggedDndId,
+            insertBeforeDndId
+          );
+          if (isSameColumn) {
+            const currentBoard = auftragBoardStatus(entity.auftrag) || config.status;
+            await moveAuftragToColumn(auftragId, currentBoard, newBoardPosition);
+          } else if (isCol1Target) {
+            const hasNr = (entity.auftrag.auftragsnummer ?? "").trim() !== "";
+            const newStatus = hasNr ? STATUS.EINGETEILT : STATUS.ANFRAGE;
+            await moveAuftragToColumn(auftragId, newStatus, newBoardPosition, {
+              termin_start: null,
+              termin_ende: null,
+              termin_typ: null,
+            });
+          } else {
+            await moveAuftragToColumn(auftragId, config.status, newBoardPosition);
           }
         }
         return;
@@ -2485,63 +2913,115 @@ export default function AdminDashboardPage() {
       const slotStart = setMinutes(setHours(slotDate, CALENDAR_HOUR_START), slotIndex * SLOT_MINUTES);
       const slotEnd = add(slotStart, { hours: 1 });
 
-      // Vergangenheits-Check: Slot-Start darf nicht in der Vergangenheit liegen
       if (slotStart < new Date()) {
         alert(`Dieser Zeitraum liegt in der Vergangenheit (${format(slotStart, "dd.MM.yyyy HH:mm", { locale: de })}). Bitte wähle einen zukünftigen Termin.`);
         return;
       }
 
+      const localStart = format(slotStart, "yyyy-MM-dd'T'HH:mm");
+      const localEnd = format(slotEnd, "yyyy-MM-dd'T'HH:mm");
+
       if (isFromCalendar) {
-        // Kalender-zu-Kalender: Ursprüngliche Dauer beibehalten – KEINE neue ticket_display_id vergeben
-        const origStart = ticket.termin_start ? new Date(ticket.termin_start) : null;
-        const origEnd = ticket.termin_ende ? new Date(ticket.termin_ende) : null;
-        const durationMs = origStart && origEnd ? origEnd.getTime() - origStart.getTime() : 60 * 60 * 1000; // Fallback 1h
-        const newEnd = new Date(slotStart.getTime() + durationMs);
-        const startIso = slotStart.toISOString();
-        const endIso = newEnd.toISOString();
-        console.log("[DnD] Kalender-Event verschieben:", { ticketId, startIso, endIso, status: ticket.status });
-        const calUpdates: Record<string, unknown> = {
-          termin_start: startIso,
-          termin_ende: endIso,
-          status: STATUS.EINGETEILT,
-          termin_typ: ticket.termin_typ ?? null,
-        };
-        const { error: dbErr } = await supabase
-          .from("tickets")
-          .update(calUpdates)
-          .eq("id", ticketId);
-        if (!dbErr) {
-          setTickets((prev) =>
-            prev.map((t) =>
-              t.id === ticketId ? { ...t, ...calUpdates } as Ticket : t
-            )
-          );
-          if (detailTicket?.id === ticketId) {
-            setDetailTicket((prev) => (prev ? { ...prev, ...calUpdates } as Ticket : null));
-            setDetailTerminStart(toDateTimeLocal(startIso));
-            setDetailTerminEnde(toDateTimeLocal(endIso));
+        if (entity.kind === "ticket") {
+          const ticketId = entity.ticket.id;
+          const origStart = entity.ticket.termin_start ? new Date(entity.ticket.termin_start) : null;
+          const origEnd = entity.ticket.termin_ende ? new Date(entity.ticket.termin_ende) : null;
+          const durationMs = origStart && origEnd ? origEnd.getTime() - origStart.getTime() : 60 * 60 * 1000;
+          const newEndCal = new Date(slotStart.getTime() + durationMs);
+          const startIso = slotStart.toISOString();
+          const endIso = newEndCal.toISOString();
+          const calUpdates: Record<string, unknown> = {
+            termin_start: startIso,
+            termin_ende: endIso,
+            status: STATUS.EINGETEILT,
+            termin_typ: entity.ticket.termin_typ ?? null,
+          };
+          const { error: dbErr } = await supabase.from("tickets").update(calUpdates).eq("id", ticketId);
+          if (!dbErr) {
+            setTickets((prev) =>
+              prev.map((t) => (t.id === ticketId ? { ...t, ...calUpdates } as Ticket : t))
+            );
+            if (detailTicket?.id === ticketId) {
+              setDetailTicket((prev) => (prev ? { ...prev, ...calUpdates } as Ticket : null));
+              setDetailTerminStart(toDateTimeLocal(startIso));
+              setDetailTerminEnde(toDateTimeLocal(endIso));
+            }
+          } else {
+            setError(dbErr.message);
           }
         } else {
-          console.error("[DnD] ❌ DB-Update fehlgeschlagen:", dbErr.message);
-          setError(dbErr.message);
+          const auftragId = entity.auftrag.id;
+          const origStart = entity.auftrag.termin_start ? new Date(entity.auftrag.termin_start) : null;
+          const origEnd = entity.auftrag.termin_ende ? new Date(entity.auftrag.termin_ende) : null;
+          const durationMs = origStart && origEnd ? origEnd.getTime() - origStart.getTime() : 60 * 60 * 1000;
+          const newEndCal = new Date(slotStart.getTime() + durationMs);
+          const startIso = slotStart.toISOString();
+          const endIso = newEndCal.toISOString();
+          const calUpdates: Record<string, unknown> = {
+            termin_start: startIso,
+            termin_ende: endIso,
+            board_status: STATUS.EINGETEILT,
+            termin_typ: entity.auftrag.termin_typ ?? null,
+          };
+          const { error: dbErr } = await supabase.from("auftraege").update(calUpdates).eq("id", auftragId);
+          if (!dbErr) {
+            setAuftraegeBoard((prev) =>
+              prev.map((a) => (a.id === auftragId ? { ...a, ...calUpdates } as HandwerkerAuftrag : a))
+            );
+            setHandwerkerAuftragDetail((prev) =>
+              prev?.id === auftragId ? { ...prev, ...calUpdates } as HandwerkerAuftrag : prev
+            );
+          } else {
+            setError(dbErr.message);
+          }
         }
       } else {
-        // Ticket aus Spalte → Kalender: Zuerst "Was für ein Termin?" (Typ), dann Zeitfenster-Dialog
-        const localStart = format(slotStart, "yyyy-MM-dd'T'HH:mm");
-        const localEnd = format(slotEnd, "yyyy-MM-dd'T'HH:mm");
         setPendingTerminStart(roundDateTimeTo15Min(localStart));
         setPendingTerminEnde(roundDateTimeTo15Min(localEnd));
         setPendingTerminTyp(null);
-        setPendingSlotDrop({ ticketId, ticket, slotStart, slotEnd, wasNachbereitung });
+        if (entity.kind === "ticket") {
+          setPendingSlotDrop({
+            kind: "ticket",
+            ticketId: entity.ticket.id,
+            ticket: entity.ticket,
+            slotStart,
+            slotEnd,
+            wasNachbereitung,
+          });
+        } else {
+          setPendingSlotDrop({
+            kind: "auftrag",
+            auftragId: entity.auftrag.id,
+            auftrag: entity.auftrag,
+            slotStart,
+            slotEnd,
+            wasNachbereitung,
+          });
+        }
       }
     },
-    [weekStart, assignTicketToSlot, detailTicket?.id, tickets, resolveColumnForOverId, computeNewPosition, moveTicketToColumn]
+    [
+      weekStart,
+      detailTicket?.id,
+      tickets,
+      auftraegeBoard,
+      columnConfigs,
+      incomingTab,
+      col1EingangTickets,
+      col1EingangAuftraege,
+      col1AngeboteTickets,
+      col1AngeboteAuftraege,
+      resolveColumnForOverId,
+      moveTicketToColumn,
+      moveAuftragToColumn,
+      dropIndicator,
+      toDateTimeLocal,
+    ]
   );
 
   /** Bestätigt den Termin aus dem Zeitfenster-Dialog und speichert in DB (mit termin_typ). */
   const confirmSlotDrop = useCallback(async () => {
     if (!pendingSlotDrop || !pendingTerminTyp) return;
-    const { ticketId, ticket, wasNachbereitung } = pendingSlotDrop;
     const startDate = new Date(pendingTerminStart);
     const endDate = new Date(pendingTerminEnde);
 
@@ -2562,39 +3042,92 @@ export default function AdminDashboardPage() {
     const endIso = endDate.toISOString();
     const statusByTyp = pendingTerminTyp === TERMIN_TYP.BESICHTIGUNG ? STATUS.BESICHTIGUNG : STATUS.AUSFUEHRUNG;
 
-    if (wasNachbereitung && ticket.termin_start) {
-      const prevStart = ticket.termin_start;
-      const prevEnd = ticket.termin_ende;
-      const historieEntry: HistorieEintrag = {
-        date: prevStart.slice(0, 10),
-        text: `Termin war ${format(new Date(prevStart), "dd.MM.yyyy HH:mm", { locale: de })} – ${prevEnd ? format(new Date(prevEnd), "HH:mm", { locale: de }) : "?"}`,
-      };
-      const currentHistorie = Array.isArray(ticket.historie) ? ticket.historie : [];
-      const newHistorie = [...currentHistorie, historieEntry];
-      const { error: dbErr } = await supabase
-        .from("tickets")
-        .update({ termin_start: startIso, termin_ende: endIso, termin_typ: pendingTerminTyp, status: statusByTyp, historie: newHistorie })
-        .eq("id", ticketId);
-      if (!dbErr) {
-        setTickets((prev) =>
-          prev.map((t) =>
-            t.id === ticketId
-              ? { ...t, termin_start: startIso, termin_ende: endIso, termin_typ: pendingTerminTyp, status: statusByTyp, historie: newHistorie }
-              : t
-          )
-        );
-        if (detailTicket?.id === ticketId) {
-          setDetailTicket((prev) => (prev ? { ...prev, termin_start: startIso, termin_ende: endIso, termin_typ: pendingTerminTyp, status: statusByTyp, historie: newHistorie } : null));
-          setDetailTerminStart(toDateTimeLocal(startIso));
-          setDetailTerminEnde(toDateTimeLocal(endIso));
-        }
-      } else setError(dbErr.message);
+    if (pendingSlotDrop.kind === "ticket") {
+      const { ticketId, ticket, wasNachbereitung } = pendingSlotDrop;
+      if (wasNachbereitung && ticket.termin_start) {
+        const prevStart = ticket.termin_start;
+        const prevEnd = ticket.termin_ende;
+        const historieEntry: HistorieEintrag = {
+          date: prevStart.slice(0, 10),
+          text: `Termin war ${format(new Date(prevStart), "dd.MM.yyyy HH:mm", { locale: de })} – ${prevEnd ? format(new Date(prevEnd), "HH:mm", { locale: de }) : "?"}`,
+        };
+        const currentHistorie = Array.isArray(ticket.historie) ? ticket.historie : [];
+        const newHistorie = [...currentHistorie, historieEntry];
+        const { error: dbErr } = await supabase
+          .from("tickets")
+          .update({ termin_start: startIso, termin_ende: endIso, termin_typ: pendingTerminTyp, status: statusByTyp, historie: newHistorie })
+          .eq("id", ticketId);
+        if (!dbErr) {
+          setTickets((prev) =>
+            prev.map((t) =>
+              t.id === ticketId
+                ? { ...t, termin_start: startIso, termin_ende: endIso, termin_typ: pendingTerminTyp, status: statusByTyp, historie: newHistorie }
+                : t
+            )
+          );
+          if (detailTicket?.id === ticketId) {
+            setDetailTicket((prev) => (prev ? { ...prev, termin_start: startIso, termin_ende: endIso, termin_typ: pendingTerminTyp, status: statusByTyp, historie: newHistorie } : null));
+            setDetailTerminStart(toDateTimeLocal(startIso));
+            setDetailTerminEnde(toDateTimeLocal(endIso));
+          }
+        } else setError(dbErr.message);
+      } else {
+        await assignTicketToSlot(ticketId, startIso, endIso, pendingTerminTyp);
+      }
     } else {
-      await assignTicketToSlot(ticketId, startIso, endIso, pendingTerminTyp);
+      const { auftragId, auftrag, wasNachbereitung } = pendingSlotDrop;
+      if (wasNachbereitung && auftrag.termin_start) {
+        const { error: dbErr } = await supabase
+          .from("auftraege")
+          .update({
+            termin_start: startIso,
+            termin_ende: endIso,
+            termin_typ: pendingTerminTyp,
+            board_status: statusByTyp,
+          })
+          .eq("id", auftragId);
+        if (!dbErr) {
+          setAuftraegeBoard((prev) =>
+            prev.map((a) =>
+              a.id === auftragId
+                ? {
+                    ...a,
+                    termin_start: startIso,
+                    termin_ende: endIso,
+                    termin_typ: pendingTerminTyp,
+                    board_status: statusByTyp,
+                  }
+                : a
+            )
+          );
+          setHandwerkerAuftragDetail((prev) =>
+            prev?.id === auftragId
+              ? {
+                  ...prev,
+                  termin_start: startIso,
+                  termin_ende: endIso,
+                  termin_typ: pendingTerminTyp,
+                  board_status: statusByTyp,
+                }
+              : prev
+          );
+        } else setError(dbErr.message);
+      } else {
+        await assignAuftragToSlot(auftragId, startIso, endIso, pendingTerminTyp);
+      }
     }
     setPendingSlotDrop(null);
     setPendingTerminTyp(null);
-  }, [pendingSlotDrop, pendingTerminTyp, pendingTerminStart, pendingTerminEnde, assignTicketToSlot, detailTicket?.id, toDateTimeLocal]);
+  }, [
+    pendingSlotDrop,
+    pendingTerminTyp,
+    pendingTerminStart,
+    pendingTerminEnde,
+    assignTicketToSlot,
+    assignAuftragToSlot,
+    detailTicket?.id,
+    toDateTimeLocal,
+  ]);
 
   const handleDragStart = useCallback((event: DragStartEvent) => {
     setActiveDragId(String(event.active?.id ?? ""));
@@ -2627,7 +3160,15 @@ export default function AdminDashboardPage() {
     // Nur loggen wenn sich overId ändert (reduziert Spam)
     if (overId !== lastLoggedOverId.current) {
       lastLoggedOverId.current = overId;
-      const category = !overId ? "KEIN ZIEL" : overId.startsWith("column-") ? "SPALTE" : overId.startsWith("ticket-") ? "TICKET" : overId.startsWith("slot-") ? "KALENDER-SLOT" : "UNBEKANNT";
+      const category = !overId
+        ? "KEIN ZIEL"
+        : overId.startsWith("column-")
+          ? "SPALTE"
+          : overId.startsWith("ticket-") || overId.startsWith("auftrag-")
+            ? "KARTE"
+            : overId.startsWith("slot-")
+              ? "KALENDER-SLOT"
+              : "UNBEKANNT";
       console.log(`[DnD] handleDragOver → ${category}: ${overId ?? "null"}`);
     }
     if (overId && typeof overId === "string" && overId.startsWith("slot-")) {
@@ -2667,13 +3208,13 @@ export default function AdminDashboardPage() {
     // Alle Ticket-Karten in dieser Spalte per DOM finden
     const colEl = document.querySelector(`[data-col-droppable="${foundCol}"]`);
     if (!colEl) return;
-    const cards = colEl.querySelectorAll<HTMLElement>("[data-ticket-id]");
+    const cards = colEl.querySelectorAll<HTMLElement>("[data-board-item-id]");
     let insertBeforeId: string | null = null;
     for (const card of cards) {
       const rect = card.getBoundingClientRect();
       const midY = rect.top + rect.height / 2;
       if (py < midY) {
-        insertBeforeId = card.getAttribute("data-ticket-id");
+        insertBeforeId = card.getAttribute("data-board-item-id");
         break;
       }
     }
@@ -2685,9 +3226,9 @@ export default function AdminDashboardPage() {
   }, []);
 
   /** Pill-Farbe/Border für Kalender-Events: Besichtigung = grau, Ausführung = Gewerk/Blau. */
-  const eventPillBg = (t: Ticket | undefined) => {
+  const eventPillBg = (t: Ticket | HandwerkerAuftrag | undefined) => {
     if ((t?.termin_typ ?? "").trim() === TERMIN_TYP.BESICHTIGUNG) return "bg-slate-500/90 border border-slate-400";
-    const firstGewerk = normalizeGewerke(t?.gewerk ?? null)[0] ?? "";
+    const firstGewerk = normalizeGewerke(t && "gewerk" in t ? t.gewerk ?? null : null)[0] ?? "";
     switch (firstGewerk) {
       case "Elektro": return "bg-amber-600/90";
       case "Sanitär": return "bg-blue-600/90";
@@ -2773,23 +3314,123 @@ export default function AdminDashboardPage() {
     </div>
   );
 
-  /** Rendert Karten für eine beliebige Ticket-Liste (Spalte 1–6). */
-  const renderTicketCards = (
-    list: Ticket[],
+  /** Rendert gemischte Board-Karten (Tickets + SPM-Aufträge) für eine Spalte. */
+  const renderBoardColumnCards = (
+    ticketsList: Ticket[],
+    auftraegeList: HandwerkerAuftrag[],
     emptyLabel: string,
     colId?: string,
     options?: { isAngeboteTab?: boolean; onOpenQuoteBuilder?: (t: Ticket) => void; offerAttentionIds?: Set<string> }
   ) => {
+    const rows = mergeBoardDisplayRows(ticketsList, auftraegeList);
     if (loading) return <p className="text-sm text-slate-400">Lade Tickets…</p>;
-    if (list.length === 0) {
-      // Auch in leerer Spalte den Indicator zeigen
+    if (rows.length === 0) {
       const showHere = activeDragId && dropIndicator && colId && dropIndicator.colId === colId;
       return showHere ? <DropIndicatorLine /> : <p className="text-sm text-slate-500">{emptyLabel}</p>;
     }
     const indicatorCol = dropIndicator && colId && dropIndicator.colId === colId ? dropIndicator : null;
     return (
       <>
-        {list.map((ticket) => {
+        {rows.map((row) => {
+          if (row.kind === "auftrag") {
+            const a = row.a;
+            const showIndA = activeDragId && indicatorCol && indicatorCol.insertBeforeId === `auftrag-${a.id}`;
+            const aufBorder = isLightTheme
+              ? "border-emerald-500/50 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:border-emerald-500 hover:bg-emerald-50/40"
+              : "border-emerald-500/60 bg-slate-900/80 hover:border-emerald-400";
+            const bs = auftragBoardStatus(a);
+            const hasPhoneA = !!(a.mieter_telefon ?? "").trim();
+            const addr = getAuftragCardAddress(a);
+            const labelA = isLightTheme
+              ? "border border-emerald-500/60 bg-emerald-50 text-emerald-700"
+              : "border border-emerald-500/60 bg-emerald-500/10 text-emerald-300";
+            return (
+              <React.Fragment key={a.id}>
+                {showIndA && <DropIndicatorLine />}
+                <SortableAuftragCard
+                  auftrag={a}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => openAuftragBoardDetail(a)}
+                  onKeyDown={(e) => e.key === "Enter" && openAuftragBoardDetail(a)}
+                  className={`cursor-pointer rounded-2xl border p-3 text-sm transition-colors active:scale-[0.99] lg:active:scale-100 ${aufBorder}`}
+                >
+                  <div className="mb-1 flex items-center justify-between gap-2">
+                    <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+                      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-medium ${labelA}`}>
+                        Auftrag
+                      </span>
+                      <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium ${isLightTheme ? "bg-amber-100 text-amber-800" : "bg-amber-500/20 text-amber-300"}`}>
+                        SPM
+                      </span>
+                      {bs === STATUS.BESICHTIGUNG && (
+                        <span className={`rounded px-1.5 py-0.5 text-[10px] ${isLightTheme ? "bg-slate-200 text-slate-700" : "bg-slate-700 text-slate-300"}`}>
+                          Besichtigung
+                        </span>
+                      )}
+                      {bs === STATUS.AUSFUEHRUNG && (
+                        <span className={`rounded px-1.5 py-0.5 text-[10px] ${isLightTheme ? "bg-blue-100 text-blue-800" : "bg-blue-500/20 text-blue-200"}`}>
+                          Ausführung
+                        </span>
+                      )}
+                    </div>
+                    <span className={`shrink-0 text-xs tabular-nums ${isLightTheme ? "text-slate-500" : "text-slate-400"}`}>
+                      {(a.auftragsnummer ?? "").trim() || "–"}
+                    </span>
+                  </div>
+                  <div className="mb-1 flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <p className={`line-clamp-1 text-sm font-medium ${isLightTheme ? "text-slate-900" : "text-slate-100"}`}>
+                        {getAuftragCardTitle(a)}
+                      </p>
+                      {addr ? (
+                        <p className={`line-clamp-1 text-xs ${isLightTheme ? "text-slate-500" : "text-slate-400"}`}>{addr}</p>
+                      ) : null}
+                    </div>
+                    {hasPhoneA && (
+                      <a
+                        href={`tel:${(a.mieter_telefon ?? "").trim()}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className={`inline-flex h-11 min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-full transition-colors active:scale-95 ${
+                          isLightTheme
+                            ? "text-emerald-700 hover:bg-emerald-50 hover:text-emerald-900"
+                            : "text-emerald-400 hover:bg-emerald-500/15 hover:text-emerald-200"
+                        }`}
+                        aria-label="Anrufen"
+                      >
+                        <Phone className="h-5 w-5" strokeWidth={2} />
+                      </a>
+                    )}
+                  </div>
+                  {a.aufgabe ? (
+                    <p className={`mt-1 line-clamp-2 text-xs ${isLightTheme ? "text-slate-600" : "text-slate-400"}`}>{a.aufgabe}</p>
+                  ) : null}
+                  <div className="mt-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+                    <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+                      {(() => {
+                        const gewerkeList = normalizeGewerke(a.gewerk ?? null);
+                        return gewerkeList.length > 0 ? (
+                          gewerkeList.map((g, idx) => {
+                            const Icon = getGewerkIcon(g);
+                            return (
+                              <span key={`${g}-${idx}`} className={`inline-flex items-center gap-1 ${getGewerkBadgeClasses(g, isLightTheme)}`}>
+                                {Icon && <Icon className="h-3 w-3 shrink-0" strokeWidth={2} />}
+                                {g}
+                              </span>
+                            );
+                          })
+                        ) : (
+                          <span className={`text-[11px] ${isLightTheme ? "text-slate-500" : "text-slate-400"}`}>–</span>
+                        );
+                      })()}
+                      <span className={`text-[11px] ${isLightTheme ? "text-slate-600" : "text-slate-500"}`}>{bs}</span>
+                    </div>
+                  </div>
+                </SortableAuftragCard>
+              </React.Fragment>
+            );
+          }
+          const ticket = row.t;
           const cardType = getCardType(ticket);
           const displayName = getTicketDisplayName(ticket);
           const hasPhone = !!(ticket.kontakt_telefon ?? "").trim();
@@ -2860,7 +3501,8 @@ export default function AdminDashboardPage() {
             }
             return "border border-blue-500/60 bg-blue-500/10 text-blue-200";
           })();
-          const showIndicatorBefore = activeDragId && indicatorCol && indicatorCol.insertBeforeId === ticket.id;
+          const showIndicatorBefore =
+            activeDragId && indicatorCol && indicatorCol.insertBeforeId === `ticket-${ticket.id}`;
           return (
             <React.Fragment key={ticket.id}>
               {showIndicatorBefore && <DropIndicatorLine />}
@@ -2870,7 +3512,7 @@ export default function AdminDashboardPage() {
                 tabIndex={0}
                 onClick={() => openDetailModal(ticket)}
                 onKeyDown={(e) => e.key === "Enter" && openDetailModal(ticket)}
-                className={`cursor-pointer rounded-2xl border p-3 text-sm transition-colors ${cardBorderClasses} ${urgencyLevel !== "neutral" ? urgencyHeatmapClasses : ""} ${urgencyLevel === "24h" ? "animate-pulse" : ""}`}
+                className={`cursor-pointer rounded-2xl border p-3 text-sm transition-colors active:scale-[0.99] lg:active:scale-100 ${cardBorderClasses} ${urgencyLevel !== "neutral" ? urgencyHeatmapClasses : ""} ${urgencyLevel === "24h" ? "animate-pulse" : ""}`}
               >
               <div className="mb-1 flex items-center justify-between gap-2">
                 <div className="flex min-w-0 flex-wrap items-center gap-1.5">
@@ -2928,14 +3570,14 @@ export default function AdminDashboardPage() {
                   <a
                     href={`tel:${ticket.kontakt_telefon!.trim()}`}
                     onClick={(e) => e.stopPropagation()}
-                    className={`shrink-0 rounded p-1.5 transition-colors ${
+                    className={`inline-flex h-11 min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-full transition-colors active:scale-95 ${
                       isLightTheme
-                        ? "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
-                        : "text-slate-400 hover:bg-slate-700 hover:text-slate-200"
+                        ? "text-emerald-700 hover:bg-emerald-50 hover:text-emerald-900"
+                        : "text-emerald-400 hover:bg-emerald-500/15 hover:text-emerald-200"
                     }`}
                     aria-label="Anrufen"
                   >
-                    <Phone className="h-3.5 w-3.5" strokeWidth={2} />
+                    <Phone className="h-5 w-5" strokeWidth={2} />
                   </a>
                 )}
               </div>
@@ -2981,7 +3623,7 @@ export default function AdminDashboardPage() {
                   <span>{formatTicketDate(ticket.created_at)}</span>
                 </div>
               </div>
-              {isAnfrageStatus && !isFromAuftrag && (
+              {isAnfrageStatus && !isFromAuftrag && !isGewerkUser && (
                 <div
                   className={`mt-3 flex w-full gap-2 border-t pt-2 ${
                     isLightTheme ? "border-slate-200" : "border-slate-700"
@@ -3126,21 +3768,21 @@ export default function AdminDashboardPage() {
         }`}>
           Terminplaner
         </h2>
-        <div className="flex items-center gap-1">
+        <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
           <button
             type="button"
             onClick={() => setWeekStart((prev) => add(prev, { weeks: -1 }))}
-            className={`rounded-full p-2 transition-all hover:opacity-90 ${
+            className={`inline-flex h-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-full transition-all hover:opacity-90 active:scale-95 ${
               isLightTheme
                 ? "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
                 : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
             }`}
             aria-label="Vorherige Woche"
           >
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-5 w-5" strokeWidth={2} />
           </button>
           <span
-            className={`min-w-[180px] text-center text-sm font-medium ${
+            className={`min-w-0 flex-1 text-center text-xs font-medium sm:min-w-[180px] sm:flex-none sm:text-sm ${
               isLightTheme ? "text-slate-700" : "text-slate-200"
             }`}
           >
@@ -3149,30 +3791,34 @@ export default function AdminDashboardPage() {
           <button
             type="button"
             onClick={() => setWeekStart((prev) => add(prev, { weeks: 1 }))}
-            className={`rounded-full p-2 transition-all hover:opacity-90 ${
+            className={`inline-flex h-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-full transition-all hover:opacity-90 active:scale-95 ${
               isLightTheme
                 ? "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
                 : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
             }`}
             aria-label="Nächste Woche"
           >
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-5 w-5" strokeWidth={2} />
           </button>
         </div>
       </div>
-      <p className="mb-2 shrink-0 text-[11px] text-slate-500">
-        Ganze Stunden 07:00–20:00. Karte links in eine Zelle ziehen → Termin + Status „Ticket“.
+      <p className={`mb-2 shrink-0 text-[11px] ${isLightTheme ? "text-slate-500" : "text-slate-500"}`}>
+        <span className="lg:hidden">07:00–20:00 · In eine Zelle ziehen für Termin</span>
+        <span className="hidden lg:inline">
+          Ganze Stunden 07:00–20:00. Karte links in eine Zelle ziehen → Termin + Status „Ticket“.
+        </span>
       </p>
-      <div className="min-h-0 flex-1 overflow-auto">
+      <div className="min-h-0 flex-1 overflow-auto overscroll-x-auto [-webkit-overflow-scrolling:touch]">
       <div
-        className={`min-h-[600px] rounded-2xl border ${
+        className={`rounded-2xl border ${
           isLightTheme ? "border-slate-200/80 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)]" : "border-slate-800 bg-[#1e293b]"
         }`}
         style={{
           display: "grid",
-          gridTemplateColumns: "64px repeat(6, 1fr)",
-          gridTemplateRows: `36px repeat(${TOTAL_SLOTS}, 48px)`,
-          minHeight: "680px",
+          gridTemplateColumns: isMobileViewport ? "52px repeat(6, minmax(56px, 1fr))" : "64px repeat(6, 1fr)",
+          gridTemplateRows: `36px repeat(${TOTAL_SLOTS}, ${isMobileViewport ? 44 : 48}px)`,
+          minHeight: isMobileViewport ? 520 : 680,
+          minWidth: isMobileViewport ? 420 : undefined,
         }}
       >
         <div
@@ -3256,8 +3902,12 @@ export default function AdminDashboardPage() {
                   : `text-white ${eventPillBg(ev.resource)} border-blue-400/50`
               }`}
               onOpenDetail={() => {
-                const t = tickets.find((x) => x.id === ev.id);
-                if (t) openDetailModal(t);
+                if (ev.resourceKind === "ticket") {
+                  const t = tickets.find((x) => x.id === ev.id);
+                  if (t) openDetailModal(t);
+                } else if (ev.resource && ev.resourceKind === "auftrag") {
+                  openAuftragBoardDetail(ev.resource as HandwerkerAuftrag);
+                }
               }}
             />
           );
@@ -3285,6 +3935,7 @@ export default function AdminDashboardPage() {
     const { setNodeRef, isOver } = useDroppable({ id: config.droppableId });
     const columnCfg = columnConfigs.find((c) => c.colId === config.droppableId);
     const list = columnCfg?.tickets ?? [];
+    const aufList = columnCfg?.auftraege ?? [];
     const isManualOver = manualOverCol === config.droppableId;
 
     const sectionColorClasses = (() => {
@@ -3333,7 +3984,7 @@ export default function AdminDashboardPage() {
               isLightTheme ? "bg-slate-100 text-slate-700" : "bg-slate-800 text-slate-300"
             }`}
           >
-            {loading ? "…" : list.length}
+            {loading ? "…" : list.length + aufList.length}
           </span>
         </div>
         <div
@@ -3346,10 +3997,13 @@ export default function AdminDashboardPage() {
         )}
         <div className="min-w-0 flex-1 cursor-default space-y-2 overflow-y-auto pr-1">
           <SortableContext
-            items={list.map((t) => `ticket-${t.id}`)}
+            items={[
+              ...list.map((t) => `ticket-${t.id}`),
+              ...aufList.map((a) => `auftrag-${a.id}`),
+            ]}
             strategy={verticalListSortingStrategy}
           >
-            {renderTicketCards(list, "Keine.", config.droppableId)}
+            {renderBoardColumnCards(list, aufList, "Keine.", config.droppableId)}
           </SortableContext>
         </div>
       </section>
@@ -3358,12 +4012,12 @@ export default function AdminDashboardPage() {
 
   return (
     <main
-      className={`min-h-screen ${
+      className={`min-h-[100dvh] min-h-screen touch-manipulation ${
         isLightTheme ? "bg-slate-50 text-slate-900" : "bg-slate-950 text-slate-100"
       }`}
     >
       <div
-        className={`sticky top-0 z-10 flex items-center justify-between gap-4 border-b px-4 py-3 backdrop-blur sm:px-6 lg:px-8 ${
+        className={`sticky top-0 z-10 flex items-center justify-between gap-3 border-b px-4 py-3 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur sm:gap-4 sm:px-6 lg:px-8 ${
           isLightTheme ? "border-slate-200/80 bg-white/95 shadow-[0_1px_0_0_rgba(0,0,0,0.04)]" : "border-slate-800 bg-slate-950/95"
         }`}
       >
@@ -3373,23 +4027,36 @@ export default function AdminDashboardPage() {
         />
         <div className="flex flex-col items-end gap-1.5">
           {adminUser?.email && (
-            <span className={`text-xs ${isLightTheme ? "text-slate-500" : "text-slate-500"}`}>
+            <span className={`max-w-[min(100%,12rem)] truncate text-xs sm:max-w-none ${isLightTheme ? "text-slate-500" : "text-slate-500"}`}>
               {adminUser.email}
             </span>
           )}
-          <div className="flex flex-wrap items-center justify-end gap-2">
+          <div className="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2">
           <button
             type="button"
             onClick={openCalendarFromHeader}
             title="Kalender öffnen"
-            className={`inline-flex items-center justify-center rounded-full border p-2 text-xs font-medium transition-all hover:opacity-90 ${
+            className={`inline-flex h-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-full border p-0 text-xs font-medium transition-all hover:opacity-90 active:scale-[0.98] ${
               isLightTheme
                 ? "border-slate-200 bg-white text-slate-700 shadow-sm hover:border-slate-300"
                 : "border-slate-600 bg-slate-900/80 text-slate-100 hover:border-slate-500 hover:bg-slate-800/80"
             }`}
           >
-            <CalendarIcon className="h-4 w-4" strokeWidth={2} />
+            <CalendarIcon className="h-5 w-5" strokeWidth={2} />
           </button>
+          {isGewerkUser && (
+            <Link
+              href="/admin/dashboard/auftraege"
+              title="Aufträge"
+              className={`inline-flex h-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-full border p-0 text-xs font-medium transition-all hover:opacity-90 active:scale-[0.98] ${
+                isLightTheme
+                  ? "border-slate-200 bg-white text-slate-700 shadow-sm hover:border-slate-300"
+                  : "border-slate-600 bg-slate-900/80 text-slate-100 hover:border-slate-500 hover:bg-slate-800/80"
+              }`}
+            >
+              <ClipboardList className="h-5 w-5 shrink-0" strokeWidth={2} />
+            </Link>
+          )}
           {!isGewerkUser && (
             <>
               <Popover>
@@ -3397,13 +4064,13 @@ export default function AdminDashboardPage() {
                   <button
                     type="button"
                     title="Einstellungen"
-                    className={`inline-flex items-center justify-center rounded-full border p-2 text-xs font-medium transition-all hover:opacity-90 ${
+                    className={`inline-flex h-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-full border p-0 text-xs font-medium transition-all hover:opacity-90 active:scale-[0.98] ${
                       isLightTheme
                         ? "border-slate-200 bg-white text-slate-700 shadow-sm hover:border-slate-300"
                         : "border-slate-600 bg-slate-900/80 text-slate-100 hover:border-slate-500 hover:bg-slate-800/80"
                     }`}
                   >
-                    <Settings className="h-4 w-4" />
+                    <Settings className="h-5 w-5" />
                   </button>
                 </PopoverTrigger>
                 <PopoverContent
@@ -3445,13 +4112,13 @@ export default function AdminDashboardPage() {
                 type="button"
                 onClick={toggleDashboardTheme}
                 title={isLightTheme ? "Dunkel" : "Hell"}
-                className={`inline-flex items-center justify-center rounded-full border p-2 text-xs font-medium transition-all hover:opacity-90 ${
+                className={`inline-flex h-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-full border p-0 text-xs font-medium transition-all hover:opacity-90 active:scale-[0.98] ${
                   isLightTheme
                     ? "border-slate-200 bg-white text-slate-700 shadow-sm hover:border-slate-300"
                     : "border-slate-600 bg-slate-900/80 text-slate-100 hover:border-slate-500 hover:bg-slate-800/80"
                 }`}
               >
-                {isLightTheme ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+                {isLightTheme ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
               </button>
             </>
           )}
@@ -3459,19 +4126,19 @@ export default function AdminDashboardPage() {
             <button
               type="submit"
               title="Abmelden"
-              className={`inline-flex items-center justify-center rounded-full border p-2 text-xs font-medium transition-all hover:opacity-90 ${
+              className={`inline-flex h-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-full border p-0 text-xs font-medium transition-all hover:opacity-90 active:scale-[0.98] ${
                 isLightTheme
                   ? "border-slate-200 bg-white text-slate-700 shadow-sm hover:border-slate-300 hover:bg-slate-100"
                   : "border-slate-600 bg-slate-900/80 text-slate-100 hover:border-slate-500 hover:bg-slate-800/80"
               }`}
             >
-              <LogOut className="h-4 w-4" />
+              <LogOut className="h-5 w-5" />
             </button>
           </form>
           </div>
         </div>
       </div>
-      <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
+      <div className="w-full px-4 py-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-6 lg:px-8 lg:pb-6">
         {error && (
           <div className="mb-4 rounded-md border border-red-500/50 bg-red-950/40 p-3 text-sm text-red-100">
             {error}
@@ -3495,11 +4162,31 @@ export default function AdminDashboardPage() {
               onValueChange={(v) => setMobileMainTab(v === "calendar" ? "calendar" : "list")}
               className="w-full"
             >
-              <TabsList className="mb-3 h-9 w-full bg-slate-800">
-                <TabsTrigger value="list" className="flex-1 text-xs data-[state=active]:bg-slate-700">
-                  {isGewerkUser ? `Eingang (${col1EingangTickets.length})` : `Anfragen (${col1Tickets.length})`}
+              <TabsList
+                className={`mb-3 grid h-12 w-full grid-cols-2 gap-1 rounded-xl p-1 ${
+                  isLightTheme ? "bg-slate-200/90" : "bg-slate-800"
+                }`}
+              >
+                <TabsTrigger
+                  value="list"
+                  className={`rounded-lg text-sm font-medium transition-all data-[state=active]:shadow-sm ${
+                    isLightTheme
+                      ? "text-slate-600 data-[state=active]:bg-white data-[state=active]:text-slate-900"
+                      : "text-slate-400 data-[state=active]:bg-slate-700 data-[state=active]:text-slate-100"
+                  }`}
+                >
+                  {isGewerkUser
+                    ? `Eingang (${col1EingangTickets.length + col1EingangAuftraege.length})`
+                    : `Anfragen (${col1Tickets.length + col1AuftraegeInBucket.length})`}
                 </TabsTrigger>
-                <TabsTrigger value="calendar" className="flex-1 text-xs data-[state=active]:bg-slate-700">
+                <TabsTrigger
+                  value="calendar"
+                  className={`rounded-lg text-sm font-medium transition-all data-[state=active]:shadow-sm ${
+                    isLightTheme
+                      ? "text-slate-600 data-[state=active]:bg-white data-[state=active]:text-slate-900"
+                      : "text-slate-400 data-[state=active]:bg-slate-700 data-[state=active]:text-slate-100"
+                  }`}
+                >
                   Kalender
                 </TabsTrigger>
               </TabsList>
@@ -3520,7 +4207,13 @@ export default function AdminDashboardPage() {
                 <section
                   ref={setCol1MobileListRef}
                   className={`flex flex-col rounded-2xl border p-4 transition-colors ${
-                    isOverCol1MobileList ? "border-blue-500 bg-slate-800/80 ring-2 ring-blue-500/50" : "border-slate-800 bg-slate-900/70"
+                    isOverCol1MobileList
+                      ? isLightTheme
+                        ? "border-blue-500 bg-blue-50 ring-2 ring-blue-400/50"
+                        : "border-blue-500 bg-slate-800/80 ring-2 ring-blue-500/50"
+                      : isLightTheme
+                        ? "border-slate-200 bg-white shadow-sm"
+                        : "border-slate-800 bg-slate-900/70"
                   }`}
                 >
                   {!isGewerkUser && (
@@ -3534,7 +4227,7 @@ export default function AdminDashboardPage() {
                             : "text-slate-400 hover:text-slate-200"
                         }`}
                       >
-                        Eingang ({col1EingangTickets.length})
+                        Eingang ({col1EingangTickets.length + col1EingangAuftraege.length})
                       </button>
                       <button
                         type="button"
@@ -3545,17 +4238,29 @@ export default function AdminDashboardPage() {
                             : "text-slate-400 hover:text-slate-200"
                         }`}
                       >
-                        Angebote ({col1AngeboteTickets.length})
+                        Angebote ({col1AngeboteTickets.length + col1AngeboteAuftraege.length})
                       </button>
                     </div>
                   )}
-                  <div ref={listScrollRef} tabIndex={-1} className="max-h-[60vh] space-y-3 overflow-y-auto pr-1">
+                  <div
+                    ref={listScrollRef}
+                    tabIndex={-1}
+                    className="max-h-[min(70dvh,calc(100dvh-14rem))] space-y-3 overflow-y-auto overscroll-y-contain pr-1 [-webkit-overflow-scrolling:touch]"
+                  >
                     <SortableContext
-                      items={(isGewerkUser || incomingTab === "Eingang" ? col1EingangTickets : col1AngeboteTickets).map((t) => `ticket-${t.id}`)}
+                      items={[
+                        ...(isGewerkUser || incomingTab === "Eingang" ? col1EingangTickets : col1AngeboteTickets).map(
+                          (t) => `ticket-${t.id}`
+                        ),
+                        ...(isGewerkUser || incomingTab === "Eingang" ? col1EingangAuftraege : col1AngeboteAuftraege).map(
+                          (a) => `auftrag-${a.id}`
+                        ),
+                      ]}
                       strategy={verticalListSortingStrategy}
                     >
-                      {renderTicketCards(
+                      {renderBoardColumnCards(
                         isGewerkUser || incomingTab === "Eingang" ? col1EingangTickets : col1AngeboteTickets,
+                        isGewerkUser || incomingTab === "Eingang" ? col1EingangAuftraege : col1AngeboteAuftraege,
                         isGewerkUser || incomingTab === "Eingang" ? "Keine Anfragen." : "Keine Angebote.",
                         "column-1",
                         !isGewerkUser && incomingTab === "Angebote"
@@ -3577,13 +4282,26 @@ export default function AdminDashboardPage() {
               <TabsContent value="calendar" className="mt-0">
                 <div
                   ref={setEingangMobileRef}
-                  className={`mb-3 rounded-lg border border-dashed px-3 py-2 text-center text-xs transition-colors ${
+                  className={`mb-3 rounded-xl border border-dashed px-3 py-3 text-center text-xs leading-snug transition-colors sm:py-2 ${
                     isOverEingangMobile
-                      ? "border-blue-500 bg-blue-500/20 text-blue-200"
-                      : "border-slate-600 bg-slate-800/50 text-slate-400"
+                      ? isLightTheme
+                        ? "border-blue-500 bg-blue-50 text-blue-800"
+                        : "border-blue-500 bg-blue-500/20 text-blue-200"
+                      : isLightTheme
+                        ? "border-slate-300 bg-slate-100 text-slate-600"
+                        : "border-slate-600 bg-slate-800/50 text-slate-400"
                   }`}
                 >
-                  {isOverEingangMobile ? "Loslassen → Termin entfernen" : "Kalender-Karte hier ablegen → Termin entfernen, Karte zurück in den Eingang"}
+                  {isOverEingangMobile ? (
+                    "Loslassen → Termin entfernen"
+                  ) : (
+                    <>
+                      <span className="sm:hidden">Karte hier ablegen → zurück zum Eingang</span>
+                      <span className="hidden sm:inline">
+                        Kalender-Karte hier ablegen → Termin entfernen, Karte zurück in den Eingang
+                      </span>
+                    </>
+                  )}
                 </div>
                 {renderWeekCalendar()}
               </TabsContent>
@@ -3632,7 +4350,11 @@ export default function AdminDashboardPage() {
                   <span className={`rounded-full px-2 py-0.5 text-xs ${
                     isLightTheme ? "bg-slate-100 text-slate-700" : "bg-slate-800 text-slate-300"
                   }`}>
-                    {loading ? "…" : (isGewerkUser || incomingTab === "Eingang" ? col1EingangTickets.length : col1AngeboteTickets.length)}
+                    {loading
+                      ? "…"
+                      : isGewerkUser || incomingTab === "Eingang"
+                        ? col1EingangTickets.length + col1EingangAuftraege.length
+                        : col1AngeboteTickets.length + col1AngeboteAuftraege.length}
                   </span>
                 </div>
                 {!isGewerkUser && (
@@ -3654,7 +4376,7 @@ export default function AdminDashboardPage() {
                             : "text-slate-400 hover:text-slate-200"
                       }`}
                     >
-                      Eingang ({col1EingangTickets.length})
+                      Eingang ({col1EingangTickets.length + col1EingangAuftraege.length})
                     </button>
                     <button
                       type="button"
@@ -3669,7 +4391,7 @@ export default function AdminDashboardPage() {
                             : "text-slate-400 hover:text-slate-200"
                       }`}
                     >
-                      Angebote ({col1AngeboteTickets.length})
+                      Angebote ({col1AngeboteTickets.length + col1AngeboteAuftraege.length})
                     </button>
                   </div>
                 )}
@@ -3683,11 +4405,19 @@ export default function AdminDashboardPage() {
                   className="min-w-0 flex-1 cursor-default space-y-3 overflow-y-auto pr-1 outline-none"
                 >
                   <SortableContext
-                    items={(isGewerkUser || incomingTab === "Eingang" ? col1EingangTickets : col1AngeboteTickets).map((t) => `ticket-${t.id}`)}
+                    items={[
+                      ...(isGewerkUser || incomingTab === "Eingang" ? col1EingangTickets : col1AngeboteTickets).map(
+                        (t) => `ticket-${t.id}`
+                      ),
+                      ...(isGewerkUser || incomingTab === "Eingang" ? col1EingangAuftraege : col1AngeboteAuftraege).map(
+                        (a) => `auftrag-${a.id}`
+                      ),
+                    ]}
                     strategy={verticalListSortingStrategy}
                   >
-                    {renderTicketCards(
+                    {renderBoardColumnCards(
                       isGewerkUser || incomingTab === "Eingang" ? col1EingangTickets : col1AngeboteTickets,
+                      isGewerkUser || incomingTab === "Eingang" ? col1EingangAuftraege : col1AngeboteAuftraege,
                       isGewerkUser || incomingTab === "Eingang" ? "Keine Anfragen." : "Keine Angebote.",
                       "column-1",
                       !isGewerkUser && incomingTab === "Angebote"
@@ -3730,11 +4460,29 @@ export default function AdminDashboardPage() {
 
           <DragOverlay dropAnimation={null} modifiers={[snapCenterToCursor]}>
             {activeDragId?.startsWith("event-") ? (() => {
-              const ticketId = activeDragId.replace(/^event-/, "");
-              const ev = calendarEvents.find((e) => e.id === ticketId);
+              const eventKey = activeDragId.replace(/^event-/, "");
+              const ev = calendarEvents.find((e) => e.id === eventKey);
               if (!ev) return null;
               const span = getSlotSpan(ev.start, ev.end);
               const overlayHeight = Math.max(44, 48 * span - 4);
+              const res = ev.resource;
+              const gewerkArr =
+                ev.resourceKind === "ticket"
+                  ? normalizeGewerke((res as Ticket | undefined)?.gewerk ?? null)
+                  : normalizeGewerke((res as HandwerkerAuftrag | undefined)?.gewerk ?? null);
+              const numLabel =
+                ev.resourceKind === "ticket"
+                  ? getTicketOrAuftragNumber(res as Ticket) !== "–"
+                    ? getTicketOrAuftragNumber(res as Ticket)
+                    : ev.id.slice(0, 8)
+                  : (res as HandwerkerAuftrag | undefined)?.auftragsnummer?.trim() || ev.id.replace(/^auftrag-/, "").slice(0, 8);
+              const titleLine =
+                ev.resourceKind === "ticket"
+                  ? getTicketDisplayName(res as Ticket)
+                  : getAuftragCardTitle(res as HandwerkerAuftrag);
+              const showSpm =
+                ev.resourceKind === "auftrag" ||
+                !!(res as Ticket | undefined)?.additional_data?.auftrag_id;
               return (
                 <div
                   className={`pointer-events-none cursor-grabbing opacity-70 mx-0.5 rounded-lg border px-1.5 py-0.5 text-left text-[11px] font-medium text-white shadow-lg flex flex-col justify-center min-w-[100px] ${
@@ -3746,16 +4494,15 @@ export default function AdminDashboardPage() {
                 >
                   <div className="flex items-center gap-1">
                     {(() => {
-                      const gewerkeList = normalizeGewerke((ev.resource as Ticket | undefined)?.gewerk ?? null);
-                      const Icon = getGewerkIcon(gewerkeList[0] ?? null);
+                      const Icon = getGewerkIcon(gewerkArr[0] ?? null);
                       return Icon ? <Icon className="h-3 w-3 shrink-0" strokeWidth={2} /> : null;
                     })()}
-                    <span className="line-clamp-1">{getTicketOrAuftragNumber(ev.resource ?? null) !== "–" ? getTicketOrAuftragNumber(ev.resource ?? null) : ev.id.slice(0, 8)}</span>
-                    {(ev.resource as Ticket | undefined)?.additional_data?.auftrag_id && (
+                    <span className="line-clamp-1">{numLabel}</span>
+                    {showSpm && (
                       <span className="shrink-0 rounded px-1 py-0.5 text-[9px] font-medium bg-amber-500/40 text-amber-100">SPM</span>
                     )}
                   </div>
-                  <span className="line-clamp-1 block text-[10px] opacity-90">{getTicketDisplayName(ev.resource ?? {} as Ticket)}</span>
+                  <span className="line-clamp-1 block text-[10px] opacity-90">{titleLine}</span>
                 </div>
               );
             })() : activeDragId?.startsWith("ticket-") ? (() => {
@@ -3773,6 +4520,22 @@ export default function AdminDashboardPage() {
                   <div className="text-sm font-medium text-slate-100">{getTicketDisplayName(ticket)}</div>
                   {getTicketOrAuftragNumber(ticket) !== "–" && (
                     <div className="text-xs text-slate-400">{getTicketOrAuftragNumber(ticket)}</div>
+                  )}
+                </div>
+              );
+            })() : activeDragId?.startsWith("auftrag-") ? (() => {
+              const aid = activeDragId.replace(/^auftrag-/, "");
+              const a = auftraegeBoard.find((x) => x.id === aid);
+              if (!a) return null;
+              return (
+                <div className="pointer-events-none cursor-grabbing opacity-70 rounded-lg border border-emerald-500/70 bg-slate-900 px-3 py-2 shadow-lg min-w-[140px]">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] text-emerald-300">AUFTRAG</span>
+                    <span className="rounded px-1.5 py-0.5 text-[9px] font-medium bg-amber-500/30 text-amber-200">SPM</span>
+                  </div>
+                  <div className="text-sm font-medium text-slate-100">{getAuftragCardTitle(a)}</div>
+                  {(a.auftragsnummer ?? "").trim() && (
+                    <div className="text-xs text-slate-400">{(a.auftragsnummer ?? "").trim()}</div>
                   )}
                 </div>
               );
@@ -3802,8 +4565,15 @@ export default function AdminDashboardPage() {
               Was für ein Termin?
             </DialogTitle>
             <DialogDescription className={isLightTheme ? "text-slate-600" : "text-slate-400"}>
-              {pendingSlotDrop?.ticket && (
-                <span className={`font-medium ${isLightTheme ? "text-slate-800" : "text-slate-200"}`}>{getTicketDisplayName(pendingSlotDrop.ticket)}</span>
+              {pendingSlotDrop?.kind === "ticket" && (
+                <span className={`font-medium ${isLightTheme ? "text-slate-800" : "text-slate-200"}`}>
+                  {getTicketDisplayName(pendingSlotDrop.ticket)}
+                </span>
+              )}
+              {pendingSlotDrop?.kind === "auftrag" && (
+                <span className={`font-medium ${isLightTheme ? "text-slate-800" : "text-slate-200"}`}>
+                  {getAuftragCardTitle(pendingSlotDrop.auftrag)}
+                </span>
               )}
             </DialogDescription>
           </DialogHeader>
@@ -3864,11 +4634,27 @@ export default function AdminDashboardPage() {
               Termin festlegen {pendingTerminTyp ? `· ${pendingTerminTyp}` : ""}
             </DialogTitle>
             <DialogDescription className={isLightTheme ? "text-slate-600" : "text-slate-400"}>
-              {pendingSlotDrop?.ticket && (
+              {pendingSlotDrop?.kind === "ticket" && (
                 <>
-                  <span className={`font-medium ${isLightTheme ? "text-slate-800" : "text-slate-200"}`}>{getTicketDisplayName(pendingSlotDrop.ticket)}</span>
+                  <span className={`font-medium ${isLightTheme ? "text-slate-800" : "text-slate-200"}`}>
+                    {getTicketDisplayName(pendingSlotDrop.ticket)}
+                  </span>
                   {getTicketOrAuftragNumber(pendingSlotDrop.ticket) !== "–" && (
-                    <span className={`ml-2 ${isLightTheme ? "text-slate-500" : "text-slate-500"}`}>({getTicketOrAuftragNumber(pendingSlotDrop.ticket)})</span>
+                    <span className={`ml-2 ${isLightTheme ? "text-slate-500" : "text-slate-500"}`}>
+                      ({getTicketOrAuftragNumber(pendingSlotDrop.ticket)})
+                    </span>
+                  )}
+                </>
+              )}
+              {pendingSlotDrop?.kind === "auftrag" && (
+                <>
+                  <span className={`font-medium ${isLightTheme ? "text-slate-800" : "text-slate-200"}`}>
+                    {getAuftragCardTitle(pendingSlotDrop.auftrag)}
+                  </span>
+                  {(pendingSlotDrop.auftrag.auftragsnummer ?? "").trim() && (
+                    <span className={`ml-2 ${isLightTheme ? "text-slate-500" : "text-slate-500"}`}>
+                      ({(pendingSlotDrop.auftrag.auftragsnummer ?? "").trim()})
+                    </span>
                   )}
                 </>
               )}
@@ -4415,6 +5201,7 @@ export default function AdminDashboardPage() {
         boardTicketId={handwerkerLinkedTicketId}
         boardTicketGewerk={handwerkerBoardTicketGewerk}
         onBoardGewerkSaved={handleHandwerkerBoardGewerkSaved}
+        onAuftragBoardGewerkSaved={handleAuftragBoardGewerkSaved}
       />
       {handwerkerAuftragLoading && (
         <div
@@ -4445,7 +5232,7 @@ export default function AdminDashboardPage() {
       >
         <DialogContent
           className={cn(
-            "max-h-[90vh] w-[900px] max-w-[95vw] overflow-y-auto border-0 p-0 shadow-xl sm:rounded-xl",
+            "max-h-[100dvh] w-[900px] max-w-[100vw] overflow-y-auto border-0 p-0 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-xl sm:max-h-[90vh] sm:max-w-[95vw] sm:rounded-xl",
             isLightTheme ? "bg-white" : "bg-slate-900",
             lightboxImage ? "pointer-events-none select-none" : "pointer-events-auto"
           )}

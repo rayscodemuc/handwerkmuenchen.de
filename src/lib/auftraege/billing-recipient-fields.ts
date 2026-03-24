@@ -3,6 +3,8 @@
  * Häufige Abweichung: Umlaut (ä) vs. Transkription (ae) — z. B. leistungsempfänger vs. leistungsempfaenger.
  */
 
+import { canonicalizeGewerkArray } from "@/lib/auftraege/canonical-gewerk";
+
 const LEISTUNG_KEYS = [
   "leistungsempfaenger",
   "leistungsempfänger",
@@ -34,6 +36,7 @@ export function normalizeAuftragRow(row: Record<string, unknown>): Record<string
   const out = { ...row };
   if (leistung != null) out.leistungsempfaenger = leistung;
   if (rechnung != null) out.rechnungsempfaenger = rechnung;
+  out.gewerk = canonicalizeGewerkArray(row.gewerk);
   return out;
 }
 

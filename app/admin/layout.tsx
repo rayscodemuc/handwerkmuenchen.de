@@ -12,8 +12,8 @@ export default async function AdminLayout({
 
   return (
     <AdminUserProvider user={{ id: user.id, email: user.email, displayName: user.displayName, role: user.role }}>
-      <div className="min-h-screen bg-slate-950">
-        <main className="overflow-auto">{children}</main>
+      <div className="min-h-[100dvh] min-h-screen">
+        <main className="min-h-[100dvh] overflow-x-hidden overflow-y-auto">{children}</main>
       </div>
     </AdminUserProvider>
   );
