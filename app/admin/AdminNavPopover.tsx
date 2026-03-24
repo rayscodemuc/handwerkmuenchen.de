@@ -3,12 +3,7 @@
 import Link from "next/link";
 import { LayoutDashboard, Users, Settings } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import type { UserRole } from "@/lib/auth";
-
-const ADMIN_NAV_ITEMS: { label: string; href: string; roles: UserRole[] }[] = [
-  { label: "Dashboard", href: "/admin/dashboard", roles: [] },
-  { label: "Benutzerverwaltung", href: "/admin/benutzer", roles: ["admin"] },
-];
+import { ADMIN_NAV_ITEMS, type UserRole } from "@/lib/auth-types";
 
 function filterNavByRole(role: UserRole) {
   return ADMIN_NAV_ITEMS.filter(
@@ -17,6 +12,8 @@ function filterNavByRole(role: UserRole) {
 }
 
 export function AdminNavPopover({ role }: { role: UserRole }) {
+  if (role !== "admin") return null;
+
   const navItems = filterNavByRole(role);
 
   return (

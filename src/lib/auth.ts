@@ -1,33 +1,16 @@
 import { createClient } from "@/lib/supabase/server";
+import {
+  type UserRole,
+  type SessionUser,
+  USER_ROLE_OPTIONS,
+  isValidUserRole,
+  ADMIN_NAV_ITEMS,
+  type NavItem,
+} from "@/lib/auth-types";
 
-export type UserRole =
-  | "admin"
-  | "gewerk_elektro"
-  | "gewerk_sanitaer"
-  | "gewerk_ausbau"
-  | "gewerk_reinigung"
-  | "gewerk_facility";
-
-export type SessionUser = {
-  id: string;
-  email: string | null;
-  role: UserRole;
-  displayName: string | null;
-};
-
-/** Anzeige + Auswahl in Admin-Benutzerverwaltung. */
-export const USER_ROLE_OPTIONS: { value: UserRole; label: string }[] = [
-  { value: "admin", label: "Admin (voller Zugriff)" },
-  { value: "gewerk_elektro", label: "Gewerk · Elektro" },
-  { value: "gewerk_sanitaer", label: "Gewerk · Sanitär" },
-  { value: "gewerk_ausbau", label: "Gewerk · Ausbau" },
-  { value: "gewerk_reinigung", label: "Gewerk · Reinigung" },
-  { value: "gewerk_facility", label: "Gewerk · Facility" },
-];
-
-export function isValidUserRole(value: string): value is UserRole {
-  return USER_ROLE_OPTIONS.some((o) => o.value === value);
-}
+// Re-export for consumers that only need server auth
+export { USER_ROLE_OPTIONS, isValidUserRole, ADMIN_NAV_ITEMS };
+export type { UserRole, SessionUser, NavItem };
 
 /** Session + Profil (Rolle) des aktuellen Nutzers. Server-only. */
 export async function getSessionUser(): Promise<SessionUser | null> {
@@ -43,7 +26,21 @@ export async function getSessionUser(): Promise<SessionUser | null> {
     .eq("id", user.id)
     .single();
 
-  const role = (profile?.role ?? "admin") as UserRole;
+  const metaRole = user.user_metadata?.role;
+  const rawRole = profile?.role ?? (typeof metaRole === "string" ? metaRole : null);
+  const legacyMap: Record<string, UserRole> = {
+    innenausbau: "gewerk_ausbau",
+    reinigung: "gewerk_reinigung",
+  };
+  let role = (rawRole && isValidUserRole(rawRole) ? rawRole : legacyMap[rawRole ?? ""] ?? null) as UserRole | null;
+  if (!role) {
+    if (!profile) {
+      console.warn("[auth] User ohne profiles-Eintrag – Fallback admin. Bitte in Supabase prüfen:", user.id, user.email);
+      role = "admin";
+    } else {
+      return null;
+    }
+  }
   const displayName = profile?.display_name ?? user.user_metadata?.display_name ?? null;
 
   return {
@@ -58,15 +55,3 @@ export async function getSessionUser(): Promise<SessionUser | null> {
 export function isAdmin(role: UserRole): boolean {
   return role === "admin";
 }
-
-/** Menüpunkte je nach Rolle. Admin sieht alles. */
-export type NavItem = {
-  label: string;
-  href: string;
-  roles: UserRole[]; // leer = alle
-};
-
-export const ADMIN_NAV_ITEMS: NavItem[] = [
-  { label: "Dashboard", href: "/admin/dashboard", roles: [] },
-  { label: "Benutzerverwaltung", href: "/admin/benutzer", roles: ["admin"] },
-];

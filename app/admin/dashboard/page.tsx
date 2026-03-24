@@ -41,6 +41,7 @@ import { Logo } from "@/components/Logo";
 import { AuftragHandwerkerDetailDialog } from "@/components/admin/AuftragHandwerkerDetailDialog";
 import { normalizeAuftragRow } from "@/lib/auftraege/billing-recipient-fields";
 import { mapAuftragstypToGewerk } from "@/lib/auftraege/mapAuftragstypToGewerk";
+import { roleToGewerk } from "@/lib/auftraege/role-to-gewerk";
 import type { HandwerkerAuftrag } from "@/src/types/handwerker-auftrag";
 import { BUSINESS_COLUMNS, DEFAULT_COMPANY_ID, STATUS, TERMIN_TYP } from "@/src/config/businessConfig";
 import { GEWERKE_OPTIONS } from "@/src/config/gewerkeOptions";
@@ -660,6 +661,61 @@ function getGewerkBadgeClasses(gewerk: string | null, isLight: boolean): string 
   }
 }
 
+/** Entfernt doppelte Ticket-IDs (gleiche Karte darf nur einmal vorkommen). */
+function dedupeTicketsById(items: Ticket[]): Ticket[] {
+  const seen = new Set<string>();
+  const out: Ticket[] = [];
+  for (const t of items) {
+    const id = t?.id;
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    out.push(t);
+  }
+  return out;
+}
+
+/** Pro SPM-Auftrag nur eine Karte: Original behalten (ältestes created_at), neuere Kopien verwerfen. */
+function dedupeSpmLinkedTickets(items: Ticket[]): Ticket[] {
+  const drop = new Set<string>();
+  const oldestFirst = (a: Ticket, b: Ticket) =>
+    new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+
+  const byAuftragId = new Map<string, Ticket[]>();
+  for (const t of items) {
+    const aid = t.additional_data?.auftrag_id?.trim();
+    if (!aid) continue;
+    const g = byAuftragId.get(aid) ?? [];
+    g.push(t);
+    byAuftragId.set(aid, g);
+  }
+  for (const group of byAuftragId.values()) {
+    if (group.length < 2) continue;
+    group.sort(oldestFirst);
+    for (let i = 1; i < group.length; i++) drop.add(group[i]!.id);
+  }
+
+  const byNr = new Map<string, Ticket[]>();
+  for (const t of items) {
+    if (drop.has(t.id)) continue;
+    const nr = t.additional_data?.auftragsnummer?.trim().replace(/\s+/g, "");
+    if (!nr) continue;
+    const g = byNr.get(nr) ?? [];
+    g.push(t);
+    byNr.set(nr, g);
+  }
+  for (const group of byNr.values()) {
+    if (group.length < 2) continue;
+    group.sort(oldestFirst);
+    for (let i = 1; i < group.length; i++) drop.add(group[i]!.id);
+  }
+
+  return items.filter((t) => !drop.has(t.id));
+}
+
+function sanitizeTicketList(items: Ticket[]): Ticket[] {
+  return dedupeSpmLinkedTickets(dedupeTicketsById(items));
+}
+
 /** Normalisiert Gewerk-Werte (String oder Array) in ein bereinigtes String-Array. */
 function normalizeGewerke(value: string[] | string | null | undefined): string[] {
   if (Array.isArray(value)) {
@@ -692,14 +748,23 @@ function getPositionForAppend(columnTickets: Ticket[], excludeTicketId?: string)
   return maxPos + 10;
 }
 
-/** Lädt alle Tickets einer Company (alle Status). */
+/** Lädt alle Tickets einer Company – gefiltert nach Rolle (API, serverseitig). */
 const fetchTickets = async (companyId: string = DEFAULT_COMPANY_ID) => {
-  const { data, error } = await supabase
-    .from("tickets")
-    .select("*")
-    .eq("company_id", companyId)
-    .order("created_at", { ascending: false });
-  return { data: data ?? [], error };
+  try {
+    const res = await fetch(`/api/tickets?company_id=${encodeURIComponent(companyId)}`, {
+      credentials: "include",
+    });
+    const json = await res.json();
+    if (!res.ok) {
+      return { data: [] as Ticket[], error: { message: json?.error ?? "Fehler beim Laden" } };
+    }
+    return { data: Array.isArray(json) ? json : [], error: null };
+  } catch (e) {
+    return {
+      data: [] as Ticket[],
+      error: { message: e instanceof Error ? e.message : "Netzwerkfehler" },
+    };
+  }
 };
 
 export default function AdminDashboardPage() {
@@ -818,6 +883,8 @@ export default function AdminDashboardPage() {
   /** Aktuell angemeldeter Nutzer (vom Layout/Server). */
   const adminUser = useAdminUser();
   const showAuftragBilling = adminUser?.role === "admin";
+  /** Gewerk-Rollen: Board nur Ticket-Eingang + Kalender (keine Angebote-/Prozess-Spalten). */
+  const isGewerkUser = Boolean(adminUser?.role && adminUser.role !== "admin");
   const { toast } = useToast();
 
   /** Auto-Historisierung: verhindert doppelte Inserts innerhalb einer Session. */
@@ -831,6 +898,10 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (isGewerkUser && incomingTab === "Angebote") setIncomingTab("Eingang");
+  }, [isGewerkUser, incomingTab]);
 
   /** Theme aus localStorage laden (nur Client). */
   useEffect(() => {
@@ -921,22 +992,37 @@ export default function AdminDashboardPage() {
   }, [detailTicket?.id, detailTicket?.image_urls]);
 
   /** Soft Refresh: Daten neu laden. Automatik: termin_ende überschritten → Status Nachbereitung. Sync: Aufträge → Tickets. */
-  const loadTickets = async () => {
-    setLoading(true);
+  const loadTickets = async (silent = false) => {
+    if (!silent) setLoading(true);
     setError(null);
     const { data, error } = await fetchTickets(DEFAULT_COMPANY_ID);
     if (error) {
       setError(error.message);
-      setLoading(false);
+      if (!silent) setLoading(false);
       return;
     }
     let list = data ?? [];
+
+    /** Clientseitige Absicherung: Gewerk-User nur Tickets mit ihrem Gewerk. */
+    if (adminUser?.role && adminUser.role !== "admin") {
+      const myGewerk = roleToGewerk(adminUser.role);
+      if (myGewerk) {
+        const norm = (s: string) => s.trim().toLowerCase().replace(/ä/g, "ae").replace(/ü/g, "ue").replace(/ö/g, "oe");
+        const myNorm = norm(myGewerk);
+        list = list.filter((t) => {
+          const gewerkeList = normalizeGewerke(t.gewerk ?? null);
+          if (gewerkeList.length === 0) return false;
+          return gewerkeList.some((v) => norm(v) === myNorm);
+        });
+      }
+    }
     console.log(`✅ Tickets geladen: ${list.length} Tickets`);
 
-    /** Aufträge aus auftraege-Tabelle als Tickets in „Neue Anfragen“ übernehmen (einmalig pro Auftrag). */
+    /** Aufträge aus auftraege-Tabelle als Tickets in „Neue Anfragen“ übernehmen (einmalig pro Auftrag). API filtert nach Rolle. */
     try {
-      const { data: auftraegeData } = await supabase.from("auftraege").select("id, auftragsnummer, datum, auftragstyp, mieter_name, mieter_email, mieter_telefon, adresse_strasse, adresse_ort, aufgabe");
-      const auftraege = (auftraegeData ?? []) as Array<{
+      const auftraegeRes = await fetch("/api/auftraege", { credentials: "include" });
+      const auftraegeRaw = auftraegeRes.ok ? (await auftraegeRes.json()) : null;
+      const auftraege = (Array.isArray(auftraegeRaw) ? auftraegeRaw : []) as Array<{
         id: string;
         auftragsnummer: string | null;
         mieter_name: string | null;
@@ -955,9 +1041,19 @@ export default function AdminDashboardPage() {
       let insertedCount = 0;
       for (const a of auftraege) {
         if (linkedAuftragIds.has(a.id)) continue;
+        const { data: existingForAuftrag } = await supabase
+          .from("tickets")
+          .select("id")
+          .eq("additional_data->>auftrag_id", a.id)
+          .limit(1)
+          .maybeSingle();
+        if (existingForAuftrag?.id) {
+          linkedAuftragIds.add(a.id);
+          continue;
+        }
         const adresse = [a.adresse_strasse, a.adresse_ort].filter(Boolean).join(", ").trim() || "Keine Angabe";
         const email = (a.mieter_email ?? "").trim() || "aus-auftrag@handwerkmuenchen.de";
-        const { data: inserted } = await supabase
+        const { data: inserted, error: insertErr } = await supabase
           .from("tickets")
           .insert({
             company_id: DEFAULT_COMPANY_ID,
@@ -971,7 +1067,11 @@ export default function AdminDashboardPage() {
             additional_data: { auftrag_id: a.id, auftragsnummer: a.auftragsnummer, quelle: "auftraege" },
           })
           .select("id")
-          .single();
+          .maybeSingle();
+        if (insertErr?.code === "23505") {
+          linkedAuftragIds.add(a.id);
+          continue;
+        }
         if (inserted) {
           linkedAuftragIds.add(a.id);
           insertedCount++;
@@ -1008,6 +1108,8 @@ export default function AdminDashboardPage() {
       console.warn("[Auftraege→Tickets Sync]", syncErr);
     }
 
+    list = sanitizeTicketList(list);
+
     const now = new Date().toISOString();
     const toMove = list.filter((t: Ticket) => {
       const s = (t.status ?? "").trim();
@@ -1033,17 +1135,33 @@ export default function AdminDashboardPage() {
     } else {
       setTickets(list);
     }
-    setLoading(false);
+    if (!silent) setLoading(false);
   };
 
   useEffect(() => {
     loadTickets();
   }, []);
 
-  /** Supabase Realtime: neue Tickets sofort anzeigen. */
+  /** Fallback: alle 60s neu laden (Gewerk-User sehen sonst evtl. keine neu zugewiesenen Tickets). */
   useEffect(() => {
+    const isGewerk = adminUser?.role && adminUser.role !== "admin";
+    if (!isGewerk) return;
+    const iv = setInterval(() => loadTickets(true), 60_000);
+    return () => clearInterval(iv);
+  }, [adminUser?.role]);
+
+  /** Supabase Realtime: neue und geänderte Tickets – Gewerk-Filter bei Gewerk-Usern. */
+  useEffect(() => {
+    const norm = (s: string) => s.trim().toLowerCase().replace(/ä/g, "ae").replace(/ü/g, "ue").replace(/ö/g, "oe");
+    const gewerkMatches = (gewerkList: string[] | null, myGewerk: string | null) => {
+      if (!myGewerk) return true;
+      if (!gewerkList || !Array.isArray(gewerkList)) return false;
+      const myNorm = norm(myGewerk);
+      return gewerkList.some((v) => norm(String(v ?? "")) === myNorm);
+    };
+
     const channel = supabase
-      .channel("tickets-insert")
+      .channel("tickets-realtime")
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "tickets" },
@@ -1051,15 +1169,40 @@ export default function AdminDashboardPage() {
           const row = payload.new as Record<string, unknown>;
           if (String(row?.company_id ?? "") !== DEFAULT_COMPANY_ID) return;
           const newTicket = row as unknown as Ticket;
+          const myGewerk = adminUser?.role && adminUser.role !== "admin" ? roleToGewerk(adminUser.role) : null;
+          if (myGewerk && !gewerkMatches(Array.isArray(newTicket.gewerk) ? newTicket.gewerk : [], myGewerk)) return;
           setTickets((prev) => {
-            if (prev.some((t) => t.id === newTicket.id)) return prev;
-            return [newTicket, ...prev];
+            if (prev.some((t) => t.id === newTicket.id)) return sanitizeTicketList(prev);
+            return sanitizeTicketList([newTicket, ...prev]);
           });
           const name = (newTicket.kunde_name ?? newTicket.partner_name ?? "").toString().trim() || "Neue Anfrage";
-          toast({
-            title: "Neue Anfrage",
-            description: name,
+          toast({ title: "Neue Anfrage", description: name });
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "tickets" },
+        (payload) => {
+          const row = payload.new as Record<string, unknown>;
+          if (String(row?.company_id ?? "") !== DEFAULT_COMPANY_ID) return;
+          const updatedTicket = row as unknown as Ticket;
+          const myGewerk = adminUser?.role && adminUser.role !== "admin" ? roleToGewerk(adminUser.role) : null;
+          const matches = gewerkMatches(Array.isArray(updatedTicket.gewerk) ? updatedTicket.gewerk : [], myGewerk);
+
+          let newlyAdded = false;
+          setTickets((prev) => {
+            const exists = prev.some((t) => t.id === updatedTicket.id);
+            if (matches) {
+              if (exists) return sanitizeTicketList(prev.map((t) => (t.id === updatedTicket.id ? updatedTicket : t)));
+              newlyAdded = true;
+              return sanitizeTicketList([updatedTicket, ...prev]);
+            }
+            if (exists) return sanitizeTicketList(prev.filter((t) => t.id !== updatedTicket.id));
+            return sanitizeTicketList(prev);
           });
+          if (newlyAdded) {
+            toast({ title: "Neues Ticket", description: (updatedTicket.kunde_name ?? updatedTicket.partner_name ?? "").toString().trim() || "Gewerk zugewiesen" });
+          }
         }
       )
       .subscribe();
@@ -1067,7 +1210,7 @@ export default function AdminDashboardPage() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [toast]);
+  }, [toast, adminUser?.role]);
 
   /** Lädt Timeline-Einträge aus ticket_history für das aktuell geöffnete Ticket. */
   const loadTicketHistoryRows = useCallback(
@@ -1349,6 +1492,8 @@ export default function AdminDashboardPage() {
       setTickets((prev) => [newTicket, ...prev]);
       setCreateTicketOpen(false);
       resetCreateTicketForm();
+      /** Nach Create: Liste neu laden (sichert Anzeige bei Realtime-Verzögerung). */
+      loadTickets();
     } catch (e) {
       setCreateTicketError(e instanceof Error ? e.message : "Unbekannter Fehler");
     } finally {
@@ -1467,7 +1612,9 @@ export default function AdminDashboardPage() {
     if (detailTicket) {
       persistAssignedTo(detailTicket.id, detailAssignedTo);
       persistTermin(detailTicket.id, detailTerminStart || null, detailTerminEnde || null);
-      persistGewerke(detailTicket.id, detailGewerke);
+      if (adminUser?.role === "admin") {
+        persistGewerke(detailTicket.id, detailGewerke);
+      }
       if (detailKundenEditMode) {
         persistKundenInfo(detailTicket.id);
       }
@@ -2768,15 +2915,6 @@ export default function AdminDashboardPage() {
                   )}
                 </span>
               </div>
-              {colId === "column-1" && isFromAuftrag && (
-                <p
-                  className={`mb-1 text-[10px] leading-snug ${
-                    isLightTheme ? "text-emerald-800/90" : "text-emerald-300/90"
-                  }`}
-                >
-                  Öffnen: gleiche Handwerker-Ansicht wie unter „Aufträge“
-                </p>
-              )}
               <div className="mb-1 flex items-start justify-between gap-2">
                 <div className="min-w-0 flex-1">
                   <p className={`line-clamp-1 text-sm font-medium ${isLightTheme ? "text-slate-900" : "text-slate-100"}`}>{displayName}</p>
@@ -3252,67 +3390,71 @@ export default function AdminDashboardPage() {
           >
             <CalendarIcon className="h-4 w-4" strokeWidth={2} />
           </button>
-          <Popover>
-            <PopoverTrigger asChild>
+          {!isGewerkUser && (
+            <>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    title="Einstellungen"
+                    className={`inline-flex items-center justify-center rounded-full border p-2 text-xs font-medium transition-all hover:opacity-90 ${
+                      isLightTheme
+                        ? "border-slate-200 bg-white text-slate-700 shadow-sm hover:border-slate-300"
+                        : "border-slate-600 bg-slate-900/80 text-slate-100 hover:border-slate-500 hover:bg-slate-800/80"
+                    }`}
+                  >
+                    <Settings className="h-4 w-4" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent
+                  align="end"
+                  className={`w-52 p-2 ${isLightTheme ? "border-slate-200 bg-white" : "border-slate-700 bg-slate-900"}`}
+                >
+                  <nav className="flex flex-col gap-0.5">
+                    <Link
+                      href="/admin/dashboard"
+                      className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                        isLightTheme ? "text-slate-700 hover:bg-slate-100" : "text-slate-300 hover:bg-slate-800 hover:text-slate-100"
+                      }`}
+                    >
+                      <LayoutDashboard className="h-4 w-4 shrink-0" />
+                      Dashboard
+                    </Link>
+                    <Link
+                      href="/admin/dashboard/auftraege"
+                      className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                        isLightTheme ? "text-slate-700 hover:bg-slate-100" : "text-slate-300 hover:bg-slate-800 hover:text-slate-100"
+                      }`}
+                    >
+                      <ClipboardList className="h-4 w-4 shrink-0" />
+                      Aufträge
+                    </Link>
+                    <Link
+                      href="/admin/benutzer"
+                      className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                        isLightTheme ? "text-slate-700 hover:bg-slate-100" : "text-slate-300 hover:bg-slate-800 hover:text-slate-100"
+                      }`}
+                    >
+                      <Users className="h-4 w-4 shrink-0" />
+                      Benutzerverwaltung
+                    </Link>
+                  </nav>
+                </PopoverContent>
+              </Popover>
               <button
                 type="button"
-                title="Einstellungen"
+                onClick={toggleDashboardTheme}
+                title={isLightTheme ? "Dunkel" : "Hell"}
                 className={`inline-flex items-center justify-center rounded-full border p-2 text-xs font-medium transition-all hover:opacity-90 ${
                   isLightTheme
                     ? "border-slate-200 bg-white text-slate-700 shadow-sm hover:border-slate-300"
                     : "border-slate-600 bg-slate-900/80 text-slate-100 hover:border-slate-500 hover:bg-slate-800/80"
                 }`}
               >
-                <Settings className="h-4 w-4" />
+                {isLightTheme ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
               </button>
-            </PopoverTrigger>
-            <PopoverContent
-              align="end"
-              className={`w-52 p-2 ${isLightTheme ? "border-slate-200 bg-white" : "border-slate-700 bg-slate-900"}`}
-            >
-              <nav className="flex flex-col gap-0.5">
-                <Link
-                  href="/admin/dashboard"
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                    isLightTheme ? "text-slate-700 hover:bg-slate-100" : "text-slate-300 hover:bg-slate-800 hover:text-slate-100"
-                  }`}
-                >
-                  <LayoutDashboard className="h-4 w-4 shrink-0" />
-                  Dashboard
-                </Link>
-                <Link
-                  href="/admin/dashboard/auftraege"
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                    isLightTheme ? "text-slate-700 hover:bg-slate-100" : "text-slate-300 hover:bg-slate-800 hover:text-slate-100"
-                  }`}
-                >
-                  <ClipboardList className="h-4 w-4 shrink-0" />
-                  Aufträge
-                </Link>
-                <Link
-                  href="/admin/benutzer"
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                    isLightTheme ? "text-slate-700 hover:bg-slate-100" : "text-slate-300 hover:bg-slate-800 hover:text-slate-100"
-                  }`}
-                >
-                  <Users className="h-4 w-4 shrink-0" />
-                  Benutzerverwaltung
-                </Link>
-              </nav>
-            </PopoverContent>
-          </Popover>
-          <button
-            type="button"
-            onClick={toggleDashboardTheme}
-            title={isLightTheme ? "Dunkel" : "Hell"}
-            className={`inline-flex items-center justify-center rounded-full border p-2 text-xs font-medium transition-all hover:opacity-90 ${
-              isLightTheme
-                ? "border-slate-200 bg-white text-slate-700 shadow-sm hover:border-slate-300"
-                : "border-slate-600 bg-slate-900/80 text-slate-100 hover:border-slate-500 hover:bg-slate-800/80"
-            }`}
-          >
-            {isLightTheme ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-          </button>
+            </>
+          )}
           <form action="/auth/signout" method="post" className="inline">
             <button
               type="submit"
@@ -3355,65 +3497,68 @@ export default function AdminDashboardPage() {
             >
               <TabsList className="mb-3 h-9 w-full bg-slate-800">
                 <TabsTrigger value="list" className="flex-1 text-xs data-[state=active]:bg-slate-700">
-                  Anfragen ({col1Tickets.length})
+                  {isGewerkUser ? `Eingang (${col1EingangTickets.length})` : `Anfragen (${col1Tickets.length})`}
                 </TabsTrigger>
                 <TabsTrigger value="calendar" className="flex-1 text-xs data-[state=active]:bg-slate-700">
                   Kalender
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="list" className="mt-0 space-y-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCreateTicketOpen(true);
-                    resetCreateTicketForm();
-                  }}
-                  className="w-full inline-flex items-center justify-center gap-1.5 rounded-full border border-blue-500/60 bg-blue-500/20 px-3 py-2.5 text-xs font-medium text-blue-200 shadow-sm transition-all hover:opacity-90 hover:bg-blue-500/30"
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                  Ticket erstellen
-                </button>
+                {!isGewerkUser && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCreateTicketOpen(true);
+                      resetCreateTicketForm();
+                    }}
+                    className="w-full inline-flex items-center justify-center gap-1.5 rounded-full border border-blue-500/60 bg-blue-500/20 px-3 py-2.5 text-xs font-medium text-blue-200 shadow-sm transition-all hover:opacity-90 hover:bg-blue-500/30"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    Ticket erstellen
+                  </button>
+                )}
                 <section
                   ref={setCol1MobileListRef}
                   className={`flex flex-col rounded-2xl border p-4 transition-colors ${
                     isOverCol1MobileList ? "border-blue-500 bg-slate-800/80 ring-2 ring-blue-500/50" : "border-slate-800 bg-slate-900/70"
                   }`}
                 >
-                  {/* Segmented Control: Eingang | Angebote (Mobile) */}
-                  <div className="mb-3 flex shrink-0 rounded-xl bg-slate-800/60 p-1">
-                    <button
-                      type="button"
-                      onClick={() => setIncomingTab("Eingang")}
-                      className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
-                        incomingTab === "Eingang"
-                          ? "bg-slate-700 text-slate-100 shadow-sm"
-                          : "text-slate-400 hover:text-slate-200"
-                      }`}
-                    >
-                      Eingang ({col1EingangTickets.length})
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setIncomingTab("Angebote")}
-                      className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
-                        incomingTab === "Angebote"
-                          ? "bg-slate-700 text-slate-100 shadow-sm"
-                          : "text-slate-400 hover:text-slate-200"
-                      }`}
-                    >
-                      Angebote ({col1AngeboteTickets.length})
-                    </button>
-                  </div>
+                  {!isGewerkUser && (
+                    <div className="mb-3 flex shrink-0 rounded-xl bg-slate-800/60 p-1">
+                      <button
+                        type="button"
+                        onClick={() => setIncomingTab("Eingang")}
+                        className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+                          incomingTab === "Eingang"
+                            ? "bg-slate-700 text-slate-100 shadow-sm"
+                            : "text-slate-400 hover:text-slate-200"
+                        }`}
+                      >
+                        Eingang ({col1EingangTickets.length})
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIncomingTab("Angebote")}
+                        className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+                          incomingTab === "Angebote"
+                            ? "bg-slate-700 text-slate-100 shadow-sm"
+                            : "text-slate-400 hover:text-slate-200"
+                        }`}
+                      >
+                        Angebote ({col1AngeboteTickets.length})
+                      </button>
+                    </div>
+                  )}
                   <div ref={listScrollRef} tabIndex={-1} className="max-h-[60vh] space-y-3 overflow-y-auto pr-1">
                     <SortableContext
-                      items={(incomingTab === "Eingang" ? col1EingangTickets : col1AngeboteTickets).map((t) => `ticket-${t.id}`)}
+                      items={(isGewerkUser || incomingTab === "Eingang" ? col1EingangTickets : col1AngeboteTickets).map((t) => `ticket-${t.id}`)}
                       strategy={verticalListSortingStrategy}
                     >
                       {renderTicketCards(
-                        incomingTab === "Eingang" ? col1EingangTickets : col1AngeboteTickets,
-                        incomingTab === "Eingang" ? "Keine Anfragen." : "Keine Angebote.",
+                        isGewerkUser || incomingTab === "Eingang" ? col1EingangTickets : col1AngeboteTickets,
+                        isGewerkUser || incomingTab === "Eingang" ? "Keine Anfragen." : "Keine Angebote.",
                         "column-1",
-                        incomingTab === "Angebote"
+                        !isGewerkUser && incomingTab === "Angebote"
                           ? {
                               isAngeboteTab: true,
                               onOpenQuoteBuilder: (t) => {
@@ -3448,23 +3593,25 @@ export default function AdminDashboardPage() {
           {/* Desktop: 6-Spalten – Obere Sektion (Planung): Spalte 1 + 2 gleiche Höhe */}
           <div className="hidden lg:block space-y-4">
             <div className="flex gap-4" style={{ height: "720px" }}>
-              {/* Spalte 1: Ticket erstellen + Neue Anfragen */}
+              {/* Spalte 1: optional Ticket erstellen + Neue Anfragen */}
               <div className="flex w-[28%] min-w-0 flex-col gap-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCreateTicketOpen(true);
-                    resetCreateTicketForm();
-                  }}
-                  className={`shrink-0 w-full inline-flex items-center justify-center gap-1.5 rounded-full border px-3 py-2.5 text-xs font-medium transition-all hover:opacity-90 ${
-                    isLightTheme
-                      ? "border-slate-200 bg-slate-100 text-slate-800 shadow-sm hover:border-slate-300 hover:bg-slate-200"
-                      : "border-blue-500/60 bg-blue-500/20 text-blue-200 shadow-sm hover:bg-blue-500/30"
-                  }`}
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                  Ticket erstellen
-                </button>
+                {!isGewerkUser && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCreateTicketOpen(true);
+                      resetCreateTicketForm();
+                    }}
+                    className={`shrink-0 w-full inline-flex items-center justify-center gap-1.5 rounded-full border px-3 py-2.5 text-xs font-medium transition-all hover:opacity-90 ${
+                      isLightTheme
+                        ? "border-slate-200 bg-slate-100 text-slate-800 shadow-sm hover:border-slate-300 hover:bg-slate-200"
+                        : "border-blue-500/60 bg-blue-500/20 text-blue-200 shadow-sm hover:bg-blue-500/30"
+                    }`}
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    Ticket erstellen
+                  </button>
+                )}
               <aside
                 ref={setCol1Ref}
                 data-col-droppable="column-1"
@@ -3480,51 +3627,52 @@ export default function AdminDashboardPage() {
               >
                 <div className="mb-2 flex shrink-0 items-center justify-between gap-2">
                   <h2 className="text-xs font-medium uppercase tracking-wider text-slate-500">
-                    {incomingTab === "Eingang" ? "1. Neue Anfragen" : "1. Angebote & Kalkulationen"}
+                    {isGewerkUser || incomingTab === "Eingang" ? "1. Neue Anfragen" : "1. Angebote & Kalkulationen"}
                   </h2>
                   <span className={`rounded-full px-2 py-0.5 text-xs ${
                     isLightTheme ? "bg-slate-100 text-slate-700" : "bg-slate-800 text-slate-300"
                   }`}>
-                    {loading ? "…" : (incomingTab === "Eingang" ? col1EingangTickets.length : col1AngeboteTickets.length)}
+                    {loading ? "…" : (isGewerkUser || incomingTab === "Eingang" ? col1EingangTickets.length : col1AngeboteTickets.length)}
                   </span>
                 </div>
-                {/* Segmented Control (Apple-Style): Eingang | Angebote */}
-                <div
-                  className={`mb-3 flex shrink-0 rounded-xl p-1 ${
-                    isLightTheme ? "bg-slate-100/80" : "bg-slate-800/60"
-                  }`}
-                >
-                  <button
-                    type="button"
-                    onClick={() => setIncomingTab("Eingang")}
-                    className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
-                      incomingTab === "Eingang"
-                        ? isLightTheme
-                          ? "bg-white text-slate-900 shadow-sm"
-                          : "bg-slate-700 text-slate-100 shadow-sm"
-                        : isLightTheme
-                          ? "text-slate-600 hover:text-slate-900"
-                          : "text-slate-400 hover:text-slate-200"
+                {!isGewerkUser && (
+                  <div
+                    className={`mb-3 flex shrink-0 rounded-xl p-1 ${
+                      isLightTheme ? "bg-slate-100/80" : "bg-slate-800/60"
                     }`}
                   >
-                    Eingang ({col1EingangTickets.length})
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setIncomingTab("Angebote")}
-                    className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
-                      incomingTab === "Angebote"
-                        ? isLightTheme
-                          ? "bg-white text-slate-900 shadow-sm"
-                          : "bg-slate-700 text-slate-100 shadow-sm"
-                        : isLightTheme
-                          ? "text-slate-600 hover:text-slate-900"
-                          : "text-slate-400 hover:text-slate-200"
-                    }`}
-                  >
-                    Angebote ({col1AngeboteTickets.length})
-                  </button>
-                </div>
+                    <button
+                      type="button"
+                      onClick={() => setIncomingTab("Eingang")}
+                      className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+                        incomingTab === "Eingang"
+                          ? isLightTheme
+                            ? "bg-white text-slate-900 shadow-sm"
+                            : "bg-slate-700 text-slate-100 shadow-sm"
+                          : isLightTheme
+                            ? "text-slate-600 hover:text-slate-900"
+                            : "text-slate-400 hover:text-slate-200"
+                      }`}
+                    >
+                      Eingang ({col1EingangTickets.length})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIncomingTab("Angebote")}
+                      className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+                        incomingTab === "Angebote"
+                          ? isLightTheme
+                            ? "bg-white text-slate-900 shadow-sm"
+                            : "bg-slate-700 text-slate-100 shadow-sm"
+                          : isLightTheme
+                            ? "text-slate-600 hover:text-slate-900"
+                            : "text-slate-400 hover:text-slate-200"
+                      }`}
+                    >
+                      Angebote ({col1AngeboteTickets.length})
+                    </button>
+                  </div>
+                )}
                 <div className={`mb-2 h-px w-full shrink-0 ${isLightTheme ? "bg-slate-200" : "bg-slate-800"}`} />
                 <p className={`mb-2 shrink-0 text-[11px] ${isLightTheme ? "text-slate-500" : "text-slate-500"}`}>
                   {isOverCol1 ? "Loslassen → Termin entfernen." : "In Kalender ziehen → Termin setzen."}
@@ -3535,14 +3683,14 @@ export default function AdminDashboardPage() {
                   className="min-w-0 flex-1 cursor-default space-y-3 overflow-y-auto pr-1 outline-none"
                 >
                   <SortableContext
-                    items={(incomingTab === "Eingang" ? col1EingangTickets : col1AngeboteTickets).map((t) => `ticket-${t.id}`)}
+                    items={(isGewerkUser || incomingTab === "Eingang" ? col1EingangTickets : col1AngeboteTickets).map((t) => `ticket-${t.id}`)}
                     strategy={verticalListSortingStrategy}
                   >
                     {renderTicketCards(
-                      incomingTab === "Eingang" ? col1EingangTickets : col1AngeboteTickets,
-                      incomingTab === "Eingang" ? "Keine Anfragen." : "Keine Angebote.",
+                      isGewerkUser || incomingTab === "Eingang" ? col1EingangTickets : col1AngeboteTickets,
+                      isGewerkUser || incomingTab === "Eingang" ? "Keine Anfragen." : "Keine Angebote.",
                       "column-1",
-                      incomingTab === "Angebote"
+                      !isGewerkUser && incomingTab === "Angebote"
                         ? {
                             isAngeboteTab: true,
                             onOpenQuoteBuilder: (t) => {
@@ -3570,12 +3718,14 @@ export default function AdminDashboardPage() {
               </section>
             </div>
 
-            {/* Untere Sektion (Prozess): weitere Kanban-Spalten dynamisch */}
-            <div className="grid grid-cols-4 gap-4" style={{ height: "720px" }}>
-              {processColumns.map((cfg) => (
-                <KanbanColumn key={cfg.id} config={cfg} />
-              ))}
-            </div>
+            {/* Untere Sektion (Prozess): nur Admin */}
+            {!isGewerkUser && (
+              <div className="grid grid-cols-4 gap-4" style={{ height: "720px" }}>
+                {processColumns.map((cfg) => (
+                  <KanbanColumn key={cfg.id} config={cfg} />
+                ))}
+              </div>
+            )}
           </div>
 
           <DragOverlay dropAnimation={null} modifiers={[snapCenterToCursor]}>
@@ -4002,158 +4152,160 @@ export default function AdminDashboardPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Create-Ticket-Dialog: manuell neue Tickets anlegen */}
-      <Dialog
-        open={createTicketOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            setCreateTicketOpen(false);
-            resetCreateTicketForm();
-          }
-        }}
-      >
-        <DialogContent className={`max-w-md ${
-          isLightTheme
-            ? "border-slate-200 bg-white text-slate-900"
-            : "border-slate-700 bg-slate-900 text-slate-100"
-        }`}>
-          <DialogHeader>
-            <DialogTitle className={isLightTheme ? "text-slate-900" : "text-slate-100"}>Ticket erstellen</DialogTitle>
-            <DialogDescription className={isLightTheme ? "text-slate-600" : "text-slate-400"}>
-              Neues Ticket manuell anlegen – erscheint im Eingang.
-            </DialogDescription>
-          </DialogHeader>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleCreateTicket();
-            }}
-            className="space-y-4 py-2"
-          >
-            {createTicketError && (
-              <div className={`rounded-md border border-red-500/50 p-2 text-sm ${isLightTheme ? "bg-red-50 text-red-800" : "bg-red-950/40 text-red-200"}`}>
-                {createTicketError}
-              </div>
-            )}
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id="create-is-partner"
-                checked={createTicketIsPartner}
-                onCheckedChange={(v) => setCreateTicketIsPartner(!!v)}
-                className={isLightTheme ? "border-slate-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600" : "border-slate-600 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"}
-              />
-              <Label htmlFor="create-is-partner" className={`text-sm cursor-pointer ${isLightTheme ? "text-slate-700" : "text-slate-300"}`}>
-                Partner-Anfrage
-              </Label>
-            </div>
-            {createTicketIsPartner ? (
-              <div className="space-y-2">
-                <Label htmlFor="create-partner-name" className={isLightTheme ? "text-slate-700" : "text-slate-300"}>Partner / Firma</Label>
-                <Input
-                  id="create-partner-name"
-                  value={createTicketPartnerName}
-                  onChange={(e) => setCreateTicketPartnerName(e.target.value)}
-                  placeholder="z. B. Hausverwaltung Süd GmbH"
-                  className={isLightTheme ? "border-slate-200 bg-white text-slate-900 placeholder:text-slate-500" : "border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"}
+      {/* Create-Ticket-Dialog: nur Admin */}
+      {!isGewerkUser && (
+        <Dialog
+          open={createTicketOpen}
+          onOpenChange={(open) => {
+            if (!open) {
+              setCreateTicketOpen(false);
+              resetCreateTicketForm();
+            }
+          }}
+        >
+          <DialogContent className={`max-w-md ${
+            isLightTheme
+              ? "border-slate-200 bg-white text-slate-900"
+              : "border-slate-700 bg-slate-900 text-slate-100"
+          }`}>
+            <DialogHeader>
+              <DialogTitle className={isLightTheme ? "text-slate-900" : "text-slate-100"}>Ticket erstellen</DialogTitle>
+              <DialogDescription className={isLightTheme ? "text-slate-600" : "text-slate-400"}>
+                Neues Ticket manuell anlegen – erscheint im Eingang.
+              </DialogDescription>
+            </DialogHeader>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleCreateTicket();
+              }}
+              className="space-y-4 py-2"
+            >
+              {createTicketError && (
+                <div className={`rounded-md border border-red-500/50 p-2 text-sm ${isLightTheme ? "bg-red-50 text-red-800" : "bg-red-950/40 text-red-200"}`}>
+                  {createTicketError}
+                </div>
+              )}
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="create-is-partner"
+                  checked={createTicketIsPartner}
+                  onCheckedChange={(v) => setCreateTicketIsPartner(!!v)}
+                  className={isLightTheme ? "border-slate-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600" : "border-slate-600 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"}
                 />
+                <Label htmlFor="create-is-partner" className={`text-sm cursor-pointer ${isLightTheme ? "text-slate-700" : "text-slate-300"}`}>
+                  Partner-Anfrage
+                </Label>
               </div>
-            ) : (
+              {createTicketIsPartner ? (
+                <div className="space-y-2">
+                  <Label htmlFor="create-partner-name" className={isLightTheme ? "text-slate-700" : "text-slate-300"}>Partner / Firma</Label>
+                  <Input
+                    id="create-partner-name"
+                    value={createTicketPartnerName}
+                    onChange={(e) => setCreateTicketPartnerName(e.target.value)}
+                    placeholder="z. B. Hausverwaltung Süd GmbH"
+                    className={isLightTheme ? "border-slate-200 bg-white text-slate-900 placeholder:text-slate-500" : "border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"}
+                  />
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Label htmlFor="create-kunde-name" className={isLightTheme ? "text-slate-700" : "text-slate-300"}>Kundenname *</Label>
+                  <Input
+                    id="create-kunde-name"
+                    value={createTicketKundeName}
+                    onChange={(e) => setCreateTicketKundeName(e.target.value)}
+                    placeholder="Max Mustermann"
+                    required
+                    className={isLightTheme ? "border-slate-200 bg-white text-slate-900 placeholder:text-slate-500" : "border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"}
+                  />
+                </div>
+              )}
               <div className="space-y-2">
-                <Label htmlFor="create-kunde-name" className={isLightTheme ? "text-slate-700" : "text-slate-300"}>Kundenname *</Label>
+                <Label htmlFor="create-email" className={isLightTheme ? "text-slate-700" : "text-slate-300"}>E-Mail *</Label>
                 <Input
-                  id="create-kunde-name"
-                  value={createTicketKundeName}
-                  onChange={(e) => setCreateTicketKundeName(e.target.value)}
-                  placeholder="Max Mustermann"
+                  id="create-email"
+                  type="email"
+                  value={createTicketEmail}
+                  onChange={(e) => setCreateTicketEmail(e.target.value)}
+                  placeholder="info@beispiel.de"
                   required
                   className={isLightTheme ? "border-slate-200 bg-white text-slate-900 placeholder:text-slate-500" : "border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"}
                 />
               </div>
-            )}
-            <div className="space-y-2">
-              <Label htmlFor="create-email" className={isLightTheme ? "text-slate-700" : "text-slate-300"}>E-Mail *</Label>
-              <Input
-                id="create-email"
-                type="email"
-                value={createTicketEmail}
-                onChange={(e) => setCreateTicketEmail(e.target.value)}
-                placeholder="info@beispiel.de"
-                required
-                className={isLightTheme ? "border-slate-200 bg-white text-slate-900 placeholder:text-slate-500" : "border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="create-telefon" className={isLightTheme ? "text-slate-700" : "text-slate-300"}>Telefon (optional)</Label>
-              <Input
-                id="create-telefon"
-                type="tel"
-                value={createTicketTelefon}
-                onChange={(e) => setCreateTicketTelefon(e.target.value)}
-                placeholder="+49 89 …"
-                className={isLightTheme ? "border-slate-200 bg-white text-slate-900 placeholder:text-slate-500" : "border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="create-adresse" className={isLightTheme ? "text-slate-700" : "text-slate-300"}>Objektadresse *</Label>
-              <Input
-                id="create-adresse"
-                value={createTicketAdresse}
-                onChange={(e) => setCreateTicketAdresse(e.target.value)}
-                placeholder="Musterstraße 42, 80331 München"
-                required
-                className={isLightTheme ? "border-slate-200 bg-white text-slate-900 placeholder:text-slate-500" : "border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="create-gewerk" className={isLightTheme ? "text-slate-700" : "text-slate-300"}>Gewerk (optional)</Label>
-              <Select value={createTicketGewerk || "_none"} onValueChange={(v) => setCreateTicketGewerk(v === "_none" ? "" : v)}>
-                <SelectTrigger className={isLightTheme ? "border-slate-200 bg-white text-slate-900" : "border-slate-600 bg-slate-800 text-slate-100"}>
-                  <SelectValue placeholder="Auswählen…" />
-                </SelectTrigger>
-                <SelectContent className={isLightTheme ? "bg-white border-slate-200" : "bg-slate-900 border-slate-700"}>
-                  <SelectItem value="_none" className={isLightTheme ? "text-slate-600" : "text-slate-400"}>– Keins –</SelectItem>
-                  {GEWERKE_OPTIONS.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value} className={isLightTheme ? "text-slate-900" : "text-slate-100"}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="create-beschreibung" className={isLightTheme ? "text-slate-700" : "text-slate-300"}>Beschreibung (optional)</Label>
-              <Textarea
-                id="create-beschreibung"
-                value={createTicketBeschreibung}
-                onChange={(e) => setCreateTicketBeschreibung(e.target.value)}
-                placeholder="Kurze Beschreibung der Anfrage…"
-                rows={3}
-                className={`resize-none ${isLightTheme ? "border-slate-200 bg-white text-slate-900 placeholder:text-slate-500" : "border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"}`}
-              />
-            </div>
-            <DialogFooter className="gap-2 sm:gap-0 pt-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  setCreateTicketOpen(false);
-                  resetCreateTicketForm();
-                }}
-                className={isLightTheme ? "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100" : "border-slate-600 bg-slate-800 text-slate-200 hover:bg-slate-700"}
-              >
-                Abbrechen
-              </Button>
-              <Button
-                type="submit"
-                disabled={createTicketSubmitting}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                {createTicketSubmitting ? "Wird erstellt…" : "Ticket erstellen"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+              <div className="space-y-2">
+                <Label htmlFor="create-telefon" className={isLightTheme ? "text-slate-700" : "text-slate-300"}>Telefon (optional)</Label>
+                <Input
+                  id="create-telefon"
+                  type="tel"
+                  value={createTicketTelefon}
+                  onChange={(e) => setCreateTicketTelefon(e.target.value)}
+                  placeholder="+49 89 …"
+                  className={isLightTheme ? "border-slate-200 bg-white text-slate-900 placeholder:text-slate-500" : "border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="create-adresse" className={isLightTheme ? "text-slate-700" : "text-slate-300"}>Objektadresse *</Label>
+                <Input
+                  id="create-adresse"
+                  value={createTicketAdresse}
+                  onChange={(e) => setCreateTicketAdresse(e.target.value)}
+                  placeholder="Musterstraße 42, 80331 München"
+                  required
+                  className={isLightTheme ? "border-slate-200 bg-white text-slate-900 placeholder:text-slate-500" : "border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="create-gewerk" className={isLightTheme ? "text-slate-700" : "text-slate-300"}>Gewerk (optional)</Label>
+                <Select value={createTicketGewerk || "_none"} onValueChange={(v) => setCreateTicketGewerk(v === "_none" ? "" : v)}>
+                  <SelectTrigger className={isLightTheme ? "border-slate-200 bg-white text-slate-900" : "border-slate-600 bg-slate-800 text-slate-100"}>
+                    <SelectValue placeholder="Auswählen…" />
+                  </SelectTrigger>
+                  <SelectContent className={isLightTheme ? "bg-white border-slate-200" : "bg-slate-900 border-slate-700"}>
+                    <SelectItem value="_none" className={isLightTheme ? "text-slate-600" : "text-slate-400"}>– Keins –</SelectItem>
+                    {GEWERKE_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value} className={isLightTheme ? "text-slate-900" : "text-slate-100"}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="create-beschreibung" className={isLightTheme ? "text-slate-700" : "text-slate-300"}>Beschreibung (optional)</Label>
+                <Textarea
+                  id="create-beschreibung"
+                  value={createTicketBeschreibung}
+                  onChange={(e) => setCreateTicketBeschreibung(e.target.value)}
+                  placeholder="Kurze Beschreibung der Anfrage…"
+                  rows={3}
+                  className={`resize-none ${isLightTheme ? "border-slate-200 bg-white text-slate-900 placeholder:text-slate-500" : "border-slate-600 bg-slate-800 text-slate-100 placeholder:text-slate-500"}`}
+                />
+              </div>
+              <DialogFooter className="gap-2 sm:gap-0 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setCreateTicketOpen(false);
+                    resetCreateTicketForm();
+                  }}
+                  className={isLightTheme ? "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100" : "border-slate-600 bg-slate-800 text-slate-200 hover:bg-slate-700"}
+                >
+                  Abbrechen
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={createTicketSubmitting}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  {createTicketSubmitting ? "Wird erstellt…" : "Ticket erstellen"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      )}
 
       <Dialog open={!!rejectionTicket} onOpenChange={(open) => !open && closeRejectionModal()}>
         <DialogContent
@@ -4259,6 +4411,7 @@ export default function AdminDashboardPage() {
         }}
         onAuftragPatch={handleHandwerkerAuftragPatch}
         showBilling={showAuftragBilling}
+        showBoardGewerkSection={adminUser?.role === "admin"}
         boardTicketId={handwerkerLinkedTicketId}
         boardTicketGewerk={handwerkerBoardTicketGewerk}
         onBoardGewerkSaved={handleHandwerkerBoardGewerkSaved}
@@ -4550,45 +4703,46 @@ export default function AdminDashboardPage() {
                           })()}
                         </dd>
                       </div>
-                      {/* Bearbeitbares Multi-Select für Gewerke */}
-                      <div className={`mt-3 rounded-lg border p-3 ${isLightTheme ? "border-slate-200 bg-white" : "border-slate-700 bg-slate-800/50"}`}>
-                        <label className={`mb-2 block text-xs font-medium ${isLightTheme ? "text-slate-700" : "text-slate-300"}`}>
-                          Gewerke zuweisen
-                        </label>
-                        <div className="flex flex-wrap gap-2">
-                          {GEWERKE_OPTIONS.map((opt) => {
-                            const isChecked = detailGewerke.includes(opt.value);
-                            return (
-                              <label
-                                key={opt.value}
-                                className={`inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
-                                  isChecked
-                                    ? isLightTheme
-                                      ? "border-blue-500 bg-blue-50 text-blue-700"
-                                      : "border-blue-500 bg-blue-500/20 text-blue-200"
-                                    : isLightTheme
-                                      ? "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
-                                      : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500"
-                                }`}
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={isChecked}
-                                  onChange={(e) => {
-                                    if (e.target.checked) {
-                                      setDetailGewerke((prev) => [...prev, opt.value]);
-                                    } else {
-                                      setDetailGewerke((prev) => prev.filter((g) => g !== opt.value));
-                                    }
-                                  }}
-                                  className="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
-                                />
-                                <span>{opt.label}</span>
-                              </label>
-                            );
-                          })}
+                      {adminUser?.role === "admin" && (
+                        <div className={`mt-3 rounded-lg border p-3 ${isLightTheme ? "border-slate-200 bg-white" : "border-slate-700 bg-slate-800/50"}`}>
+                          <label className={`mb-2 block text-xs font-medium ${isLightTheme ? "text-slate-700" : "text-slate-300"}`}>
+                            Gewerke zuweisen
+                          </label>
+                          <div className="flex flex-wrap gap-2">
+                            {GEWERKE_OPTIONS.map((opt) => {
+                              const isChecked = detailGewerke.includes(opt.value);
+                              return (
+                                <label
+                                  key={opt.value}
+                                  className={`inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
+                                    isChecked
+                                      ? isLightTheme
+                                        ? "border-blue-500 bg-blue-50 text-blue-700"
+                                        : "border-blue-500 bg-blue-500/20 text-blue-200"
+                                      : isLightTheme
+                                        ? "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                                        : "border-slate-600 bg-slate-800 text-slate-400 hover:border-slate-500"
+                                  }`}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={isChecked}
+                                    onChange={(e) => {
+                                      if (e.target.checked) {
+                                        setDetailGewerke((prev) => [...prev, opt.value]);
+                                      } else {
+                                        setDetailGewerke((prev) => prev.filter((g) => g !== opt.value));
+                                      }
+                                    }}
+                                    className="h-3.5 w-3.5 rounded border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                                  />
+                                  <span>{opt.label}</span>
+                                </label>
+                              );
+                            })}
+                          </div>
                         </div>
-                      </div>
+                      )}
                       <div>
                         <dt className={`${isLightTheme ? "text-slate-500" : "text-slate-400"} ${detailKundenEditMode ? "mb-1" : ""}`}>Anfragetext</dt>
                         <dd>
@@ -5084,11 +5238,45 @@ export default function AdminDashboardPage() {
                           <SelectValue placeholder="Spalte wählen" />
                         </SelectTrigger>
                         <SelectContent>
-                          {BUSINESS_COLUMNS.filter((c) => c.kind === "kanban").map((col) => (
-                            <SelectItem key={col.id} value={col.status} className="text-xs">
-                              {col.title}
-                            </SelectItem>
-                          ))}
+                          {isGewerkUser
+                            ? (() => {
+                                const gewerkBoardStatuses = [
+                                  STATUS.ANFRAGE,
+                                  STATUS.EINGETEILT,
+                                  STATUS.BESICHTIGUNG,
+                                  STATUS.AUSFUEHRUNG,
+                                ] as const;
+                                const labels: Record<string, string> = {
+                                  [STATUS.ANFRAGE]: "1. Neue Anfragen",
+                                  [STATUS.EINGETEILT]: "2. Terminplaner",
+                                  [STATUS.BESICHTIGUNG]: "Besichtigung",
+                                  [STATUS.AUSFUEHRUNG]: "Ausführung",
+                                };
+                                const raw = (detailTicket.status ?? "").trim() || STATUS.ANFRAGE;
+                                const extra =
+                                  !gewerkBoardStatuses.includes(raw as (typeof gewerkBoardStatuses)[number])
+                                    ? [{ value: raw, label: `${raw} (aktuell)` }]
+                                    : [];
+                                return (
+                                  <>
+                                    {extra.map((o) => (
+                                      <SelectItem key={o.value} value={o.value} className="text-xs">
+                                        {o.label}
+                                      </SelectItem>
+                                    ))}
+                                    {gewerkBoardStatuses.map((st) => (
+                                      <SelectItem key={st} value={st} className="text-xs">
+                                        {labels[st] ?? st}
+                                      </SelectItem>
+                                    ))}
+                                  </>
+                                );
+                              })()
+                            : BUSINESS_COLUMNS.filter((c) => c.kind === "kanban").map((col) => (
+                                <SelectItem key={col.id} value={col.status} className="text-xs">
+                                  {col.title}
+                                </SelectItem>
+                              ))}
                         </SelectContent>
                       </Select>
                     </div>

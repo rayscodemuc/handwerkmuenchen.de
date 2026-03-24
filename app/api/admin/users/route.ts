@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSessionUser, isValidUserRole, type UserRole } from "@/lib/auth";
+import { sendWelcomeEmail } from "@/lib/send-welcome-email";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
 
 export type AdminUserRow = {
@@ -104,11 +105,25 @@ export async function POST(request: Request) {
     });
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      // "Database error creating new user" = meist Trigger/Constraint in profiles
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.message?.includes("Database error") ? 500 : 400 }
+      );
     }
 
     if (!data.user) {
       return NextResponse.json({ error: "Nutzer konnte nicht angelegt werden." }, { status: 500 });
+    }
+
+    // Willkommens-Mail (optional – schlägt nicht fehl, wenn Resend nicht konfiguriert)
+    const { sent, error: emailError } = await sendWelcomeEmail({
+      to: email,
+      displayName,
+      role: body.role,
+    });
+    if (!sent && emailError) {
+      console.warn("[admin/users] Willkommens-Mail nicht versendet:", emailError);
     }
 
     return NextResponse.json({
@@ -117,6 +132,7 @@ export async function POST(request: Request) {
       role: body.role as UserRole,
       display_name: displayName,
       created_at: data.user.created_at,
+      email_sent: sent,
     });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Unbekannter Fehler";

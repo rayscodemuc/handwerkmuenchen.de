@@ -1,4 +1,4 @@
-import type { UserRole } from "@/lib/auth";
+import type { UserRole } from "@/lib/auth-types";
 
 const ROLE_TO_GEWERK: Partial<Record<UserRole, string>> = {
   gewerk_elektro: "Elektro",

@@ -1,10 +1,19 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { USER_ROLE_OPTIONS, type UserRole } from "@/lib/auth";
+import { KeyRound, Mail } from "lucide-react";
+import { useAdminUser } from "@/app/admin/AdminUserContext";
+import { USER_ROLE_OPTIONS, type UserRole } from "@/lib/auth-types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -26,6 +35,7 @@ function roleLabel(role: UserRole): string {
 }
 
 export function AdminUsersPanel() {
+  const currentUser = useAdminUser();
   const [users, setUsers] = useState<AdminUserRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [listError, setListError] = useState<string | null>(null);
@@ -37,6 +47,10 @@ export function AdminUsersPanel() {
   const [creating, setCreating] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
+  const [resendingId, setResendingId] = useState<string | null>(null);
+  const [resetUser, setResetUser] = useState<AdminUserRow | null>(null);
+  const [resetPassword, setResetPassword] = useState("");
+  const [resetting, setResetting] = useState(false);
 
   const loadUsers = useCallback(async () => {
     setLoading(true);
@@ -78,12 +92,16 @@ export function AdminUsersPanel() {
           display_name: displayName.trim() || undefined,
         }),
       });
-      const json = (await res.json()) as { error?: string };
+      const json = (await res.json()) as { error?: string; email_sent?: boolean };
       if (!res.ok) {
         setFormError(json.error ?? "Anlegen fehlgeschlagen");
         return;
       }
-      setFormSuccess("Nutzer wurde angelegt und kann sich sofort anmelden.");
+      setFormSuccess(
+        json.email_sent
+          ? "Nutzer wurde angelegt. Eine Willkommens-Mail mit Anmelde-Link wurde versendet."
+          : "Nutzer wurde angelegt und kann sich sofort anmelden."
+      );
       setEmail("");
       setPassword("");
       setDisplayName("");
@@ -92,6 +110,65 @@ export function AdminUsersPanel() {
       setFormError("Netzwerkfehler");
     } finally {
       setCreating(false);
+    }
+  };
+
+  const handleResendEmail = async (u: AdminUserRow) => {
+    if (!u.email?.trim()) return;
+    setFormError(null);
+    setFormSuccess(null);
+    setResendingId(u.id);
+    try {
+      const res = await fetch("/api/admin/users/resend-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: u.email,
+          role: u.role,
+          display_name: u.display_name ?? null,
+        }),
+      });
+      const json = (await res.json()) as { error?: string; message?: string };
+      if (res.ok) {
+        setFormSuccess(json.message ?? "Willkommens-Mail wurde erneut versendet.");
+      } else {
+        setFormError(json.error ?? "E-Mail konnte nicht versendet werden.");
+      }
+    } catch {
+      setFormError("Netzwerkfehler");
+    } finally {
+      setResendingId(null);
+    }
+  };
+
+  const handleOpenReset = (u: AdminUserRow) => {
+    setFormError(null);
+    setFormSuccess(null);
+    setResetUser(u);
+    setResetPassword("");
+  };
+
+  const handleResetPassword = async () => {
+    if (!resetUser || resetPassword.length < 8) return;
+    setResetting(true);
+    try {
+      const res = await fetch("/api/admin/users/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: resetUser.id, password: resetPassword }),
+      });
+      const json = (await res.json()) as { error?: string; message?: string };
+      if (res.ok) {
+        setFormError(null);
+        setFormSuccess(json.message ?? "Passwort wurde geändert. Der Nutzer kann sich jetzt anmelden.");
+        setResetUser(null);
+      } else {
+        setFormError(json.error ?? "Passwort konnte nicht geändert werden.");
+      }
+    } catch {
+      setFormError("Netzwerkfehler");
+    } finally {
+      setResetting(false);
     }
   };
 
@@ -203,13 +280,14 @@ export function AdminUsersPanel() {
           <p className="text-sm text-slate-500">Keine Nutzer gefunden.</p>
         ) : (
           <div className="overflow-x-auto rounded-xl border border-slate-800">
-            <table className="w-full min-w-[520px] text-left text-sm">
+            <table className="w-full min-w-[560px] text-left text-sm">
               <thead className="border-b border-slate-800 bg-slate-900/80 text-xs uppercase tracking-wide text-slate-500">
                 <tr>
                   <th className="px-4 py-3 font-medium">E-Mail</th>
                   <th className="px-4 py-3 font-medium">Rolle</th>
                   <th className="px-4 py-3 font-medium">Name</th>
                   <th className="px-4 py-3 font-medium">Angelegt</th>
+                  <th className="w-24 px-4 py-3 font-medium">Aktionen</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800">
@@ -221,6 +299,46 @@ export function AdminUsersPanel() {
                     <td className="px-4 py-3 text-slate-500">
                       {u.created_at ? new Date(u.created_at).toLocaleString("de-DE") : "–"}
                     </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-1">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-9 w-9 text-slate-400 hover:bg-slate-800 hover:text-slate-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                          onClick={() => handleOpenReset(u)}
+                          disabled={u.id === currentUser?.id}
+                          aria-label={
+                            u.id === currentUser?.id
+                              ? "Eigenes Passwort nur über „Passwort vergessen“ änderbar"
+                              : `Passwort für ${u.email} zurücksetzen`
+                          }
+                          title={
+                            u.id === currentUser?.id
+                              ? "Eigenes Passwort nur über „Passwort vergessen“ änderbar"
+                              : "Passwort zurücksetzen"
+                          }
+                        >
+                          <KeyRound className="h-4 w-4" />
+                        </Button>
+                        {u.email?.trim() ? (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-9 w-9 text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+                            onClick={() => void handleResendEmail(u)}
+                            disabled={resendingId === u.id}
+                            aria-label={`Willkommens-Mail an ${u.email} erneut senden`}
+                            title="Willkommens-Mail erneut senden"
+                          >
+                            <Mail className="h-4 w-4" />
+                          </Button>
+                        ) : (
+                          <span className="w-9" />
+                        )}
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -228,6 +346,56 @@ export function AdminUsersPanel() {
           </div>
         )}
       </section>
+
+      <Dialog open={!!resetUser} onOpenChange={(o) => !o && setResetUser(null)}>
+        <DialogContent className="border-slate-700 bg-slate-900 sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-slate-100">
+              Passwort zurücksetzen
+            </DialogTitle>
+          </DialogHeader>
+          {resetUser && (
+            <>
+              <p className="text-sm text-slate-400">
+                Neues Passwort für <strong className="text-slate-200">{resetUser.email}</strong>:
+              </p>
+              <div className="space-y-2">
+                <Label htmlFor="reset-pass" className="text-slate-300">
+                  Neues Passwort (min. 8 Zeichen)
+                </Label>
+                <Input
+                  id="reset-pass"
+                  type="password"
+                  value={resetPassword}
+                  onChange={(e) => setResetPassword(e.target.value)}
+                  minLength={8}
+                  autoComplete="new-password"
+                  className="border-slate-600 bg-slate-800 text-slate-100"
+                  placeholder="••••••••"
+                />
+              </div>
+              <DialogFooter className="gap-2 sm:gap-0">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setResetUser(null)}
+                  className="border-slate-600 text-slate-200"
+                >
+                  Abbrechen
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => void handleResetPassword()}
+                  disabled={resetPassword.length < 8 || resetting}
+                  className="bg-slate-100 text-slate-900 hover:bg-white"
+                >
+                  {resetting ? "Wird gespeichert…" : "Passwort ändern"}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

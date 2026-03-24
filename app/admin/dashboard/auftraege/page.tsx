@@ -209,6 +209,7 @@ export default function AuftraegePage() {
         onOpenChange={(open) => !open && setDetailAuftrag(null)}
         onAuftragPatch={handleAuftragPatch}
         showBilling={showBilling}
+        showBoardGewerkSection={adminUser?.role === "admin"}
       />
     </div>
   );

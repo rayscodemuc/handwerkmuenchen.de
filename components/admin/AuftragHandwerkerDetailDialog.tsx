@@ -21,7 +21,7 @@ import {
   Send,
   Trash2,
 } from "lucide-react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -112,6 +112,8 @@ export type AuftragHandwerkerDetailDialogProps = {
   boardTicketId?: string | null;
   boardTicketGewerk?: string[] | null;
   onBoardGewerkSaved?: (ticketId: string, gewerk: string[] | null) => void;
+  /** Nur Admin: Gewerk am Board-Ticket bearbeiten. Gewerk-Nutzer: Bereich ausgeblendet. */
+  showBoardGewerkSection?: boolean;
 };
 
 export function AuftragHandwerkerDetailDialog({
@@ -123,6 +125,7 @@ export function AuftragHandwerkerDetailDialog({
   boardTicketId: boardTicketIdProp,
   boardTicketGewerk,
   onBoardGewerkSaved,
+  showBoardGewerkSection = true,
 }: AuftragHandwerkerDetailDialogProps) {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [deletingImageUrl, setDeletingImageUrl] = useState<string | null>(null);
@@ -173,6 +176,13 @@ export function AuftragHandwerkerDetailDialog({
   }, [auftrag?.id, auftrag?.handwerker_notizen, (auftrag as Record<string, unknown> | null)?.handwerker_kommentare, auftrag?.created_at]);
 
   useEffect(() => {
+    if (!showBoardGewerkSection) {
+      setFetchedBoardTicketId(null);
+      setFetchedBoardGewerk(null);
+      setBoardTicketLookupDone(true);
+      boardGewerkSyncKey.current = "";
+      return;
+    }
     if (!open || !auftrag?.id) {
       setFetchedBoardTicketId(null);
       setFetchedBoardGewerk(null);
@@ -207,7 +217,7 @@ export function AuftragHandwerkerDetailDialog({
     return () => {
       cancelled = true;
     };
-  }, [open, auftrag?.id, boardTicketIdProp]);
+  }, [open, auftrag?.id, boardTicketIdProp, showBoardGewerkSection]);
 
   useEffect(() => {
     if (!open) {
@@ -238,7 +248,7 @@ export function AuftragHandwerkerDetailDialog({
   ]);
 
   const saveBoardGewerk = useCallback(async () => {
-    if (!effectiveBoardTicketId) return;
+    if (!showBoardGewerkSection || !effectiveBoardTicketId) return;
     setBoardGewerkSaving(true);
     setDialogError(null);
     const value = boardGewerke.length > 0 ? boardGewerke : null;
@@ -253,7 +263,7 @@ export function AuftragHandwerkerDetailDialog({
       onBoardGewerkSaved?.(effectiveBoardTicketId, value);
     }
     setBoardGewerkSaving(false);
-  }, [effectiveBoardTicketId, boardGewerke, onBoardGewerkSaved]);
+  }, [showBoardGewerkSection, effectiveBoardTicketId, boardGewerke, onBoardGewerkSaved]);
 
   const uploadAuftragImage = useCallback(
     async (
@@ -532,9 +542,9 @@ export function AuftragHandwerkerDetailDialog({
                     <div className="flex items-start justify-between gap-2 px-4 pb-2 pt-3 sm:px-5 sm:pt-4">
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <h2 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+                          <DialogTitle className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
                             {detailAuftrag.auftragsnummer ?? "–"}
-                          </h2>
+                          </DialogTitle>
                           <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-900">
                             SPM
                           </span>
@@ -740,73 +750,75 @@ export function AuftragHandwerkerDetailDialog({
                           </>
                         )}
 
-                        <details className="group border-t border-slate-100">
-                          <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2.5 outline-none sm:px-4 [&::-webkit-details-marker]:hidden">
-                            <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-                              Gewerk (Board)
-                            </span>
-                            <span className="min-w-0 flex-1 truncate text-right text-xs text-slate-600">
-                              {!boardTicketLookupDone
-                                ? "…"
-                                : !effectiveBoardTicketId
-                                  ? "Keine Karte"
-                                  : boardGewerke.length > 0
-                                    ? boardGewerke.join(", ")
-                                    : "Nicht gewählt"}
-                            </span>
-                            <ChevronDown className="h-4 w-4 shrink-0 text-slate-400 transition-transform group-open:rotate-180" />
-                          </summary>
-                          <div className="space-y-2 border-t border-slate-50 px-3 pb-3 pt-2 sm:px-4">
-                            {!boardTicketLookupDone ? (
-                              <p className="text-xs text-slate-500">Wird geladen…</p>
-                            ) : !effectiveBoardTicketId ? (
-                              <p className="text-xs leading-relaxed text-slate-600">
-                                Sobald eine Kanban-Karte mit diesem Auftrag existiert, kannst du das Gewerk hier
-                                setzen.
-                              </p>
-                            ) : (
-                              <>
-                                <div className="flex flex-wrap gap-1.5">
-                                  {GEWERKE_OPTIONS.map((opt) => {
-                                    const checked = boardGewerke.includes(opt.value);
-                                    return (
-                                      <label
-                                        key={opt.value}
-                                        className={`inline-flex cursor-pointer items-center rounded-full border px-2.5 py-1 text-xs transition-colors ${
-                                          checked
-                                            ? "border-slate-900 bg-slate-900 text-white"
-                                            : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
-                                        }`}
-                                      >
-                                        <input
-                                          type="checkbox"
-                                          className="sr-only"
-                                          checked={checked}
-                                          onChange={() =>
-                                            setBoardGewerke((prev) =>
-                                              prev.includes(opt.value)
-                                                ? prev.filter((g) => g !== opt.value)
-                                                : [...prev, opt.value]
-                                            )
-                                          }
-                                        />
-                                        {opt.label}
-                                      </label>
-                                    );
-                                  })}
-                                </div>
-                                <button
-                                  type="button"
-                                  disabled={boardGewerkSaving}
-                                  onClick={() => void saveBoardGewerk()}
-                                  className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-slate-800 disabled:opacity-50"
-                                >
-                                  {boardGewerkSaving ? "Speichern…" : "Speichern"}
-                                </button>
-                              </>
-                            )}
-                          </div>
-                        </details>
+                        {showBoardGewerkSection && (
+                          <details className="group border-t border-slate-100">
+                            <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2.5 outline-none sm:px-4 [&::-webkit-details-marker]:hidden">
+                              <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                                Gewerk (Board)
+                              </span>
+                              <span className="min-w-0 flex-1 truncate text-right text-xs text-slate-600">
+                                {!boardTicketLookupDone
+                                  ? "…"
+                                  : !effectiveBoardTicketId
+                                    ? "Keine Karte"
+                                    : boardGewerke.length > 0
+                                      ? boardGewerke.join(", ")
+                                      : "Nicht gewählt"}
+                              </span>
+                              <ChevronDown className="h-4 w-4 shrink-0 text-slate-400 transition-transform group-open:rotate-180" />
+                            </summary>
+                            <div className="space-y-2 border-t border-slate-50 px-3 pb-3 pt-2 sm:px-4">
+                              {!boardTicketLookupDone ? (
+                                <p className="text-xs text-slate-500">Wird geladen…</p>
+                              ) : !effectiveBoardTicketId ? (
+                                <p className="text-xs leading-relaxed text-slate-600">
+                                  Sobald eine Kanban-Karte mit diesem Auftrag existiert, kannst du das Gewerk hier
+                                  setzen.
+                                </p>
+                              ) : (
+                                <>
+                                  <div className="flex flex-wrap gap-1.5">
+                                    {GEWERKE_OPTIONS.map((opt) => {
+                                      const checked = boardGewerke.includes(opt.value);
+                                      return (
+                                        <label
+                                          key={opt.value}
+                                          className={`inline-flex cursor-pointer items-center rounded-full border px-2.5 py-1 text-xs transition-colors ${
+                                            checked
+                                              ? "border-slate-900 bg-slate-900 text-white"
+                                              : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
+                                          }`}
+                                        >
+                                          <input
+                                            type="checkbox"
+                                            className="sr-only"
+                                            checked={checked}
+                                            onChange={() =>
+                                              setBoardGewerke((prev) =>
+                                                prev.includes(opt.value)
+                                                  ? prev.filter((g) => g !== opt.value)
+                                                  : [...prev, opt.value]
+                                              )
+                                            }
+                                          />
+                                          {opt.label}
+                                        </label>
+                                      );
+                                    })}
+                                  </div>
+                                  <button
+                                    type="button"
+                                    disabled={boardGewerkSaving}
+                                    onClick={() => void saveBoardGewerk()}
+                                    className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-slate-800 disabled:opacity-50"
+                                  >
+                                    {boardGewerkSaving ? "Speichern…" : "Speichern"}
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </details>
+                        )}
                       </div>
 
                       <section className="overflow-hidden rounded-xl border border-slate-200/90 bg-white shadow-sm">

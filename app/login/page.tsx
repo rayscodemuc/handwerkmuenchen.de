@@ -13,6 +13,7 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") ?? "/admin/dashboard";
+  const message = searchParams.get("message");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -24,12 +25,22 @@ function LoginForm() {
     setLoading(true);
     try {
       const supabase = createClient();
+      const emailNorm = email.trim().toLowerCase();
       const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
+        email: emailNorm,
         password,
       });
       if (signInError) {
-        setError(signInError.message);
+        const msg = signInError.message;
+        if (msg === "Invalid login credentials" || msg?.includes("invalid")) {
+          setError(
+            message === "password_reset"
+              ? "E-Mail oder Passwort stimmen nicht. Verwenden Sie das neue Passwort, das Sie gerade festgelegt haben."
+              : "E-Mail oder Passwort ist falsch. Bitte prüfen Sie Ihre Eingabe."
+          );
+        } else {
+          setError(msg);
+        }
         return;
       }
       router.push(redirect);
@@ -55,6 +66,11 @@ function LoginForm() {
             Melden Sie sich mit Ihren Zugangsdaten an.
           </p>
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+            {message === "password_reset" && (
+              <div className="rounded-lg border border-emerald-500/50 bg-emerald-950/40 px-3 py-2 text-sm text-emerald-200">
+                Passwort wurde erfolgreich zurückgesetzt. Sie können sich jetzt anmelden.
+              </div>
+            )}
             {error && (
               <div className="rounded-lg border border-red-500/50 bg-red-950/40 px-3 py-2 text-sm text-red-200">
                 {error}
@@ -96,6 +112,14 @@ function LoginForm() {
             >
               {loading ? "Wird angemeldet…" : "Anmelden"}
             </Button>
+            <p className="text-center">
+              <Link
+                href="/auth/forgot-password"
+                className="text-sm text-slate-400 underline decoration-slate-500/50 underline-offset-2 hover:text-slate-200 hover:decoration-slate-400"
+              >
+                Passwort vergessen?
+              </Link>
+            </p>
           </form>
           <p className="mt-4 text-center text-xs text-slate-500">
             <Link href="/" className="text-slate-400 hover:text-slate-200">
