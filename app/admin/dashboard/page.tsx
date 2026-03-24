@@ -2888,9 +2888,7 @@ export default function AdminDashboardPage() {
             const currentStatus = (entity.ticket.status ?? "").trim() || config.status;
             await moveTicketToColumn(ticketId, currentStatus, newPosition);
           } else if (isCol1Target) {
-            const hasTicketNumber = (entity.ticket.ticket_display_id ?? "").trim() !== "";
-            const newStatus = hasTicketNumber ? STATUS.EINGETEILT : STATUS.ANFRAGE;
-            await moveTicketToColumn(ticketId, newStatus, newPosition, {
+            await moveTicketToColumn(ticketId, STATUS.ANFRAGE, newPosition, {
               termin_start: null,
               termin_ende: null,
               termin_typ: null,
@@ -2914,9 +2912,7 @@ export default function AdminDashboardPage() {
             const currentBoard = auftragBoardStatus(entity.auftrag) || config.status;
             await moveAuftragToColumn(auftragId, currentBoard, newBoardPosition);
           } else if (isCol1Target) {
-            const hasNr = (entity.auftrag.auftragsnummer ?? "").trim() !== "";
-            const newStatus = hasNr ? STATUS.EINGETEILT : STATUS.ANFRAGE;
-            await moveAuftragToColumn(auftragId, newStatus, newBoardPosition, {
+            await moveAuftragToColumn(auftragId, STATUS.ANFRAGE, newBoardPosition, {
               termin_start: null,
               termin_ende: null,
               termin_typ: null,
