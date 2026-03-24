@@ -5393,16 +5393,20 @@ export default function AdminDashboardPage() {
         >
           <DialogContent
             className={cn(
-              "flex max-h-[min(92dvh,720px)] w-[calc(100vw-1.25rem)] max-w-md flex-col gap-0 overflow-hidden p-0 sm:w-full",
-              "max-sm:top-[max(0.75rem,env(safe-area-inset-top))] max-sm:translate-y-0",
+              "flex flex-col gap-0 overflow-hidden p-0",
+              /* Mobil: volle Fläche (Sheet), keine abgeschnittenen Ränder */
+              "max-sm:bottom-0 max-sm:left-0 max-sm:right-0 max-sm:top-0 max-sm:h-[100dvh] max-sm:max-h-[100dvh] max-sm:w-full max-sm:max-w-none max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-none max-sm:border-0 max-sm:shadow-none",
+              /* Desktop: klassisches Modal */
+              "sm:left-1/2 sm:top-1/2 sm:h-auto sm:max-h-[min(92dvh,720px)] sm:w-full sm:max-w-md sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-lg sm:border sm:shadow-lg",
               isLightTheme
-                ? "border-slate-200 bg-white text-slate-900"
-                : "border-slate-700 bg-slate-900 text-slate-100"
+                ? "border-slate-200 bg-white text-slate-900 max-sm:bg-white"
+                : "border-slate-700 bg-slate-900 text-slate-100 max-sm:bg-slate-900"
             )}
           >
             <div
               className={cn(
-                "shrink-0 border-b px-4 pb-3 pt-5 pr-14 text-left sm:px-6 sm:pr-16",
+                "shrink-0 border-b px-4 pb-3 pr-14 text-left sm:px-6 sm:pr-16",
+                "pt-[max(1.25rem,calc(0.75rem+env(safe-area-inset-top)))] sm:pt-5",
                 isLightTheme ? "border-slate-200/90" : "border-slate-700/80"
               )}
             >
@@ -5532,7 +5536,7 @@ export default function AdminDashboardPage() {
               </div>
               <DialogFooter
                 className={cn(
-                  "shrink-0 gap-2 border-t px-4 py-3 sm:gap-0 sm:px-6",
+                  "shrink-0 gap-2 border-t px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:gap-0 sm:px-6 sm:pb-3",
                   isLightTheme ? "border-slate-200/90 bg-slate-50/90" : "border-slate-700/80 bg-slate-900/95"
                 )}
               >
