@@ -4891,7 +4891,7 @@ export default function AdminDashboardPage() {
                     <div
                       ref={listScrollRef}
                       tabIndex={-1}
-                      className="max-h-[min(70dvh,calc(100dvh-14rem))] space-y-3 overflow-y-auto overscroll-y-contain pr-1 [-webkit-overflow-scrolling:touch]"
+                      className="max-h-[min(70dvh,calc(100dvh-14rem))] space-y-3 overflow-y-auto overscroll-y-contain pr-1 pb-[max(4rem,calc(2.5rem+env(safe-area-inset-bottom)))] [-webkit-overflow-scrolling:touch] [scroll-padding-bottom:max(4rem,calc(2.5rem+env(safe-area-inset-bottom)))]"
                     >
                       <SortableContext
                         items={[
@@ -5052,7 +5052,7 @@ export default function AdminDashboardPage() {
                 <div
                   ref={listScrollRef as React.RefObject<HTMLDivElement>}
                   tabIndex={-1}
-                  className="min-w-0 flex-1 cursor-default space-y-3 overflow-y-auto pr-1 outline-none"
+                  className="min-w-0 flex-1 cursor-default space-y-3 overflow-y-auto pr-1 pb-6 outline-none lg:pb-8"
                 >
                   <SortableContext
                     items={[

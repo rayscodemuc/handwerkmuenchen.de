@@ -381,7 +381,9 @@ export function GewerkAuftraegeDashboardList({
   );
 
   return (
-    <div className={`rounded-2xl ${surface}`}>
+    <div
+      className={`rounded-2xl pb-[max(2.5rem,calc(1.5rem+env(safe-area-inset-bottom)))] ${surface}`}
+    >
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
           <h2 className={`text-lg font-semibold ${title}`}>Meine Aufträge</h2>

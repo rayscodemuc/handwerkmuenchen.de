@@ -1114,7 +1114,10 @@ export function AuftragHandwerkerDetailDialog({
           onOpenChange(o);
         }}
       >
-        <DialogContent className="flex h-[100dvh] max-h-[100dvh] w-full min-w-0 max-w-none flex-col gap-0 overflow-hidden border-0 p-0 sm:h-[min(92dvh,880px)] sm:max-h-[92dvh] sm:max-w-2xl sm:rounded-2xl sm:border sm:border-slate-200 sm:p-0">
+        <DialogContent
+          hideClose
+          className="flex h-[100dvh] max-h-[100dvh] w-full min-w-0 max-w-none flex-col gap-0 overflow-hidden border-0 p-0 sm:h-[min(92dvh,880px)] sm:max-h-[92dvh] sm:max-w-2xl sm:rounded-2xl sm:border sm:border-slate-200 sm:p-0"
+        >
           <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           {mergedAuftrag &&
             (() => {
