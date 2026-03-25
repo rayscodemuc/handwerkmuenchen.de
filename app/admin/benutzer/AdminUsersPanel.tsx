@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { KeyRound, Mail } from "lucide-react";
+import { KeyRound, Mail, Trash2 } from "lucide-react";
 import { useAdminUser } from "@/app/admin/AdminUserContext";
 import { USER_ROLE_OPTIONS, type UserRole } from "@/lib/auth-types";
 import { Button } from "@/components/ui/button";
@@ -34,6 +34,10 @@ function roleLabel(role: UserRole): string {
   return USER_ROLE_OPTIONS.find((o) => o.value === role)?.label ?? role;
 }
 
+function isGewerkRole(role: UserRole): boolean {
+  return role.startsWith("gewerk_");
+}
+
 export function AdminUsersPanel() {
   const currentUser = useAdminUser();
   const [users, setUsers] = useState<AdminUserRow[]>([]);
@@ -51,6 +55,8 @@ export function AdminUsersPanel() {
   const [resetUser, setResetUser] = useState<AdminUserRow | null>(null);
   const [resetPassword, setResetPassword] = useState("");
   const [resetting, setResetting] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<AdminUserRow | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const loadUsers = useCallback(async () => {
     setLoading(true);
@@ -173,6 +179,30 @@ export function AdminUsersPanel() {
       setFormError("Netzwerkfehler");
     } finally {
       setResetting(false);
+    }
+  };
+
+  const handleConfirmDeleteGewerkUser = async () => {
+    if (!userToDelete) return;
+    setFormError(null);
+    setFormSuccess(null);
+    setDeletingId(userToDelete.id);
+    try {
+      const res = await fetch(`/api/admin/users/${encodeURIComponent(userToDelete.id)}`, {
+        method: "DELETE",
+      });
+      const json = (await res.json()) as { error?: string };
+      if (!res.ok) {
+        setFormError(json.error ?? "Löschen fehlgeschlagen.");
+        return;
+      }
+      setFormSuccess(`Gewerk-Nutzer ${userToDelete.email ?? userToDelete.id} wurde gelöscht.`);
+      setUserToDelete(null);
+      await loadUsers();
+    } catch {
+      setFormError("Netzwerkfehler");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -326,6 +356,23 @@ export function AdminUsersPanel() {
                         {resendingId === u.id ? "Sende…" : "E-Mail"}
                       </Button>
                     ) : null}
+                    {isGewerkRole(u.role) && u.id !== currentUser?.id ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="min-h-11 touch-manipulation border-red-200 text-red-700 hover:bg-red-50 hover:text-red-800"
+                        onClick={() => {
+                          setFormError(null);
+                          setFormSuccess(null);
+                          setUserToDelete(u);
+                        }}
+                        disabled={deletingId === u.id}
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        {deletingId === u.id ? "Löschen…" : "Löschen"}
+                      </Button>
+                    ) : null}
                   </div>
                   {u.id === currentUser?.id && (
                     <p className="mt-2 text-xs text-slate-500">
@@ -344,7 +391,7 @@ export function AdminUsersPanel() {
                     <th className="px-4 py-3 font-medium">Rolle</th>
                     <th className="px-4 py-3 font-medium">Name</th>
                     <th className="px-4 py-3 font-medium">Angelegt</th>
-                    <th className="w-24 px-4 py-3 font-medium">Aktionen</th>
+                    <th className="min-w-[8rem] px-4 py-3 font-medium">Aktionen</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
@@ -394,6 +441,24 @@ export function AdminUsersPanel() {
                           ) : (
                             <span className="w-9" />
                           )}
+                          {isGewerkRole(u.role) && u.id !== currentUser?.id ? (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-9 w-9 text-red-600 hover:bg-red-50 hover:text-red-800"
+                              onClick={() => {
+                                setFormError(null);
+                                setFormSuccess(null);
+                                setUserToDelete(u);
+                              }}
+                              disabled={deletingId === u.id}
+                              aria-label={`Gewerk-Nutzer ${u.email ?? u.id} löschen`}
+                              title="Gewerk-Nutzer löschen"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          ) : null}
                         </div>
                       </td>
                     </tr>
@@ -404,6 +469,37 @@ export function AdminUsersPanel() {
           </>
         )}
       </section>
+
+      <Dialog open={!!userToDelete} onOpenChange={(o) => !o && setUserToDelete(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Gewerk-Nutzer löschen</DialogTitle>
+          </DialogHeader>
+          {userToDelete && (
+            <>
+              <p className="text-sm text-muted-foreground">
+                Soll der Zugang für{" "}
+                <strong className="text-foreground">{userToDelete.email ?? userToDelete.id}</strong>{" "}
+                (<span className="text-foreground">{roleLabel(userToDelete.role)}</span>) dauerhaft gelöscht werden?
+                Dies kann nicht rückgängig gemacht werden.
+              </p>
+              <DialogFooter className="gap-2 sm:gap-0">
+                <Button type="button" variant="outline" onClick={() => setUserToDelete(null)}>
+                  Abbrechen
+                </Button>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={() => void handleConfirmDeleteGewerkUser()}
+                  disabled={!!deletingId}
+                >
+                  {deletingId ? "Wird gelöscht…" : "Endgültig löschen"}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={!!resetUser} onOpenChange={(o) => !o && setResetUser(null)}>
         <DialogContent className="sm:max-w-md">

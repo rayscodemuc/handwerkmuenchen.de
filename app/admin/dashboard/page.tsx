@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
-import { Phone, Paintbrush, SprayCan, Building, Zap, Droplets, Hourglass, CheckCircle, X, ChevronLeft, ChevronRight, GripVertical, Trash2, MessageSquare, Send, Sun, Moon, CalendarIcon, Plus, FileText, Settings, LayoutDashboard, Users, LogOut, Pencil, Save, Upload, Paperclip } from "lucide-react";
+import { Phone, Paintbrush, SprayCan, Building, Zap, Droplets, Hourglass, CheckCircle, X, ChevronLeft, ChevronRight, GripVertical, Trash2, MessageSquare, Send, Sun, Moon, CalendarIcon, Plus, FileText, Settings, LayoutDashboard, Users, LogOut, Pencil, Save, Upload, Paperclip, Search } from "lucide-react";
 import { format, add, setHours, setMinutes, startOfWeek as startOfWeekDf } from "date-fns";
 import { de } from "date-fns/locale";
 import { DndContext, DragOverlay, useDraggable, useDroppable, closestCorners, pointerWithin, rectIntersection, MeasuringStrategy, PointerSensor, useSensor, useSensors, type DragEndEvent, type DragStartEvent, type DragOverEvent, type CollisionDetection } from "@dnd-kit/core";
@@ -120,6 +120,72 @@ function getTicketOrAuftragNumber(t: Ticket | null): string {
   const nr = (t.additional_data as { auftragsnummer?: string } | undefined)?.auftragsnummer;
   if (nr?.trim()) return nr.trim();
   return (t.ticket_display_id ?? "").trim() || "–";
+}
+
+function normalizeBoardSearchNeedle(raw: string): string {
+  return raw.trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+function boardSearchHaystack(parts: (string | null | undefined)[]): string {
+  return parts
+    .map((p) => (p ?? "").trim())
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+}
+
+function ticketMatchesBoardSearch(t: Ticket, needle: string): boolean {
+  if (!needle) return true;
+  const h = boardSearchHaystack([
+    t.id,
+    t.ticket_display_id,
+    t.kunde_name,
+    t.partner_name,
+    t.kontakt_email,
+    t.kontakt_telefon,
+    t.objekt_adresse,
+    t.beschreibung,
+    getTicketOrAuftragNumber(t),
+    t.additional_data?.auftrag_id,
+    t.additional_data?.auftragsnummer,
+    ...(Array.isArray(t.gewerk) ? t.gewerk : []),
+    t.status,
+    t.assigned_to,
+    t.interne_notizen,
+  ]);
+  return h.includes(needle);
+}
+
+function auftragMatchesBoardSearch(a: HandwerkerAuftrag, needle: string): boolean {
+  if (!needle) return true;
+  const h = boardSearchHaystack([
+    a.id,
+    a.auftragsnummer,
+    a.mieter_name,
+    a.mieter_email,
+    a.mieter_telefon,
+    a.adresse_strasse,
+    a.adresse_ort,
+    a.aufgabe,
+    a.rechnungsempfaenger,
+    a.leistungsempfaenger,
+    a.auftragstyp,
+    a.board_status,
+    a.status,
+    ...(Array.isArray(a.gewerk) ? a.gewerk : []),
+    typeof a.handwerker_notizen === "string" ? a.handwerker_notizen : null,
+  ]);
+  return h.includes(needle);
+}
+
+function filterTicketsByBoardSearch(list: Ticket[], needle: string): Ticket[] {
+  if (!needle) return list;
+  return list.filter((t) => ticketMatchesBoardSearch(t, needle));
+}
+
+function filterAuftraegeByBoardSearch(list: HandwerkerAuftrag[], needle: string): HandwerkerAuftrag[] {
+  if (!needle) return list;
+  return list.filter((a) => auftragMatchesBoardSearch(a, needle));
 }
 
 /**
@@ -1104,6 +1170,8 @@ export default function AdminDashboardPage() {
   const [mobileBoardTab, setMobileBoardTab] = useState<
     "eingang" | "angebote" | "column-3" | "column-4" | "column-5" | "column-6"
   >("eingang");
+  /** Filter für sichtbare Karten (Tickets & Aufträge); DnD/Spaltenlogik bleibt auf vollen Daten). */
+  const [boardSearchQuery, setBoardSearchQuery] = useState("");
   /** Viewport &lt; lg: Kalender-Grid und Touch-Optimierung. */
   const [isMobileViewport, setIsMobileViewport] = useState(false);
   const desktopCalendarSectionRef = useRef<HTMLElement | null>(null);
@@ -1192,6 +1260,13 @@ export default function AdminDashboardPage() {
     });
     return list;
   }, [auftraegeBoard]);
+
+  const boardSearchNeedle = useMemo(() => normalizeBoardSearchNeedle(boardSearchQuery), [boardSearchQuery]);
+
+  const gewerkAuftraegeForView = useMemo(
+    () => filterAuftraegeByBoardSearch(gewerkSortedAuftraege, boardSearchNeedle),
+    [gewerkSortedAuftraege, boardSearchNeedle]
+  );
 
   /** Auto-Historisierung: verhindert doppelte Inserts innerhalb einer Session. */
   const historizedBesichtigungKeysRef = useRef<Set<string>>(new Set());
@@ -2552,7 +2627,8 @@ export default function AdminDashboardPage() {
 
   /** Tickets ohne verknüpften SPM-Auftrag (Auftrag erscheint als eigene Karte). */
   const ticketsOnBoard = useMemo(
-    () => tickets.filter((t) => !ticketHasLinkedAuftrag(t)),
+    () =>
+      dedupeTicketsById(tickets.filter((t) => !ticketHasLinkedAuftrag(t))),
     [tickets]
   );
 
@@ -2691,6 +2767,23 @@ export default function AdminDashboardPage() {
     [col1AuftraegeInBucket]
   );
 
+  const col1EingangTicketsView = useMemo(
+    () => filterTicketsByBoardSearch(col1EingangTickets, boardSearchNeedle),
+    [col1EingangTickets, boardSearchNeedle]
+  );
+  const col1AngeboteTicketsView = useMemo(
+    () => filterTicketsByBoardSearch(col1AngeboteTickets, boardSearchNeedle),
+    [col1AngeboteTickets, boardSearchNeedle]
+  );
+  const col1EingangAuftraegeView = useMemo(
+    () => filterAuftraegeByBoardSearch(col1EingangAuftraege, boardSearchNeedle),
+    [col1EingangAuftraege, boardSearchNeedle]
+  );
+  const col1AngeboteAuftraegeView = useMemo(
+    () => filterAuftraegeByBoardSearch(col1AngeboteAuftraege, boardSearchNeedle),
+    [col1AngeboteAuftraege, boardSearchNeedle]
+  );
+
   /** Spalte 2: Terminplaner – Tickets mit Termin (Eingeteilt, Besichtigung, Ausführung). */
   const col2Tickets = useMemo(
     () =>
@@ -2783,7 +2876,9 @@ export default function AdminDashboardPage() {
 
   /** Kalender-Events: Tickets + Aufträge mit termin_start in Spalte-2-Logik. */
   const calendarEvents = useMemo((): WeekEvent[] => {
-    const fromTickets = col2Tickets
+    const tTickets = filterTicketsByBoardSearch(col2Tickets, boardSearchNeedle);
+    const tAuftraege = filterAuftraegeByBoardSearch(col2Auftraege, boardSearchNeedle);
+    const fromTickets = tTickets
       .filter((t) => t.termin_start != null && t.termin_start.trim() !== "")
       .map((t) => ({
         id: t.id,
@@ -2793,7 +2888,7 @@ export default function AdminDashboardPage() {
         end: t.termin_ende ? new Date(t.termin_ende) : new Date(t.termin_start!),
         resource: t,
       }));
-    const fromAuftraege = col2Auftraege
+    const fromAuftraege = tAuftraege
       .filter((a) => (a.termin_start ?? "").trim() !== "")
       .map((a) => ({
         id: `auftrag-${a.id}`,
@@ -2806,7 +2901,7 @@ export default function AdminDashboardPage() {
         resource: a,
       }));
     return [...fromTickets, ...fromAuftraege];
-  }, [col2Tickets, col2Auftraege]);
+  }, [col2Tickets, col2Auftraege, boardSearchNeedle]);
 
   /** Setzt nur den Status / Spalte. Bei Statuswechsel erscheint das Ticket in der Zielspalte ganz oben. */
   const setTicketStatus = useCallback(
@@ -4517,8 +4612,17 @@ export default function AdminDashboardPage() {
   }) => {
     const { setNodeRef, isOver } = useDroppable({ id: config.droppableId });
     const columnCfg = columnConfigs.find((c) => c.colId === config.droppableId);
-    const list = columnCfg?.tickets ?? [];
-    const aufList = columnCfg?.auftraege ?? [];
+    const listAll = columnCfg?.tickets ?? [];
+    const aufListAll = columnCfg?.auftraege ?? [];
+    const list = useMemo(
+      () => filterTicketsByBoardSearch(listAll, boardSearchNeedle),
+      [listAll, boardSearchNeedle]
+    );
+    const aufList = useMemo(
+      () => filterAuftraegeByBoardSearch(aufListAll, boardSearchNeedle),
+      [aufListAll, boardSearchNeedle]
+    );
+    const emptyBoardMsg = boardSearchNeedle ? "Keine Treffer für diese Suche." : "Keine.";
     const isManualOver = manualOverCol === config.droppableId;
 
     const sectionColorClasses = (() => {
@@ -4594,7 +4698,7 @@ export default function AdminDashboardPage() {
             ]}
             strategy={verticalListSortingStrategy}
           >
-            {renderBoardColumnCards(list, aufList, "Keine.", config.droppableId)}
+            {renderBoardColumnCards(list, aufList, emptyBoardMsg, config.droppableId)}
           </SortableContext>
         </div>
       </section>
@@ -4608,14 +4712,50 @@ export default function AdminDashboardPage() {
       }`}
     >
       <div
-        className={`sticky top-0 z-10 flex flex-col gap-3 border-b px-4 py-3 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur sm:gap-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:gap-3 lg:px-8 ${
+        className={`sticky top-0 z-10 flex flex-col gap-3 border-b px-4 py-3 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur sm:gap-4 sm:px-6 lg:flex-row lg:flex-wrap lg:items-center lg:justify-between lg:gap-3 lg:px-8 ${
           isLightTheme ? "border-slate-200/80 bg-white/95 shadow-[0_1px_0_0_rgba(0,0,0,0.04)]" : "border-slate-800 bg-slate-950/95"
         }`}
       >
         <div className="flex w-full shrink-0 justify-center lg:w-auto lg:justify-start">
           <Logo variant={isLightTheme ? "footer" : "header"} className="h-8" />
         </div>
-        <div className="flex w-full min-w-0 flex-col items-center gap-2 lg:w-auto lg:items-end lg:gap-1.5">
+        <div className="relative w-full min-w-0 lg:order-2 lg:max-w-md lg:flex-1">
+          <Search
+            className={`pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 ${
+              isLightTheme ? "text-slate-400" : "text-slate-500"
+            }`}
+            strokeWidth={2}
+            aria-hidden
+          />
+          <Input
+            type="search"
+            value={boardSearchQuery}
+            onChange={(e) => setBoardSearchQuery(e.target.value)}
+            placeholder="Tickets & Aufträge suchen …"
+            autoComplete="off"
+            aria-label="Tickets und Aufträge durchsuchen"
+            className={`h-10 w-full min-w-0 pl-9 pr-10 text-sm ${
+              isLightTheme
+                ? "border-slate-200 bg-white text-slate-900 placeholder:text-slate-400"
+                : "border-slate-600 bg-slate-900/80 text-slate-100 placeholder:text-slate-500"
+            }`}
+          />
+          {boardSearchQuery.trim() ? (
+            <button
+              type="button"
+              onClick={() => setBoardSearchQuery("")}
+              className={`absolute right-0 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-md transition-colors ${
+                isLightTheme
+                  ? "text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                  : "text-slate-400 hover:bg-slate-800 hover:text-slate-100"
+              }`}
+              aria-label="Suche zurücksetzen"
+            >
+              <X className="h-4 w-4" strokeWidth={2} />
+            </button>
+          ) : null}
+        </div>
+        <div className="flex w-full min-w-0 flex-col items-center gap-2 lg:order-3 lg:w-auto lg:items-end lg:gap-1.5">
           <div className="flex w-full min-w-0 items-center justify-between gap-2 pb-0.5 lg:w-auto lg:flex-wrap lg:justify-end lg:gap-2 lg:pb-0">
             <div className="flex min-w-0 flex-nowrap items-center gap-1.5 overflow-x-auto overflow-y-visible [-webkit-overflow-scrolling:touch] sm:gap-2 lg:contents lg:overflow-visible [&_button]:shrink-0">
               {!isGewerkUser && (
@@ -4760,7 +4900,7 @@ export default function AdminDashboardPage() {
           {isGewerkUser ? (
           <div className="mx-auto w-full max-w-3xl">
             <GewerkAuftraegeDashboardList
-              auftraege={gewerkSortedAuftraege}
+              auftraege={gewerkAuftraegeForView}
               loading={loading}
               isLightTheme={isLightTheme}
               onRefresh={() => void loadTickets(true)}
@@ -4808,16 +4948,18 @@ export default function AdminDashboardPage() {
                           {
                             id: "eingang" as const,
                             title: "Eingang",
-                            count: col1EingangTickets.length + col1EingangAuftraege.length,
+                            count: col1EingangTicketsView.length + col1EingangAuftraegeView.length,
                           },
                           {
                             id: "angebote" as const,
                             title: "Angebote",
-                            count: col1AngeboteTickets.length + col1AngeboteAuftraege.length,
+                            count: col1AngeboteTicketsView.length + col1AngeboteAuftraegeView.length,
                           },
                           ...processColumns.map((cfg) => {
                             const colCfg = columnConfigs.find((c) => c.colId === cfg.droppableId);
-                            const n = (colCfg?.tickets.length ?? 0) + (colCfg?.auftraege.length ?? 0);
+                            const n =
+                              filterTicketsByBoardSearch(colCfg?.tickets ?? [], boardSearchNeedle).length +
+                              filterAuftraegeByBoardSearch(colCfg?.auftraege ?? [], boardSearchNeedle).length;
                             const raw = cfg.title.replace(/^\d+\.\s*/, "").trim();
                             const title = (raw.split("&")[0] ?? raw).trim();
                             return {
@@ -4895,19 +5037,23 @@ export default function AdminDashboardPage() {
                     >
                       <SortableContext
                         items={[
-                          ...(mobileBoardTab === "eingang" ? col1EingangTickets : col1AngeboteTickets).map(
+                          ...(mobileBoardTab === "eingang" ? col1EingangTicketsView : col1AngeboteTicketsView).map(
                             (t) => `ticket-${t.id}`
                           ),
-                          ...(mobileBoardTab === "eingang" ? col1EingangAuftraege : col1AngeboteAuftraege).map(
+                          ...(mobileBoardTab === "eingang" ? col1EingangAuftraegeView : col1AngeboteAuftraegeView).map(
                             (a) => `auftrag-${a.id}`
                           ),
                         ]}
                         strategy={verticalListSortingStrategy}
                       >
                         {renderBoardColumnCards(
-                          mobileBoardTab === "eingang" ? col1EingangTickets : col1AngeboteTickets,
-                          mobileBoardTab === "eingang" ? col1EingangAuftraege : col1AngeboteAuftraege,
-                          mobileBoardTab === "eingang" ? "Keine Anfragen." : "Keine Angebote.",
+                          mobileBoardTab === "eingang" ? col1EingangTicketsView : col1AngeboteTicketsView,
+                          mobileBoardTab === "eingang" ? col1EingangAuftraegeView : col1AngeboteAuftraegeView,
+                          boardSearchNeedle
+                            ? "Keine Treffer für diese Suche."
+                            : mobileBoardTab === "eingang"
+                              ? "Keine Anfragen."
+                              : "Keine Angebote.",
                           "column-1",
                           mobileBoardTab === "angebote"
                             ? {
@@ -5003,8 +5149,8 @@ export default function AdminDashboardPage() {
                     {loading
                       ? "…"
                       : isGewerkUser || incomingTab === "Eingang"
-                        ? col1EingangTickets.length + col1EingangAuftraege.length
-                        : col1AngeboteTickets.length + col1AngeboteAuftraege.length}
+                        ? col1EingangTicketsView.length + col1EingangAuftraegeView.length
+                        : col1AngeboteTicketsView.length + col1AngeboteAuftraegeView.length}
                   </span>
                 </div>
                 {!isGewerkUser && (
@@ -5026,7 +5172,7 @@ export default function AdminDashboardPage() {
                             : "text-slate-400 hover:text-slate-200"
                       }`}
                     >
-                      Eingang ({col1EingangTickets.length + col1EingangAuftraege.length})
+                      Eingang ({col1EingangTicketsView.length + col1EingangAuftraegeView.length})
                     </button>
                     <button
                       type="button"
@@ -5041,7 +5187,7 @@ export default function AdminDashboardPage() {
                             : "text-slate-400 hover:text-slate-200"
                       }`}
                     >
-                      Angebote ({col1AngeboteTickets.length + col1AngeboteAuftraege.length})
+                      Angebote ({col1AngeboteTicketsView.length + col1AngeboteAuftraegeView.length})
                     </button>
                   </div>
                 )}
@@ -5056,19 +5202,23 @@ export default function AdminDashboardPage() {
                 >
                   <SortableContext
                     items={[
-                      ...(isGewerkUser || incomingTab === "Eingang" ? col1EingangTickets : col1AngeboteTickets).map(
+                      ...(isGewerkUser || incomingTab === "Eingang" ? col1EingangTicketsView : col1AngeboteTicketsView).map(
                         (t) => `ticket-${t.id}`
                       ),
-                      ...(isGewerkUser || incomingTab === "Eingang" ? col1EingangAuftraege : col1AngeboteAuftraege).map(
+                      ...(isGewerkUser || incomingTab === "Eingang" ? col1EingangAuftraegeView : col1AngeboteAuftraegeView).map(
                         (a) => `auftrag-${a.id}`
                       ),
                     ]}
                     strategy={verticalListSortingStrategy}
                   >
                     {renderBoardColumnCards(
-                      isGewerkUser || incomingTab === "Eingang" ? col1EingangTickets : col1AngeboteTickets,
-                      isGewerkUser || incomingTab === "Eingang" ? col1EingangAuftraege : col1AngeboteAuftraege,
-                      isGewerkUser || incomingTab === "Eingang" ? "Keine Anfragen." : "Keine Angebote.",
+                      isGewerkUser || incomingTab === "Eingang" ? col1EingangTicketsView : col1AngeboteTicketsView,
+                      isGewerkUser || incomingTab === "Eingang" ? col1EingangAuftraegeView : col1AngeboteAuftraegeView,
+                      boardSearchNeedle
+                        ? "Keine Treffer für diese Suche."
+                        : isGewerkUser || incomingTab === "Eingang"
+                          ? "Keine Anfragen."
+                          : "Keine Angebote.",
                       "column-1",
                       !isGewerkUser && incomingTab === "Angebote"
                         ? {
