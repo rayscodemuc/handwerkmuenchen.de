@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAdminUser } from "@/app/admin/AdminUserContext";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo } from "@/components/Logo";
@@ -37,8 +38,12 @@ function isGewerkActive(pathname: string, basePath: string, slug: string): boole
 }
 
 export function Header() {
+  const adminUser = useAdminUser();
+  const isAdmin = Boolean(adminUser?.role && adminUser.role === "admin");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  // Show Mangelmeldungen button also when inside an Admin area (routing-based safeguard for environments without AdminUserProvider)
+  const showMangelButton = isAdmin || pathname.startsWith("/admin");
   const [isScrolled, setIsScrolled] = useState(false);
   const [hoveredGewerkSlug, setHoveredGewerkSlug] = useState<string | null>(null);
   const { setHoveredGewerk } = useGewerkHover();
@@ -144,6 +149,21 @@ export function Header() {
               </Button>
             </Link>
           </div>
+
+          {/* Admin-Dashboard-Mangelmeldungen (darstellungsseitig: nur Admin sichtbar) */}
+          {showMangelButton && (
+            <div className="hidden lg:flex lg:items-center lg:ml-2">
+              <Link href="/admin/mangelmeldungen">
+                <Button
+                  variant="ghost"
+                  size="lg"
+                  className="rounded-full border border-transparent bg-[#4C626C] text-white px-6 hover:bg-[#8AB0AB] hover:text-[#26413C]"
+                  >
+                  Mangelmeldungen
+                </Button>
+              </Link>
+            </div>
+          )}
 
           {/* Mobile: Burger (unter lg) */}
           <button
