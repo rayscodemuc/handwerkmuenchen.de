@@ -161,7 +161,13 @@ const priorityOptions = [
             <div className="mb-2 text-sm text-gray-600">Filter nach Gewerk</div>
             <select className="border rounded w-full px-2 py-1" value={gewerg} onChange={(e)=>setGewerg(e.target.value)}>
               <option value="">Alle</option>
-              {GEWERKE_OPTIONS.map((g) => (<option key={g} value={g}>{g}</option>))}
+              {GEWERKE_OPTIONS.map((g) => {
+                const isObj = typeof g === 'object' && g !== null;
+                const value = isObj ? (g as any).value ?? "" : (g as any);
+                const label = isObj ? (g as any).label ?? String(value) : String(g);
+                const key = isObj ? (g as any).value ?? String(value) : String(value);
+                return <option key={key} value={value}>{label}</option>;
+              })}
             </select>
           </div>
           <div className="border rounded p-2" style={{minHeight:200}}>
