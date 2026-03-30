@@ -4767,11 +4767,24 @@ export default function AdminDashboardPage() {
                     isLightTheme
                       ? "border-slate-200 bg-white text-slate-700 shadow-sm hover:border-slate-300"
                       : "border-slate-600 bg-slate-900/80 text-slate-100 hover:border-slate-500 hover:bg-slate-800/80"
-                  }`}
+                  }`} 
                 >
                   <CalendarIcon className="h-5 w-5" strokeWidth={2} />
                 </button>
               )}
+              { /* Link/Button to Mangelmeldungen */ }
+              <button
+                type="button"
+                onClick={() => window.location.assign('/admin/mangelmeldungen')}
+                title="Mangelmeldungen"
+                className={`inline-flex h-11 min-h-[44px] min-w-[44px] touch-manipulation items-center justify-center rounded-full border p-0 text-xs font-medium transition-all hover:opacity-90 ml-2 active:scale-[0.98] ${
+                  isLightTheme
+                    ? "border-slate-200 bg-white text-slate-700 shadow-sm hover:border-slate-300"
+                    : "border-slate-600 bg-slate-900/80 text-slate-100 hover:border-slate-500 hover:bg-slate-800/80"
+                }`}
+              >
+                <span className="text-sm font-semibold">Mangelmeldungen</span>
+              </button>
               {isGewerkUser && (
                 <>
                   <button
@@ -7439,4 +7452,3 @@ export default function AdminDashboardPage() {
     </main>
   );
 }
-
