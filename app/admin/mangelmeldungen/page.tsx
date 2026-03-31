@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -100,6 +102,11 @@ const priorityOptions = [
 
   return (
     <section className="container mx-auto px-4 py-8">
+      <div className="mb-4">
+        <Link href="/admin/dashboard" className="inline-flex items-center text-sm text-blue-600 hover:underline">
+          <ChevronLeft className="h-4 w-4 mr-2" /> Zurück zum Dashboard
+        </Link>
+      </div>
       <div className="rounded-2xl bg-white p-6 mb-6 shadow flex justify-between items-center">
         <div>
           <h2 className="text-xl font-semibold text-gray-800">Mangelmeldung erstellen (Testmodus)</h2>
