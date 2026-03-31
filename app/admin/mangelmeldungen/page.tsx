@@ -199,7 +199,7 @@ export default function MangelmeldungenPage() {
                         m.prioritaet || "mittel"
                       )}`}
                     >
-                      {PRIORITAET_LABELS[m.prioritaet] || m.prioritaet || "Mittel"}
+                      {PRIORITAET_LABELS[m.prioritaet ?? ""] || m.prioritaet || "Mittel"}
                     </span>
                   </td>
                   <td className="px-4 py-3">
