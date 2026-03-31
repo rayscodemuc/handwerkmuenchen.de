@@ -6,7 +6,8 @@
     "dev": "next dev -p 3010 -H 127.0.0.1",
     "build": "next build",
     "start": "next start -p 3010",
-    "lint": "eslint"
+    "lint": "eslint",
+    "seed-test-ticket": "bash ./scripts/seed-test-ticket.sh"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
