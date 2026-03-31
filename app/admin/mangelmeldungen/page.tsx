@@ -100,6 +100,24 @@ const priorityOptions = [
       .catch(() => setListLoaded(true));
   }, [gewerg]);
 
+  // Dev-bypass für lokalen Test: Kopfzeilen-Header automatisch hinzufügen
+  React.useEffect(() => {
+    const enableBypass = (process.env.DEV_BYPASS_AUTH || "").toLowerCase() === "true";
+    if (!enableBypass || typeof window === "undefined" || !window.fetch) return;
+    const originalFetch = (window.fetch as any).bind(window);
+    (window as any).fetch = (input: any, init?: any) => {
+      const newInit = { ...(init || {}) };
+      newInit.headers = newInit.headers ? newInit.headers : {};
+      if (typeof newInit.headers.set === 'function') {
+        (newInit.headers as any).set('x-dev-admin', '1');
+      } else {
+        (newInit.headers as any)['x-dev-admin'] = '1';
+      }
+      return originalFetch(input, newInit);
+    } as any;
+    return () => { (window as any).fetch = originalFetch; };
+  }, []);
+
   return (
     <section className="container mx-auto px-4 py-8">
       <div className="mb-4">
