@@ -61,6 +61,13 @@ export async function getSessionUser(): Promise<SessionUser | null> {
  * Behebt Fälle, in denen `cookies()` in /api/* keine Supabase-Session sieht, obwohl der Nutzer im Admin-Bereich ist.
  */
 export async function getSessionUserFromRequest(request: Request): Promise<SessionUser | null> {
+  // Dev bypass for local testing: allow quick login without real credentials
+  if ((process.env.DEV_BYPASS_AUTH === "true")) {
+    const devHeader = request.headers.get("x-dev-admin");
+    if (devHeader === "1" || (typeof devHeader === "string" && devHeader.toLowerCase() === "true")) {
+      return { id: "dev-admin", email: "dev-admin@example.com", role: "admin", displayName: "Dev Admin" } as SessionUser;
+    }
+  }
   const cookieClient = await createClient();
   const {
     data: { user },
