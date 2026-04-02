@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
-import { Phone, Paintbrush, SprayCan, Building, Zap, Droplets, Hourglass, CheckCircle, X, ChevronLeft, ChevronRight, GripVertical, Trash2, MessageSquare, Send, Sun, Moon, CalendarIcon, Plus, FileText, Settings, LayoutDashboard, Users, LogOut, Pencil, Save, Upload, Paperclip, Search } from "lucide-react";
+import { Phone, Paintbrush, SprayCan, Building, Zap, Droplets, Hourglass, CheckCircle, X, ChevronLeft, ChevronRight, GripVertical, Trash2, MessageSquare, Send, Sun, Moon, CalendarIcon, Bell, Plus, FileText, Settings, LayoutDashboard, Users, LogOut, Pencil, Save, Upload, Paperclip, Search } from "lucide-react";
 import { format, add, setHours, setMinutes, startOfWeek as startOfWeekDf } from "date-fns";
 import { de } from "date-fns/locale";
 import { DndContext, DragOverlay, useDraggable, useDroppable, closestCorners, pointerWithin, rectIntersection, MeasuringStrategy, PointerSensor, useSensor, useSensors, type DragEndEvent, type DragStartEvent, type DragOverEvent, type CollisionDetection } from "@dnd-kit/core";
@@ -4767,11 +4767,21 @@ export default function AdminDashboardPage() {
                     isLightTheme
                       ? "border-slate-200 bg-white text-slate-700 shadow-sm hover:border-slate-300"
                       : "border-slate-600 bg-slate-900/80 text-slate-100 hover:border-slate-500 hover:bg-slate-800/80"
-                  }`}
+                  }`} 
                 >
                   <CalendarIcon className="h-5 w-5" strokeWidth={2} />
                 </button>
               )}
+              { /* Icon-only Mangelmeldungen button (no text) */ }
+              <button
+                type="button"
+                onClick={() => window.location.assign('/admin/mangelmeldungen')}
+                aria-label="Mangelmeldungen"
+                title="Mangelmeldungen"
+                className={`inline-flex h-11 min-h-[44px] min-w-[44px] touch-manipulation items-center justify-center rounded-full border p-0 text-xs font-medium transition-all hover:opacity-90 ml-2 ${isLightTheme ? "border-slate-200 bg-white text-slate-700 shadow-sm hover:border-slate-300" : "border-slate-600 bg-slate-900/80 text-slate-100 hover:border-slate-500 hover:bg-slate-800/80"}`}
+              >
+                <Bell className="h-5 w-5" />
+              </button>
               {isGewerkUser && (
                 <>
                   <button
@@ -7439,4 +7449,3 @@ export default function AdminDashboardPage() {
     </main>
   );
 }
-
