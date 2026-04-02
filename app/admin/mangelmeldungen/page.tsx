@@ -104,18 +104,14 @@ const priorityOptions = [
   React.useEffect(() => {
     const enableBypass = (process.env.DEV_BYPASS_AUTH || "").toLowerCase() === "true";
     if (!enableBypass || typeof window === "undefined" || !window.fetch) return;
-    const originalFetch = (window.fetch as any).bind(window);
-    (window as any).fetch = (input: any, init?: any) => {
-      const newInit = { ...(init || {}) };
-      newInit.headers = newInit.headers ? newInit.headers : {};
-      if (typeof newInit.headers.set === 'function') {
-        (newInit.headers as any).set('x-dev-admin', '1');
-      } else {
-        (newInit.headers as any)['x-dev-admin'] = '1';
-      }
-      return originalFetch(input, newInit);
-    } as any;
-    return () => { (window as any).fetch = originalFetch; };
+    const originalFetch = window.fetch.bind(window);
+    window.fetch = (input: any, init?: any) => {
+      const headers = new Headers((init && init.headers) || {});
+      headers.set('x-dev-admin', '1');
+      const newInit = { ...(init || {}), headers };
+      return originalFetch(input, newInit as any);
+    };
+    return () => { window.fetch = originalFetch; };
   }, []);
 
   return (
