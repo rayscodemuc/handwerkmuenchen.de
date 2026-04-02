@@ -50,14 +50,14 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
 
-  const path = request.nextUrl.pathname;
-  const isAdminRoute = path.startsWith("/admin");
+  const path2 = request.nextUrl.pathname;
+  const isAdminRoute = path2.startsWith("/admin");
 
   // Nicht eingeloggt + Admin-Route → Login
   if (!user && isAdminRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
-    url.searchParams.set("redirect", path);
+    url.searchParams.set("redirect", path2);
     return NextResponse.redirect(url);
   }
 
