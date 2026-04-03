@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Impressum",
-  description: "Impressum und Anbieterkennzeichnung der Calm Design Foundation.",
+  description: "Impressum und Anbieterkennzeichnung von handwerkmuenchen.de.",
   alternates: {
     canonical: "/impressum",
   },

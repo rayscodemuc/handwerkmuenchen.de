@@ -40,10 +40,11 @@ function isGewerkActive(pathname: string, basePath: string, slug: string): boole
 export function Header() {
   const adminUser = useAdminUser();
   const isAdmin = Boolean(adminUser?.role && adminUser.role === "admin");
+  const isGewerkUser = Boolean(adminUser?.role && adminUser.role.startsWith("gewerk_"));
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
-  // Show Mangelmeldungen button also when inside an Admin area (routing-based safeguard for environments without AdminUserProvider)
-  const showMangelButton = isAdmin || pathname.startsWith("/admin");
+  // Show Mangelmeldungen button for admins and gewerke users
+  const showMangelButton = isAdmin || isGewerkUser || pathname.startsWith("/admin");
   const [isScrolled, setIsScrolled] = useState(false);
   const [hoveredGewerkSlug, setHoveredGewerkSlug] = useState<string | null>(null);
   const { setHoveredGewerk } = useGewerkHover();

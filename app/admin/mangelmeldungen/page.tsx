@@ -1,212 +1,237 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { Plus } from "lucide-react";
 import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DEFAULT_COMPANY_ID } from "@/src/config/businessConfig";
-import { GEWERKE_OPTIONS } from "@/src/config/gewerkeOptions";
-import { useUniversalSubmit } from "@/hooks/useUniversalSubmit";
+import { Button } from "@/components/ui/button";
+import { useAdminUser } from "../AdminUserContext";
+import { MangelMeldungDialog } from "@/components/admin/MangelMeldungDialog";
 
-type MangelFormFields = {
-  title: string;
-  address: string;
-  beschreibung: string;
-  prioritaet: string;
-  kunde_name: string;
-  kontakt_email: string;
+type Mangelmeldung = {
+  id: string;
+  titel: string;
+  bereich: string;
+  status: string;
+  prioritaet?: string;
+  erstellt_at?: string;
+  beschreibung?: string;
+  created_at: string;
 };
 
+const STATUS_LABELS: Record<string, string> = {
+  offen: "Offen",
+  in_bearbeitung: "In Bearbeitung",
+  behoben: "Behoben",
+};
+
+const PRIORITAET_LABELS: Record<string, string> = {
+  tief: "Tief",
+  mittel: "Mittel",
+  hoch: "Hoch",
+};
+
+const BEREICH_LABELS: Record<string, string> = {
+  gewerk_elektro: "Elektro",
+  gewerk_sanitaer: "Sanitär",
+  gewerk_ausbau: "Ausbau",
+  gewerk_reinigung: "Reinigung",
+  gewerk_facility: "Facility",
+};
+
+function statusBadgeClass(status: string): string {
+  switch (status) {
+    case "offen":
+      return "bg-red-100 text-red-800";
+    case "in_bearbeitung":
+      return "bg-yellow-100 text-yellow-800";
+    case "behoben":
+      return "bg-green-100 text-green-800";
+    default:
+      return "bg-gray-100 text-gray-800";
+  }
+}
+
+function prioritaetBadgeClass(p: string): string {
+  switch (p) {
+    case "hoch":
+      return "bg-red-50 text-red-700 border-red-200";
+    case "mittel":
+      return "bg-yellow-50 text-yellow-700 border-yellow-200";
+    case "tief":
+      return "bg-blue-50 text-blue-700 border-blue-200";
+    default:
+      return "bg-gray-50 text-gray-700 border-gray-200";
+  }
+}
+
 export default function MangelmeldungenPage() {
-  const { submit, loading, success, reset } = useUniversalSubmit();
-  const [form, setForm] = useState<MangelFormFields>({
-    title: "",
-    address: "",
-    beschreibung: "",
-    prioritaet: "hoch",
-    kunde_name: "Admin",
-    kontakt_email: "admin@example.com",
-  });
+  const adminUser = useAdminUser();
+  const isAdmin = adminUser?.role === "admin";
+  const [data, setData] = useState<Mangelmeldung[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  const handleChange = <K extends keyof MangelFormFields>(key: K, value: MangelFormFields[K]) => {
-    setForm((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const payload = {
-      company_id: DEFAULT_COMPANY_ID,
-      kunde_name: form.kunde_name,
-      kontakt_email: form.kontakt_email,
-      beschreibung: form.beschreibung,
-      address: form.address,
-      titel: form.title,
-      prioritaet: form.prioritaet,
-      test_mode: true,
-      test_user: "admin",
-    };
-
-    const result = await submit(payload, DEFAULT_COMPANY_ID);
-    if (result?.success) {
-      // Clear form after successful submission
-      setForm({
-        title: "",
-        address: "",
-        beschreibung: "",
-        prioritaet: "hoch",
-        kunde_name: "Admin",
-        kontakt_email: "admin@example.com",
-      });
-      reset();
-    }
-  };
-
-const priorityOptions = [
-    { value: "hoch", label: "Hoch" },
-    { value: "mittel", label: "Mittel" },
-    { value: "niedrig", label: "Niedrig" },
-  ];
-
-  // MVP: zwei Sektionen in einer Seite – Formular links, Liste rechts
-  // Liste-Logik wird hier ergänzt (Sektion B)
-  const [list, setList] = useState<any[]>([]);
-  const [listLoaded, setListLoaded] = useState(false);
-  const [gewerg, setGewerg] = useState<string>("");
-
-  const markRead = async (id: string) => {
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
     try {
-      await fetch('/api/admin/mangelmeldungen/mark-read', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ids: [id] }),
-      });
-      setList((prev) => prev.filter((t) => t.id !== id));
-    } catch {
-      // ignore errors in MVP
+      const endpoint = isAdmin
+        ? "/api/admin/mangelmeldungen"
+        : "/api/gewerke/mangelmeldungen";
+      const res = await fetch(endpoint);
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        throw new Error(d.error || `Fehler ${res.status}`);
+      }
+      const json = await res.json();
+      setData(Array.isArray(json) ? json : []);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Unbekannter Fehler");
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [isAdmin]);
 
-  // Lade Liste beim ersten Render
   useEffect(() => {
-    fetch(`/api/admin/mangelmeldungen/list?unreadOnly=false&limit=50&offset=0&gewerg=${encodeURIComponent(gewerg)}`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (Array.isArray(data)) setList(data);
-        setListLoaded(true);
-      })
-      .catch(() => setListLoaded(true));
-  }, [gewerg]);
+    fetchData();
+  }, [fetchData, refreshKey]);
 
-  // Dev-bypass für lokalen Test: Kopfzeilen-Header automatisch hinzufügen
-  React.useEffect(() => {
-    const enableBypass = (process.env.DEV_BYPASS_AUTH || "").toLowerCase() === "true";
-    if (!enableBypass || typeof window === "undefined" || !window.fetch) return;
-    const originalFetch = window.fetch.bind(window);
-    window.fetch = (input: any, init?: any) => {
-      const headers = new Headers((init && init.headers) || {});
-      headers.set('x-dev-admin', '1');
-      const newInit = { ...(init || {}), headers };
-      return originalFetch(input, newInit as any);
-    };
-    return () => { window.fetch = originalFetch; };
-  }, []);
+  const handleSuccess = () => {
+    setRefreshKey((k) => k + 1);
+  };
 
   return (
-    <section className="container mx-auto px-4 py-8">
-      <div className="mb-4">
-        <Link href="/admin/dashboard" className="inline-flex items-center text-sm text-blue-600 hover:underline">
-          <ChevronLeft className="h-4 w-4 mr-2" /> Zurück zum Dashboard
-        </Link>
-      </div>
-      <div className="rounded-2xl bg-white p-6 mb-6 shadow flex justify-between items-center">
+    <div className="container mx-auto px-4 py-6 max-w-6xl">
+      <div className="flex items-center justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-xl font-semibold text-gray-800">Mangelmeldung erstellen (Testmodus)</h2>
-          <p className="text-sm text-gray-600 mt-1">Zwei Sektionen: Neuen Mangel melden + Gewerke-Meldungen</p>
+          <h1 className="text-2xl font-semibold text-slate-900">
+            Mangelmeldungen
+          </h1>
+          {!isAdmin && (
+            <p className="text-sm text-slate-500 mt-1">
+              Nur Meldungen aus Ihrem Gewerkebereich
+            </p>
+          )}
         </div>
-        <span className="inline-flex items-center rounded-full bg-blue-600 px-3 py-1 text-sm text-white">Unread: 0</span>
+        <div className="flex items-center gap-3">
+          <Link href="/admin/dashboard" className="text-sm text-slate-600 hover:text-slate-900 hover:underline">
+            ← Dashboard
+          </Link>
+          <Button onClick={() => setDialogOpen(true)}>
+            <Plus className="h-4 w-4 mr-1.5" />
+            Mangel melden
+          </Button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="title">Titel</Label>
-              <Input id="title" value={form.title} onChange={(e) => handleChange("title", e.target.value)} placeholder="Kurze Bezeichnung des Mangels" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="address">Standort/Adresse</Label>
-              <Input id="address" value={form.address} onChange={(e) => handleChange("address", e.target.value)} placeholder="Musterstraße 1, 80331 München" />
-            </div>
-          </div>
-          <div className="col-span-1 md:col-span-2 space-y-2">
-            <Label htmlFor="beschreibung">Beschreibung</Label>
-            <Textarea id="beschreibung" rows={5} value={form.beschreibung} onChange={(e) => handleChange("beschreibung", e.target.value)} placeholder="Beschreiben Sie den Mangel detailliert..." />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="prioritaet">Priorität</Label>
-              <Select name="prioritaet" value={form.prioritaet} onValueChange={(value) => handleChange("prioritaet", value)}>
-                <SelectTrigger className="text-[#3E505B] bg-white">
-                  <SelectValue placeholder="Priorität auswählen" />
-                </SelectTrigger>
-                <SelectContent>
-                  {priorityOptions.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="kunde_name">Auftraggeber (Name)</Label>
-              <Input id="kunde_name" value={form.kunde_name} onChange={(e) => handleChange("kunde_name", e.target.value)} placeholder="Ihr Name" />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="kontakt_email">Auftraggeber (E-Mail)</Label>
-            <Input id="kontakt_email" type="email" value={form.kontakt_email} onChange={(e) => handleChange("kontakt_email", e.target.value)} placeholder="admin@example.com" />
-          </div>
-          <div className="flex justify-end">
-            <button type="submit" className="rounded-full bg-[#3E505B] px-6 py-3 text-white font-semibold hover:bg-[#4C626C]">
-              Mangel melden
-            </button>
-          </div>
-        </form>
+      {loading && (
+        <div className="flex items-center justify-center py-12">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-slate-600" />
+        </div>
+      )}
 
-        {/* Sektion B: Gewerke-Meldungen-Liste */}
-        <aside className="space-y-2">
-          <h3 className="text-lg font-semibold text-gray-800">Gewerke-Meldungen</h3>
-          <div className="border rounded p-2">
-            <div className="mb-2 text-sm text-gray-600">Filter nach Gewerk</div>
-            <select className="border rounded w-full px-2 py-1" value={gewerg} onChange={(e)=>setGewerg(e.target.value)}>
-              <option value="">Alle</option>
-              {GEWERKE_OPTIONS.map((g) => {
-                const isObj = typeof g === 'object' && g !== null;
-                const value = isObj ? (g as any).value ?? "" : (g as any);
-                const label = isObj ? (g as any).label ?? String(value) : String(g);
-                const key = isObj ? (g as any).value ?? String(value) : String(value);
-                return <option key={key} value={value}>{label}</option>;
-              })}
-            </select>
-          </div>
-          <div className="border rounded p-2" style={{minHeight:200}}>
-            {list.length === 0 && listLoaded ? (
-              <div className="text-sm text-gray-500">Keine Meldungen</div>
-            ) : (
-              <ul>
-                {list.map((t) => (
-                  <li key={t.id} className="flex justify-between py-1 border-b text-sm">
-                    <span>{t.kunde_name ?? t.objekt_adresse ?? t.beschreibung?.slice(0,40) ?? "Meldung"}</span>
-                    <button className="text-blue-600" onClick={() => markRead(t.id)}>Als gelesen</button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </aside>
-      </div>
-    </section>
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-red-800">
+          Fehler beim Laden: {error}
+        </div>
+      )}
+
+      {!loading && !error && data.length === 0 && (
+        <div className="bg-slate-50 border border-slate-200 rounded-lg px-6 py-12 text-center">
+          <p className="text-slate-600">Keine Mangelmeldungen vorhanden.</p>
+          <Button
+            variant="outline"
+            className="mt-4"
+            onClick={() => setDialogOpen(true)}
+          >
+            Erste Mangelmeldung erstellen
+          </Button>
+        </div>
+      )}
+
+      {!loading && data.length > 0 && (
+        <div className="border rounded-lg overflow-hidden shadow-sm bg-white">
+          <table className="min-w-full divide-y divide-slate-200">
+            <thead className="bg-slate-50">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  Titel
+                </th>
+                {isAdmin && (
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    Bereich
+                  </th>
+                )}
+                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  Priorität
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  Erstellt
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {data.map((m) => (
+                <tr key={m.id} className="hover:bg-slate-50 transition-colors">
+                  <td className="px-4 py-3">
+                    <div className="font-medium text-slate-900">{m.titel}</div>
+                    {m.beschreibung && (
+                      <div className="text-sm text-slate-500 mt-0.5 line-clamp-1">
+                        {m.beschreibung}
+                      </div>
+                    )}
+                  </td>
+                  {isAdmin && (
+                    <td className="px-4 py-3">
+                      <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">
+                        {BEREICH_LABELS[m.bereich] || m.bereich}
+                      </span>
+                    </td>
+                  )}
+                  <td className="px-4 py-3">
+                    <span
+                      className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${prioritaetBadgeClass(
+                        m.prioritaet || "mittel"
+                      )}`}
+                    >
+                      {PRIORITAET_LABELS[m.prioritaet ?? ""] || m.prioritaet || "Mittel"}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusBadgeClass(
+                        m.status || "offen"
+                      )}`}
+                    >
+                      {STATUS_LABELS[m.status] || m.status || "Offen"}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-slate-500 whitespace-nowrap">
+                    {m.created_at
+                      ? new Date(m.created_at).toLocaleDateString("de-DE", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                        })
+                      : "—"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <MangelMeldungDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onSuccess={handleSuccess}
+      />
+    </div>
   );
 }

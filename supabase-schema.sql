@@ -158,3 +158,73 @@ SET search_path = ''
 AS $$
   SELECT role FROM public.profiles WHERE id = auth.uid();
 $$;
+
+-- =============================================================================
+-- mangelmeldungen
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS public.mangelmeldungen (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  titel TEXT NOT NULL,
+  beschreibung TEXT,
+  bereich TEXT NOT NULL,
+  status TEXT DEFAULT 'offen' CHECK (status IN ('offen', 'in_bearbeitung', 'behoben')),
+  prioritaet TEXT DEFAULT 'mittel' CHECK (prioritaet IN ('tief', 'mittel', 'hoch')),
+  erstellt_von UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+  auftrag_id UUID REFERENCES public.tickets(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_mangelmeldungen_bereich ON public.mangelmeldungen(bereich);
+CREATE INDEX IF NOT EXISTS idx_mangelmeldungen_status ON public.mangelmeldungen(status);
+CREATE INDEX IF NOT EXISTS idx_mangelmeldungen_erstellt_von ON public.mangelmeldungen(erstellt_von);
+
+ALTER TABLE public.mangelmeldungen ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Admins can read all mangelmeldungen"
+  ON public.mangelmeldungen FOR SELECT
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.profiles p
+      WHERE p.id = auth.uid() AND p.role = 'admin'
+    )
+  );
+
+CREATE POLICY "Admins can insert mangelmeldungen"
+  ON public.mangelmeldungen FOR INSERT
+  TO authenticated
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.profiles p
+      WHERE p.id = auth.uid() AND p.role = 'admin'
+    )
+  );
+
+CREATE POLICY "Admins can update mangelmeldungen"
+  ON public.mangelmeldungen FOR UPDATE
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.profiles p
+      WHERE p.id = auth.uid() AND p.role = 'admin'
+    )
+  );
+
+CREATE POLICY "Gewerke can read own mangelmeldungen"
+  ON public.mangelmeldungen FOR SELECT
+  TO authenticated
+  USING (
+    bereich = (
+      SELECT role FROM public.profiles WHERE id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Gewerke can insert own mangelmeldungen"
+  ON public.mangelmeldungen FOR INSERT
+  TO authenticated
+  WITH CHECK (
+    bereich = (
+      SELECT role FROM public.profiles WHERE id = auth.uid()
+    )
+  );
