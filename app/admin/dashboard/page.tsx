@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
-import { Phone, Paintbrush, SprayCan, Building, Zap, Droplets, Hourglass, CheckCircle, X, ChevronLeft, ChevronRight, GripVertical, Trash2, MessageSquare, Send, Sun, Moon, CalendarIcon, Plus, FileText, Settings, LayoutDashboard, Users, LogOut, Pencil, Save, Upload, Paperclip, Search } from "lucide-react";
+import { Phone, Paintbrush, SprayCan, Building, Zap, Droplets, Hourglass, CheckCircle, X, ChevronLeft, ChevronRight, GripVertical, Trash2, MessageSquare, Send, Sun, Moon, CalendarIcon, Plus, FileText, Settings, LayoutDashboard, Users, LogOut, Pencil, Save, Upload, Paperclip, Search, AlertTriangle } from "lucide-react";
 import { format, add, setHours, setMinutes, startOfWeek as startOfWeekDf } from "date-fns";
 import { de } from "date-fns/locale";
 import { DndContext, DragOverlay, useDraggable, useDroppable, closestCorners, pointerWithin, rectIntersection, MeasuringStrategy, PointerSensor, useSensor, useSensors, type DragEndEvent, type DragStartEvent, type DragOverEvent, type CollisionDetection } from "@dnd-kit/core";
@@ -40,6 +40,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { Logo } from "@/components/Logo";
 import { AuftragHandwerkerDetailDialog } from "@/components/admin/AuftragHandwerkerDetailDialog";
 import { GewerkAuftraegeDashboardList } from "@/components/admin/GewerkAuftraegeDashboardList";
+import { GewerkMangelMeldenDialog } from "@/components/admin/GewerkMangelMeldenDialog";
+import { GewerkMaengelAdminSection } from "@/components/admin/GewerkMaengelAdminSection";
 import { AuftragEingangKommendeRowView, AuftragEingangVolleKarteView } from "@/components/admin/eingang-auftrag-cards";
 import {
   TicketEingangKommendeRowView,
@@ -53,6 +55,7 @@ import { primaryAuftragAnhangUrl } from "@/lib/auftraege/primary-auftrag-anhang-
 import { filterAuftraegeRowsByRole } from "@/lib/auftraege/filter-auftraege-by-role";
 import { roleToGewerk } from "@/lib/auftraege/role-to-gewerk";
 import type { HandwerkerAuftrag } from "@/src/types/handwerker-auftrag";
+import type { GewerkMangelAdminRow } from "@/src/types/gewerk-maengel-admin";
 import { BUSINESS_COLUMNS, DEFAULT_COMPANY_ID, STATUS, TERMIN_TYP } from "@/src/config/businessConfig";
 import { GEWERKE_OPTIONS } from "@/src/config/gewerkeOptions";
 
@@ -1078,6 +1081,8 @@ export default function AdminDashboardPage() {
   /** SPM-Aufträge als eigene Board-Karten (ohne Pflicht-Ticket). */
   const [auftraegeBoard, setAuftraegeBoard] = useState<HandwerkerAuftrag[]>([]);
   const [loading, setLoading] = useState(true);
+  /** Mängelmeldungen vom Gewerk (nur Admin-Anzeige). */
+  const [gewerkMaengel, setGewerkMaengel] = useState<GewerkMangelAdminRow[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [convertingId, setConvertingId] = useState<string | null>(null);
@@ -1172,6 +1177,7 @@ export default function AdminDashboardPage() {
   >("eingang");
   /** Filter für sichtbare Karten (Tickets & Aufträge); DnD/Spaltenlogik bleibt auf vollen Daten). */
   const [boardSearchQuery, setBoardSearchQuery] = useState("");
+  const [gewerkMangelOpen, setGewerkMangelOpen] = useState(false);
   /** Viewport &lt; lg: Kalender-Grid und Touch-Optimierung. */
   const [isMobileViewport, setIsMobileViewport] = useState(false);
   const desktopCalendarSectionRef = useRef<HTMLElement | null>(null);
@@ -1451,6 +1457,23 @@ export default function AdminDashboardPage() {
     } else {
       setTickets(list);
     }
+
+    if (adminUser?.role === "admin") {
+      try {
+        const res = await fetch("/api/admin/gewerk-maengel");
+        const json = (await res.json()) as unknown;
+        if (res.ok && Array.isArray(json)) {
+          setGewerkMaengel(json as GewerkMangelAdminRow[]);
+        } else {
+          setGewerkMaengel([]);
+        }
+      } catch {
+        setGewerkMaengel([]);
+      }
+    } else {
+      setGewerkMaengel([]);
+    }
+
     if (!silent) setLoading(false);
   };
 
@@ -4776,6 +4799,19 @@ export default function AdminDashboardPage() {
                 <>
                   <button
                     type="button"
+                    onClick={() => setGewerkMangelOpen(true)}
+                    title="Mangel melden"
+                    className={`inline-flex h-11 min-h-[44px] min-w-[44px] touch-manipulation items-center justify-center rounded-full border p-0 text-xs font-medium transition-all hover:opacity-90 active:scale-[0.98] ${
+                      isLightTheme
+                        ? "border-amber-200/90 bg-amber-50 text-amber-900 shadow-sm hover:border-amber-300 hover:bg-amber-100"
+                        : "border-amber-500/50 bg-amber-500/10 text-amber-200 hover:border-amber-400/60 hover:bg-amber-500/20"
+                    }`}
+                    aria-label="Mangel melden"
+                  >
+                    <AlertTriangle className="h-5 w-5" strokeWidth={2} />
+                  </button>
+                  <button
+                    type="button"
                     onClick={openCalendarFromHeader}
                     title="Kalender öffnen"
                     className={`inline-flex h-11 min-h-[44px] min-w-[44px] touch-manipulation items-center justify-center rounded-full border p-0 text-xs font-medium transition-all hover:opacity-90 active:scale-[0.98] ${
@@ -4906,9 +4942,15 @@ export default function AdminDashboardPage() {
               onRefresh={() => void loadTickets(true)}
               onSelectAuftrag={openAuftragBoardDetail}
             />
+            <GewerkMangelMeldenDialog
+              open={gewerkMangelOpen}
+              onOpenChange={setGewerkMangelOpen}
+              isLightTheme={isLightTheme}
+            />
           </div>
           ) : (
           <>
+          <GewerkMaengelAdminSection rows={gewerkMaengel} isLightTheme={isLightTheme} />
           {/* Mobile: Anfragen/Eingang (Standard); Kalender nur per Header-Icon */}
           <div className="lg:hidden">
             {mobileMainTab === "list" ? (
