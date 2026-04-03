@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
-import { Phone, Paintbrush, SprayCan, Building, Zap, Droplets, Hourglass, CheckCircle, X, ChevronLeft, ChevronRight, GripVertical, Trash2, MessageSquare, Send, Sun, Moon, CalendarIcon, Bell, Plus, FileText, Settings, LayoutDashboard, Users, LogOut, Pencil, Save, Upload, Paperclip, Search } from "lucide-react";
+import { Phone, Paintbrush, SprayCan, Building, Zap, Droplets, Hourglass, CheckCircle, X, ChevronLeft, ChevronRight, GripVertical, Trash2, MessageSquare, Send, Sun, Moon, CalendarIcon, Bell, Plus, FileText, Settings, LayoutDashboard, Users, LogOut, Pencil, Save, Upload, Paperclip, Search, AlertTriangle } from "lucide-react";
 import { format, add, setHours, setMinutes, startOfWeek as startOfWeekDf } from "date-fns";
 import { de } from "date-fns/locale";
 import { DndContext, DragOverlay, useDraggable, useDroppable, closestCorners, pointerWithin, rectIntersection, MeasuringStrategy, PointerSensor, useSensor, useSensors, type DragEndEvent, type DragStartEvent, type DragOverEvent, type CollisionDetection } from "@dnd-kit/core";
@@ -4415,13 +4415,27 @@ export default function AdminDashboardPage() {
           calMobile ? "flex flex-col" : "flex flex-row items-center justify-between"
         )}
       >
-        <h2
-          className={`text-xs font-medium uppercase tracking-wider ${
-            isLightTheme ? "text-slate-600" : "text-slate-400"
-          }`}
-        >
-          Terminplaner
-        </h2>
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
+          <h2
+            className={`text-xs font-medium uppercase tracking-wider ${
+              isLightTheme ? "text-slate-600" : "text-slate-400"
+            }`}
+          >
+            Terminplaner
+          </h2>
+          <Link
+            href="/admin/mangelmeldungen"
+            className={cn(
+              "inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors",
+              isLightTheme
+                ? "border-slate-200 bg-white text-slate-800 shadow-sm hover:border-slate-300 hover:bg-slate-50"
+                : "border-slate-600 bg-slate-900/80 text-slate-100 hover:border-slate-500 hover:bg-slate-800/80"
+            )}
+          >
+            <AlertTriangle className="h-3.5 w-3.5 shrink-0" strokeWidth={2} aria-hidden />
+            Mangel melden
+          </Link>
+        </div>
         <div className="flex shrink-0 items-center justify-center gap-1 sm:gap-1.5">
           <button
             type="button"
