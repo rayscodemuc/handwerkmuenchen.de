@@ -29,6 +29,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { createClient } from "@/lib/supabase/client";
+import { authFetch } from "@/lib/supabase/auth-fetch";
 import {
   normalizeAuftragRow,
   resolveLeistungsempfaenger,
@@ -615,37 +616,33 @@ export function AuftragHandwerkerDetailDialog({
     setBoardGewerkSaving(true);
     setDialogError(null);
     const value = boardGewerke.length > 0 ? boardGewerke : null;
-    /**
-     * Gemischtes Board zeigt SPM-Karten aus `auftraege` (Badges aus auftraege.gewerk).
-     * Legacy: oft existiert zusätzlich ein Ticket mit gleichem Gewerk — beides muss synchron bleiben,
-     * sonst wirkt die Zuweisung „verschwunden“, wenn nur tickets.gewerk gesetzt wurde.
-     */
-    const tasks: Promise<{ error: { message: string } | null }>[] = [];
     if (auftrag?.id) {
-      tasks.push(
-        Promise.resolve(
-          supabase.from("auftraege").update({ gewerk: value }).eq("id", auftrag.id)
-        ).then((r) => ({ error: r.error }))
-      );
-    }
-    if (effectiveBoardTicketId) {
-      tasks.push(
-        Promise.resolve(
-          supabase.from("tickets").update({ gewerk: value }).eq("id", effectiveBoardTicketId)
-        ).then((r) => ({ error: r.error }))
-      );
-    }
-    if (tasks.length === 0) {
+      const response = await authFetch(`/api/admin/auftraege/${encodeURIComponent(auftrag.id)}/gewerk`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          gewerk: value,
+          ticketId: effectiveBoardTicketId,
+        }),
+      });
+      const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+      if (!response.ok) {
+        setDialogError(payload?.error ?? "Gewerk konnte nicht gespeichert werden.");
+        setBoardGewerkSaving(false);
+        return;
+      }
+    } else if (effectiveBoardTicketId) {
+      const { error } = await supabase.from("tickets").update({ gewerk: value }).eq("id", effectiveBoardTicketId);
+      if (error) {
+        setDialogError(error.message);
+        setBoardGewerkSaving(false);
+        return;
+      }
+    } else {
       setBoardGewerkSaving(false);
       return;
     }
-    const results = await Promise.all(tasks);
-    const firstErr = results.find((r) => r.error)?.error;
-    if (firstErr) {
-      setDialogError(firstErr.message);
-      setBoardGewerkSaving(false);
-      return;
-    }
+
     if (effectiveBoardTicketId) {
       setFetchedBoardGewerk(value);
     }

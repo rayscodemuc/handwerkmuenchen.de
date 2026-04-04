@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth";
+import { GewerkPushBootstrap } from "@/components/push/GewerkPushBootstrap";
 import { AdminUserProvider } from "./AdminUserContext";
 
 /** Mobile-first: volle Gerätebreite, Safe Area (Notch/Home-Indikator), kein willkürliches Zoomen. */
@@ -37,6 +38,7 @@ export default async function AdminLayout({
       {/* Kein overflow-y-auto hier: min-h + auto-Höhe = kein innerer Overflow; auf Mobil blockiert das oft den Seiten-Scroll. */}
       <div className="min-h-[100dvh] min-h-screen touch-manipulation">
         <main className="min-h-[100dvh] w-full min-w-0">{children}</main>
+        <GewerkPushBootstrap />
       </div>
     </AdminUserProvider>
   );

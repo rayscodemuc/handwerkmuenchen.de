@@ -18,6 +18,7 @@ const METADATA_BASE = "https://handwerkmuenchen.de";
 
 export const metadata: Metadata = {
   metadataBase: new URL(METADATA_BASE),
+  manifest: "/manifest.webmanifest",
   title: {
     default: "handwerkmuenchen.de | Ihr Meisterbetrieb für Sanitär, Elektro & Ausbau in München",
     template: "%s | handwerkmuenchen.de",
