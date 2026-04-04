@@ -31,6 +31,9 @@ type DebugState = {
   navigatorStandalone: string;
   origin: string | null;
   userAgentPreview: string | null;
+  notificationApi: "available" | "missing";
+  pushApi: "available" | "missing";
+  vapidKey: "present" | "missing";
 };
 
 export function GewerkPushBootstrap() {
@@ -50,16 +53,21 @@ export function GewerkPushBootstrap() {
     navigatorStandalone: "unknown",
     origin: null,
     userAgentPreview: null,
+    notificationApi: "missing",
+    pushApi: "missing",
+    vapidKey: "missing",
   });
   const publicKey = useMemo(() => getPushVapidPublicKey(), []);
   const promptKey = user ? `push-prompt-dismissed:${user.id}` : "";
 
   useEffect(() => {
     if (!user || !isGewerkRole(user.role)) return;
-    if (!("Notification" in window) || !("serviceWorker" in navigator) || !("PushManager" in window)) return;
-    if (!publicKey) return;
 
     let cancelled = false;
+    const notificationApi = "Notification" in window;
+    const serviceWorkerApi = "serviceWorker" in navigator;
+    const pushApi = "PushManager" in window;
+    const permission = notificationApi ? Notification.permission : "unsupported";
 
     const displayMode = window.matchMedia("(display-mode: standalone)").matches
       ? "standalone"
@@ -70,6 +78,35 @@ export function GewerkPushBootstrap() {
       typeof window.navigator !== "undefined" && "standalone" in window.navigator
         ? String((window.navigator as Navigator & { standalone?: boolean }).standalone ?? "unknown")
         : "unsupported";
+
+    setDebug((prev) => ({
+      ...prev,
+      permission,
+      serviceWorker: serviceWorkerApi ? "registered" : "missing",
+      displayMode,
+      navigatorStandalone,
+      origin: window.location.origin,
+      userAgentPreview: navigator.userAgent,
+      notificationApi: notificationApi ? "available" : "missing",
+      pushApi: pushApi ? "available" : "missing",
+      vapidKey: publicKey ? "present" : "missing",
+      lastError:
+        !notificationApi
+          ? "Notification API auf diesem Gerät/Kontext nicht verfügbar."
+          : !serviceWorkerApi
+            ? "Service Worker API auf diesem Gerät/Kontext nicht verfügbar."
+            : !pushApi
+              ? "PushManager API auf diesem Gerät/Kontext nicht verfügbar."
+              : !publicKey
+                ? "VAPID Public Key fehlt im Frontend."
+                : prev.lastError,
+    }));
+
+    if (!notificationApi || !serviceWorkerApi || !pushApi || !publicKey) {
+      return () => {
+        cancelled = true;
+      };
+    }
 
     const syncSubscription = async (swRegistration: ServiceWorkerRegistration) => {
       const existing = await swRegistration.pushManager.getSubscription();
@@ -83,6 +120,9 @@ export function GewerkPushBootstrap() {
         navigatorStandalone,
         origin: window.location.origin,
         userAgentPreview: navigator.userAgent,
+        notificationApi: "available",
+        pushApi: "available",
+        vapidKey: publicKey ? "present" : "missing",
       }));
       if (!existing) return;
 
@@ -114,6 +154,9 @@ export function GewerkPushBootstrap() {
         navigatorStandalone,
         origin: window.location.origin,
         userAgentPreview: navigator.userAgent,
+        notificationApi: "available",
+        pushApi: "available",
+        vapidKey: publicKey ? "present" : "missing",
       }));
 
       if (Notification.permission === "granted") {
@@ -139,6 +182,9 @@ export function GewerkPushBootstrap() {
           navigatorStandalone,
           origin: window.location.origin,
           userAgentPreview: navigator.userAgent,
+          notificationApi: "available",
+          pushApi: "available",
+          vapidKey: publicKey ? "present" : "missing",
         }));
         setShowBanner(false);
         return;
@@ -170,6 +216,9 @@ export function GewerkPushBootstrap() {
                 <p>Display Mode: <span className="font-medium text-slate-100">{debug.displayMode}</span></p>
                 <p>Navigator Standalone: <span className="font-medium text-slate-100">{debug.navigatorStandalone}</span></p>
                 <p>Origin: <span className="font-medium text-slate-100 break-all">{debug.origin ?? "unbekannt"}</span></p>
+                <p>Notification API: <span className="font-medium text-slate-100">{debug.notificationApi}</span></p>
+                <p>Push API: <span className="font-medium text-slate-100">{debug.pushApi}</span></p>
+                <p>VAPID Key: <span className="font-medium text-slate-100">{debug.vapidKey}</span></p>
                 {debug.endpointPreview ? <p className="break-all text-[11px] text-slate-400">{debug.endpointPreview}</p> : null}
                 {debug.userAgentPreview ? <p className="break-all text-[11px] text-slate-500">{debug.userAgentPreview}</p> : null}
                 {debug.lastError ? <p className="text-rose-300">{debug.lastError}</p> : null}
@@ -198,6 +247,9 @@ export function GewerkPushBootstrap() {
                               : "unsupported",
                           origin: window.location.origin,
                           userAgentPreview: navigator.userAgent,
+                          notificationApi: "Notification" in window ? "available" : "missing",
+                          pushApi: "PushManager" in window ? "available" : "missing",
+                          vapidKey: publicKey ? "present" : "missing",
                         }));
                         if (existing) {
                           const response = await authFetch("/api/push/subscribe", {
