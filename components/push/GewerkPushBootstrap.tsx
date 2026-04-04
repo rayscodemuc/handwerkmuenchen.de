@@ -27,6 +27,10 @@ type DebugState = {
   lastSync: string | null;
   lastError: string | null;
   endpointPreview: string | null;
+  displayMode: string;
+  navigatorStandalone: string;
+  origin: string | null;
+  userAgentPreview: string | null;
 };
 
 export function GewerkPushBootstrap() {
@@ -42,6 +46,10 @@ export function GewerkPushBootstrap() {
     lastSync: null,
     lastError: null,
     endpointPreview: null,
+    displayMode: "unknown",
+    navigatorStandalone: "unknown",
+    origin: null,
+    userAgentPreview: null,
   });
   const publicKey = useMemo(() => getPushVapidPublicKey(), []);
   const promptKey = user ? `push-prompt-dismissed:${user.id}` : "";
@@ -53,6 +61,16 @@ export function GewerkPushBootstrap() {
 
     let cancelled = false;
 
+    const displayMode = window.matchMedia("(display-mode: standalone)").matches
+      ? "standalone"
+      : window.matchMedia("(display-mode: browser)").matches
+        ? "browser"
+        : "unknown";
+    const navigatorStandalone =
+      typeof window.navigator !== "undefined" && "standalone" in window.navigator
+        ? String((window.navigator as Navigator & { standalone?: boolean }).standalone ?? "unknown")
+        : "unsupported";
+
     const syncSubscription = async (swRegistration: ServiceWorkerRegistration) => {
       const existing = await swRegistration.pushManager.getSubscription();
       setDebug((prev) => ({
@@ -61,6 +79,10 @@ export function GewerkPushBootstrap() {
         serviceWorker: "registered",
         subscription: existing ? "present" : "missing",
         endpointPreview: existing?.endpoint ? `${existing.endpoint.slice(0, 48)}...` : null,
+        displayMode,
+        navigatorStandalone,
+        origin: window.location.origin,
+        userAgentPreview: navigator.userAgent,
       }));
       if (!existing) return;
 
@@ -88,6 +110,10 @@ export function GewerkPushBootstrap() {
         ...prev,
         permission: Notification.permission,
         serviceWorker: "registered",
+        displayMode,
+        navigatorStandalone,
+        origin: window.location.origin,
+        userAgentPreview: navigator.userAgent,
       }));
 
       if (Notification.permission === "granted") {
@@ -109,6 +135,10 @@ export function GewerkPushBootstrap() {
           ...prev,
           permission: "denied",
           subscription: existing ? "present" : "missing",
+          displayMode,
+          navigatorStandalone,
+          origin: window.location.origin,
+          userAgentPreview: navigator.userAgent,
         }));
         setShowBanner(false);
         return;
@@ -137,7 +167,11 @@ export function GewerkPushBootstrap() {
                 <p>Service Worker: <span className="font-medium text-slate-100">{debug.serviceWorker}</span></p>
                 <p>Subscription: <span className="font-medium text-slate-100">{debug.subscription}</span></p>
                 <p>Letzter Sync: <span className="font-medium text-slate-100">{debug.lastSync ?? "noch keiner"}</span></p>
+                <p>Display Mode: <span className="font-medium text-slate-100">{debug.displayMode}</span></p>
+                <p>Navigator Standalone: <span className="font-medium text-slate-100">{debug.navigatorStandalone}</span></p>
+                <p>Origin: <span className="font-medium text-slate-100 break-all">{debug.origin ?? "unbekannt"}</span></p>
                 {debug.endpointPreview ? <p className="break-all text-[11px] text-slate-400">{debug.endpointPreview}</p> : null}
+                {debug.userAgentPreview ? <p className="break-all text-[11px] text-slate-500">{debug.userAgentPreview}</p> : null}
                 {debug.lastError ? <p className="text-rose-300">{debug.lastError}</p> : null}
               </div>
               {registration ? (
@@ -157,6 +191,13 @@ export function GewerkPushBootstrap() {
                           serviceWorker: "registered",
                           subscription: existing ? "present" : "missing",
                           endpointPreview: existing?.endpoint ? `${existing.endpoint.slice(0, 48)}...` : null,
+                          displayMode: window.matchMedia("(display-mode: standalone)").matches ? "standalone" : "browser",
+                          navigatorStandalone:
+                            typeof window.navigator !== "undefined" && "standalone" in window.navigator
+                              ? String((window.navigator as Navigator & { standalone?: boolean }).standalone ?? "unknown")
+                              : "unsupported",
+                          origin: window.location.origin,
+                          userAgentPreview: navigator.userAgent,
                         }));
                         if (existing) {
                           const response = await authFetch("/api/push/subscribe", {
