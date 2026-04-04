@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Bell } from "lucide-react";
+import { Bell, RefreshCw } from "lucide-react";
 import { authFetch } from "@/lib/supabase/auth-fetch";
 import { getPushVapidPublicKey } from "@/lib/push/config";
 import { isGewerkRole } from "@/lib/auftraege/role-to-gewerk";
@@ -20,11 +20,29 @@ async function registerServiceWorker() {
   return navigator.serviceWorker.register("/sw.js");
 }
 
+type DebugState = {
+  permission: NotificationPermission | "unsupported";
+  serviceWorker: "registered" | "missing";
+  subscription: "present" | "missing" | "unknown";
+  lastSync: string | null;
+  lastError: string | null;
+  endpointPreview: string | null;
+};
+
 export function GewerkPushBootstrap() {
   const user = useAdminUser();
   const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
   const [showBanner, setShowBanner] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [debugBusy, setDebugBusy] = useState(false);
+  const [debug, setDebug] = useState<DebugState>({
+    permission: "unsupported",
+    serviceWorker: "missing",
+    subscription: "unknown",
+    lastSync: null,
+    lastError: null,
+    endpointPreview: null,
+  });
   const publicKey = useMemo(() => getPushVapidPublicKey(), []);
   const promptKey = user ? `push-prompt-dismissed:${user.id}` : "";
 
@@ -37,9 +55,16 @@ export function GewerkPushBootstrap() {
 
     const syncSubscription = async (swRegistration: ServiceWorkerRegistration) => {
       const existing = await swRegistration.pushManager.getSubscription();
+      setDebug((prev) => ({
+        ...prev,
+        permission: Notification.permission,
+        serviceWorker: "registered",
+        subscription: existing ? "present" : "missing",
+        endpointPreview: existing?.endpoint ? `${existing.endpoint.slice(0, 48)}...` : null,
+      }));
       if (!existing) return;
 
-      await authFetch("/api/push/subscribe", {
+      const response = await authFetch("/api/push/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -47,12 +72,23 @@ export function GewerkPushBootstrap() {
           userAgent: navigator.userAgent,
         }),
       });
+      const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+      setDebug((prev) => ({
+        ...prev,
+        lastSync: response.ok ? new Date().toLocaleTimeString("de-DE") : prev.lastSync,
+        lastError: response.ok ? null : payload?.error ?? "Subscribe fehlgeschlagen",
+      }));
     };
 
     void (async () => {
       const swRegistration = await registerServiceWorker();
       if (cancelled || !swRegistration) return;
       setRegistration(swRegistration);
+      setDebug((prev) => ({
+        ...prev,
+        permission: Notification.permission,
+        serviceWorker: "registered",
+      }));
 
       if (Notification.permission === "granted") {
         await syncSubscription(swRegistration);
@@ -69,6 +105,11 @@ export function GewerkPushBootstrap() {
             body: JSON.stringify({ subscription: existing.toJSON() }),
           });
         }
+        setDebug((prev) => ({
+          ...prev,
+          permission: "denied",
+          subscription: existing ? "present" : "missing",
+        }));
         setShowBanner(false);
         return;
       }
@@ -82,7 +123,72 @@ export function GewerkPushBootstrap() {
   }, [promptKey, publicKey, user]);
 
   if (!user || !isGewerkRole(user.role) || !showBanner || !registration || !publicKey) {
-    return null;
+    return user && isGewerkRole(user.role) ? (
+      <div className="fixed inset-x-3 bottom-3 z-[120] sm:left-auto sm:right-4 sm:max-w-md">
+        <div className="rounded-2xl border border-slate-800 bg-slate-950/96 p-4 text-slate-100 shadow-2xl backdrop-blur">
+          <div className="flex items-start gap-3">
+            <div className="mt-0.5 rounded-full bg-slate-800 p-2 text-slate-200">
+              <Bell className="h-4 w-4" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold">Push-Status</p>
+              <div className="mt-2 space-y-1 text-xs text-slate-300">
+                <p>Permission: <span className="font-medium text-slate-100">{debug.permission}</span></p>
+                <p>Service Worker: <span className="font-medium text-slate-100">{debug.serviceWorker}</span></p>
+                <p>Subscription: <span className="font-medium text-slate-100">{debug.subscription}</span></p>
+                <p>Letzter Sync: <span className="font-medium text-slate-100">{debug.lastSync ?? "noch keiner"}</span></p>
+                {debug.endpointPreview ? <p className="break-all text-[11px] text-slate-400">{debug.endpointPreview}</p> : null}
+                {debug.lastError ? <p className="text-rose-300">{debug.lastError}</p> : null}
+              </div>
+              {registration ? (
+                <div className="mt-3 flex gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    disabled={debugBusy}
+                    onClick={async () => {
+                      setDebugBusy(true);
+                      try {
+                        const existing = await registration.pushManager.getSubscription();
+                        setDebug((prev) => ({
+                          ...prev,
+                          permission: Notification.permission,
+                          serviceWorker: "registered",
+                          subscription: existing ? "present" : "missing",
+                          endpointPreview: existing?.endpoint ? `${existing.endpoint.slice(0, 48)}...` : null,
+                        }));
+                        if (existing) {
+                          const response = await authFetch("/api/push/subscribe", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              subscription: existing.toJSON(),
+                              userAgent: navigator.userAgent,
+                            }),
+                          });
+                          const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+                          setDebug((prev) => ({
+                            ...prev,
+                            lastSync: response.ok ? new Date().toLocaleTimeString("de-DE") : prev.lastSync,
+                            lastError: response.ok ? null : payload?.error ?? "Subscribe fehlgeschlagen",
+                          }));
+                        }
+                      } finally {
+                        setDebugBusy(false);
+                      }
+                    }}
+                  >
+                    <RefreshCw className="h-3.5 w-3.5" />
+                    Status prüfen
+                  </Button>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      </div>
+    ) : null;
   }
 
   const enablePush = async () => {
