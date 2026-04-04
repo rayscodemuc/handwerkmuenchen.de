@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSessionUserFromRequest } from "@/lib/auth";
+import { gewerkToRole } from "@/lib/auftraege/role-to-gewerk";
+import { buildAssignmentNotificationBody, sendAssignmentNotification } from "@/lib/push/send-assignment-notification";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import { normalizeAuftragRow } from "@/lib/auftraege/billing-recipient-fields";
 import { kanbanPositionSortKey } from "@/lib/auftraege/kanban-position-sort-key";
@@ -93,6 +95,21 @@ export async function POST(request: Request) {
     }
 
     const row = normalizeAuftragRow(inserted as Record<string, unknown>) as HandwerkerAuftrag;
+
+    await Promise.all(
+      (row.gewerk ?? []).map(async (entry) => {
+        const role = gewerkToRole(entry);
+        if (!role) return null;
+        return sendAssignmentNotification({
+          role,
+          auftragId: row.id,
+          title: "Neuer Auftrag",
+          body: buildAssignmentNotificationBody(row.aufgabe),
+          deepLink: "/admin/dashboard",
+        });
+      })
+    );
+
     return NextResponse.json(row);
   } catch (e) {
     console.error("[admin/auftraege POST]", e);
